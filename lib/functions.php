@@ -4501,11 +4501,7 @@ function sanitize_unserialize_selected_items($items) {
 
 		// validate that sanitized string is correctly formatted
 		if (preg_match('/^a:[0-9]+:{/', $unstripped) && !preg_match('/(^|;|{|})O:\+?[0-9]+:"/', $unstripped)) {
-			if(version_compare(PHP_VERSION, '7.0.0', '>=')) {
-				$items = unserialize($unstripped, array('allowed_classes' => false));
-			} else {
-				$items = unserialize($unstripped);
-			}
+			$items = unserialize($unstripped, array('allowed_classes' => false));
 
 			if (is_array($items)) {
 				foreach ($items as $item) {
@@ -4530,6 +4526,7 @@ function sanitize_unserialize_selected_items($items) {
 
 function cacti_escapeshellcmd($string) {
 	global $config;
+
 
 	if ($string == '') {
 		return $string;
