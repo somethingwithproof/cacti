@@ -2582,7 +2582,7 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 
 					$output = shell_exec("$php -q $script");
 
-					if ($output == '' || $output == false) {
+					if ($output === null || $output === '') {
 						$output = 'U';
 					} elseif (str_contains($output, ':U')) {
 						$output = 'U';
