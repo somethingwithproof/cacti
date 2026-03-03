@@ -48,8 +48,6 @@ switch ($action) {
 				header('Location: index.php');
 			}
 
-			header('Location: index.php');
-
 			exit;
 		}
 }
@@ -81,10 +79,6 @@ $user = db_fetch_row_prepared('SELECT *
 	FROM user_auth
 	WHERE id = ?',
 	[$_SESSION[SESS_USER_ID]]);
-
-$version = CACTI_VERSION;
-
-global $user_auth_realm_filenames;
 
 if (!cacti_sizeof($user) || $user['realm'] != 0) {
 	if (!cacti_sizeof($user)) {
@@ -294,8 +288,6 @@ if (read_config_option('secpass_history') != '0') {
 
 $secpass_tooltip .= $secpass_body;
 
-$selectedTheme = get_selected_theme();
-
 $skip_current = (empty($user['password']));
 
 if (isrv('ref')) {
@@ -411,17 +403,14 @@ html_auth_header('change_password', __('Change Password'), __('Change Password')
 		</td>
 	</tr>
 <?php
-$secpass_minlen = read_config_option('secpass_minlen');
 
 html_auth_footer('change_password', $errorMessage, "
 	<script type='text/javascript'>
-	var password_change = $('#password_change').is(':checked');
+ 	$(function() {
+ 		$('#current').focus();
 
-	$(function() {
-		$('#current').focus();
-
-		/* clear passwords */
-		$('#password').val('');
-		$('#password_confirm').val('');
-	});
-	</script>");
+ 		/* clear passwords */
+ 		$('#password').val('');
+ 		$('#password_confirm').val('');
+ 	});
+ 	</script>");

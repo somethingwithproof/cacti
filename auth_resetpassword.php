@@ -251,8 +251,6 @@ if (read_config_option('secpass_history') != '0') {
 
 $secpass_tooltip .= $secpass_body;
 
-$selectedTheme = get_selected_theme();
-
 if ($action == 'formidentity') {
 	$title_message = __('Please enter your Cacti username or email address.');
 } elseif ($action == 'formreset') {
@@ -310,8 +308,6 @@ if ($action == 'formreset') {?>
 	</tr>
 <?php
 }
-
-$secpass_minlen = read_config_option('secpass_minlen');
 
 html_auth_footer('reset_password', $errorMessage, "
 	<script type='text/javascript'>
