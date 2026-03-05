@@ -500,8 +500,11 @@ if (!defined('IN_CACTI_INSTALL')) {
 db_cacti_initialized($config['is_web']);
 
 if ($config['is_web']) {
-	if (read_config_option('force_https') == 'on') {
-		$is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && cacti_strtolower($_SERVER['HTTPS']) !== 'off');
+	// Skip the HTTPS redirect during installation. The installer uses AJAX
+	// callbacks that have already been dispatched over the current protocol;
+	// redirecting mid-install breaks the final steps for remote data collectors.
+	if (!defined('IN_CACTI_INSTALL') && read_config_option('force_https') == 'on') {
+		$is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off');
 
 		if (!$is_https && isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
 			header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
