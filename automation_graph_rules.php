@@ -134,14 +134,7 @@ function automation_export() : void {
 			}
 
 			if (cacti_sizeof($export_data)) {
-				$export_file_name = $export_data['export_name'];
-
-				header('Content-type: application/json');
-				header('Content-Disposition: attachment; filename=' . $export_file_name);
-
-				$output = json_encode($export_data, JSON_PRETTY_PRINT);
-
-				print $output;
+				send_json_export($export_data);
 			}
 		}
 	} else {
