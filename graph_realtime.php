@@ -345,7 +345,7 @@ set_user_setting('realtime_gwindow', abs(grv('graph_start')));
 set_user_setting('realtime_size', grv('size'));
 set_user_setting('realtime_nolegend', grv('graph_nolegend'));
 
-if (read_config_option('realtime_enabled') == '') {
+if (!is_realtime_enabled()) {
 	print "<html>\n";
 	print "<body>\n";
 	print '	<p><strong>' . __('Real-time has been disabled by your administrator.') . "</strong></p>\n";
@@ -408,7 +408,7 @@ $sizes = [
 				</select>
 				<select id='ds_step' onChange='imageOptionsChanged("interval")'>
 					<?php
-$min_refresh = read_config_option('realtime_interval');
+$min_refresh = get_realtime_interval();
 
 foreach ($realtime_refresh as $interval => $text) {
 	if ($interval >= $min_refresh) {

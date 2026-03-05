@@ -33,7 +33,7 @@
  */
 function initialize_realtime_step_and_window() : void {
 	if (!isset($_SESSION['sess_realtime_dsstep'])) {
-		$_SESSION['sess_realtime_dsstep'] = read_config_option('realtime_interval');
+		$_SESSION['sess_realtime_dsstep'] = get_realtime_interval();
 	}
 
 	if (!isset($_SESSION['sess_realtime_window'])) {
@@ -1789,7 +1789,7 @@ function html_graph_single_view() : void {
 					print '<br>';
 				}
 
-				if (read_config_option('realtime_enabled') == 'on' || is_realm_allowed(25)) {
+				if (is_realtime_enabled() || is_realm_allowed(25)) {
 					print "<a class='iconLink' href='#' onclick=\"window.open('" . CACTI_PATH_URL . 'graph_realtime.php?top=0&left=0&local_graph_id=' . grv('local_graph_id') . "', 'popup_" . grv('local_graph_id') . "', 'directories=no,toolbar=no,menubar=no,resizable=yes,location=no,scrollbars=no,status=no,titlebar=no,width=650,height=300');return false\"><i class='drillDown ti ti-chart-area realTime' title='" . __esc('Click to view just this Graph in Real-time') . "'></i></a><br>";
 				}
 

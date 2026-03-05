@@ -743,6 +743,14 @@ function read_config_option(string $config_name, bool $force = false) : mixed {
 	return $value;
 }
 
+function is_realtime_enabled() : bool {
+	return read_config_option('realtime_enabled') == 'on';
+}
+
+function get_realtime_interval() : int {
+	return (int) read_config_option('realtime_interval');
+}
+
 /**
  * get_selected_theme - checks the user settings and if the user selected
  * theme is set, returns it otherwise returns the system default.

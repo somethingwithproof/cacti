@@ -557,7 +557,7 @@ function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_button
 		print '<br>';
 	}
 
-	if (read_config_option('realtime_enabled') == 'on' && is_realm_allowed(25)) {
+	if (is_realtime_enabled() && is_realm_allowed(25)) {
 		if (read_user_setting('realtime_mode') == '' || read_user_setting('realtime_mode') == '1') {
 			print "<a class='iconLink realtime' href='#' role='link' id='graph_" . $local_graph_id . "_realtime'><i class='drillDown ti ti-chart-area realTime' title='" . __esc('Click to view just this Graph in Real-time') . "'></i></a><br>";
 		} else {
