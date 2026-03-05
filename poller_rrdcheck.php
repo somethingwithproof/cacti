@@ -192,13 +192,10 @@ function rrdcheck_master_handler(bool $forcerun = false) : void {
 
 	$last_run = read_config_option('rrdcheck_last_run_time');
 
-	// see if boost is active or not
-	$boost_active = read_config_option('boost_rrd_update_enable');
-
 	// next let's see if it's time to update the interval
 	$current_time = time();
 
-	if ($boost_active == 'on') {
+	if (is_boost_enabled()) {
 		// boost will spawn the collector
 		rrdcheck_debug('Skipping Periodic Rollup - Boost will handle the Periodic Roll-up Cycle');
 	} else {

@@ -381,7 +381,7 @@ if (cacti_sizeof($poller_items) && read_config_option('poller_enabled') == 'on')
 						(local_data_id, rrd_name, time, output)
 						VALUES ' . implode(', ', $output_array), true, $poller_db_cnn_id);
 
-					if (read_config_option('boost_redirect') == 'on' && read_config_option('boost_rrd_update_enable') == 'on') {
+					if (is_boost_redirect_enabled() && is_boost_enabled()) {
 						db_execute('INSERT IGNORE INTO poller_output_boost
 							(local_data_id, rrd_name, time, output)
 							VALUES ' . implode(', ', $output_array), true, $poller_db_cnn_id);
@@ -463,7 +463,7 @@ if (cacti_sizeof($poller_items) && read_config_option('poller_enabled') == 'on')
 					(local_data_id, rrd_name, time, output)
 					VALUES ' . implode(', ', $output_array), true, $poller_db_cnn_id);
 
-				if (read_config_option('boost_redirect') == 'on' && read_config_option('boost_rrd_update_enable') == 'on') {
+				if (is_boost_redirect_enabled() && is_boost_enabled()) {
 					db_execute('INSERT IGNORE INTO poller_output_boost
 						(local_data_id, rrd_name, time, output)
 						VALUES ' . implode(', ', $output_array), true, $poller_db_cnn_id);
@@ -497,7 +497,7 @@ if (cacti_sizeof($poller_items) && read_config_option('poller_enabled') == 'on')
 			(local_data_id, rrd_name, time, output)
 			VALUES ' . implode(', ', $output_array), true, $poller_db_cnn_id);
 
-		if (read_config_option('boost_redirect') == 'on' && read_config_option('boost_rrd_update_enable') == 'on') {
+		if (is_boost_redirect_enabled() && is_boost_enabled()) {
 			db_execute('INSERT IGNORE INTO poller_output_boost
 				(local_data_id, rrd_name, time, output)
 				VALUES ' . implode(', ', $output_array), true, $poller_db_cnn_id);

@@ -122,7 +122,7 @@ $rrd_updates = -1;
 ini_set('max_execution_time', '0');
 boost_memory_limit();
 
-$boost_debug = read_config_option('boost_debug_enabled') == 'on' ? true : false;
+$boost_debug = read_config_option('boost_debug_enabled') == 'on';
 $boost_log   = read_config_option('path_boost_log');
 $cacti_log   = read_config_option('path_cactilog');
 
@@ -548,9 +548,9 @@ function boost_time_to_run(bool $forcerun, int $current_time, int $last_run_time
 
 	boost_debug('Checking if Boost is ready to run.');
 
-	if ((read_config_option('boost_rrd_update_enable') == 'on') || $forcerun) {
+	if (is_boost_enabled() || $forcerun) {
 		// turn on the system level updates as that is what dictates "on/off"
-		if (!$forcerun && read_config_option('boost_rrd_update_system_enable') != 'on') {
+		if (!$forcerun && !is_boost_system_enabled()) {
 			set_config_option('boost_rrd_update_system_enable', 'on');
 		}
 
@@ -605,7 +605,7 @@ function boost_time_to_run(bool $forcerun, int $current_time, int $last_run_time
 			boost_debug('Someone attempted to disable boost through there are multiple Data Collectors Defined!');
 
 			set_config_option('boost_rrd_update_system_enable', 'on');
-		} elseif (read_config_option('boost_rrd_update_system_enable') == 'on') {
+		} elseif (is_boost_system_enabled()) {
 			// turn off the system level updates, we want to disable
 			set_config_option('boost_rrd_update_system_enable', '');
 		}
@@ -1402,7 +1402,7 @@ function boost_log_child_statistics(int $rrd_updates, int $child) : void {
 
 function boost_purge_cached_png_files(bool $forcerun) : void {
 	// remove stale png's from the cache.  I consider png's stale after 1 hour
-	if ((read_config_option('boost_png_cache_enable') == 'on') || $forcerun) {
+	if (is_boost_png_cache_enabled() || $forcerun) {
 		$cache_directory = read_config_option('boost_png_cache_directory');
 		$remove_time     = time() - 3600;
 

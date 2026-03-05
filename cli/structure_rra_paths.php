@@ -92,7 +92,7 @@ if (cacti_sizeof($parms)) {
 
 $start = microtime(true);
 
-if (read_config_option('boost_rrd_update_enable') !== 'on') {
+if (!is_boost_enabled()) {
 	print PHP_EOL . 'FATAL: Cacti\'s Performance Booster required to run this utility.' . PHP_EOL . PHP_EOL;
 	display_help();
 

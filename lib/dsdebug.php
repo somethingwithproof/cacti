@@ -192,7 +192,7 @@ function dsdebug_poller_bottom() : bool {
 
 				$total_issues++;
 			} else {
-				if (read_config_option('boost_rrd_update_enable') == 'on') {
+				if (is_boost_enabled()) {
 					boost_process_poller_output($c['datasource']);
 				}
 

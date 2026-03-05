@@ -22,6 +22,22 @@
  +-------------------------------------------------------------------------+
 */
 
+function is_boost_enabled(): bool {
+	return read_config_option('boost_rrd_update_enable') == 'on';
+}
+
+function is_boost_system_enabled(): bool {
+	return read_config_option('boost_rrd_update_system_enable') == 'on';
+}
+
+function is_boost_png_cache_enabled(): bool {
+	return read_config_option('boost_png_cache_enable') == 'on';
+}
+
+function is_boost_redirect_enabled(): bool {
+	return read_config_option('boost_redirect') == 'on';
+}
+
 /**
  * Sorts a multi-dimensional array by one or more fields.
  *
@@ -186,10 +202,9 @@ function boost_error_handler(int $errno, string $errmsg, string $filename, int $
  *              otherwise returns false.
  */
 function boost_check_correct_enabled() : bool {
-	if ((read_config_option('boost_rrd_update_enable') == 'on') ||
-		(read_config_option('boost_rrd_update_system_enable') == 'on')) {
+	if (is_boost_enabled() || is_boost_system_enabled()) {
 		// turn on the system level updates as that is what dictates "off"
-		if (read_config_option('boost_rrd_update_system_enable') != 'on') {
+		if (!is_boost_system_enabled()) {
 			db_execute("REPLACE INTO settings (name,value)
 				VALUES ('boost_rrd_update_system_enable','on')");
 		}
@@ -229,7 +244,7 @@ function boost_poller_on_demand(array &$results) : bool {
 		$conn = false;
 	}
 
-	if (read_config_option('boost_rrd_update_enable') == 'on' || POLLER_ID > 1) {
+	if (is_boost_enabled() || POLLER_ID > 1) {
 		set_config_option('boost_rrd_update_enable', 'on');
 
 		// suppress warnings
@@ -251,7 +266,7 @@ function boost_poller_on_demand(array &$results) : bool {
 
 		if (boost_check_correct_enabled()) {
 			// if boost redirect is on, rows are being inserted directly
-			if (read_config_option('boost_redirect') == 'on') {
+			if (is_boost_redirect_enabled()) {
 				restore_error_handler();
 
 				return false;
@@ -371,7 +386,7 @@ function boost_poller_id_check() : bool {
  * @return bool Returns false if Boost is not enabled or not properly configured.
  */
 function boost_fetch_cache_check(int $local_data_id, mixed $rrdtool_pipe = null) : bool {
-	if (read_config_option('boost_rrd_update_enable') == 'on') {
+	if (is_boost_enabled()) {
 		// include poller processing routines
 		include_once(CACTI_PATH_LIBRARY . '/poller.php');
 
@@ -445,7 +460,7 @@ function boost_return_cached_image(&$graph_data_array) : bool {
 		return false;
 	}
 
-	if (read_config_option('boost_png_cache_enable') == 'on' && boost_determine_caching_state()) {
+	if (is_boost_png_cache_enabled() && boost_determine_caching_state()) {
 		return true;
 	} else {
 		return false;
@@ -707,7 +722,7 @@ function boost_graph_set_file(string|null &$output, int $local_graph_id, int|nul
 	/* check the graph cache and use it if it is valid, otherwise turn over to
 	 * cacti's graphing functions.
 	 */
-	if ((read_config_option('boost_png_cache_enable')) && (boost_determine_caching_state())) {
+	if (is_boost_png_cache_enabled() && boost_determine_caching_state()) {
 		$cache_directory = read_config_option('boost_png_cache_directory');
 
 		if (read_config_option('business_hours_enable') == 'on') {
@@ -1815,7 +1830,7 @@ function boost_memory_limit() : void {
  * @return void
  */
 function boost_poller_bottom() : void {
-	if (read_config_option('boost_rrd_update_enable') == 'on') {
+	if (is_boost_enabled()) {
 		include_once(CACTI_PATH_LIBRARY . '/poller.php');
 
 		chdir(CACTI_PATH_BASE);
@@ -1825,7 +1840,7 @@ function boost_poller_bottom() : void {
 		boost_update_snmp_statistics();
 
 		$boost_log     = read_config_option('path_boost_log');
-		$boost_debug   = read_config_option('boost_debug_enabled') == 'on' ? true : false;
+		$boost_debug   = read_config_option('boost_debug_enabled') == 'on';
 		$boost_logdir  = dirname($boost_log);
 
 		if ($boost_debug && $boost_log != '') {
