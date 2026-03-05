@@ -618,8 +618,7 @@ function host_export() : void {
 
 	$stdout = fopen('php://output', 'w');
 
-	header('Content-type: application/excel');
-	header('Content-Disposition: attachment; filename=cacti-devices-' . time() . '.csv');
+	send_csv_download('cacti-devices-' . time() . '.csv', 'application/excel');
 
 	if (cacti_sizeof($hosts)) {
 		$columns = array_keys($hosts[0]);

@@ -9561,6 +9561,19 @@ function detect_cpu_cores() : int {
 }
 
 /**
+ * Send HTTP headers for a CSV file download.
+ *
+ * @param string $filename     Suggested filename for the download prompt.
+ * @param string $content_type MIME type; defaults to application/csv.
+ *
+ * @return void
+ */
+function send_csv_download(string $filename, string $content_type = 'application/csv') : void {
+	header('Content-type: ' . $content_type);
+	header('Content-Disposition: attachment; filename=' . $filename);
+}
+
+/**
  * wrapper function to emulate pecl stats if it's not installed
  *
  * @param array $items  A list of items to calculate the standard deviation for

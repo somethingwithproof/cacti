@@ -631,8 +631,7 @@ function color_export() : void {
 		$sql_having");
 
 	if (cacti_sizeof($colors)) {
-		header('Content-type: application/csv');
-		header('Content-Disposition: attachment; filename=colors.csv');
+		send_csv_download('colors.csv');
 
 		print '"name","hex"' . "\n";
 

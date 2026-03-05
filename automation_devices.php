@@ -645,8 +645,7 @@ function export_discovery_results() : void {
 
 	$results = get_discovery_results($total_rows, 0, true);
 
-	header('Content-type: application/csv');
-	header('Content-Disposition: attachment; filename=discovery_results.csv');
+	send_csv_download('discovery_results.csv');
 	print "Host,IP,System Name,System Location,System Contact,System Description,OS,Uptime,SNMP,Status\n";
 
 	if (cacti_sizeof($results)) {
