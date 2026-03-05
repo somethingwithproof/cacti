@@ -50,7 +50,7 @@ function api_scheduler_form() : array {
 			'description'   => __('What time will this Network discover item start?'),
 			'value'         => '|arg1:start_at|',
 			'max_length'    => '30',
-			'default'       => date('Y-m-d H:i:s'),
+			'default'       => get_datetime(),
 			'size'          => 60
 		],
 		'recur_every' => [
@@ -428,7 +428,7 @@ function api_scheduler_is_time_to_start(array $schedule, string $table = 'automa
 	}
 
 	if (is_null($schedule['start_at'])) {
-		$schedule['start_at'] = date('Y-m-d H:i:s');
+		$schedule['start_at'] = get_datetime();
 	}
 
 	switch($schedule['sched_type']) {

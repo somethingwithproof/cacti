@@ -784,7 +784,7 @@ while ($poller_runs_completed < $poller_runs) {
 
 			if ($poller_id == 1) {
 				// insert the current date/time for graphs
-				set_config_option('date', date('Y-m-d H:i:s'));
+				set_config_option('date', get_datetime());
 
 				// open a pipe to rrdtool for writing
 				if (!$boost_enabled) {
@@ -871,7 +871,7 @@ while ($poller_runs_completed < $poller_runs) {
 				poller_run_stats($loop_start);
 
 				// Mark the poller done immediately due to lack of devices
-				$start_end = date('Y-m-d H:i:s');
+				$start_end = get_datetime();
 
 				db_execute_prepared('INSERT INTO poller_time
 					(pid, poller_id, start_time, end_time)

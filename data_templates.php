@@ -192,7 +192,7 @@ function form_save() : void {
 		}
 
 		if (!is_error_message()) {
-			$save1['last_updated'] = date('Y-m-d H:i:s');
+			$save1['last_updated'] = get_datetime();
 
 			$data_template_id = sql_save($save1, 'data_template');
 

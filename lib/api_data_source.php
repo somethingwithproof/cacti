@@ -31,7 +31,7 @@
  * @return void
  */
 function api_data_source_cache_crc_update(int $poller_id, string $variable = 'poller_replicate_data_source_cache_crc') : void {
-	$hash = hash('ripemd160', date('Y-m-d H:i:s') . random_int(0, mt_getrandmax()) . "$poller_id");
+	$hash = hash('ripemd160', get_datetime() . random_int(0, mt_getrandmax()) . "$poller_id");
 
 	db_execute_prepared("REPLACE INTO settings
 		SET value = ?, name='$variable" . '_' . "$poller_id'",

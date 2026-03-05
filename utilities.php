@@ -185,7 +185,7 @@ function utilities_clear_logfile() : void {
 			if (defined('CACTI_DATE_TIME_FORMAT')) {
 				$date = date(CACTI_DATE_TIME_FORMAT);
 			} else {
-				$date = date('Y-m-d H:i:s');
+				$date = get_datetime();
 			}
 
 			$log_fh = fopen($logfile, 'w');

@@ -292,7 +292,7 @@ function form_save() : void {
 		$save2['left_axis_formatter']           = form_input_validate((isrv('left_axis_formatter') ? gnrv('left_axis_formatter') : ''), 'left_axis_formatter', '', true, 3);
 
 		if (!is_error_message()) {
-			$save1['last_updated'] = date('Y-m-d H:i:s');
+			$save1['last_updated'] = get_datetime();
 
 			$graph_template_id = sql_save($save1, 'graph_templates');
 

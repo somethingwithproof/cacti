@@ -242,7 +242,7 @@ if ($report_id === false) {
 			db_execute_prepared('UPDATE reports
 				SET last_started = ?
 				WHERE id = ?',
-				[date('Y-m-d H:i:s'), $report['id']]);
+				[get_datetime(), $report['id']]);
 
 			generate_report($queue_id, $report, false);
 		}

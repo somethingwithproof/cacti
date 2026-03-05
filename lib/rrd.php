@@ -1710,7 +1710,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 	$cactiLastDate     = read_config_option('date');
 
 	if (empty($cactiLastDate)) {
-		$cactiLastDate = date('Y-m-d H:i:s');
+		$cactiLastDate = get_datetime();
 	}
 
 	$dateTime = date($dateTimeFormat, strtotime($cactiLastDate));

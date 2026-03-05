@@ -1518,7 +1518,7 @@ function cacti_log(mixed $string, bool $output = false, string $environ = 'CMDPH
 	if (defined('CACTI_DATE_TIME_FORMAT')) {
 		$date = date(CACTI_DATE_TIME_FORMAT);
 	} else {
-		$date = date('Y-m-d H:i:s');
+		$date = get_datetime();
 	}
 
 	cacti_browser_zone_set();
@@ -4939,6 +4939,19 @@ function sanitize_search_string(string $string) : string {
 	}
 
 	return $string;
+}
+
+/**
+ * get_datetime - returns the current datetime (or current minus offset) as a
+ * Y-m-d H:i:s string. Centralises the date('Y-m-d H:i:s', time() - $offset)
+ * pattern used across the codebase.
+ *
+ * @param int $offset Seconds to subtract from now (default 0)
+ *
+ * @return string Formatted datetime string
+ */
+function get_datetime(int $offset = 0): string {
+	return date('Y-m-d H:i:s', time() - $offset);
 }
 
 /**

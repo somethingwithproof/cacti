@@ -30,7 +30,7 @@ require_once(CACTI_PATH_LIBRARY . '/ping.php');
 
 ini_set('max_execution_time', '0');
 
-$start = date('Y-m-d H:i:s'); // for runtime measurement
+$start = get_datetime(); // for runtime measurement
 
 // correct for a windows PHP bug. fixed in 5.2.0
 if (cacti_count($_SERVER['argv']) < 4) {
@@ -131,7 +131,7 @@ if (cacti_sizeof($idbyhost)) {
 	}
 
 	// all polled items need the same insert time
-	$host_update_time = date('Y-m-d H:i:s');
+	$host_update_time = get_datetime();
 
 	foreach ($idbyhost as $host_id => $local_data_ids) {
 		$col_poller_id = db_fetch_cell_prepared('SELECT poller_id

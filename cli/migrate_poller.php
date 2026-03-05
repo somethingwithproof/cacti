@@ -238,7 +238,7 @@ function write_migration_log(array $device, int $dest_poller) : void {
 	$message = "Migrated device ID: {$device['id']}, Hostname: {$device['hostname']}, Description: {$device['description']}, From Poller: {$device['poller_id']} to Poller: $dest_poller";
 
 	// Append to log file
-	$result = file_put_contents($migration_log_file, date('Y-m-d H:i:s') . " - $message" . PHP_EOL, FILE_APPEND);
+	$result = file_put_contents($migration_log_file, get_datetime() . " - $message" . PHP_EOL, FILE_APPEND);
 
 	if ($result === false) {
 		cacti_log("ERROR: Failed to write to migration log file: $migration_log_file", false, 'MIGRATE');

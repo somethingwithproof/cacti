@@ -2309,7 +2309,7 @@ function reports_log_and_notify(int $id, int $start_time, string $report_type, s
 		$save['report_txt_output']  = $oput_text;
 		$save['report_attachments'] = base64_encode(json_encode($attachments));
 		$save['send_type']          = $report['request_type'];
-		$save['send_time']          = date('Y-m-d H:i:s');
+		$save['send_time']          = get_datetime();
 		$save['run_time']           = $end_time - $start_time;
 		$save['sent_by']            = $report['requested_by'];
 		$save['sent_id']            = $report['requested_id'];
@@ -2344,7 +2344,7 @@ function reports_queue(string $name, int $request_type, string $source, int $sou
 	$save['source_id']      = $source_id;
 	$save['status']         = 'pending';
 	$save['run_command']    = $command;
-	$save['scheduled_time'] = date('Y-m-d H:i:s');
+	$save['scheduled_time'] = get_datetime();
 	$save['notification']   = json_encode($notification);
 	$save['requested_by']   = $requested_by;
 	$save['requested_id']   = $requested_id;
@@ -2380,7 +2380,7 @@ function reports_run(int $id) : bool {
 		db_execute_prepared('UPDATE reports_queued
 			SET status = ?, start_time = ?
 			WHERE id = ?',
-			['running', date('Y-m-d H:i:s'), $id]);
+			['running', get_datetime(), $id]);
 	} else {
 		return false;
 	}

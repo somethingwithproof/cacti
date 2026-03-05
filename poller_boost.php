@@ -225,7 +225,7 @@ if ($child == false) {
 			cacti_log('INFO: Boost last child processes ended.', true, 'BOOST');
 
 			// tell the main poller that we are done
-			set_config_option('boost_poller_status', 'complete - end time:' . date('Y-m-d H:i:s'));
+			set_config_option('boost_poller_status', 'complete - end time:' . get_datetime());
 
 			// Finish processing post
 			set_config_option('boost_last_run_time', $current_time);
@@ -322,7 +322,7 @@ function sig_handler(int $signo) : void {
 			cacti_log('WARNING: Boost Poller terminated by user', true, 'BOOST');
 
 			// tell the main poller that we are done
-			set_config_option('boost_poller_status', 'terminated - end time:' . date('Y-m-d H:i:s'));
+			set_config_option('boost_poller_status', 'terminated - end time:' . get_datetime());
 
 			if ($child) {
 				unregister_process('boost', 'child', $child, getmypid());
@@ -400,7 +400,7 @@ function boost_prepare_process_table() : bool {
 
 	// if the poller is not running, or has never run, start
 	// mark the boost server as running
-	set_config_option('boost_poller_status', 'running - start time:' . date('Y-m-d H:i:s'));
+	set_config_option('boost_poller_status', 'running - start time:' . get_datetime());
 
 	$delayed_inserts = db_fetch_row("SHOW STATUS LIKE 'Not_flushed_delayed_rows'");
 

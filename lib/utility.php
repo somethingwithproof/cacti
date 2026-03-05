@@ -31,7 +31,7 @@
  * @return void
  */
 function update_replication_crc(int $poller_id, string $variable) : void {
-	$hash = hash('ripemd160', date('Y-m-d H:i:s') . random_int(0, mt_getrandmax()) . $poller_id);
+	$hash = hash('ripemd160', get_datetime() . random_int(0, mt_getrandmax()) . $poller_id);
 
 	db_execute_prepared("REPLACE INTO settings
 		SET value = ?, name='$variable" . ($poller_id > 0 ? '_' . "$poller_id'" : "'"),
