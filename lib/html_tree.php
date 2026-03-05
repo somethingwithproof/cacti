@@ -1999,7 +1999,7 @@ function html_tree_get_content() : void {
 	?>
 	<script type='text/javascript'>
 	refreshIsLogout = false;
-	refreshPage     = '<?php print str_replace('tree_content', 'tree', sanitize_uri($_SERVER['REQUEST_URI'])); ?>';
+	refreshPage     = '<?php print str_replace('tree_content', 'tree', get_current_request_uri()); ?>';
 	refreshMSeconds = <?php print read_user_setting('page_refresh') * 1000; ?>;
 	refreshFunction = 'refreshGraphs()';
 	var graph_start     = <?php print get_current_graph_start(); ?>;

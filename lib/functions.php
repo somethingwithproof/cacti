@@ -4460,6 +4460,15 @@ function get_nearest_timespan(int $timespan) : int {
 }
 
 /**
+ * get_current_request_uri - returns the sanitized REQUEST_URI for the current request
+ *
+ * @return string The sanitized URI requested by the browser
+ */
+function get_current_request_uri(): string {
+	return sanitize_uri($_SERVER['REQUEST_URI'] ?? '');
+}
+
+/**
  * get_browser_query_string - returns the full url, including args requested by the browser
  *
  * @return string The url requested by the browser
@@ -9558,6 +9567,24 @@ function detect_cpu_cores() : int {
 	}
 
 	return intval(trim($cpu_cores));
+}
+
+/**
+ * Send an array as a JSON file download.
+ *
+ * The filename is taken from $export_data['export_name'] when present;
+ * $filename is used as a fallback.
+ *
+ * @param array  $export_data Array to encode and send.
+ * @param string $filename    Fallback filename when export_name is absent.
+ */
+function send_json_export(array $export_data, string $filename = 'export.json') : void {
+	$export_file_name = isset($export_data['export_name']) ? $export_data['export_name'] : $filename;
+
+	header('Content-type: application/json');
+	header('Content-Disposition: attachment; filename=' . $export_file_name);
+
+	print json_encode($export_data, JSON_PRETTY_PRINT);
 }
 
 /**
