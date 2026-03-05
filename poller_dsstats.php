@@ -167,7 +167,7 @@ if (!$force) {
 // Collect data as determined by the type
 switch ($type) {
 	case 'pmaster':
-		if (read_config_option('dsstats_enable') == 'on' || $force) {
+		if (is_dsstats_enabled() || $force) {
 			dsstats_master_handler($type, $force, $fpartition);
 		}
 
@@ -268,7 +268,7 @@ function dsstats_master_handler(string $type, bool $force, bool $fpartition) : v
 	$current_time = time();
 
 	// handle partition creation and pruning before we start
-	if (read_config_option('dsstats_gdg_enable') == 'on') {
+	if (is_dsstats_gdg_enabled()) {
 		if (date('z', $last_major_time) != date('z', $current_time) || $fpartition) {
 			dsstats_create_partitions($last_major_time, $current_time, $fpartition);
 			dsstats_remove_old_partitions();

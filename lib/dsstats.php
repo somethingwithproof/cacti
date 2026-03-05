@@ -22,6 +22,14 @@
  +-------------------------------------------------------------------------+
 */
 
+function is_dsstats_enabled(): bool {
+	return read_config_option('dsstats_enable') == 'on';
+}
+
+function is_dsstats_gdg_enabled(): bool {
+	return read_config_option('dsstats_gdg_enable') == 'on';
+}
+
 /**
  * get_rrdfile_names - this routine returns all of the RRDfiles know to Cacti
  *   so as to be processed when performing the Daily, Weekly, Monthly and Yearly
@@ -841,7 +849,7 @@ function dsstats_poller_output(mixed &$rrd_update_array) : void {
 	set_error_handler('dsstats_error_handler');
 
 	// do not make any calculations unless enabled
-	if (read_config_option('dsstats_enable') == 'on') {
+	if (is_dsstats_enabled()) {
 		if (cacti_sizeof($rrd_update_array) > 0) {
 			// we will assume a smaller than the max packet size.  This would appear to be around the sweat spot.
 			$max_packet       = '264000';
@@ -1137,7 +1145,7 @@ function dsstats_boost_bottom() : void {
 	$total_real   = 0;
 	$total_dsses  = 0;
 
-	if (read_config_option('dsstats_enable') == 'on') {
+	if (is_dsstats_enabled()) {
 		include_once(CACTI_PATH_LIBRARY . '/rrd.php');
 
 		// run the daily stats. log to database to prevent secondary runs
@@ -1177,7 +1185,7 @@ function dsstats_memory_limit() : void {
  * @return void
  */
 function dsstats_poller_bottom() : void {
-	if (read_config_option('dsstats_enable') == 'on') {
+	if (is_dsstats_enabled()) {
 		include_once(CACTI_PATH_LIBRARY . '/poller.php');
 
 		chdir(CACTI_PATH_BASE);
