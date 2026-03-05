@@ -195,7 +195,7 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 
 		// remember me support.  Not for guest of basic auth
 		if ($auth_method != AUTH_METHOD_BASIC && $user['id'] !== get_guest_account()) {
-			if (!$error && isrv('remember_me') && read_config_option('auth_cache_enabled') == 'on') {
+			if (!$error && isrv('remember_me') && is_auth_cache_enabled()) {
 				set_auth_cookie($user);
 			}
 		}
@@ -341,7 +341,7 @@ if (isset($_SERVER['HTTPS']) && isset($_SERVER['HTTP_HOST']) && isset($_SERVER['
 	$is_https = false;
 }
 
-if (read_config_option('auth_cache_enabled') == 'on' && $is_https) { ?>
+if (is_auth_cache_enabled() && $is_https) { ?>
 	<tr>
 		<td colspan='2'>
 			<input style='vertical-align:-3px;' type='checkbox' id='remember_me' name='remember_me' <?php print(isset($_COOKIE['cacti_remembers']) || !ierv('remember_me') ? 'checked' : ''); ?>>

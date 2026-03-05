@@ -390,7 +390,7 @@ function settings() : bool {
 		]
 	];
 
-	if (read_config_option('auth_cache_enabled') == 'on') {
+	if (is_auth_cache_enabled()) {
 		$fields_user += [
 			'logout_everywhere' => [
 				'method'        => 'button',

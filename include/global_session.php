@@ -77,7 +77,7 @@ if (isset($_SESSION['refresh'])) {
 	$myrefresh['seconds'] = $refresh;
 	$myrefresh['page']    = sanitize_uri($_SERVER['REQUEST_URI']);
 	$refreshIsLogout      = 'false';
-} elseif (read_config_option('auth_cache_enabled') == 'on' && isset($_SESSION['cacti_remembers']) && $_SESSION['cacti_remembers'] == true) {
+} elseif (is_auth_cache_enabled() && isset($_SESSION['cacti_remembers']) && $_SESSION['cacti_remembers'] == true) {
 	$myrefresh['seconds'] = 99999999;
 	$myrefresh['page']    = sanitize_uri($_SERVER['REQUEST_URI']);
 	$refreshIsLogout      = 'false';

@@ -5155,7 +5155,7 @@ function set_page_refresh(array $refresh) : void {
 		$_SESSION['refresh']['seconds'] = $refresh['seconds'];
 	}
 
-	if (read_config_option('auth_cache_enabled') == 'on' && isset($_SESSION['cacti_remembers']) && $_SESSION['cacti_remembers'] == true) {
+	if (is_auth_cache_enabled() && isset($_SESSION['cacti_remembers']) && $_SESSION['cacti_remembers'] == true) {
 		$_SESSION['refresh']['logout'] = 'false';
 	} elseif (isset($refresh['logout'])) {
 		if ($refresh['logout'] == 'true' || $refresh['logout'] === true) {
@@ -8582,6 +8582,10 @@ function is_function_enabled(string $name) : bool {
 	return function_exists($name) &&
 		!in_array($name, array_map('trim', explode(', ', ini_get('disable_functions'))), true) &&
 		cacti_strtolower(ini_get('safe_mode')) != 1;
+}
+
+function is_auth_cache_enabled() : bool {
+	return read_config_option('auth_cache_enabled') == 'on';
 }
 
 function is_page_ajax() : bool {

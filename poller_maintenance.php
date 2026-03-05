@@ -428,7 +428,7 @@ function logrotate_check(bool $force) : void {
 
 function authcache_purge() : void {
 	// removing security tokens older than 90 days
-	if (read_config_option('auth_cache_enabled') == 'on') {
+	if (is_auth_cache_enabled()) {
 		db_execute_prepared('DELETE FROM user_auth_cache
 			WHERE last_update < ?',
 			[date('Y-m-d H:i:s', time() - (86400 * 90))]);
