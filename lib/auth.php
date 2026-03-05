@@ -3466,7 +3466,7 @@ function auth_checkclear_lockout(string $username, int $realm) : void {
 				[$username, $realm]);
 
 			if (cacti_sizeof($user)) {
-				$unlock = intval(read_config_option('secpass_unlocktime'));
+				$unlock = read_config_option_int('secpass_unlocktime');
 
 				if ($unlock > 1440) {
 					$unlock = 1440;
@@ -4216,7 +4216,7 @@ function secpass_check_pass(string $password) : string {
  * @return bool Returns true if the password is not in the history, false otherwise.
  */
 function secpass_check_history(int $id, string $password) : bool {
-	$history = intval(read_config_option('secpass_history'));
+	$history = read_config_option_int('secpass_history');
 
 	if ($history > 0) {
 		$user = db_fetch_row_prepared("SELECT password, password_history

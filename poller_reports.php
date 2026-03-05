@@ -119,7 +119,7 @@ if ($report_id === false) {
 	$number_sent = 0;
 
 	if (!$force) {
-		$timeout = intval(read_config_option('scheduler_timeout'));
+		$timeout = read_config_option_int('scheduler_timeout');
 
 		if (empty($timeout)) {
 			$timeout = 300;
@@ -218,7 +218,7 @@ if ($report_id === false) {
 		unregister_process('reports', 'master', 0);
 	}
 } else {
-	$timeout = intval(read_config_option('scheduler_timeout'));
+	$timeout = read_config_option_int('scheduler_timeout');
 
 	if (empty($timeout)) {
 		$timeout = 300;

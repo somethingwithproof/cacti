@@ -433,7 +433,7 @@ function aggregate_graphs_insert_graph_items(int $_new_graph_id, int $_old_graph
 
 				// if this is a data query graph type, try to substitute
 				if (isset($graph_local['snmp_query_id']) && $graph_local['snmp_query_id'] > 0 && $graph_local['snmp_index'] != '') {
-					$max_chars = intval(read_config_option('max_data_query_field_length'));
+					$max_chars = read_config_option_int('max_data_query_field_length');
 
 					$save['text_format'] = substitute_snmp_query_data($save['text_format'], $graph_local['host_id'], $graph_local['snmp_query_id'], $graph_local['snmp_index'], $max_chars);
 

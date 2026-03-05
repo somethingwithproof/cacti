@@ -744,6 +744,18 @@ function read_config_option(string $config_name, bool $force = false) : mixed {
 }
 
 /**
+ * read_config_option_int - reads a configuration option and returns it as an integer.
+ *
+ * @param string $config_name The name of the configuration option
+ * @param bool   $force       Force a re-read from the database
+ *
+ * @return int The current value cast to int (0 when the option is unset or non-numeric)
+ */
+function read_config_option_int(string $config_name, bool $force = false): int {
+	return (int) read_config_option($config_name, $force);
+}
+
+/**
  * get_selected_theme - checks the user settings and if the user selected
  * theme is set, returns it otherwise returns the system default.
  *
@@ -3158,7 +3170,7 @@ function clean_up_path(mixed $path) : mixed {
 	if ($path != '') {
 		if (CACTI_SERVER_OS == 'win32') {
 			$path = str_replace('/', '\\', $path);
-		} elseif (CACTI_SERVER_OS == 'unix' || read_config_option('using_cygwin') == 'on' || intval(read_config_option('storage_location')) > 0) { // @phpstan-ignore-line
+		} elseif (CACTI_SERVER_OS == 'unix' || read_config_option('using_cygwin') == 'on' || read_config_option_int('storage_location') > 0) { // @phpstan-ignore-line
 			$path = str_replace('\\', '/', $path);
 		}
 	}
@@ -5387,7 +5399,7 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 	$mail = new PHPMailer\PHPMailer\PHPMailer;
 
 	// Set a reasonable timeout of 5 seconds
-	$timeout = intval(read_config_option('settings_smtp_timeout'));
+	$timeout = read_config_option_int('settings_smtp_timeout');
 
 	if (empty($timeout) || $timeout < 0 || $timeout > 300) {
 		$mail->Timeout = 5;
@@ -5419,7 +5431,7 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 	} elseif ($how == 2) {
 		$mail->isSMTP();
 		$mail->Host = read_config_option('settings_smtp_host');
-		$mail->Port = intval(read_config_option('settings_smtp_port'));
+		$mail->Port = read_config_option_int('settings_smtp_port');
 
 		if (read_config_option('settings_smtp_username') != '') {
 			$mail->SMTPAuth = true;
@@ -5450,7 +5462,7 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 	} elseif ($how == 3) {
 		$mail->isSMTP();
 		$mail->Host = read_config_option('settings_oauth2_host');
-		$mail->Port = intval(read_config_option('settings_oauth2_port'));
+		$mail->Port = read_config_option_int('settings_oauth2_port');
 
 		$secure = read_config_option('settings_oauth2_secure');
 
@@ -5761,7 +5773,7 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 
 	$result   = $mail->send();
 	$error    = $mail->ErrorInfo; // $result ? '' : $mail->ErrorInfo;
-	$method   = $mail_methods[intval(read_config_option('settings_how'))];
+	$method   = $mail_methods[read_config_option_int('settings_how')];
 	$rtype    = $result ? 'INFO' : 'WARNING';
 	$rmsg     = $result ? 'successfully sent' : 'failed';
 	$end_time = microtime(true);
@@ -6015,11 +6027,11 @@ function email_test() : void {
 		print __('Method: SMTP') . '<br>';
 		$mail          = __('SMTP') . '<br>';
 		$smtp_host     = read_config_option('settings_smtp_host');
-		$smtp_port     = intval(read_config_option('settings_smtp_port'));
+		$smtp_port     = read_config_option_int('settings_smtp_port');
 		$smtp_username = read_config_option('settings_smtp_username');
 		$smtp_password = read_config_option('settings_smtp_password');
 		$smtp_secure   = read_config_option('settings_smtp_secure');
-		$smtp_timeout  = intval(read_config_option('settings_smtp_timeout'));
+		$smtp_timeout  = read_config_option_int('settings_smtp_timeout');
 
 		$mail .= '<b>' . __('Device') . "</b>: $smtp_host<br>";
 		$mail .= '<b>' . __('Port') . "</b>: $smtp_port<br>";

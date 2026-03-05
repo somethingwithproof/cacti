@@ -286,7 +286,7 @@ function null_out_substitutions(string $string) : string {
 function expand_title(int $host_id, int $snmp_query_id, string $snmp_index, string $title) : string {
 	if ((strstr($title, '|')) && (!empty($host_id))) {
 		if (($snmp_query_id != '0') && ($snmp_index != '')) {
-			$max_chars = intval(read_config_option('max_data_query_field_length'));
+			$max_chars = read_config_option_int('max_data_query_field_length');
 			$title     = substitute_snmp_query_data(null_out_substitutions(substitute_host_data($title, '|', '|', $host_id)), $host_id, $snmp_query_id, $snmp_index, $max_chars);
 		} else {
 			$title = null_out_substitutions(substitute_host_data($title, '|', '|', $host_id));

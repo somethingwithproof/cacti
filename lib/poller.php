@@ -2308,7 +2308,7 @@ function poller_push_table(object $db_cnn, array $records, string $table, bool $
  * @return bool True if up else false
  */
 function remote_poller_up(int $poller_id) : bool {
-	$gone_time = intval(read_config_option('poller_interval')) * 2;
+	$gone_time = read_config_option_int('poller_interval') * 2;
 
 	if (empty($poller_id) || $poller_id <= 1) {
 		return false;

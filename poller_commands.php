@@ -56,7 +56,7 @@ $debug     = false;
 $host_id   = false;
 $forcerun  = false;
 $type      = 'master';
-$threads   = intval(read_config_option('commands_processes'));
+$threads   = read_config_option_int('commands_processes');
 $poller_id = POLLER_ID;
 
 global $poller_db_cnn_id, $remote_db_cnn_id, $type, $host_id, $poller_id;
@@ -431,7 +431,7 @@ function commands_kill_running_processes() : void {
 }
 
 function poller_commands_timeout() : int {
-	$timeout = intval(read_config_option('commands_timeout'));
+	$timeout = read_config_option_int('commands_timeout');
 
 	if (empty($timeout)) {
 		$timeout = 300;

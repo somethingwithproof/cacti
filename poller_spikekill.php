@@ -84,7 +84,7 @@ if (cacti_sizeof($parms)) {
 	}
 }
 
-$timeout = intval(read_config_option('spikekill_timeout'));
+$timeout = read_config_option_int('spikekill_timeout');
 
 // silently end if the registered process is still running, or process table missing
 if (!register_process_start('spikekill', 'master', 0, $timeout)) {
@@ -211,7 +211,7 @@ function debug(string $message) : void {
 
 function purge_spike_backups() : mixed {
 	$directory = read_config_option('spikekill_backupdir');
-	$retention = intval(read_config_option('spikekill_purge'));
+	$retention = read_config_option_int('spikekill_purge');
 
 	$purges = 0;
 

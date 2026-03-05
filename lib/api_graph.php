@@ -364,7 +364,7 @@ function api_reapply_suggested_graph_title(int $local_graph_id) : bool {
 		foreach ($suggested_values as $suggested_value) {
 			// once we find a match; don't try to find more
 			if (!isset($suggested_values_graph[$suggested_value['field_name']])) {
-				$max_chars = intval(read_config_option('max_data_query_field_length'));
+				$max_chars = read_config_option_int('max_data_query_field_length');
 
 				if (empty($max_chars)) {
 					$max_chars = 40;

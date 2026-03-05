@@ -1253,7 +1253,7 @@ function dsstats_rrdtool_init() : array {
 function dsstats_rrdtool_execute(string $command, array $rrd_process) : string {
 	static $broken = false;
 
-	$use_proxy = (intval(read_config_option('storage_location')) > 0 ? true : false);
+	$use_proxy = (read_config_option_int('storage_location') > 0 ? true : false);
 
 	if ($use_proxy) {
 		$stdout = rrdtool_execute($command, false, RRDTOOL_OUTPUT_STDOUT, $rrd_process, 'DSSTATS');

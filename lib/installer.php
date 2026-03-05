@@ -227,8 +227,8 @@ class Installer implements JsonSerializable {
 
 		$this->errors        = [];
 		$this->templates     = [];
-		$this->eula          = intval(read_config_option('install_eula', true));
-		$this->cronInterval  = intval(read_config_option('cron_interval', true));
+		$this->eula          = read_config_option_int('install_eula', true);
+		$this->cronInterval  = read_config_option_int('cron_interval', true);
 		$this->locales       = get_installed_locales();
 		$this->stepData      = null;
 		$this->setLanguage($this->getLanguage());
@@ -1325,7 +1325,7 @@ class Installer implements JsonSerializable {
 	}
 
 	private function getDefaultTemplate(bool $force = false) : int {
-		$default_template = intval(read_config_option('default_template', true));
+		$default_template = read_config_option_int('default_template', true);
 
 		if (read_config_option('install_get_template_message_logged', true) == '') {
 			log_install_always('templates', 'getDefaultTemplate(): Default Device Template is \'' . $default_template . '\'');
@@ -3261,7 +3261,7 @@ class Installer implements JsonSerializable {
 	}
 
 	public function processStepInstall() : string {
-		$time = intval(read_config_option('install_updated', true));
+		$time = read_config_option_int('install_updated', true);
 
 		$output  = Installer::sectionTitle(__('Installing Cacti Server v%s', CACTI_VERSION_FULL));
 		$output .= Installer::sectionNormal(__('Your Cacti Server is now installing'));

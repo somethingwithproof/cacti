@@ -511,7 +511,7 @@ function api_data_source_get_interface_speed(array $data_local) : int {
 			cacti_log('Interface Speed Detected by ifSpeed: "' . $speed . '"', false, 'DSTRACE');
 		}
 	} else {
-		$speed = intval(read_config_option('default_interface_speed'));
+		$speed = read_config_option_int('default_interface_speed');
 
 		if (empty($speed)) {
 			$speed = '10000000000000';
@@ -624,7 +624,7 @@ function api_reapply_suggested_data_source_data(int $local_data_id) : void {
 				$subs_string = api_data_source_get_interface_speed($data_local);
 				$sv['text']  = $subs_string;
 			} else {
-				$max_chars = intval(read_config_option('max_data_query_field_length'));
+				$max_chars = read_config_option_int('max_data_query_field_length');
 
 				if (empty($max_chars)) {
 					$max_chars = 40;

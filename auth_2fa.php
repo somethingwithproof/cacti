@@ -39,7 +39,7 @@ $user = db_fetch_row_prepared('SELECT id, username, tfa_enabled, tfa_secret, log
 	[$_SESSION[SESS_USER_ID]]);
 
 $message = '';
-$tfaMins = intval(read_config_option('secpass_mfatime'));
+$tfaMins = read_config_option_int('secpass_mfatime');
 
 if ($tfaMins <= 0) {
 	$tfaMins = 60;

@@ -1054,7 +1054,7 @@ function snmp_get_method(string $type = 'walk', mixed $version = 1, mixed $conte
 function cacti_snmp_options_sanitize(mixed $version, mixed $community, mixed &$port, mixed &$timeout, mixed &$retries, mixed &$max_oids) : bool {
 	// determine default retries
 	if ($retries == 0 || !is_numeric($retries)) {
-		$retries = intval(read_config_option('snmp_retries'));
+		$retries = read_config_option_int('snmp_retries');
 
 		if (empty($retries)) {
 			$retries = 3;
@@ -1065,7 +1065,7 @@ function cacti_snmp_options_sanitize(mixed $version, mixed $community, mixed &$p
 
 	// determine default max_oids
 	if ($max_oids == 0 || !is_numeric($max_oids)) {
-		$max_oids = intval(read_config_option('max_get_size'));
+		$max_oids = read_config_option_int('max_get_size');
 
 		if (empty($max_oids)) {
 			$max_oids = 10;
@@ -1074,7 +1074,7 @@ function cacti_snmp_options_sanitize(mixed $version, mixed $community, mixed &$p
 
 	// determine default timeout
 	if ($timeout == 0 || !is_numeric($timeout)) {
-		$timeout = intval(read_config_option('snmp_timeout'));
+		$timeout = read_config_option_int('snmp_timeout');
 
 		if (empty($timeout)) {
 			$timeout = 500;

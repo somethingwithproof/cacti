@@ -153,7 +153,7 @@ if (read_config_option('dsstats_mode') != read_config_option('dsstats_temp_mode'
 
 // silently end if the registered process is still running
 if (!$force) {
-	$timeout = intval(read_config_option('dsstats_timeout'));
+	$timeout = read_config_option_int('dsstats_timeout');
 
 	if (empty($timeout)) {
 		$timeout = 600;
@@ -368,10 +368,10 @@ function dsstats_create_partitions(int $last_major_time, int $current_time, bool
 }
 
 function dsstats_remove_old_partitions() : void {
-	$daily_retention   = intval(read_config_option('dsstats_daily_retention'));
-	$weekly_retention  = intval(read_config_option('dsstats_weekly_retention'));
-	$monthly_retention = intval(read_config_option('dsstats_monthly_retention'));
-	$yearly_retention  = intval(read_config_option('dsstats_yearly_retention'));
+	$daily_retention   = read_config_option_int('dsstats_daily_retention');
+	$weekly_retention  = read_config_option_int('dsstats_weekly_retention');
+	$monthly_retention = read_config_option_int('dsstats_monthly_retention');
+	$yearly_retention  = read_config_option_int('dsstats_yearly_retention');
 
 	dsstats_prune_partitions('data_source_stats_daily', $daily_retention);
 	dsstats_prune_partitions('data_source_stats_weekly', $weekly_retention);

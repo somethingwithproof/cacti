@@ -112,8 +112,8 @@ function __rrd_proxy_init(string $logopt = 'WEBLOG') : mixed {
 
 	$load_balancing = read_config_option('rrdp_load_balancing') == 'on' ? true : false;
 
-	$portp   = intval(read_config_option('rrdp_port'));
-	$portb   = intval(read_config_option('rrdp_port_backup'));
+	$portp   = read_config_option_int('rrdp_port');
+	$portb   = read_config_option_int('rrdp_port_backup');
 	$servera = read_config_option('rrdp_server');
 	$serverb = read_config_option('rrdp_server_backup');
 
@@ -125,7 +125,7 @@ function __rrd_proxy_init(string $logopt = 'WEBLOG') : mixed {
 		$rrdp    = socket_connect($rrdp_socket, $server, $port);
 	} else {
 		$server  = read_config_option('rrdp_server');
-		$port    = intval(read_config_option('rrdp_port'));
+		$port    = read_config_option_int('rrdp_port');
 		$rrdp_id = 1;
 
 		$rrdp    = socket_connect($rrdp_socket, $server, $port);
@@ -700,7 +700,7 @@ function rrdtool_function_interface_speed(array $data_local) : string {
 	} elseif (!empty($ifSpeed)) {
 		$speed = $ifSpeed;
 	} else {
-		$speed = intval(read_config_option('default_interface_speed'));
+		$speed = read_config_option_int('default_interface_speed');
 
 		if (empty($speed)) {
 			$speed = '10000000000000';
@@ -1538,9 +1538,9 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 	}
 
 	if (empty($graph_data_array['graph_end'])) {
-		$main_last_run = intval(read_config_option('poller_lastrun_1'));
+		$main_last_run = read_config_option_int('poller_lastrun_1');
 		$now_time      = time();
-		$default_delta = intval(read_config_option('poller_interval')) * -1;
+		$default_delta = read_config_option_int('poller_interval') * -1;
 
 		if ($main_last_run > 0) {
 			$delta_time = $main_last_run - $now_time;
@@ -4753,7 +4753,7 @@ function add_unknown_data(array $graph_array, array &$xport_meta) : array {
 			$graph_array['graph_defs'] .= "CDEF:unknowndata='$tmp_def" . str_repeat(',+', $pluscnt);
 			$graph_array['graph_defs'] .= ",INF,UNKN,IF'" . RRD_NL;
 
-			$ud_color   = intval(read_config_option('graph_unknown_color'));
+			$ud_color   = read_config_option_int('graph_unknown_color');
 
 			if ($ud_color > 0) {
 				$ud_color = get_color($ud_color);
@@ -4833,7 +4833,7 @@ function add_business_hours(array $data, mixed &$xport_meta) : array {
 				$data['graph_defs'] .= 'CDEF:officehours' . $day . '=a,POP,TIME,' . $current_start_bh_time . ',LT,1,0,IF,TIME,' . $current_end_bh_time . ',GT,1,0,IF,MAX,0,GT,0,1,IF' . RRD_NL;
 				$data['graph_defs'] .= 'CDEF:dslimit' . $day . '=INF,officehours' . $day . ',*' . RRD_NL;
 
-				$bh_color = intval(read_config_option('business_hours_color'));
+				$bh_color = read_config_option_int('business_hours_color');
 
 				if (empty($bh_color)) {
 					$bh_color = 'CCCCCC';

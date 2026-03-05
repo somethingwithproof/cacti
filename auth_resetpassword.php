@@ -163,7 +163,7 @@ switch ($action) {
 					[time(), $user['id']]);
 			}
 
-			$history = intval(read_config_option('secpass_history'));
+			$history = read_config_option_int('secpass_history');
 
 			if ($history > 0) {
 				$h = db_fetch_row_prepared("SELECT password, password_history

@@ -128,7 +128,7 @@ if (function_exists('pcntl_signal')) {
 // take time and log performance data
 $start = microtime(true);
 
-$timeout = intval(read_config_option('rrdcheck_timeout'));
+$timeout = read_config_option_int('rrdcheck_timeout');
 
 // let's give this script lot of time to run for ever
 ini_set('max_execution_time', '0');

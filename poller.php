@@ -213,10 +213,10 @@ if (CACTI_CONNECTION == 'online') {
 }
 
 // get number of polling items from the database
-$poller_interval = intval(read_config_option('poller_interval'));
+$poller_interval = read_config_option_int('poller_interval');
 
 // retrieve the last time the poller ran
-$poller_lastrun  = intval(read_config_option('poller_lastrun_' . $poller_id));
+$poller_lastrun  = read_config_option_int('poller_lastrun_' . $poller_id);
 
 // is boost enabled
 $boost_enabled   = read_config_option('boost_rrd_update_enable') == 'on' ? true : false;
@@ -254,7 +254,7 @@ $process_leveling = read_config_option('process_leveling');
 if (cacti_sizeof($poller)) {
 	$concurrent_processes = $poller['processes'];
 } else {
-	$concurrent_processes = intval(read_config_option('concurrent_processes'));
+	$concurrent_processes = read_config_option_int('concurrent_processes');
 }
 
 if ($concurrent_processes < 1) {
@@ -967,8 +967,8 @@ while ($poller_runs_completed < $poller_runs) {
 		}
 	} else {
 		$pr_exceeded = read_config_option('poller_runtime_exceeded');
-		$exceeds     = intval(read_config_option('poller_runtime_exceeded_count_' . $poller_id));
-		$exceedstot  = intval(read_config_option('poller_runtime_exceeded_time_' . $poller_id));
+		$exceeds     = read_config_option_int('poller_runtime_exceeded_count_' . $poller_id);
+		$exceedstot  = read_config_option_int('poller_runtime_exceeded_time_' . $poller_id);
 
 		if ($pr_exceeded == '') {
 			set_config_option('poller_runtime_exceeded', '3600');

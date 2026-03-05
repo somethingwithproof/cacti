@@ -98,7 +98,7 @@ maint_debug('Checking for Purge Actions');
 
 // silently end if the registered process is still running, or process table missing
 if (!$force) {
-	$timeout = intval(read_config_option('maintenance_timeout'));
+	$timeout = read_config_option_int('maintenance_timeout');
 
 	if (!register_process_start('maintenance', 'master', POLLER_ID, $timeout)) {
 		cacti_log('INFO: Another maintenance session is already running', false, 'MAINTENANCE', POLLER_VERBOSITY_LOW);
@@ -330,7 +330,7 @@ function reindex_devices() : bool {
 		return false;
 	}
 
-	$last_run = intval(read_config_option('periodic_reindex_lastrun'));
+	$last_run = read_config_option_int('periodic_reindex_lastrun');
 	$now      = time();
 
 	if (empty($last_run)) {

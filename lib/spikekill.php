@@ -141,9 +141,9 @@ class spikekill {
 		$this->dmethod   = read_config_option('spikekill_method', true);
 		$this->davgnan   = read_config_option('spikekill_avgnan', true);
 		$this->ddsfilter = read_config_option('spikekill_dsfilter', true);
-		$this->dnumspike = intval(read_config_option('spikekill_number', true));
-		$this->dstddev   = intval(read_config_option('spikekill_deviations', true));
-		$this->dabsmax   = intval(read_config_option('spikekill_absmax', true));
+		$this->dnumspike = read_config_option_int('spikekill_number', true);
+		$this->dstddev   = read_config_option_int('spikekill_deviations', true);
+		$this->dabsmax   = read_config_option_int('spikekill_absmax', true);
 	}
 
 	public function __destruct() {

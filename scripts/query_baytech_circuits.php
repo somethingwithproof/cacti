@@ -66,7 +66,7 @@ if (isset($_SERVER['argv'][15])) {
 }
 
 // get number of snmp retries from global settings
-$snmp_retries   = intval(read_config_option('snmp_retries'));
+$snmp_retries   = read_config_option_int('snmp_retries');
 
 // -------------------------------------------------------------------------
 // main code starts here

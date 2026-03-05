@@ -129,7 +129,7 @@ $group_id      = filegroup($base_rra_path);
 set_config_option('extended_paths', 'on');
 
 $pattern  = read_config_option('extended_paths_type');
-$maxdirs  = intval(read_config_option('extended_paths_hashes'));
+$maxdirs  = read_config_option_int('extended_paths_hashes');
 $pattern1 = '';
 $pattern2 = '';
 

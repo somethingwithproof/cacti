@@ -663,7 +663,7 @@ function boost_output_rrd_data(int $child) : mixed {
 
 	boost_debug("Processes:$child, TotalRows:$total_rows");
 
-	$max_per_select = intval(read_config_option('boost_rrd_update_max_records_per_select'));
+	$max_per_select = read_config_option_int('boost_rrd_update_max_records_per_select');
 
 	$data_ids = db_fetch_cell_prepared('SELECT
 		COUNT(local_data_id)
@@ -768,9 +768,9 @@ function boost_process_local_data_ids(int $last_id, int $child, mixed $rrdtool_p
 	set_error_handler('boost_error_handler');
 
 	// load system variables needed
-	$upd_string_len      = intval(read_config_option('boost_rrd_update_string_length'));
-	$rrd_update_interval = intval(read_config_option('boost_rrd_update_interval'));
-	$data_ids_to_get     = intval(read_config_option('boost_rrd_update_max_records_per_select'));
+	$upd_string_len      = read_config_option_int('boost_rrd_update_string_length');
+	$rrd_update_interval = read_config_option_int('boost_rrd_update_interval');
+	$data_ids_to_get     = read_config_option_int('boost_rrd_update_max_records_per_select');
 	$rrd_field_names     = [];
 
 	if ($archive_tables === false) {
