@@ -2224,11 +2224,15 @@ function db_dump_data($database = '', $tables = '', $credentials = array(), $out
 	if (strstr($options, '--defaults-extra-file') !== false) {
 		exec("mysqldump $options $credentials_string $database $tables > " . $output_file, $output, $retval);
 	} else {
-		exec("mysqldump $options $credentials_string " . $database . ' version >/dev/null 2>&1', $output, $retval);
+		$dump_esc   = cacti_escapeshellcmd('mysqldump');
+		$output_esc = cacti_escapeshellarg((string) $output_file);
+
+		exec("$dump_esc $options $credentials_string " . cacti_escapeshellarg($database) . ' version >/dev/null 2>&1', $output, $retval);
+
 		if ($retval) {
-			exec("mysqldump $options $credentials_string -u" . $username . ' -p' . $password . ' ' . $database . " $tables > " . $output_file, $output, $retval);
+			exec("$dump_esc $options $credentials_string --user=" . cacti_escapeshellarg($username) . ' --password=' . cacti_escapeshellarg($password) . ' ' . cacti_escapeshellarg($database) . ' ' . cacti_escapeshellarg($tables) . " > $output_esc", $output, $retval);
 		} else {
-			exec("mysqldump $options $credentials_string $database $tables > " . $output_file, $output, $retval);
+			exec("$dump_esc $options $credentials_string " . cacti_escapeshellarg($database) . ' ' . cacti_escapeshellarg($tables) . " > $output_esc", $output, $retval);
 		}
 	}
 	return $retval;
