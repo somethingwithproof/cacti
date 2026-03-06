@@ -779,7 +779,7 @@ function rrdtool_function_create($local_data_id, $show_source, $rrdtool_pipe = f
 		$success = rrdtool_execute("create $data_source_path $create_ds$create_rra", true, RRDTOOL_OUTPUT_STDOUT, $rrdtool_pipe, 'POLLER');
 
 		if ($config['cacti_server_os'] != 'win32' && posix_getuid() == 0) {
-			shell_exec("chown $owner_id:$group_id $data_source_path");
+			shell_exec('chown ' . (int) $owner_id . ':' . (int) $group_id . ' ' . cacti_escapeshellarg($data_source_path));
 		}
 
 		return $success;
