@@ -44,4 +44,27 @@ function upgrade_to_0_8_1() {
 				array($item["id"], $item["username"]));
 		}
 	}
+
+	$host = db_fetch_row_prepared('SELECT *
+		FROM host
+		WHERE id = ?',
+		[$host_id]);
+
+	$aps  = cacti_snmp_walk($host['hostname'],
+		$host['snmp_community'],
+		'.1.3.6.1.4.1.14823.2.3.3.1.2.1.1.3',
+		$host['snmp_version'],
+		$host['snmp_username'],
+		$host['snmp_password'],
+		$host['snmp_auth_protocol'],
+		$host['snmp_priv_passphrase'],
+		$host['snmp_priv_protocol'],
+		$host['snmp_context'],
+		$host['snmp_port'],
+		$host['snmp_timeout'],
+		$host['snmp_retries'],
+		SNMP_POLLER,
+		$host['snmp_engine_id']);
+
+	return ('count:' . count($aps) . PHP_EOL);
 }

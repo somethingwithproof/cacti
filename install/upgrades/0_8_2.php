@@ -29,8 +29,49 @@ function upgrade_to_0_8_2() {
 	db_install_add_column('host', array('name' => 'disabled', 'type' => 'char(2)'));
 	db_install_add_column('host', array('name' => 'status', 'type' => 'tinyint(2)', 'NULL' => false));
 
-	db_install_execute("UPDATE host_snmp_cache set field_name='ifName' where field_name='ifAlias' and snmp_query_id=1;");
-	db_install_execute("UPDATE snmp_query_graph_rrd_sv set text = REPLACE(text,'ifAlias','ifName') where (snmp_query_graph_id=1 or snmp_query_graph_id=13 or snmp_query_graph_id=14 or snmp_query_graph_id=16 or snmp_query_graph_id=9 or snmp_query_graph_id=2 or snmp_query_graph_id=3 or snmp_query_graph_id=4);");
-	db_install_execute("UPDATE snmp_query_graph_sv set text = REPLACE(text,'ifAlias','ifName') where (snmp_query_graph_id=1 or snmp_query_graph_id=13 or snmp_query_graph_id=14 or snmp_query_graph_id=16 or snmp_query_graph_id=9 or snmp_query_graph_id=2 or snmp_query_graph_id=3 or snmp_query_graph_id=4);");
-	db_install_execute("UPDATE host set disabled = '';");
+	array_shift($_SERVER['argv']);
+	print call_user_func_array('ss_fortigate_ipsec', $_SERVER['argv']);
+} else {
+	include_once(__DIR__ . '/../lib/snmp.php');
+}
+
+function ss_fortigate_ipsec(int $host_id = 0) : mixed {
+	global $environ, $poller_id, $config;
+
+	$total = 0;
+	$down  = 0;
+
+	if ($host_id <= 0) {
+		return 'total:0 down:0' . PHP_EOL;
+	}
+
+	$host = db_fetch_row_prepared('SELECT *
+		FROM host
+		WHERE id = ?',
+		[$host_id]);
+
+	$tunnels  = cacti_snmp_walk($host['hostname'],
+		$host['snmp_community'],
+		'.1.3.6.1.4.1.12356.101.12.2.2.1.20',
+		$host['snmp_version'],
+		$host['snmp_username'],
+		$host['snmp_password'],
+		$host['snmp_auth_protocol'],
+		$host['snmp_priv_passphrase'],
+		$host['snmp_priv_protocol'],
+		$host['snmp_context'],
+		$host['snmp_port'],
+		$host['snmp_timeout'],
+		$host['snmp_retries'],
+		SNMP_POLLER,
+		$host['snmp_engine_id']);
+
+	foreach ($tunnels as $tunnel) {
+		if ($tunnel['value'] == 1) {
+			$down++;
+		}
+		$total++;
+	}
+
+	return ('total:' . $total . ' down:' . $down . PHP_EOL);
 }

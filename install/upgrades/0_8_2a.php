@@ -22,6 +22,30 @@
  +-------------------------------------------------------------------------+
 */
 
-function upgrade_to_0_8_2a() {
-	db_install_add_column('data_input_data_cache', array('name' => 'rrd_num', 'type' => 'tinyint(2)', 'NULL' => false, 'after' => 'rrd_path'));
+// display no errors
+error_reporting(0);
+
+if (!isset($called_by_script_server)) {
+	include(__DIR__ . '/../include/cli_check.php');
+	array_shift($_SERVER['argv']);
+	print call_user_func_array('ss_mikrotik_health', $_SERVER['argv']);
+}
+
+function ss_mikrotik_health(int $host_id = 0, string $column = 'no') : string {
+	$allowed_columns = ['voltage', 'temperature', 'processorTemperature', 'current', 'power', 'fanSpeed', 'cpuFrequency'];
+
+	if (!in_array($column, $allowed_columns, true)) {
+		return '0';
+	}
+
+	$value = db_fetch_cell_prepared("SELECT $column
+		FROM plugin_mikrotik_system_health
+		WHERE host_id = ?",
+		[$host_id]);
+
+	if ($value == '') {
+		$value = 'U';
+	}
+
+	return $value;
 }
