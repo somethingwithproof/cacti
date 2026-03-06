@@ -57,8 +57,7 @@ if (isset_request_var('error')) {
 			'ignore_errors'     => true
 		),
 		'http' => array(
-			'follow_location'   => 0,
-			'max_redirects'     => 1
+			'follow_location' => 0
 		)
 	);
 
