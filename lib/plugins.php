@@ -97,7 +97,12 @@ function api_plugin_hook(string $name) : array {
 				}
 
 				if (function_exists($plugin_func)) {
-					api_plugin_run_plugin_hook($name, $plugin_name, $plugin_func, $args);
+					try {
+						api_plugin_run_plugin_hook($name, $plugin_name, $plugin_func, $args);
+					} catch (\Throwable $e) {
+						// Isolate per-plugin failures so one bad plugin cannot kill the poller.
+						cacti_log(sprintf('ERROR: Plugin hook "%s" threw %s for plugin "%s": %s', $name, get_class($e), $plugin_name, $e->getMessage()), false, 'PLUGIN');
+					}
 				} elseif (debounce_run_notification($debounce)) {
 					cacti_log(sprintf('WARNING: Function "%s" does not exist in %s/%s for hook "%s"' . PHP_EOL, $plugin_func, $plugin_name, $plugin_file, $name), false, 'PLUGIN', POLLER_VERBOSITY_MEDIUM);
 				}
@@ -166,7 +171,12 @@ function api_plugin_hook_function(string $name, mixed $parm = null) : mixed {
 							$is_array = false;
 						}
 
-						$ret = api_plugin_run_plugin_hook_function($name, $hdata['name'], $function, $ret);
+						try {
+							$ret = api_plugin_run_plugin_hook_function($name, $hdata['name'], $function, $ret);
+						} catch (\Throwable $e) {
+							// Preserve $ret and continue to the next plugin so one failure does not corrupt the chain.
+							cacti_log(sprintf('ERROR: Plugin hook "%s" threw %s for plugin "%s": %s', $name, get_class($e), $hdata['name'], $e->getMessage()), false, 'PLUGIN');
+						}
 
 						if (($is_array && !is_array($ret)) || ($ret == null && $null_ret === false)) {
 							if (cacti_sizeof($result) > 1) {
