@@ -30,7 +30,7 @@ msgstr "تم تصميم Cacti ليكون حلًا بيانيًا كاملًا ي
 #: about.php:46
 #, fuzzy, php-format
 msgid "Please see the official %sCacti website%s for information on how to use Cacti, get support, and updates."
-msgstr "يرجى الاطلاع على الموقع٪ sCacti٪ s الرسمي للحصول على المعلومات والدعم والتحديثات."
+msgstr ""
 
 #: about.php:50
 #, fuzzy
@@ -66,7 +66,7 @@ msgstr "شكرًا جزيلاً"
 #: about.php:88
 #, fuzzy, php-format
 msgid "A very special thanks to %sTobi Oetiker%s, the creator of %sRRDtool%s and the very popular %sMRTG%s."
-msgstr "شكر خاص جدًا إلى٪ sTobi Oetiker٪ s ، منشئ٪ sRRDtool٪ s و٪ sMRTG٪ s الشائعة جدًا."
+msgstr ""
 
 #: about.php:91
 msgid "The users of Cacti"
@@ -141,7 +141,7 @@ msgstr "لا تتفق مع الركام"
 #: aggregate_graphs.php:114 graphs.php:280 host.php:228
 #, fuzzy, php-format
 msgid "Place on a Tree (%s)"
-msgstr "ضعه على شجرة (٪ s)"
+msgstr ""
 
 #: aggregate_graphs.php:579
 msgid "Override Values for Graph Item"
@@ -176,7 +176,7 @@ msgstr "لا توجد حاليًا أي قوالب مجمعة محددة للر�
 #: aggregate_graphs.php:845
 #, fuzzy, php-format
 msgid "In order to migrate the Aggregate Graphs below to a Template based Aggregate, first create an Aggregate Template for the Graph Template '%s'."
-msgstr "لترحيل الرسوم البيانية الإجمالية أدناه إلى Aggregate مستند إلى قالب ، قم أولاً بإنشاء قالب تجميع قالب الرسم البياني &#39;٪ s&#39;."
+msgstr ""
 
 #: aggregate_graphs.php:864
 msgid "You currently have no reports defined."
@@ -342,12 +342,12 @@ msgstr "لا تتفق مع الركام"
 #: aggregate_graphs.php:970
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Aggregate Graph on Tree %s."
-msgstr "انقر فوق &quot;متابعة&quot; لحذف قالب (نماذج) الرسم البياني الكلي التالي."
+msgstr ""
 
 #: aggregate_graphs.php:971
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Aggregate Graphs on Tree %s."
-msgstr "انقر فوق &quot;متابعة&quot; لوضع التالي (الإجمالي) Graph (s) تحت فرع شجرة."
+msgstr ""
 
 #: aggregate_graphs.php:972
 #, fuzzy
@@ -367,7 +367,7 @@ msgstr "فرع الوجهة:"
 #: user_admin.php:1833
 #, fuzzy, php-format
 msgid "[edit: %s]"
-msgstr "[تحرير:٪ s]"
+msgstr ""
 
 #: aggregate_graphs.php:1039 aggregate_graphs.php:1151
 #: aggregate_graphs.php:1153
@@ -411,7 +411,7 @@ msgstr "معاينة التجميع [٪ s]"
 #: aggregate_graphs.php:1158
 #, fuzzy, php-format
 msgid "Aggregate Preview %s"
-msgstr "معاينة التجميع [٪ s]"
+msgstr ""
 
 #: aggregate_graphs.php:1180 graph.php:624 graphs.php:2418
 msgid "RRDtool Command:"
@@ -428,7 +428,7 @@ msgstr "لا الشيكات"
 #: aggregate_graphs.php:1213
 #, fuzzy, php-format
 msgid "Aggregate Graph %s"
-msgstr "قم بتضمين نص عنوان GPRINT للرسومات البيانية المصدر مع الرسوم البيانية المجمعة."
+msgstr ""
 
 #: aggregate_graphs.php:1238 aggregate_templates.php:405 graphs.php:1682
 msgid "Prefix Replacement Values"
@@ -806,7 +806,7 @@ msgstr "حذف قالب (نماذج) الرسم البياني"
 #: aggregate_templates.php:363
 #, fuzzy, php-format
 msgid "Aggregate Template [edit: %s]"
-msgstr "نموذج التجميع [edit:٪ s]"
+msgstr ""
 
 #: aggregate_templates.php:365
 msgid "Aggregate Template [new]"
@@ -920,7 +920,7 @@ msgstr "متطلبات كلمة المرور تشمل:"
 #: auth_changepassword.php:332 auth_resetpassword.php:237
 #, fuzzy, php-format
 msgid "Must be at least %d characters in length"
-msgstr "يجب أن يكون طوله٪ d حرفًا على الأقل"
+msgstr ""
 
 #: auth_changepassword.php:336 auth_resetpassword.php:241
 msgid "Must include mixed case"
@@ -937,7 +937,7 @@ msgstr "يجب أن يتضمن حرفًا خاصًا واحدًا على الأ�
 #: auth_changepassword.php:348 auth_resetpassword.php:253
 #, fuzzy, php-format
 msgid "Cannot be reused for %d password changes"
-msgstr "لا يمكن إعادة استخدامها لـ٪ d تغييرات كلمة المرور"
+msgstr ""
 
 #: auth_changepassword.php:403
 msgid "There are problems with the Change Password page.  Contact your Cacti administrator right away."
@@ -949,7 +949,7 @@ msgstr "يرجى إدخال كلمة المرور الحالية والخاصة 
 
 #: auth_changepassword.php:412 auth_resetpassword.php:263
 msgid "Please enter your new Cacti password."
-msgstr "يرجى إدخال كلمة المرور الحالية والخاصة بك <br> كلمة السر الصبار."
+msgstr ""
 
 #: auth_changepassword.php:415 include/global_form.php:1698
 #: lib/functions.php:4080 lib/html.php:3070
@@ -1006,7 +1006,7 @@ msgstr "تمت مصادقة المستخدم ، ولكن تم تعطيل حسا�
 #: auth_login.php:141
 #, fuzzy, php-format
 msgid "Access Denied!  Guest user id %s does not exist.  Please contact your Administrator."
-msgstr "رفض الوصول ، يرجى الاتصال بك Cacti Administrator."
+msgstr ""
 
 #: auth_login.php:180
 #, fuzzy
@@ -1251,7 +1251,7 @@ msgstr ""
 #: auth_resetpassword.php:261
 #, fuzzy
 msgid "Please enter your Cacti username or email address."
-msgstr "يرجى إدخال كلمة المرور الحالية والخاصة بك <br> كلمة السر الصبار."
+msgstr ""
 
 #: auth_resetpassword.php:265
 msgid "Reset password problem."
@@ -1298,12 +1298,12 @@ msgstr "يضاف يدويا من خلال واجهة التشغيل الآلي �
 #: automation_devices.php:125
 #, fuzzy, php-format
 msgid "Device %s Added to Cacti"
-msgstr "يضاف إلى الصبار"
+msgstr ""
 
 #: automation_devices.php:127
 #, fuzzy, php-format
 msgid "Device %s Not Added to Cacti"
-msgstr "لا تضاف إلى الصبار"
+msgstr ""
 
 #: automation_devices.php:137
 msgid "Devices Removed from Cacti Automation database"
@@ -1722,7 +1722,7 @@ msgstr "شكل العنوان"
 #: automation_graph_rules.php:649
 #, fuzzy, php-format
 msgid "Rule Selection [edit: %s]"
-msgstr "اختيار القاعدة [تحرير:٪ s]"
+msgstr ""
 
 #: automation_graph_rules.php:652 automation_graph_rules.php:667
 #: automation_tree_rules.php:688 automation_tree_rules.php:693
@@ -1861,32 +1861,32 @@ msgstr "نطاق اكتشاف الشبكة الجديدة"
 #: automation_networks.php:366
 #, fuzzy, php-format
 msgid "Can Not Restart Discovery for Discovery in Progress for Network '%s'"
-msgstr "لا يمكن إعادة تشغيل Discovery for Discovery in Progress for Network &#39;٪ s&#39;"
+msgstr ""
 
 #: automation_networks.php:370
 #, fuzzy, php-format
 msgid "Can Not Perform Discovery for Disabled Network '%s'"
-msgstr "لا يمكن تنفيذ اكتشاف شبكة معطلة &#39;٪ s&#39;"
+msgstr ""
 
 #: automation_networks.php:439
 #, fuzzy, php-format
 msgid "ERROR: You must specify the day of the week.  Disabling Network %s!."
-msgstr "خطأ: يجب تحديد يوم من الأسبوع. تعطيل الشبكة٪ s!"
+msgstr ""
 
 #: automation_networks.php:445
 #, fuzzy, php-format
 msgid "ERROR: You must specify both the Months and Days of Month.  Disabling Network %s!"
-msgstr "خطأ: يجب عليك تحديد كل من الأشهر والأيام من الشهر. تعطيل الشبكة٪ s!"
+msgstr ""
 
 #: automation_networks.php:451
 #, fuzzy, php-format
 msgid "ERROR: You must specify the Months, Weeks of Months, and Days of Week.  Disabling Network %s!"
-msgstr "خطأ: يجب تحديد الأشهر ، أسابيع الأشهر ، وأيام الأسبوع. تعطيل الشبكة٪ s!"
+msgstr ""
 
 #: automation_networks.php:469
 #, fuzzy, php-format
 msgid "ERROR: Network '%s' is Invalid."
-msgstr "خطأ: الشبكة &#39;٪ s&#39; غير صالحة."
+msgstr ""
 
 #: automation_networks.php:628 host.php:436 lib/html_form.php:1614
 msgid "Update this Field"
@@ -2156,7 +2156,7 @@ msgstr "حدد عدد مؤشرات الترابط التي سيتم استخدا
 #: automation_networks.php:807
 #, fuzzy, php-format
 msgid "%d Thread"
-msgstr "٪ d مؤشر ترابط"
+msgstr ""
 
 #: automation_networks.php:808 automation_networks.php:809
 #: automation_networks.php:810 automation_networks.php:811
@@ -2170,7 +2170,7 @@ msgstr "٪ d مؤشر ترابط"
 #: include/global_arrays.php:907 include/global_arrays.php:908
 #, fuzzy, php-format
 msgid "%d Threads"
-msgstr "٪ d مؤشرات"
+msgstr ""
 
 #: automation_networks.php:824
 msgid "Run Limit"
@@ -2183,7 +2183,7 @@ msgstr "بعد &quot;حد التشغيل&quot; المحدد ، سيتم إنها
 #: automation_networks.php:828 automation_networks.php:1546 pollers.php:975
 #, fuzzy, php-format
 msgid "%d Minute"
-msgstr "٪ d دقيقة"
+msgstr ""
 
 #: automation_networks.php:829 automation_networks.php:830
 #: automation_networks.php:831 automation_networks.php:832
@@ -2574,7 +2574,7 @@ msgstr "كل X اسابيع."
 #: automation_networks.php:1224
 #, fuzzy, php-format
 msgid "Network Discovery Range [edit: %s]"
-msgstr "نطاق اكتشاف الشبكة [تحرير]:٪ s"
+msgstr ""
 
 #: automation_networks.php:1227
 msgid "Network Discovery Range [new]"
@@ -2812,12 +2812,12 @@ msgstr "خيار SNMP:"
 #: automation_snmp.php:537
 #, fuzzy, php-format
 msgid "SNMP Version: <b>%s</b>"
-msgstr "إصدار SNMP: <b>٪ s</b>"
+msgstr ""
 
 #: automation_snmp.php:538
 #, fuzzy, php-format
 msgid "SNMP Community/Username: <b>%s</b>"
-msgstr "SNMP مجتمع / اسم المستخدم: <b>٪ s</b>"
+msgstr ""
 
 #: automation_snmp.php:543 automation_templates.php:675
 #: automation_templates.php:797 cdef.php:317 color_templates.php:495
@@ -2849,7 +2849,7 @@ msgstr "قم بإزالة عنصر SNMP"
 #: automation_snmp.php:610
 #, fuzzy, php-format
 msgid "SNMP Options [edit: %s]"
-msgstr "خيارات SNMP [تحرير:٪ s]"
+msgstr ""
 
 #: automation_snmp.php:612
 msgid "SNMP Options [new]"
@@ -2871,7 +2871,7 @@ msgstr "تسلسل البند."
 #: automation_snmp.php:675
 #, fuzzy, php-format
 msgid "SNMP Option Set [edit: %s]"
-msgstr "مجموعة خيارات SNMP [تحرير:٪ s]"
+msgstr ""
 
 #: automation_snmp.php:677
 msgid "SNMP Option Set [new]"
@@ -2951,7 +2951,7 @@ msgstr "الإجراء"
 #: lib/html_reports.php:1848 vdef.php:596
 #, fuzzy, php-format
 msgid "Item # %d"
-msgstr "البند #٪ د"
+msgstr ""
 
 #: automation_snmp.php:743
 msgid "none"
@@ -3117,7 +3117,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف قالب الرسم ا
 #: automation_templates.php:669
 #, fuzzy, php-format
 msgid "Graph Rule Name: '%s'"
-msgstr "اسم الرسم البياني:٪ s"
+msgstr ""
 
 #: automation_templates.php:676
 #, fuzzy
@@ -3137,7 +3137,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف طلبات البحث 
 #: automation_templates.php:791
 #, fuzzy, php-format
 msgid "Tree Rule Name: '%s'"
-msgstr "عناصر القاعدة الشجرية"
+msgstr ""
 
 #: automation_templates.php:798
 #, fuzzy
@@ -3214,7 +3214,7 @@ msgstr "إذا تم تحديده ، عندما يتم فحص شبكة الأتم
 #: automation_templates.php:974
 #, fuzzy, php-format
 msgid "Device Rules [edit: %s]"
-msgstr "الجهاز [تحرير:٪ s]"
+msgstr ""
 
 #: automation_templates.php:976
 #, fuzzy
@@ -3476,7 +3476,7 @@ msgstr "لا تظهر"
 #: automation_tree_rules.php:700
 #, fuzzy, php-format
 msgid "Tree Rule Selection [edit: %s]"
-msgstr "اختيار قواعد الشجرة [تحرير:٪ s]"
+msgstr ""
 
 #: automation_tree_rules.php:708
 msgid "Tree Rules Selection [new]"
@@ -3608,7 +3608,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف عنصر CDEF التا
 #: cdef.php:310
 #, fuzzy, php-format
 msgid "CDEF Name: %s"
-msgstr "اسم CDEF:٪ s"
+msgstr ""
 
 #: cdef.php:318
 msgid "Remove CDEF Item"
@@ -3621,7 +3621,7 @@ msgstr "CDEF معاينة"
 #: cdef.php:423
 #, fuzzy, php-format
 msgid "CDEF Items [edit: %s]"
-msgstr "عناصر CDEF [تحرير:٪ s]"
+msgstr ""
 
 #: cdef.php:436
 msgid "CDEF Item Type"
@@ -3642,7 +3642,7 @@ msgstr "أدخل قيمة لهذا البند CDEF."
 #: cdef.php:556
 #, fuzzy, php-format
 msgid "CDEF [edit: %s]"
-msgstr "CDEF [تحرير:٪ s]"
+msgstr ""
 
 #: cdef.php:558
 msgid "CDEF [new]"
@@ -3707,7 +3707,7 @@ msgstr "الاسم الكامل"
 #: changelog.php:99
 #, fuzzy, php-format
 msgid "Change Log [%s]"
-msgstr "1 التغيير"
+msgstr ""
 
 #: changelog.php:160 support.php:1018
 #, php-format
@@ -3785,7 +3785,7 @@ msgstr "<strong>عرافة</strong> - قيمة الهيكس"
 #: color.php:398
 #, fuzzy, php-format
 msgid "Colors [edit: %s]"
-msgstr "الألوان [تحرير:٪ s]"
+msgstr ""
 
 #: color.php:400
 msgid "Colors [new]"
@@ -3945,12 +3945,12 @@ msgstr "إزالة عنصر اللون"
 #: color_templates.php:563
 #, fuzzy, php-format
 msgid "Color Template Items [edit Report Item: %s]"
-msgstr "عناصر قالب اللون [تحرير عنصر تقرير:٪ s]"
+msgstr ""
 
 #: color_templates.php:566
 #, fuzzy, php-format
 msgid "Color Template Items [new Report Item: %s]"
-msgstr "عناصر قالب اللون [جديد تقرير العنصر:٪ s]"
+msgstr ""
 
 #: color_templates.php:601
 msgid "Color Template Items [new]"
@@ -3959,7 +3959,7 @@ msgstr "عناصر قالب اللون [جديد]"
 #: color_templates.php:617
 #, fuzzy, php-format
 msgid "Color Template Items [edit: %s]"
-msgstr "عناصر قالب الألوان [تحرير:٪ s]"
+msgstr ""
 
 #: color_templates.php:654
 msgid "Delete Color Item"
@@ -3968,7 +3968,7 @@ msgstr "حذف عنصر اللون"
 #: color_templates.php:683
 #, fuzzy, php-format
 msgid "Color Template [edit: %s]"
-msgstr "لون قالب [تحرير:٪ s]"
+msgstr ""
 
 #: color_templates.php:685
 msgid "Color Template [new]"
@@ -3977,12 +3977,12 @@ msgstr "قالب اللون [جديد]"
 #: color_templates.php:762
 #, fuzzy, php-format
 msgid "Color Template '%s' had %d Aggregate Templates pushed out and %d Non-Templated Aggregates pushed out"
-msgstr "قالب اللون '٪ s' تم دفع٪ d من القوالب المجمعة للخارج وتم دفع٪ d التجميعات التي لا تحتوي على قالب"
+msgstr ""
 
 #: color_templates.php:764
 #, fuzzy, php-format
 msgid "Color Template '%s' had no Aggregate Templates or Graphs using this Color Template."
-msgstr "لا يحتوي قالب الألوان '٪ s' على قوالب مجمعة أو رسوم بيانية باستخدام قالب الألوان هذا."
+msgstr ""
 
 #: color_templates.php:818 color_templates.php:832 color_templates.php:835
 #: color_templates.php:903 include/global_arrays.php:2895
@@ -4215,7 +4215,7 @@ msgstr "لم يتم استقصاء مصدر البيانات"
 #: data_debug.php:831
 #, fuzzy, php-format
 msgid "Data Source Troubleshooter [ Auto Refreshing till Complete ] %s"
-msgstr "أداة حل مشكلات مصدر البيانات [٪ s]"
+msgstr ""
 
 #: data_debug.php:831 data_debug.php:833
 msgid "Refresh Now"
@@ -4224,12 +4224,12 @@ msgstr "تحديث"
 #: data_debug.php:833
 #, fuzzy, php-format
 msgid "Data Source Troubleshooter [ Auto Refreshing till RRDfile Update ] %s"
-msgstr "أداة حل مشكلات مصدر البيانات [٪ s]"
+msgstr ""
 
 #: data_debug.php:835
 #, fuzzy, php-format
 msgid "Data Source Troubleshooter [ Analysis Complete! %s ]"
-msgstr "أداة حل مشكلات مصدر البيانات [٪ s]"
+msgstr ""
 
 #: data_debug.php:835
 msgid "Rerun Analysis"
@@ -4251,7 +4251,7 @@ msgstr "النتائج"
 
 #: data_debug.php:854
 msgid "<not set>"
-msgstr "لم يتم التعيين"
+msgstr ""
 
 #: data_debug.php:891 data_debug.php:945
 msgid "Data Source Repair Recommendations"
@@ -4264,7 +4264,7 @@ msgstr "مشكل"
 #: data_debug.php:910
 #, fuzzy, php-format
 msgid "For attribute '%s', issue found '%s'"
-msgstr "بالنسبة إلى attrbitute '٪ s' ، تم العثور على المشكلة '٪ s'"
+msgstr ""
 
 #: data_debug.php:925
 msgid "Apply Suggested Fixes"
@@ -4273,7 +4273,7 @@ msgstr "إعادة تطبيق الأسماء المقترحة"
 #: data_debug.php:925
 #, fuzzy, php-format
 msgid "Repair Steps [ %s ]"
-msgstr "خطوات الإصلاح [٪ s]"
+msgstr ""
 
 #: data_debug.php:927
 msgid "Repair Steps [ Run Fix from Command Line ]"
@@ -4294,7 +4294,7 @@ msgstr "جميع الاجهزة"
 #: data_debug.php:1037
 #, fuzzy, php-format
 msgid "Data Source Troubleshooter [ %s ]"
-msgstr "أداة حل مشكلات مصدر البيانات [٪ s]"
+msgstr ""
 
 #: data_debug.php:1037
 msgid "No Device"
@@ -4390,12 +4390,12 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف حقل إدخال ال
 #: data_input.php:293
 #, fuzzy, php-format
 msgid "Field Name: %s"
-msgstr "اسم الحقل:٪ s"
+msgstr ""
 
 #: data_input.php:294
 #, fuzzy, php-format
 msgid "Friendly Name: %s"
-msgstr "اسم مألوف:٪ s"
+msgstr ""
 
 #: data_input.php:300
 msgid "Remove Data Input Field"
@@ -4408,7 +4408,7 @@ msgstr "يبدو أن هذا البرنامج النصي لا يحتوي على 
 #: data_input.php:429
 #, fuzzy, php-format
 msgid "Output Fields [edit: %s]"
-msgstr "حقول الإخراج [تحرير:٪ s]"
+msgstr ""
 
 #: data_input.php:430 include/global_form.php:669
 msgid "Output Field"
@@ -4417,7 +4417,7 @@ msgstr "حقل الإخراج"
 #: data_input.php:432
 #, fuzzy, php-format
 msgid "Input Fields [edit: %s]"
-msgstr "حقول الإدخال [تحرير:٪ s]"
+msgstr ""
 
 #: data_input.php:433
 msgid "Input Field"
@@ -4426,7 +4426,7 @@ msgstr "حقل إدخال"
 #: data_input.php:494
 #, fuzzy, php-format
 msgid "Data Input Method [edit: %s]"
-msgstr "طرق إدخال البيانات [تحرير:٪ s]"
+msgstr ""
 
 #: data_input.php:498
 msgid "Data Input Method [new]"
@@ -4593,7 +4593,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف رابطة رسوما�
 #: data_queries.php:545
 #, fuzzy, php-format
 msgid "Graph Name: %s"
-msgstr "اسم الرسم البياني:٪ s"
+msgstr ""
 
 #: data_queries.php:551
 msgid "Remove Data Query Graph Template"
@@ -4602,7 +4602,7 @@ msgstr "تحويل إلى قالب الرسم البياني"
 #: data_queries.php:636
 #, fuzzy, php-format
 msgid "Associated Graph/Data Templates [edit: %s]"
-msgstr "قوالب الرسم البياني / البيانات المرتبطة [تحرير:٪ s]"
+msgstr ""
 
 #: data_queries.php:638
 msgid "Associated Graph/Data Templates [new]"
@@ -4615,7 +4615,7 @@ msgstr "قوالب البيانات المرتبطة"
 #: data_queries.php:690
 #, fuzzy, php-format
 msgid "Data Template - %s"
-msgstr "حذف قالب (نماذج) البيانات"
+msgstr ""
 
 #: data_queries.php:742
 msgid "If this Graph Template requires the Data Template Data Source to the left, select the correct XML output column and then to enable the mapping either check or toggle here."
@@ -4662,7 +4662,7 @@ msgstr ""
 #: data_queries.php:1102
 #, fuzzy, php-format
 msgid "Data Queries [edit: %s]"
-msgstr "استعلامات البيانات [تحرير:٪ s]"
+msgstr ""
 
 #: data_queries.php:1104
 msgid "Data Queries [new]"
@@ -4800,7 +4800,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف ملف تعريف مص
 #: data_source_profiles.php:403
 #, fuzzy, php-format
 msgid "Profile Name: %s"
-msgstr "اسم الملف الشخصي:٪ s"
+msgstr ""
 
 #: data_source_profiles.php:409
 msgid "Remove Data Source Profile RRA"
@@ -4817,12 +4817,12 @@ msgstr "(بعض العناصر للقراءة فقط)"
 #: data_source_profiles.php:524
 #, fuzzy, php-format
 msgid "RRA [edit: %s %s]"
-msgstr "RRA [تحرير:٪ s٪ s]"
+msgstr ""
 
 #: data_source_profiles.php:614
 #, fuzzy, php-format
 msgid "Data Source Profile [edit: %s]"
-msgstr "ملف تعريف مصدر البيانات [تحرير:٪ s]"
+msgstr ""
 
 #: data_source_profiles.php:616
 msgid "Data Source Profile [new]"
@@ -4866,12 +4866,12 @@ msgstr "حذف عنصر ملف تعريف مصدر البيانات"
 #: data_source_profiles.php:799
 #, fuzzy, php-format
 msgid "%s KBytes per Data Sources and %s Bytes for the Header"
-msgstr "٪ s kbytes لكل &quot;مصادر البيانات&quot; و٪ s بايت للرأس"
+msgstr ""
 
 #: data_source_profiles.php:808
 #, fuzzy, php-format
 msgid "%s KBytes per Data Source"
-msgstr "٪ s kbytes لكل مصدر بيانات"
+msgstr ""
 
 #: data_source_profiles.php:810
 msgid "Enter a valid number of Rows to obtain the RRA size."
@@ -4890,7 +4890,7 @@ msgstr ""
 #: include/global_settings.php:1962
 #, fuzzy, php-format
 msgid "%d Years"
-msgstr "٪ d سنوات"
+msgstr ""
 
 #: data_source_profiles.php:824
 msgid "1 Year"
@@ -4902,7 +4902,7 @@ msgstr "سنة واحدة"
 #: rrdcleaner.php:524
 #, fuzzy, php-format
 msgid "%d Month"
-msgstr "٪ d شهر"
+msgstr ""
 
 #: data_source_profiles.php:833 include/global_arrays.php:812
 #: include/global_arrays.php:813 include/global_arrays.php:814
@@ -4917,7 +4917,7 @@ msgstr "٪ d شهر"
 #: rrdcleaner.php:527
 #, fuzzy, php-format
 msgid "%d Months"
-msgstr "٪ d شهر"
+msgstr ""
 
 #: data_source_profiles.php:842 include/global_arrays.php:752
 #: include/global_arrays.php:808 include/global_arrays.php:829
@@ -4925,7 +4925,7 @@ msgstr "٪ d شهر"
 #: include/global_settings.php:1869 rrdcleaner.php:520 rrdcleaner.php:521
 #, fuzzy, php-format
 msgid "%d Week"
-msgstr "٪ d أسبوع"
+msgstr ""
 
 #: data_source_profiles.php:842 include/global_arrays.php:809
 #: include/global_arrays.php:810 include/global_arrays.php:830
@@ -4935,14 +4935,14 @@ msgstr "٪ d أسبوع"
 #: include/global_settings.php:3228 rrdcleaner.php:522 rrdcleaner.php:523
 #, fuzzy, php-format
 msgid "%d Weeks"
-msgstr "٪ d أسابيع"
+msgstr ""
 
 #: data_source_profiles.php:851 include/global_arrays.php:751
 #: include/global_arrays.php:795 include/global_arrays.php:805
 #: include/global_arrays.php:1601 include/global_settings.php:1863
 #, fuzzy, php-format
 msgid "%d Day"
-msgstr "٪ d يوم"
+msgstr ""
 
 #: data_source_profiles.php:851 include/global_arrays.php:796
 #: include/global_arrays.php:806 include/global_arrays.php:807
@@ -5084,7 +5084,7 @@ msgstr[5] ""
 #, fuzzy
 msgid "Leave the Graph Untouched"
 msgid_plural "Leave all Graphs untouched."
-msgstr[0] "اترك <strong>الرسم</strong> دون تغيير."
+msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
@@ -5095,7 +5095,7 @@ msgstr[5] ""
 #, fuzzy
 msgid "Delete all Graph Items that reference this Data Source."
 msgid_plural "Delete all Graph Items that reference these Data Sources"
-msgstr[0] "احذف كافة <strong>عناصر Graph</strong> التي تشير إلى مصدر البيانات هذا."
+msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
@@ -5106,7 +5106,7 @@ msgstr[5] ""
 #, fuzzy
 msgid "Delete all Graphs that reference this Data Source."
 msgid_plural "Delete all Graphs that reference these Data Sources"
-msgstr[0] "احذف جميع <strong>الرسومات البيانية</strong> التي تشير إلى مصدر البيانات هذا."
+msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
@@ -5200,12 +5200,12 @@ msgstr "إعادة تطبيق التسمية المقترحة إلى مصدر ا
 #: data_sources.php:651 data_templates.php:875
 #, fuzzy, php-format
 msgid "Custom Data [data input: %s]"
-msgstr "البيانات المخصصة [إدخال البيانات:٪ s]"
+msgstr ""
 
 #: data_sources.php:684
 #, fuzzy, php-format
 msgid "(From Device: %s)"
-msgstr "(من الجهاز:٪ s)"
+msgstr ""
 
 #: data_sources.php:687
 msgid "(From Data Template)"
@@ -5222,7 +5222,7 @@ msgstr "لا حقول الإدخال لمصدر إدخال البيانات ال
 #: data_sources.php:809
 #, fuzzy, php-format
 msgid "Data Template Selection [edit: %s]"
-msgstr "اختيار قالب البيانات [تحرير:٪ s]"
+msgstr ""
 
 #: data_sources.php:815
 msgid "Data Template Selection [new]"
@@ -5247,7 +5247,7 @@ msgstr "قم بتشغيل وضع معلومات مصدر البيانات."
 #: data_sources.php:864
 #, fuzzy, php-format
 msgid "Edit Graph: '%s'."
-msgstr "تحرير قالب الرسم البياني."
+msgstr ""
 
 #: data_sources.php:869 graphs.php:2280
 msgid "Edit Device."
@@ -5305,7 +5305,7 @@ msgstr "البيانات المخصصة"
 #: data_sources.php:1105
 #, fuzzy, php-format
 msgid "Data Source Item %s"
-msgstr "عنصر مصدر البيانات٪ s"
+msgstr ""
 
 #: data_sources.php:1108 data_templates.php:807 package_import.php:1137
 #: package_import.php:1215 templates_import.php:291
@@ -5342,7 +5342,7 @@ msgstr "مصادر البيانات [لا يوجد جهاز]"
 #: data_sources.php:1375
 #, fuzzy, php-format
 msgid "Data Sources [ %s ]"
-msgstr "مصادر البيانات [٪ s]"
+msgstr ""
 
 #: data_sources.php:1456
 msgid "Bad Indexes"
@@ -5503,7 +5503,7 @@ msgstr ""
 #: data_templates.php:670
 #, fuzzy, php-format
 msgid "Data Templates [edit: %s]"
-msgstr "قوالب البيانات [تحرير:٪ s]"
+msgstr ""
 
 #: data_templates.php:691
 msgid "Edit Data Input Method."
@@ -5528,7 +5528,7 @@ msgstr "لا يمكن تعديل قوالب البيانات المستخدمة"
 #: data_templates.php:807 data_templates.php:809
 #, fuzzy, php-format
 msgid "Data Source Item [%s]"
-msgstr "عنصر مصدر البيانات [٪ s]"
+msgstr ""
 
 #: data_templates.php:890
 #, fuzzy
@@ -5637,7 +5637,7 @@ msgstr "حذف GPRINT الإعداد المسبق (s)"
 #: gprint_presets.php:163
 #, fuzzy, php-format
 msgid "GPRINT Presets [edit: %s]"
-msgstr "إعدادات GPRINT المسبقة [تحرير:٪ s]"
+msgstr ""
 
 #: gprint_presets.php:165
 msgid "GPRINT Presets [new]"
@@ -5695,7 +5695,7 @@ msgstr "الرسم البياني غير موجود"
 #: graph.php:115 graph.php:409
 #, fuzzy, php-format
 msgid "Graph Utility View for Graph: %s"
-msgstr "عرض أداة الرسم البياني"
+msgstr ""
 
 #: graph.php:160 lib/html.php:585
 msgid "Graph Details, Zooming and Debugging Utilities"
@@ -5789,7 +5789,7 @@ msgstr "الحد الأدنى:"
 #: graph_templates.php:818
 #, fuzzy, php-format
 msgid "Graph Template Items [edit graph: %s]"
-msgstr "عناصر قالب الرسم البياني [عدل الرسم البياني:٪ s]"
+msgstr ""
 
 #: graph_templates.php:855
 #, fuzzy
@@ -5804,7 +5804,7 @@ msgstr "سيحد هذا المرشح من مصادر البيانات المرئ
 #: graph_templates.php:1163 graph_templates.php:1178
 #, fuzzy, php-format
 msgid "Sync of Graph Template '%s' Resulted in %s Repairs!"
-msgstr "مزامنة نموذج الرسم البياني \"%s\" الناتجة في %s إصلاحات!"
+msgstr ""
 
 #: graph_templates.php:1165 graph_templates.php:1180
 #, fuzzy, php-format
@@ -5921,7 +5921,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لمزامنة الرسومات
 #: graph_templates.php:1331
 #, fuzzy, php-format
 msgid "Graph Template Items [edit: %s]"
-msgstr "عناصر قالب الرسم البياني [تحرير:٪ s]"
+msgstr ""
 
 #: graph_templates.php:1338 include/global_arrays.php:2403
 msgid "Graph Item Inputs"
@@ -5934,7 +5934,7 @@ msgstr "لا المدخلات"
 #: graph_templates.php:1424
 #, fuzzy, php-format
 msgid "Graph Template [edit: %s]"
-msgstr "قالب الرسم البياني [تحرير:٪ s]"
+msgstr ""
 
 #: graph_templates.php:1426
 msgid "Graph Template [new]"
@@ -6024,7 +6024,7 @@ msgstr "لا توجد قوالب الرسم البياني"
 #: graph_templates.php:1916
 #, fuzzy, php-format
 msgid "Graph Item Inputs [edit graph: %s]"
-msgstr "مدخلات عناصر الرسم البياني [عدل الرسم البياني:٪ s]"
+msgstr ""
 
 #: graph_templates.php:1963
 msgid "Associated Graph Items"
@@ -6033,7 +6033,7 @@ msgstr "عناصر الرسم البياني المرتبطة"
 #: graph_templates.php:1991
 #, fuzzy, php-format
 msgid "Item #%s"
-msgstr "العناصر"
+msgstr ""
 
 #: graph_view.php:444
 msgid "Graph Preview Filters"
@@ -6225,7 +6225,7 @@ msgstr "جهاز"
 #: graphs.php:339
 #, fuzzy, php-format
 msgid "Created graph: %s"
-msgstr "الرسم البياني المنشأ:٪ s"
+msgstr ""
 
 #: graphs.php:347 lib/template.php:2251 lib/template.php:2285
 msgid "ERROR: No Data Source associated. Check Template"
@@ -6238,7 +6238,7 @@ msgstr "مصادر البيانات [لا يوجد جهاز]"
 #: graphs.php:796
 #, fuzzy, php-format
 msgid "Data Sources [%s]"
-msgstr "مصادر البيانات [٪ s]"
+msgstr ""
 
 #: graphs.php:811 include/global_arrays.php:1494 include/global_form.php:1786
 msgid "Data Template"
@@ -6247,7 +6247,7 @@ msgstr "قالب البيانات"
 #: graphs.php:889
 #, fuzzy, php-format
 msgid "Graph Items [graph: %s]"
-msgstr "عناصر الرسم البياني [الرسم البياني:٪ s]"
+msgstr ""
 
 #: graphs.php:933
 msgid "Choose the Data Source to associate with this Graph Item."
@@ -6500,12 +6500,12 @@ msgstr "وضع الرسوم البيانية على التقرير"
 #: graphs.php:1912
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Graph on Tree %s."
-msgstr "انقر فوق &quot;متابعة&quot; لحذف شجرة التالية."
+msgstr ""
 
 #: graphs.php:1913
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Graphs on Tree %s."
-msgstr "انقر فوق &quot;متابعة&quot; لحذف شجرة التالية."
+msgstr ""
 
 #: graphs.php:1914
 #, fuzzy
@@ -6528,12 +6528,12 @@ msgstr "عناصر الرسم البياني [جديد]"
 #: graphs.php:2102
 #, fuzzy, php-format
 msgid "Graph Items [edit: %s]"
-msgstr "عناصر الرسم البياني [تحرير:٪ s]"
+msgstr ""
 
 #: graphs.php:2212
 #, fuzzy, php-format
 msgid "Graph [edit: %s]"
-msgstr "رسم بياني [تحرير:٪ s]"
+msgstr ""
 
 #: graphs.php:2218
 msgid "Graph [new]"
@@ -6554,7 +6554,7 @@ msgstr "تحرير قالب الرسم البياني."
 #: graphs.php:2275
 #, fuzzy, php-format
 msgid "Edit Data Source: '%s'."
-msgstr "مصادر البيانات [٪ s]"
+msgstr ""
 
 #: graphs.php:2284
 msgid "Unlock Graph."
@@ -6576,7 +6576,7 @@ msgstr "قالب الرسم البياني المحدد"
 #: graphs.php:2320
 #, php-format
 msgid "Choose a Graph Template to apply to this Graph. Please note that you may only change Graph Templates to a 100%% compatible Graph Template, which means that it includes identical Data Sources."
-msgstr "اختر قالب الرسم البياني لتطبيقه على هذا الرسم البياني. يرجى ملاحظة أنه يمكنك فقط تغيير قوالب الرسم البياني إلى قالب رسم بياني متوافق بنسبة 100٪ ، مما يعني أنه يحتوي على مصادر بيانات متطابقة."
+msgstr ""
 
 #: graphs.php:2328
 msgid "Choose the Device that this Graph belongs to."
@@ -6609,7 +6609,7 @@ msgstr "إدارة مجموعة المستخدمين [تحرير:٪ s]"
 #: graphs.php:2688
 #, fuzzy, php-format
 msgid "Graph Management [ %s ]"
-msgstr "إدارة الرسم البياني"
+msgstr ""
 
 #: graphs.php:2756 graphs.php:2759
 #, fuzzy
@@ -6641,7 +6641,7 @@ msgstr "الإعدادات الافتراضية المحفوظة"
 #: graphs_new.php:338
 #, fuzzy, php-format
 msgid "New Graphs for [ %s ] (%s %s)"
-msgstr "رسومات بيانية جديدة لـ [٪ s]"
+msgstr ""
 
 #: graphs_new.php:340
 msgid "New Graphs for [ All Devices ]"
@@ -6697,22 +6697,22 @@ msgstr "حدد كل الصفوف"
 #: graphs_new.php:678
 #, fuzzy, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id of '%s'"
-msgstr "خطأ في تحليل ملف XML لمورد استعلام البيانات لاستعلام البيانات '%s' بالمعرف '%s'"
+msgstr ""
 
 #: graphs_new.php:695
 #, fuzzy, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id '%s'.  Field Name '%s' missing a 'direction' attribute"
-msgstr "خطأ في تحليل ملف XML لمورد استعلام البيانات لاستعلام البيانات '%s' بالمعرف '%s'"
+msgstr ""
 
 #: graphs_new.php:699
 #, fuzzy, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id '%s'"
-msgstr "خطأ في تحليل ملف XML لمورد استعلام البيانات لاستعلام البيانات '%s' بالمعرف '%s'"
+msgstr ""
 
 #: graphs_new.php:740
 #, fuzzy, php-format
 msgid "Data Query [%s]"
-msgstr "استعلام البيانات [٪ s]"
+msgstr ""
 
 #: graphs_new.php:867
 msgid "From there you can get more information."
@@ -6824,12 +6824,12 @@ msgstr "خطأ: جهاز ["
 #: host.php:217
 #, fuzzy, php-format
 msgid "Device Reindex Completed in %0.2f seconds.  There were %d items updated."
-msgstr "اكتمل جهاز Reindex في٪ 0.2f ثانية. تم تحديث٪ d عنصر."
+msgstr ""
 
 #: host.php:360
 #, fuzzy, php-format
 msgid "Unable to add some Devices to Report '%s'"
-msgstr "غير قادر على الإتصال بالسيرفر"
+msgstr ""
 
 #: host.php:479
 #, fuzzy
@@ -6966,12 +6966,12 @@ msgstr "ضع جهاز (أجهزة) على شجرة"
 #: host.php:564
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Device on Tree %s."
-msgstr "انقر فوق &quot;متابعة&quot; لحذف قالب (نماذج) الأجهزة التالي."
+msgstr ""
 
 #: host.php:565
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Devices on Tree %s."
-msgstr "انقر فوق &quot;متابعة&quot; لحذف شجرة التالية."
+msgstr ""
 
 #: host.php:566
 #, fuzzy
@@ -6990,7 +6990,7 @@ msgstr "الجهاز [جديد]"
 #: host.php:721
 #, fuzzy, php-format
 msgid "Device [edit: %s]"
-msgstr "الجهاز [تحرير:٪ s]"
+msgstr ""
 
 #: host.php:724
 msgid "Disable Device Debug"
@@ -7086,7 +7086,7 @@ msgstr "طريقة إعادة الفهرسة"
 #: host.php:982
 #, fuzzy, php-format
 msgid " [%d Items, %d Rows]"
-msgstr "[٪ d عناصر ،٪ d صفوف]"
+msgstr ""
 
 #: host.php:982
 msgid "Fail"
@@ -7326,7 +7326,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف قالب الرسم ا
 #: host_templates.php:283
 #, fuzzy, php-format
 msgid "Graph Template Name: %s"
-msgstr "اسم قالب الرسم البياني:٪ s"
+msgstr ""
 
 #: host_templates.php:289
 #, fuzzy
@@ -7340,7 +7340,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف طلبات البحث 
 #: host_templates.php:350
 #, fuzzy, php-format
 msgid "Data Query Name: %s"
-msgstr "اسم استعلام البيانات:٪ s"
+msgstr ""
 
 #: host_templates.php:356
 #, fuzzy
@@ -7350,7 +7350,7 @@ msgstr "إزالة الاستعلام"
 #: host_templates.php:415
 #, fuzzy, php-format
 msgid "Device Templates [edit: %s]"
-msgstr "قوالب الأجهزة [تحرير:٪ s]"
+msgstr ""
 
 #: host_templates.php:417
 msgid "Device Templates [new]"
@@ -7992,7 +7992,7 @@ msgstr "غير مستخدم"
 #: include/global_arrays.php:960
 #, fuzzy, php-format
 msgid "Version %d"
-msgstr "الإصدار٪ d"
+msgstr ""
 
 #: include/global_arrays.php:658 include/global_arrays.php:668
 msgid "[None]"
@@ -8145,7 +8145,7 @@ msgstr "اختيار الفاصل الزمني Poller"
 #: include/global_arrays.php:881 include/global_arrays.php:882
 #, fuzzy, php-format
 msgid "Every %d Seconds"
-msgstr "كل٪ d ثانية"
+msgstr ""
 
 #: include/global_arrays.php:760 include/global_arrays.php:883
 #: include/global_arrays.php:928
@@ -8174,12 +8174,12 @@ msgstr "كل ساعة"
 #: include/global_settings.php:2849
 #, fuzzy, php-format
 msgid "Every %d Hours"
-msgstr "كل٪ d ساعات"
+msgstr ""
 
 #: include/global_arrays.php:771
 #, fuzzy, php-format
 msgid "Every %d Day"
-msgstr "كل يوم٪ 1"
+msgstr ""
 
 #: include/global_arrays.php:783
 #, fuzzy, php-format
@@ -8195,7 +8195,7 @@ msgstr "%d دقيقة (دقائق)"
 #: include/global_settings.php:1961 rrdcleaner.php:528
 #, fuzzy, php-format
 msgid "%d Year"
-msgstr "٪ d سنة"
+msgstr ""
 
 #: include/global_arrays.php:888
 msgid "Disabled/Manual"
@@ -8816,7 +8816,7 @@ msgstr "كل الخطوط"
 #: include/global_arrays.php:1269 include/global_arrays.php:1270
 #, fuzzy, php-format
 msgid "%d Lines"
-msgstr "٪ d خطوط"
+msgstr ""
 
 #: include/global_arrays.php:1349
 msgid "Console Access"
@@ -8952,7 +8952,7 @@ msgstr "آخر ساعة"
 #: include/global_arrays.php:1567 include/global_arrays.php:1568
 #, fuzzy, php-format
 msgid "Last %d Hours"
-msgstr "آخر٪ d ساعات"
+msgstr ""
 
 #: include/global_arrays.php:1569
 msgid "Last Day"
@@ -8962,7 +8962,7 @@ msgstr "اليوم الآخير"
 #: include/global_arrays.php:1572
 #, fuzzy, php-format
 msgid "Last %d Days"
-msgstr "آخر٪ d يوم"
+msgstr ""
 
 #: include/global_arrays.php:1573
 msgid "Last Week"
@@ -8971,7 +8971,7 @@ msgstr "الاسبوع الماضى"
 #: include/global_arrays.php:1574
 #, fuzzy, php-format
 msgid "Last %d Weeks"
-msgstr "آخر٪ d أسابيع"
+msgstr ""
 
 #: include/global_arrays.php:1575
 msgid "Last Month"
@@ -8981,7 +8981,7 @@ msgstr "الشهر الماضي"
 #: include/global_arrays.php:1578 include/global_arrays.php:1579
 #, fuzzy, php-format
 msgid "Last %d Months"
-msgstr "آخر٪ d شهر"
+msgstr ""
 
 #: include/global_arrays.php:1580
 msgid "Last Year"
@@ -8990,7 +8990,7 @@ msgstr "العام الماضي"
 #: include/global_arrays.php:1581
 #, fuzzy, php-format
 msgid "Last %d Years"
-msgstr "آخر٪ d سنوات"
+msgstr ""
 
 #: include/global_arrays.php:1582
 msgid "Day Shift"
@@ -9067,7 +9067,7 @@ msgstr "بعد التعزيز"
 #: include/global_arrays.php:1742
 #, fuzzy, php-format
 msgid "%d MBytes"
-msgstr "٪ d ميغابايت"
+msgstr ""
 
 #: include/global_arrays.php:1680
 msgid "1 GByte"
@@ -9077,7 +9077,7 @@ msgstr "1 جيجابايت"
 #: lib/boost.php:62
 #, fuzzy, php-format
 msgid "%s GBytes"
-msgstr "٪ s GBytes"
+msgstr ""
 
 #: include/global_arrays.php:1682 include/global_arrays.php:1683
 #: include/global_arrays.php:1745 include/global_arrays.php:1746
@@ -9085,7 +9085,7 @@ msgstr "٪ s GBytes"
 #: include/global_arrays.php:1749 include/global_arrays.php:1750
 #, fuzzy, php-format
 msgid "%d GBytes"
-msgstr "٪ d GBytes"
+msgstr ""
 
 #: include/global_arrays.php:1703
 msgid "2,000 Data Source Items"
@@ -9140,12 +9140,12 @@ msgstr "6 ساعات"
 #: include/global_settings.php:1681 include/global_settings.php:1682
 #, fuzzy, php-format
 msgid "%s Hours"
-msgstr "٪ s ساعات"
+msgstr ""
 
 #: include/global_arrays.php:1743
 #, fuzzy, php-format
 msgid "%d GByte"
-msgstr "٪ d GBytes"
+msgstr ""
 
 #: include/global_arrays.php:1751 utilities.php:1656 utilities.php:1657
 #: utilities.php:1706
@@ -9166,7 +9166,7 @@ msgstr "غير محدود"
 #: include/global_settings.php:1677 include/global_settings.php:1678
 #, fuzzy, php-format
 msgid "%s Minutes"
-msgstr "٪ s دقائق"
+msgstr ""
 
 #: include/global_arrays.php:1780
 msgid "1 Megabyte"
@@ -9177,7 +9177,7 @@ msgstr "1 ميجابايت"
 #: include/global_arrays.php:1785 include/global_arrays.php:1786
 #, fuzzy, php-format
 msgid "%d Megabytes"
-msgstr "٪ d ميجابايت"
+msgstr ""
 
 #: include/global_arrays.php:1794
 msgid "Send Now"
@@ -9438,7 +9438,7 @@ msgstr "كل أسبوع"
 #: include/global_arrays.php:2017 include/global_arrays.php:2018
 #, fuzzy, php-format
 msgid "Every %d Weeks"
-msgstr "كل٪ d أسابيع"
+msgstr ""
 
 #: include/global_arrays.php:2049
 msgctxt "A short textual representation of a month, three letters"
@@ -10082,7 +10082,7 @@ msgstr "الاكتشاف التلقائي / التعيين عند أول إعا�
 #: include/global_form.php:188
 #, fuzzy, php-format
 msgid "%d Repetition"
-msgstr "خيارات الشبكة"
+msgstr ""
 
 #: include/global_form.php:189 include/global_form.php:190
 #: include/global_form.php:191 include/global_form.php:192
@@ -10094,7 +10094,7 @@ msgstr "خيارات الشبكة"
 #: include/global_form.php:203
 #, fuzzy, php-format
 msgid "%d Repetitions"
-msgstr "خيارات الشبكة"
+msgstr ""
 
 #: include/global_form.php:212
 msgid "The maximum number of attempts to reach a device via an SNMP readstring prior to giving up."
@@ -10235,17 +10235,17 @@ msgstr "نتيجة التحقق من التحقق من Whitespace عن أسلو�
 #: include/global_form.php:451 include/global_form.php:462
 #, fuzzy, php-format
 msgid "Field [%s]"
-msgstr "مجالات]"
+msgstr ""
 
 #: include/global_form.php:452
 #, fuzzy, php-format
 msgid "Choose the associated field from the %s field."
-msgstr "اختر الحقل المرتبط من الحقل٪ s."
+msgstr ""
 
 #: include/global_form.php:463
 #, fuzzy, php-format
 msgid "Enter a name for this %s field.  Note: If using name value pairs in your script, for example: NAME:VALUE, it is important that the name match your output field name identically to the script output name or names."
-msgstr "أدخل اسمًا لهذا الحقل٪ s. ملاحظة: في حالة استخدام أزواج قيمة الاسم في النص البرمجي ، على سبيل المثال: NAME: VALUE ، من المهم أن يتطابق الاسم مع اسم حقل الإخراج بشكل مطابق لاسم أو أسماء مخرجات البرنامج النصي."
+msgstr ""
 
 #: include/global_form.php:482
 msgid "Update RRDfile"
@@ -10278,7 +10278,7 @@ msgstr "كود النوع الخاص"
 #: include/global_form.php:507
 #, fuzzy, php-format
 msgid "If this field should be treated specially by host templates, indicate so here. Valid keywords for this field are %s"
-msgstr "إذا كان يجب التعامل مع هذا الحقل بشكل خاص عن طريق نماذج المضيف ، فأشر إلى هنا. الكلمات الرئيسية الصالحة لهذا الحقل هي٪ s"
+msgstr ""
 
 #: include/global_form.php:539
 msgid "The name given to this data template."
@@ -10580,7 +10580,7 @@ msgstr "تنسيق المحور الأيمن (- محور - تنسيق - تنسي
 #: include/global_form.php:904 include/global_form.php:920
 #, fuzzy, php-format
 msgid "By default, the format of the axis labels gets determined automatically.  If you want to do this yourself, use this option with the same %lf arguments you know from the PRINT and GPRINT commands."
-msgstr "بشكل افتراضي ، يتم تحديد تنسيق تسميات المحور تلقائيًا. إذا كنت ترغب في القيام بذلك بنفسك ، استخدم هذا الخيار مع نفس الوسيطة٪ lf التي تعرفها من أوامر PRINT و GPRINT."
+msgstr ""
 
 #: include/global_form.php:907
 msgid "Right Axis Formatter (--right-axis-formatter &lt;formatname&gt;)"
@@ -10588,7 +10588,7 @@ msgstr "محاور المحور الأيمن (- منضام المحور المن
 
 #: include/global_form.php:912
 msgid "When you setup the right axis labeling, apply a rule to the data format.  Supported formats include \"numeric\" where data is treated as numeric, \"timestamp\" where values are interpreted as UNIX timestamps (number of seconds since January 1970) and expressed using strftime format (default is \"%Y-%m-%d %H:%M:%S\").  See also --units-length and --right-axis-format.  Finally \"duration\" where values are interpreted as duration in milliseconds.  Formatting follows the rules of valstrfduration qualified PRINT/GPRINT."
-msgstr "عند إعداد وضع العلامات على المحور الأيمن ، قم بتطبيق قاعدة على تنسيق البيانات. تتضمن التنسيقات المدعومة &quot;رقمية&quot; حيث يتم التعامل مع البيانات على أنها رقمية ، &quot;طابع زمني&quot; حيث يتم تفسير القيم على أنها طوابع زمنية UNIX (عدد الثواني منذ يناير 1970) ويتم التعبير عنها باستخدام تنسيق strftime (الافتراضي هو &quot;٪ Y-٪ m-٪ d٪ H :٪الآنسة&quot;). انظر أيضا - طول طول و - بصري - شكل المحور. وأخيرًا &quot;المدة&quot; حيث يتم تفسير القيم على أنها المدة بالمللي ثانية. يتبع التنسيق قواعد valstrfduration المؤهلين PRINT / GPRINT."
+msgstr ""
 
 #: include/global_form.php:915
 #, fuzzy
@@ -10601,7 +10601,7 @@ msgstr "يسار محاور المنسق (- منسوب محور - تنسيق &lt
 
 #: include/global_form.php:928
 msgid "When you setup the left axis labeling, apply a rule to the data format.  Supported formats include \"numeric\" where data is treated as numeric, \"timestamp\" where values are interpreted as UNIX timestamps (number of seconds since January 1970) and expressed using strftime format (default is \"%Y-%m-%d %H:%M:%S\").  See also --units-length.  Finally \"duration\" where values are interpreted as duration in milliseconds.  Formatting follows the rules of valstrfduration qualified PRINT/GPRINT."
-msgstr "عندما تقوم بإعداد وضع العلامات على المحور الأيسر ، قم بتطبيق قاعدة على تنسيق البيانات. تتضمن التنسيقات المدعومة &quot;رقمية&quot; حيث يتم التعامل مع البيانات على أنها رقمية ، &quot;طابع زمني&quot; حيث يتم تفسير القيم على أنها طوابع زمنية UNIX (عدد الثواني منذ يناير 1970) ويتم التعبير عنها باستخدام تنسيق strftime (الافتراضي هو &quot;٪ Y-٪ m-٪ d٪ H :٪الآنسة&quot;). انظر أيضا - طول طول. وأخيرًا &quot;المدة&quot; حيث يتم تفسير القيم على أنها المدة بالمللي ثانية. يتبع التنسيق قواعد valstrfduration المؤهلين PRINT / GPRINT."
+msgstr ""
 
 #: include/global_form.php:931
 msgid "Legend Options"
@@ -10930,7 +10930,7 @@ msgstr ""
 #: include/global_form.php:1344
 #, fuzzy
 msgid "The type of ping packet to sent.  <br><i>NOTE: ICMP on Linux/UNIX requires root privileges.</i>  <br><i>NOTE: TCP Ping Closed - Even if the tcp ping is not successful, the device can be considered UP.</i>"
-msgstr "نوع حزمة ping لإرسالها. <br> <i>ملاحظة: يتطلب ICMP على Linux / UNIX امتيازات الجذر.</i>"
+msgstr ""
 
 #: include/global_form.php:1381 include/global_form.php:1931
 msgid "Additional Options"
@@ -12253,7 +12253,7 @@ msgstr "العدد الافتراضي لسلسلة الأجهزة. ينطبق ه
 #: include/global_settings.php:816
 #, fuzzy, php-format
 msgid "%s Thread"
-msgstr "٪ d مؤشر ترابط"
+msgstr ""
 
 #: include/global_settings.php:817 include/global_settings.php:818
 #: include/global_settings.php:819 include/global_settings.php:820
@@ -12262,7 +12262,7 @@ msgstr "٪ d مؤشر ترابط"
 #: include/global_settings.php:825
 #, fuzzy, php-format
 msgid "%s Threads"
-msgstr "٪ d مؤشرات"
+msgstr ""
 
 #: include/global_settings.php:829
 msgid "Re-index Method for Data Queries"
@@ -12414,7 +12414,7 @@ msgstr "نوع بينغ"
 
 #: include/global_settings.php:985
 msgid "Default Ping type for all new Devices.</i>"
-msgstr "نوع Ping الافتراضي لجميع الأجهزة الجديدة."
+msgstr ""
 
 #: include/global_settings.php:992
 msgid "Default Ping Port for all new Devices.  With TCP, Cacti will attempt to Syn the port.  With UDP, Cacti requires either a successful connection, or a 'port not reachable' error to determine if the Device is up or not."
@@ -13019,7 +13019,7 @@ msgstr "الحد الأقصى لمقدار الوقت الذي يمكن فيه �
 #: include/global_settings.php:1674
 #, fuzzy, php-format
 msgid "%s Minute"
-msgstr "٪ s دقائق"
+msgstr ""
 
 #: include/global_settings.php:1586
 msgid "Data Source Statistics Timeout"
@@ -13043,7 +13043,7 @@ msgstr "أقصى قدر من الوقت يمكن أن يعمل فيه البرن
 #: include/global_settings.php:1679
 #, fuzzy, php-format
 msgid "%s Hour"
-msgstr "٪ s ساعات"
+msgstr ""
 
 #: include/global_settings.php:1614
 #, fuzzy
@@ -13109,7 +13109,7 @@ msgstr "1 عملية"
 #: include/global_settings.php:2567 include/global_settings.php:2568
 #, fuzzy, php-format
 msgid "%d Processes"
-msgstr "العمليات٪ d"
+msgstr ""
 
 #: include/global_settings.php:1655
 msgid "Maintenance Background Generation Timeout"
@@ -13190,7 +13190,7 @@ msgstr "طريقة التوثيق"
 
 #: include/global_settings.php:1767
 msgid "<blockquote><i>Built-in Authentication</i> - Cacti handles user authentication, which allows you to create users and give them rights to different areas within Cacti.<br><br><i>Web Basic Authentication</i> - Authentication is handled by the web server. Users can be added or created automatically on first login if the Template User is defined, otherwise the defined guest permissions will be used.<br><br><i>LDAP Authentication</i> - Allows for authentication against a LDAP server. Users will be created automatically on first login if the Template User is defined, otherwise the defined guest permissions will be used.  If PHPs LDAP module is not enabled, LDAP Authentication will not appear as a selectable option.<br><br><i>Multiple LDAP/AD Domain Authentication</i> - Allows administrators to support multiple disparate groups from different LDAP/AD directories to access Cacti resources.  Just as LDAP Authentication, the PHP LDAP module is required to utilize this method.</blockquote>"
-msgstr "<blockquote style=\";text-align:right;direction:rtl\"> <i>مصادقة مضمنة</i> - Cacti يتعامل مع مصادقة المستخدم ، والذي يسمح لك بإنشاء مستخدمين ومنحهم حقوق لمناطق مختلفة في Cacti. <br><br> <i>مصادقة الويب الأساسية</i> - تتم معالجة المصادقة بواسطة خادم الويب. يمكن إضافة أو إنشاء المستخدمين تلقائيًا عند تسجيل الدخول لأول مرة في حالة تعريف مستخدم القالب ، وإلا سيتم استخدام أذونات الضيوف المحددة. <br><br> <i>مصادقة LDAP</i> - يسمح للمصادقة على خادم LDAP. سيتم إنشاء المستخدمين تلقائيًا عند تسجيل الدخول لأول مرة في حالة تعريف مستخدم القالب ، وإلا سيتم استخدام أذونات الضيوف المحددة. إذا لم يتم تمكين وحدة LDAP لـ PHP ، فلن تظهر مصادقة LDAP كخيار قابل للتحديد. <br><br> <i>مصادقة مجال LDAP / AD متعددة</i> - يسمح للمسؤولين بدعم عدة مجموعات مختلفة من دلائل LDAP / AD مختلفة للوصول إلى موارد Cacti. تمامًا مثل مصادقة LDAP ، يلزم استخدام وحدة LDAP LDAP لاستخدام هذه الطريقة. </blockquote>"
+msgstr ""
 
 #: include/global_settings.php:1773
 msgid "Support Authentication Cookies"
@@ -13255,7 +13255,7 @@ msgstr "1 محاولة"
 #: include/global_settings.php:1824
 #, fuzzy, php-format
 msgid "%d Attempts"
-msgstr "٪ d محاولات"
+msgstr ""
 
 #: include/global_settings.php:1828
 msgid "Auto Unlock"
@@ -13403,7 +13403,7 @@ msgstr "1 التغيير"
 #: include/global_settings.php:1996
 #, fuzzy, php-format
 msgid "%d Changes"
-msgstr "٪ d التغييرات"
+msgstr ""
 
 #: include/global_settings.php:2000
 #, fuzzy
@@ -13803,7 +13803,7 @@ msgstr "تمكين التعداد المباشر لجدول poller_output_boost"
 #: include/global_settings.php:2378
 #, fuzzy
 msgid "Enables direct insert of records into poller output boost table with results in a 25% time reduction in each poll cycle."
-msgstr "تمكن الإدراج المباشر للسجلات في تعزيز إنتاج الملقط مع النتائج في تقليل الوقت بنسبة 25٪ في كل دورة استطلاع."
+msgstr ""
 
 #: include/global_settings.php:2383
 #, fuzzy
@@ -14123,7 +14123,7 @@ msgstr "طريقة الإزالة"
 
 #: include/global_settings.php:2692
 msgid "There are two removal methods.  The first, Standard Deviation, will remove any sample that is X number of standard deviations away from the average of samples.  The second method, Variance, will remove any sample that is X% more than the Variance average.  The Variance method takes into account a certain number of 'outliers'.  Those are exceptional samples, like the spike, that need to be excluded from the Variance Average calculation."
-msgstr "هناك طريقتان للإزالة. الأول ، الانحراف المعياري ، سيزيل أي عينة تمثل X عدد من الانحرافات المعيارية بعيداً عن متوسط العينات. الطريقة الثانية ، تباين ، ستزيل أي عينة X٪ أكثر من متوسط التباين. تأخذ طريقة التباين في الاعتبار عدد معين من &quot;القيم المتطرفة&quot;. هذه عينات استثنائية ، مثل السنبلة ، التي يجب استبعادها من حساب &quot;تباين الدرجة&quot;."
+msgstr ""
 
 #: include/global_settings.php:2696
 msgid "Standard Deviation"
@@ -14171,7 +14171,7 @@ msgstr "سيتم استبعاد أي قيمة تمثل هذه الانحرافا
 #: include/global_settings.php:2729
 #, fuzzy, php-format
 msgid "%d Standard Deviations"
-msgstr "٪ d الانحرافات المعيارية"
+msgstr ""
 
 #: include/global_settings.php:2733 lib/html.php:2784
 msgid "Variance Percentage"
@@ -14180,7 +14180,7 @@ msgstr "النسبة المئوية للتغيير"
 #: include/global_settings.php:2734
 #, php-format
 msgid "This value represents the percentage above the adjusted sample average once outliers have been removed from the sample.  For example, a Variance Percentage of 100%% on an adjusted average of 50 would remove any sample above the quantity of 100 from the graph."
-msgstr "تمثل هذه القيمة النسبة المئوية فوق متوسط العينة المعدل بعد إزالة القيم المتطرفة من العينة. على سبيل المثال ، فإن نسبة التباين بنسبة 100 ٪٪ على متوسط معدّل قدره 50 ستزيل أي عينة أعلى من الكمية 100 من الرسم البياني."
+msgstr ""
 
 #: include/global_settings.php:2757
 msgid "Variance Number of Outliers"
@@ -14199,7 +14199,7 @@ msgstr "تمثل هذه القيمة عدد العينات العالية وال
 #: include/global_settings.php:2774
 #, fuzzy, php-format
 msgid "%d High/Low Samples"
-msgstr "٪ d عينات عالية / منخفضة"
+msgstr ""
 
 #: include/global_settings.php:2778
 msgid "Max Kills Per RRA"
@@ -14217,7 +14217,7 @@ msgstr "تمثل هذه القيمة الحد الأقصى لعدد الارتف
 #: include/global_settings.php:2793 include/global_settings.php:2794
 #, fuzzy, php-format
 msgid "%d Spikes"
-msgstr "٪ d سبايك"
+msgstr ""
 
 #: include/global_settings.php:2798
 msgid "Absolute Maximum Value"
@@ -14700,7 +14700,7 @@ msgstr "<strong>ملاحظة:</strong> لم تتم إعادة تصميم أي م
 #: install/functions.php:961
 #, fuzzy, php-format
 msgid "Path for %s"
-msgstr "مسار لـ٪ s"
+msgstr ""
 
 #: install/functions.php:1199
 msgid "New Poller"
@@ -14714,12 +14714,12 @@ msgstr "نشط / مثبت"
 #: install/install.php:99
 #, fuzzy, php-format
 msgid "Cacti Server v%s - Maintenance"
-msgstr "Cacti Server v٪ s - الصيانة"
+msgstr ""
 
 #: install/install.php:110
 #, fuzzy, php-format
 msgid "Cacti Server v%s - Installation Wizard"
-msgstr "Cacti Server v٪ s - معالج التثبيت"
+msgstr ""
 
 #: install/install.php:110
 msgid "Refresh current page"
@@ -14732,7 +14732,7 @@ msgstr "جار التهيئة"
 #: install/install.php:117
 #, fuzzy, php-format
 msgid "Please wait while the installation system for Cacti Version %s initializes. You must have JavaScript enabled for this to work."
-msgstr "الرجاء الانتظار بينما يتم تهيئة نظام التثبيت لـ Cacti Version٪ s. يجب تمكين جافا سكريبت لتشغيل هذا."
+msgstr ""
 
 #: install/install.php:121
 #, fuzzy
@@ -14833,7 +14833,7 @@ msgstr "يشير لون الخط الأزرق إلى أن القاعدة سيت�
 #: lib/api_automation.php:979
 #, fuzzy, php-format
 msgid "Matching Objects [ %s ]&nbsp;"
-msgstr "كائنات المطابقة [٪ s]"
+msgstr ""
 
 #: lib/api_automation.php:988
 msgid "Device Status"
@@ -14932,12 +14932,12 @@ msgstr "إنشاء قاعدة شجرة (رسم بياني)"
 #: lib/api_automation.php:2435
 #, fuzzy, php-format
 msgid "Rule Item [edit rule item for %s: %s]"
-msgstr "عنصر القاعدة [تحرير عنصر القاعدة لـ٪ s:٪ s]"
+msgstr ""
 
 #: lib/api_automation.php:2437
 #, fuzzy, php-format
 msgid "Rule Item [new rule item for %s: %s]"
-msgstr "عنصر القاعدة [عنصر قاعدة جديد لـ٪ s:٪ s]"
+msgstr ""
 
 #: lib/api_automation.php:3457
 msgid "Added by Cacti Automation"
@@ -15013,12 +15013,12 @@ msgstr "تحديث"
 #: lib/api_automation.php:5309 lib/api_automation.php:5311
 #, fuzzy, php-format
 msgid "Automation Network SNMP Option %s!"
-msgstr "أتمتة SNMP خيارات"
+msgstr ""
 
 #: lib/api_automation.php:5315 lib/api_automation.php:5317
 #, fuzzy, php-format
 msgid "Automation Network SNMP Option %s Failed!"
-msgstr "أتمتة SNMP خيارات"
+msgstr ""
 
 #: lib/api_automation.php:5351
 msgid "The Automation Network Rule does not include any SNMP Options!"
@@ -15040,7 +15040,7 @@ msgstr "قالب غير معروف"
 #: lib/api_automation.php:5404 lib/api_automation.php:5406
 #, fuzzy, php-format
 msgid "Automation Network Rule '%s' %s!"
-msgstr "افتراضي شبكة الأتمتة"
+msgstr ""
 
 #: lib/api_automation.php:5410 lib/api_automation.php:5412
 #, php-format
@@ -15163,29 +15163,29 @@ msgstr "الجهاز معطل"
 #: lib/auth.php:2355 lib/auth.php:2357 lib/auth.php:2363 lib/auth.php:2365
 #, fuzzy, php-format
 msgid "Graph:(%s%s)"
-msgstr "رسم بياني:"
+msgstr ""
 
 #: lib/auth.php:2378 lib/auth.php:2384 lib/auth.php:2451 lib/auth.php:2453
 #: lib/auth.php:2457 lib/auth.php:2459
 #, fuzzy, php-format
 msgid "Device:(%s%s)"
-msgstr "جهاز"
+msgstr ""
 
 #: lib/auth.php:2392 lib/auth.php:2398 lib/auth.php:2467 lib/auth.php:2469
 #: lib/auth.php:2473 lib/auth.php:2475
 #, fuzzy, php-format
 msgid "Template:(%s%s)"
-msgstr "قوالب"
+msgstr ""
 
 #: lib/auth.php:2405
 #, fuzzy, php-format
 msgid "Graph+Device+Template:(%s%s)"
-msgstr "قالب الجهاز:"
+msgstr ""
 
 #: lib/auth.php:2442 lib/auth.php:2444
 #, fuzzy, php-format
 msgid "Device+Template:(%s%s)"
-msgstr "قالب الجهاز:"
+msgstr ""
 
 #: lib/auth.php:2488 lib/auth.php:2495 lib/auth.php:2504
 msgid "Restricted By: "
@@ -15235,17 +15235,17 @@ msgstr "تم تكوين مصادقة الويب الأساسية ، ولكن ل�
 #: lib/auth.php:3810
 #, fuzzy, php-format
 msgid "%s authenticated by Web Server, but both Template and Guest Users are not defined in Cacti."
-msgstr "٪ s تمت مصادقته بواسطة خادم الويب ، ولكن لم يتم تعريف كل من القالب ومستخدمي الزائر في Cacti."
+msgstr ""
 
 #: lib/auth.php:3917
 #, fuzzy, php-format
 msgid "Access Denied!  LDAP Search Error: %s"
-msgstr "خطأ في بحث LDAP:٪ s"
+msgstr ""
 
 #: lib/auth.php:3938 lib/auth.php:4102
 #, fuzzy, php-format
 msgid "Access Denied!  LDAP Error: %s"
-msgstr "خطأ LDAP:٪ s"
+msgstr ""
 
 #: lib/auth.php:3950 lib/auth.php:4114 lib/auth.php:4463
 #, fuzzy
@@ -15255,12 +15255,12 @@ msgstr "تم الرفض! لم يتم توفير كلمة مرور من قبل ا
 #: lib/auth.php:4001
 #, fuzzy, php-format
 msgid "LDAP Search Error: %s"
-msgstr "خطأ في بحث LDAP:٪ s"
+msgstr ""
 
 #: lib/auth.php:4094 lib/auth.php:5105
 #, fuzzy, php-format
 msgid "Access Denied!  Template user id %s does not exist.  Please contact your Administrator."
-msgstr "رفض الوصول ، يرجى الاتصال بك Cacti Administrator."
+msgstr ""
 
 #: lib/auth.php:4479
 #, fuzzy
@@ -15279,7 +15279,7 @@ msgstr "فرض مسؤول Cacti كلمات مرور معقدة لعمليات ت
 #: lib/auth.php:4541
 #, fuzzy, php-format
 msgid "Password must be at least %d characters!"
-msgstr "يجب أن تكون كلمة المرور على الأقل٪ d حرف!"
+msgstr ""
 
 #: lib/auth.php:4547
 msgid "Your password must contain at least 1 numerical character!"
@@ -15347,22 +15347,22 @@ msgstr ""
 #: lib/boost.php:64 utilities.php:1708
 #, fuzzy, php-format
 msgid "%s MBytes"
-msgstr "٪ d ميغابايت"
+msgstr ""
 
 #: lib/boost.php:67
 #, fuzzy, php-format
 msgid "%s KBytes"
-msgstr "٪ s GBytes"
+msgstr ""
 
 #: lib/boost.php:70
 #, fuzzy, php-format
 msgid "%s Bytes"
-msgstr "٪ s GBytes"
+msgstr ""
 
 #: lib/clog_webapi.php:109 utilities.php:529
 #, fuzzy, php-format
 msgid "%s - WEBUI NOTE: Cacti Log Cleared from Web Management Interface."
-msgstr "٪ ق - WEBUI ملاحظة: سجل الصبار مسح من واجهة إدارة الويب."
+msgstr ""
 
 #: lib/clog_webapi.php:224
 msgid "Click 'Continue' to purge the Log File.<br><br><br>Note: If logging is set to both Cacti and Syslog, the log information will remain in Syslog."
@@ -15391,12 +15391,12 @@ msgstr "- عرض المسؤول"
 #: lib/clog_webapi.php:290
 #, fuzzy, php-format
 msgid "Log [Total Lines: %d %s - Filter active]"
-msgstr "السجل [إجمالي الخطوط:٪ d٪ s - الفلتر النشط]"
+msgstr ""
 
 #: lib/clog_webapi.php:292
 #, fuzzy, php-format
 msgid "Log [Total Lines: %d %s - Unfiltered]"
-msgstr "السجل [إجمالي الخطوط:٪ d٪ s - غير مصفى]"
+msgstr ""
 
 #: lib/clog_webapi.php:297 utilities.php:430 utilities.php:791
 #: utilities.php:1042 utilities.php:1045 utilities.php:1141 utilities.php:2008
@@ -15527,17 +15527,17 @@ msgstr "البرنامج المساعد هوكس كاملة"
 #: lib/data_query.php:103
 #, fuzzy, php-format
 msgid "Running Data Query [%s]."
-msgstr "تشغيل استعلام البيانات [٪ s]."
+msgstr ""
 
 #: lib/data_query.php:113
 #, fuzzy, php-format
 msgid "Found Type = '%s' [%s]."
-msgstr "تم العثور على Type = &#39;٪ s&#39; [٪ s]."
+msgstr ""
 
 #: lib/data_query.php:135
 #, fuzzy, php-format
 msgid "Unknown Type = '%s'."
-msgstr "نوع غير معروف = &#39;٪ s&#39;."
+msgstr ""
 
 #: lib/data_query.php:172
 msgid "WARNING: Sort Field Association has Changed.  Re-mapping issues may occur!"
@@ -15550,32 +15550,32 @@ msgstr "اكتمال تحديث البيانات فرز ذاكرة التخزي�
 #: lib/data_query.php:209
 #, fuzzy, php-format
 msgid "Found %s Local Data ID's to Verify"
-msgstr "تم العثور على معرّف البيانات المحلية لـ٪ s للتحقق منها"
+msgstr ""
 
 #: lib/data_query.php:303
 #, fuzzy, php-format
 msgid "Index Change Detected! CurrentIndex: %s, PreviousIndex: %s"
-msgstr "تغيير مؤشر الكشف! CurrentIndex:٪ s، FormerIndex:٪ s"
+msgstr ""
 
 #: lib/data_query.php:323
 #, fuzzy, php-format
 msgid "Transient Index Removal Detected! PreviousIndex: %s.  No action taken."
-msgstr "إزالة الفهرس الكشف عن! PreviousIndex:٪ s"
+msgstr ""
 
 #: lib/data_query.php:326
 #, fuzzy, php-format
 msgid "Index Removal Detected! PreviousIndex: %s"
-msgstr "إزالة الفهرس الكشف عن! PreviousIndex:٪ s"
+msgstr ""
 
 #: lib/data_query.php:360
 #, fuzzy, php-format
 msgid "Verification of %s Local Data ID's Complete"
-msgstr "اكتمال اقتران مؤشر مع البيانات المحلية"
+msgstr ""
 
 #: lib/data_query.php:363
 #, fuzzy, php-format
 msgid "Found Changed %s and %s Orphaned Local Data ID's to Re-map."
-msgstr "تم العثور على تم تغيير٪ s و٪ s معرّف البيانات المحلية المعزول لإعادة التعيين."
+msgstr ""
 
 #: lib/data_query.php:366
 msgid "Done remapping Graphs to their new Indexes"
@@ -15596,7 +15596,7 @@ msgstr "اكتمال اقتران مؤشر مع البيانات المحلية"
 #: lib/data_query.php:392
 #, fuzzy, php-format
 msgid "Update Re-Index Cache complete. There were %s index changes, and %s orphaned indexes."
-msgstr "اكتمل تحديث Re-Index Cache. كانت هناك"
+msgstr ""
 
 #: lib/data_query.php:396
 msgid "Update Poller Cache for Query complete"
@@ -15621,7 +15621,7 @@ msgstr "التحقق من تغيير حقل الفرز. لم يتم اكتشاف
 #: lib/data_query.php:509
 #, fuzzy, php-format
 msgid "Detected New Sort Field: '%s' Old Sort Field '%s'"
-msgstr "حقل الكشف الجديد الذي تم اكتشافه: حقل &quot;٪ s&quot; القديم &quot;٪ s&quot;"
+msgstr ""
 
 #: lib/data_query.php:526
 msgid "ERROR: New Sort Field not suitable.  Sort Field will not change."
@@ -15634,12 +15634,12 @@ msgstr "حقل فرز جديد تم التحقق منه. يتم تحديث حق�
 #: lib/data_query.php:626
 #, fuzzy, php-format
 msgid "Could not find data query XML file at '%s'"
-msgstr "تعذر العثور على ملف XML لاستعلامات البيانات في &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:631
 #, fuzzy, php-format
 msgid "Found data query XML file at '%s'"
-msgstr "تم العثور على ملف XML لاستعلامات البيانات في &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:654 lib/data_query.php:846 lib/data_query.php:2452
 msgid "Error parsing XML file into an array."
@@ -15652,7 +15652,7 @@ msgstr "تحليل ملف XML موافق."
 #: lib/data_query.php:667 lib/data_query.php:854
 #, fuzzy, php-format
 msgid "Invalid field &lt;index_order&gt;%s&lt;/index_order&gt;"
-msgstr "حقل غير صالح &lt;index_order&gt;٪ s &lt;/ index_order&gt;"
+msgstr ""
 
 #: lib/data_query.php:668 lib/data_query.php:855
 msgid "Must contain &lt;direction&gt;input&lt;/direction&gt; or &lt;direction&gt;input-output&lt;/direction&gt; fields only"
@@ -15669,12 +15669,12 @@ msgstr "&lt;arg_num_indexes&gt; مفقودة في ملف XML ، &quot;عدد ا�
 #: lib/data_query.php:690
 #, fuzzy, php-format
 msgid "Executing script for num of indexes '%s'"
-msgstr "تنفيذ نص برمجي لعدد الأسهر &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:693
 #, fuzzy, php-format
 msgid "Found number of indexes: %s"
-msgstr "تم العثور على عدد من الفهارس:٪ s"
+msgstr ""
 
 #: lib/data_query.php:697
 msgid "&lt;arg_num_indexes&gt; missing in XML file, 'Index Count Changed' not supported"
@@ -15691,7 +15691,7 @@ msgstr "خطأ: لم يُرجع استعلام البيانات أي فهارس.
 #: lib/data_query.php:715
 #, fuzzy, php-format
 msgid "Executing script for list of indexes '%s', Index Count: %s"
-msgstr "تنفيذ البرنامج النصي لقائمة الفهارس &quot;٪ s&quot; ، عدد الفهرس:٪ s"
+msgstr ""
 
 #: lib/data_query.php:717
 msgid "Click to show Data Query output for 'index'"
@@ -15700,37 +15700,37 @@ msgstr "انقر لعرض إخراج بيانات الاستعلام لـ &quot;
 #: lib/data_query.php:720
 #, fuzzy, php-format
 msgid "Found index: %s"
-msgstr "فهرس تم العثور عليه:٪ s"
+msgstr ""
 
 #: lib/data_query.php:735 lib/data_query.php:1233
 #, fuzzy, php-format
 msgid "Click to show Data Query output for field '%s'"
-msgstr "انقر لعرض إخراج استعلام البيانات للحقل &quot;٪ s&quot;"
+msgstr ""
 
 #: lib/data_query.php:741
 #, fuzzy, php-format
 msgid "Sort field returned no data for field name %s, skipping"
-msgstr "حقل فرز لم يعط أي بيانات. لا يمكن متابعة إعادة الفهرس."
+msgstr ""
 
 #: lib/data_query.php:743
 #, fuzzy, php-format
 msgid "Executing script query '%s'"
-msgstr "تنفيذ استعلام البرنامج النصي &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:754 lib/data_query.php:761
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s"
-msgstr "تم العثور على عنصر [٪ s = &#39;٪ s&#39;] index:٪ s"
+msgstr ""
 
 #: lib/data_query.php:799 lib/data_query.php:814
 #, fuzzy, php-format
 msgid "Total: %f, Delta: %f, %s"
-msgstr "الإجمالي:٪ f، Delta:٪ f،٪ s"
+msgstr ""
 
 #: lib/data_query.php:839
 #, fuzzy, php-format
 msgid "Invalid host_id: %s"
-msgstr "غير صالح host_id:٪ s"
+msgstr ""
 
 #: lib/data_query.php:866
 msgid "Auto Bulk Walk Size Selected."
@@ -15743,7 +15743,7 @@ msgstr "فشل تحميل جلسة SNMP."
 #: lib/data_query.php:886
 #, php-format
 msgid "Tested Bulk Walk Size %d with a response of %2.4f."
-msgstr "حجم المشي المجمع الذي تم اختباره %d باستجابة %2.4f."
+msgstr ""
 
 #: lib/data_query.php:898
 #, php-format
@@ -15762,7 +15762,7 @@ msgstr "تم إصلاح حجم الممر المجمع على %d."
 #: lib/data_query.php:935
 #, fuzzy, php-format
 msgid "Executing SNMP get for num of indexes @ '%s' Index Count: %s"
-msgstr "تنفيذ SNMP الحصول على num من الفهارس @ &#39;٪ s&#39; عدد الفهرس:٪ s"
+msgstr ""
 
 #: lib/data_query.php:937
 msgid "&lt;oid_num_indexes&gt; missing in XML file, 'Index Count Changed' emulated by counting oid_index entries"
@@ -15771,7 +15771,7 @@ msgstr "&lt;oid_num_indexes&gt; مفقودة في ملف XML ، &#39;عدد ال
 #: lib/data_query.php:940
 #, fuzzy, php-format
 msgid "Executing SNMP walk for list of indexes @ '%s' Index Count: %s"
-msgstr "تنفيذ المشي SNMP للحصول على قائمة الفهارس @ &#39;٪ s&#39; عدد الفهرس:٪ s"
+msgstr ""
 
 #: lib/data_query.php:944
 msgid "No SNMP data returned"
@@ -15780,107 +15780,107 @@ msgstr "لم يتم إرجاع أي بيانات SNMP"
 #: lib/data_query.php:950
 #, fuzzy, php-format
 msgid "Index found at OID: '%s' value: '%s'"
-msgstr "تم العثور على فهرس في OID: قيمة &#39;٪ s&#39;: &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:966
 #, fuzzy, php-format
 msgid "List of indexes filtered by value @ '%s' Index Count: %s"
-msgstr "تصفية قائمة الفهارس @ &#39;٪ s&#39; عدد الفهرس:٪ s"
+msgstr ""
 
 #: lib/data_query.php:970
 #, fuzzy, php-format
 msgid "Filtered Index by value found at OID: '%s' value: '%s'"
-msgstr "تم العثور على فهرس تم تصنيفه في OID: قيمة &#39;٪ s&#39;: &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:987
 #, fuzzy, php-format
 msgid "Filtering list of indexes @ '%s' Index Count: %s"
-msgstr "تصفية قائمة الفهارس @ &#39;٪ s&#39; عدد الفهرس:٪ s"
+msgstr ""
 
 #: lib/data_query.php:991
 #, fuzzy, php-format
 msgid "Filtered Index found at OID: '%s' value: '%s'"
-msgstr "تم العثور على فهرس تم تصنيفه في OID: قيمة &#39;٪ s&#39;: &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1011
 #, fuzzy, php-format
 msgid "Fixing wrong 'method' field for '%s' since 'rewrite_index' or 'oid_suffix' is defined"
-msgstr "يتم تحديد إصلاح حقل &quot;method&quot; خاطئ لـ &quot;٪ s&quot; نظرًا لأن &quot;rewrite_index&quot; أو &quot;oid_suffix&quot;"
+msgstr ""
 
 #: lib/data_query.php:1018
 #, fuzzy, php-format
 msgid "Inserting index data for field '%s' [value='%s']"
-msgstr "إدراج بيانات الفهرس للحقل &#39;٪ s&#39; [value = &#39;٪ s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1023
 #, fuzzy, php-format
 msgid "Located input field '%s' [get]"
-msgstr "يقع حقل الإدخال &#39;٪ s&#39; [get]"
+msgstr ""
 
 #: lib/data_query.php:1032
 #, fuzzy, php-format
 msgid "Found OID rewrite rule: 's/%s/%s/'"
-msgstr "تم العثور على قاعدة إعادة كتابة OID: &#39;s /٪ s /٪ s /&#39;"
+msgstr ""
 
 #: lib/data_query.php:1043
 #, fuzzy, php-format
 msgid "oid_rewrite at OID: '%s' new OID: '%s'"
-msgstr "oid_rewrite عند OID: &#39;٪ s&#39; OID جديد: &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1064
 #, fuzzy, php-format
 msgid "Executing SNMP get for data @ '%s' [value='%s']"
-msgstr "تنفيذ SNMP get for data @ &#39;٪ s&#39; [value = &#39;٪ s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1076
 #, fuzzy, php-format
 msgid "Field '%s' %s"
-msgstr "الحقل &#39;٪ s&#39;٪ s"
+msgstr ""
 
 #: lib/data_query.php:1140
 #, fuzzy, php-format
 msgid "Executing SNMP get for %s oids (%s)"
-msgstr "تنفيذ SNMP تحصل على٪ s من سوادات (٪ s)"
+msgstr ""
 
 #: lib/data_query.php:1167 lib/data_query.php:1260 lib/data_query.php:1269
 #, fuzzy, php-format
 msgid "Sort field returned no data for OID[%s], skipping."
-msgstr "حقل فرز لم يتم إرجاع البيانات. لا يمكن متابعة Re-Index لـ OID [٪ s]"
+msgstr ""
 
 #: lib/data_query.php:1171
 #, fuzzy, php-format
 msgid "Found result for data @ '%s' [value='%s']"
-msgstr "تم العثور على نتيجة للبيانات @ &quot;٪ s&quot; [value = &#39;٪ s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1179
 #, fuzzy, php-format
 msgid "Setting result for data @ '%s' [key='%s', value='%s']"
-msgstr "تعيين النتيجة للبيانات @ &quot;٪ s&quot; [key = &#39;٪ s&#39;، value = &#39;٪ s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1183
 #, fuzzy, php-format
 msgid "Skipped result for data @ '%s' [key='%s', value='%s']"
-msgstr "تم تخطي النتيجة للبيانات @ &quot;٪ s&quot; [key = &#39;٪ s&#39;، value = &#39;٪ s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1197
 #, fuzzy, php-format
 msgid "Got SNMP get result for data @ '%s' [value='%s'] (index: %s)"
-msgstr "حصلت على SNMP الحصول على نتيجة للبيانات @ &#39;٪ s&#39; [value = &#39;٪ s&#39;] (index:٪ s)"
+msgstr ""
 
 #: lib/data_query.php:1227
 #, fuzzy, php-format
 msgid "Executing SNMP get for data @ '%s' [value='$value']"
-msgstr "تنفيذ SNMP الحصول على البيانات @ &quot;٪ s&quot; [value = &#39;$ value&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1235
 #, fuzzy, php-format
 msgid "Located input field '%s' [walk]"
-msgstr "يقع حقل الإدخال &quot;٪ s&quot; [walk]"
+msgstr ""
 
 #: lib/data_query.php:1275
 #, fuzzy, php-format
 msgid "Executing SNMP walk for data @ '%s'"
-msgstr "تنفيذ المشي SNMP للبيانات @ &quot;٪ s&quot;"
+msgstr ""
 
 #: lib/data_query.php:1295 lib/data_query.php:1359 lib/data_query.php:1410
 #: lib/data_query.php:1463
@@ -15891,22 +15891,22 @@ msgstr ""
 #: lib/data_query.php:1342
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s [from %s]"
-msgstr "تم العثور على عنصر [٪ s = &#39;٪ s&#39;] index:٪ s [from٪ s]"
+msgstr ""
 
 #: lib/data_query.php:1386
 #, fuzzy, php-format
 msgid "Found OCTET STRING '%s' decoded value: '%s'"
-msgstr "تم العثور على قيمة تم فك تشفيرها بواسطة٪ OCTET &#39;٪ s&#39;: &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1392 lib/data_query.php:1443
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s [from regexp oid parse]"
-msgstr "تم العثور على عنصر [٪ s = &#39;٪ s&#39;] index:٪ s [from regexp oid parse]"
+msgstr ""
 
 #: lib/data_query.php:1472
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s [from regexp oid value parse]"
-msgstr "تم العثور على عنصر [٪ s = &#39;٪ s&#39;] index:٪ s [from regexp oid value parse]"
+msgstr ""
 
 #: lib/data_query.php:1710
 #, php-format
@@ -15920,7 +15920,7 @@ msgstr ""
 #: lib/data_query.php:1750
 #, fuzzy, php-format
 msgid "rewrite_value: '%s' => '%s'"
-msgstr "oid_rewrite عند OID: &#39;٪ s&#39; OID جديد: &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1856
 #, fuzzy
@@ -15938,7 +15938,7 @@ msgstr "فهرس غير معروف"
 #: lib/data_query.php:2567
 #, fuzzy, php-format
 msgid "You must select an XML output column for Data Source '%s' and toggle the checkbox to its right"
-msgstr "يجب تحديد عمود إخراج XML لمصدر البيانات '٪ s' وتبديل مربع الاختيار إلى اليمين"
+msgstr ""
 
 #: lib/data_query.php:2573
 msgid "Your Graph Template has not Data Templates in use.  Please correct your Graph Template"
@@ -15955,7 +15955,7 @@ msgstr "فشل في تعديل طول حقل كلمة المرور ، لا يم�
 #: lib/dsdebug.php:175
 #, fuzzy, php-format
 msgid "Data Source ID %s does not exist"
-msgstr "مصدر البيانات غير موجود"
+msgstr ""
 
 #: lib/dsdebug.php:259
 msgid "Debug not completed after 5 pollings"
@@ -15972,12 +15972,12 @@ msgstr "لم يتم تعيين مصدر البيانات على أنه نشط"
 #: lib/dsdebug.php:277
 #, fuzzy, php-format
 msgid "RRDfile Folder (rra) is not writable by Poller.  Folder owner: %s.  Poller runs as: %s"
-msgstr "مجلد RRD غير قابل للكتابة بواسطة Poller. مالك RRD:"
+msgstr ""
 
 #: lib/dsdebug.php:282
 #, fuzzy, php-format
 msgid "RRDfile is not writable by Poller.  RRDfile owner: %s.  Poller runs as %s"
-msgstr "ملف RRD غير قابل للكتابة بواسطة Poller. مالك RRD:"
+msgstr ""
 
 #: lib/dsdebug.php:291
 msgid "RRDfile does not match Data Source"
@@ -16007,12 +16007,12 @@ msgstr "لم يتم تحديث ملف RRD بعد الاقتراع"
 #: lib/functions.php:458 settings.php:1505
 #, fuzzy, php-format
 msgid "Settings save to Data Collector %d skipped due to heartbeat."
-msgstr "حفظ الإعدادات إلى Data Collector٪ d فشل."
+msgstr ""
 
 #: lib/functions.php:470 settings.php:1517
 #, fuzzy, php-format
 msgid "Settings save to Data Collector %d Failed."
-msgstr "حفظ الإعدادات إلى Data Collector٪ d فشل."
+msgstr ""
 
 #: lib/functions.php:896
 #, php-format
@@ -16045,7 +16045,7 @@ msgstr "الرسالة غير موجودة."
 #: lib/functions.php:1670
 #, fuzzy, php-format
 msgid "Error %s is not readable"
-msgstr "الخطأ٪ s غير قابل للقراءة"
+msgstr ""
 
 #: lib/functions.php:4058
 #, fuzzy
@@ -16098,26 +16098,26 @@ msgstr "غير الاستفسار القائمة"
 #: lib/functions.php:4290
 #, fuzzy, php-format
 msgid "Link %s"
-msgstr "الرابط٪ s"
+msgstr ""
 
 #: lib/functions.php:5465
 msgid "Mailer Error: No recipient address set!!<br>If using the <i>Test Mail</i> link, please set the <b>Alert e-mail</b> setting."
-msgstr "ميلر خطأ: لا <b>لمعالجة</b> وضع !! <br> إذا كنت تستخدم رابط <i>اختبار البريد</i> ، فيرجى ضبط إعداد <b>البريد الإلكتروني التنبيه</b> ."
+msgstr ""
 
 #: lib/functions.php:5812
 #, fuzzy, php-format
 msgid "Authentication failed: %s"
-msgstr "فشل المصادقة:٪ s"
+msgstr ""
 
 #: lib/functions.php:5816
 #, fuzzy, php-format
 msgid "HELO failed: %s"
-msgstr "فشلت HELO:٪ s"
+msgstr ""
 
 #: lib/functions.php:5819
 #, fuzzy, php-format
 msgid "Connect failed: %s"
-msgstr "فشل الاتصال:٪ s"
+msgstr ""
 
 #: lib/functions.php:5822
 msgid "SMTP error: "
@@ -16187,7 +16187,7 @@ msgstr "تثبيت"
 #: lib/functions.php:6565 lib/functions.php:6660
 #, fuzzy, php-format
 msgid "Cacti disabled plugin %s due to the following error: %s!  See the Cacti logfile for more details."
-msgstr "تم تعطيل المكون الإضافي لـ Cacti٪ s بسبب الخطأ التالي:٪ s! انظر ملف السجل Cacti لمزيد من التفاصيل."
+msgstr ""
 
 #: lib/functions.php:6752
 #, php-format
@@ -16205,17 +16205,17 @@ msgstr ""
 #: lib/functions.php:7247
 #, fuzzy, php-format
 msgid "- Dev %s"
-msgstr "إضافة جهاز (أجهزة)"
+msgstr ""
 
 #: lib/functions.php:7249
 #, fuzzy, php-format
 msgid "- Beta %s"
-msgstr "-٪ s بيتا"
+msgstr ""
 
 #: lib/functions.php:7309
 #, fuzzy, php-format
 msgid "Version %s %s"
-msgstr "الإصدار٪ s٪ s"
+msgstr ""
 
 #: lib/functions.php:7852
 #, php-format
@@ -16283,7 +16283,7 @@ msgstr "السابق"
 #: lib/html.php:671
 #, fuzzy, php-format
 msgid "%d to %d of %s [ %s ]"
-msgstr "٪ d إلى٪ d من٪ s [٪ s]"
+msgstr ""
 
 #: lib/html.php:674 lib/html.php:703 lib/installer.php:1778
 msgid "Next"
@@ -16292,12 +16292,12 @@ msgstr "التالي"
 #: lib/html.php:681
 #, fuzzy, php-format
 msgid "All %d %s"
-msgstr "كل٪ d٪ s"
+msgstr ""
 
 #: lib/html.php:700
 #, fuzzy, php-format
 msgid "Current Page: %s"
-msgstr "القيمة الحالية"
+msgstr ""
 
 #: lib/html.php:731
 #, php-format
@@ -16820,7 +16820,7 @@ msgstr ""
 #: lib/html.php:3403
 #, fuzzy, php-format
 msgid "Version %s | %s"
-msgstr "الإصدار٪ s٪ s"
+msgstr ""
 
 #: lib/html_filter.php:89
 msgid "Apply filter to table"
@@ -16865,7 +16865,7 @@ msgstr "أدخل مسار دليل صالح"
 #: lib/html_form.php:1317
 #, fuzzy, php-format
 msgid "Cacti Color (%s)"
-msgstr "لون الصبار (٪ s)"
+msgstr ""
 
 #: lib/html_form.php:1383
 msgid "NO FONT VERIFICATION POSSIBLE"
@@ -16907,7 +16907,7 @@ msgstr ""
 #: lib/html_form_template.php:648 lib/html_form_template.php:660
 #, fuzzy, php-format
 msgid "Data Query Data Sources must be created through %s"
-msgstr "يجب إنشاء مصادر بيانات طلبات البحث عبر٪ s"
+msgstr ""
 
 #: lib/html_graph.php:268 lib/html_tree.php:1268
 msgid "Save the current Graphs, Columns, Thumbnail, Preset, and Timeshift preferences to your profile"
@@ -16979,32 +16979,32 @@ msgstr "توقف"
 #: lib/html_graph.php:649 lib/html_graph.php:679
 #, fuzzy, php-format
 msgid "Create Graph from %s"
-msgstr "إنشاء رسم بياني من٪ s"
+msgstr ""
 
 #: lib/html_graph.php:677
 #, fuzzy, php-format
 msgid "Create %s Graphs from %s"
-msgstr "إنشاء٪ s رسوم بيانية من٪ s"
+msgstr ""
 
 #: lib/html_graph.php:718
 #, fuzzy, php-format
 msgid "Graph [Template: %s]"
-msgstr "حذف قالب (نماذج) الرسم البياني"
+msgstr ""
 
 #: lib/html_graph.php:720
 #, fuzzy, php-format
 msgid "Graph Items [Template: %s]"
-msgstr "عناصر الرسم البياني [القالب:٪ s]"
+msgstr ""
 
 #: lib/html_graph.php:725
 #, fuzzy, php-format
 msgid "Data Source [Template: %s]"
-msgstr "مصدر البيانات [القالب:٪ s]"
+msgstr ""
 
 #: lib/html_graph.php:735
 #, fuzzy, php-format
 msgid "Custom Data [Template: %s]"
-msgstr "البيانات المخصصة [القالب:٪ s]"
+msgstr ""
 
 #: lib/html_reports.php:37
 msgid "New Report"
@@ -17300,22 +17300,22 @@ msgstr "ارسال تبليغ"
 #: lib/html_reports.php:618
 #, fuzzy, php-format
 msgid "Unable to send Report '%s'.  Please set destination e-mail addresses"
-msgstr "غير قادر على إرسال التقرير &#39;٪ s&#39;. يرجى تحديد عناوين البريد الإلكتروني المستهدفة"
+msgstr ""
 
 #: lib/html_reports.php:620
 #, fuzzy, php-format
 msgid "Unable to send Report '%s'.  Please set an e-mail subject"
-msgstr "غير قادر على إرسال التقرير &#39;٪ s&#39;. يرجى وضع موضوع البريد الإلكتروني"
+msgstr ""
 
 #: lib/html_reports.php:622
 #, fuzzy, php-format
 msgid "Unable to send Report '%s'.  Please set an e-mail From Name"
-msgstr "غير قادر على إرسال التقرير &#39;٪ s&#39;. يرجى ضبط البريد الإلكتروني من الاسم"
+msgstr ""
 
 #: lib/html_reports.php:624
 #, fuzzy, php-format
 msgid "Unable to send Report '%s'.  Please set an e-mail from address"
-msgstr "غير قادر على إرسال التقرير &#39;٪ s&#39;. يرجى ضبط البريد الإلكتروني من العنوان"
+msgstr ""
 
 #: lib/html_reports.php:1068
 msgid "Item Type to be added."
@@ -17411,12 +17411,12 @@ msgstr "حجم الخط من البند"
 #: lib/html_reports.php:1219
 #, fuzzy, php-format
 msgid "Report Item [edit Report: %s]"
-msgstr "تقرير العنصر [تحرير التقرير:٪ s]"
+msgstr ""
 
 #: lib/html_reports.php:1221
 #, fuzzy, php-format
 msgid "Report Item [new Report: %s]"
-msgstr "تقرير العنصر [تقرير جديد:٪ s]"
+msgstr ""
 
 #: lib/html_reports.php:1463
 msgid "Events"
@@ -17433,22 +17433,22 @@ msgstr "[الجديد]"
 #: lib/html_reports.php:1572
 #, fuzzy, php-format
 msgid "Details %s"
-msgstr "التفاصيل"
+msgstr ""
 
 #: lib/html_reports.php:1618
 #, fuzzy, php-format
 msgid "Report Items %s"
-msgstr "لا تقرير البنود"
+msgstr ""
 
 #: lib/html_reports.php:1664
 #, fuzzy, php-format
 msgid "Scheduled Events %s"
-msgstr "مناسبات مجدولة"
+msgstr ""
 
 #: lib/html_reports.php:1676
 #, fuzzy, php-format
 msgid "Report Preview %s"
-msgstr "معاينة التقرير"
+msgstr ""
 
 #: lib/html_reports.php:1712
 msgid "Item Details"
@@ -17457,7 +17457,7 @@ msgstr "تفاصيل العنصر"
 #: lib/html_reports.php:1727
 #, fuzzy, php-format
 msgid "Graph: %s"
-msgstr "تغيير Graph (s) جهاز مرتبط"
+msgstr ""
 
 #: lib/html_reports.php:1730 lib/html_reports.php:1758
 #: lib/html_reports.php:1771 lib/html_reports.php:1772
@@ -17469,7 +17469,7 @@ msgstr "باستخدام CSS"
 #: lib/html_reports.php:1740
 #, fuzzy, php-format
 msgid "Device: %s"
-msgstr "تغيير جهاز (خيارات) SNMP Options"
+msgstr ""
 
 #: lib/html_reports.php:1743
 #, fuzzy
@@ -17479,7 +17479,7 @@ msgstr "إضافة قالب الرسم البياني إلى قالب الجها
 #: lib/html_reports.php:1745
 #, fuzzy, php-format
 msgid ", Graph Template: %s"
-msgstr "حذف قالب (نماذج) الرسم البياني"
+msgstr ""
 
 #: lib/html_reports.php:1754 lib/html_reports.php:1824
 #, fuzzy, php-format
@@ -17489,17 +17489,17 @@ msgstr "، باستخدام RegEx: \"%s\""
 #: lib/html_reports.php:1800
 #, fuzzy, php-format
 msgid "Tree: %s"
-msgstr "شجرة:"
+msgstr ""
 
 #: lib/html_reports.php:1811
 #, fuzzy, php-format
 msgid ", Device: %s"
-msgstr "إضافة جهاز (أجهزة)"
+msgstr ""
 
 #: lib/html_reports.php:1813
 #, fuzzy, php-format
 msgid ", Branch: %s"
-msgstr "فرع شجرة:"
+msgstr ""
 
 #: lib/html_reports.php:1816
 msgid "(All Branches)"
@@ -17520,7 +17520,7 @@ msgstr "مستوى المسؤول"
 #: lib/html_reports.php:1957
 #, fuzzy, php-format
 msgid "Reports [%s]"
-msgstr "التقارير [٪ s]"
+msgstr ""
 
 #: lib/html_reports.php:1957
 msgid "User Level"
@@ -17622,7 +17622,7 @@ msgstr "مختار"
 #: lib/html_utility.php:589 lib/html_utility.php:828
 #, fuzzy, php-format
 msgid "The regular expression \"%s\" is not valid. Error is %s"
-msgstr "عبارة البحث &quot;٪ s&quot; غير صالحة. الخطأ هو٪ s"
+msgstr ""
 
 #: lib/html_utility.php:1040
 msgid "Cacti regular expressions are limited to 50 characters only for security reasons."
@@ -17660,7 +17660,7 @@ msgstr "تحميل"
 #: lib/html_validate.php:97
 #, fuzzy, php-format
 msgid "Validation error for variable %s with a value of %s.  See backtrace below for more details."
-msgstr "خطأ في التحقق من المتغير٪ s بقيمة٪ s. انظر backtrace أدناه لمزيد من التفاصيل."
+msgstr ""
 
 #: lib/html_validate.php:115
 msgid "Validation Error"
@@ -17685,12 +17685,12 @@ msgstr "قابل للكتابة"
 #: lib/import.php:1712 lib/import.php:1729
 #, fuzzy, php-format
 msgid "New Graph Template: %s"
-msgstr "حذف قالب (نماذج) الرسم البياني"
+msgstr ""
 
 #: lib/import.php:1741 lib/import.php:1751
 #, fuzzy, php-format
 msgid "New Data Query: %s"
-msgstr "استعلام البيانات [٪ s]"
+msgstr ""
 
 #: lib/import.php:2382
 msgid "Unknown Field"
@@ -17759,7 +17759,7 @@ msgstr "كان المسار غير قابل للكتابة"
 #: lib/installer.php:786
 #, fuzzy, php-format
 msgid "Failed to set specified %sRRDTool version: %s"
-msgstr "أخفق تعيين الإصدار المحدد٪ sRRDTool:٪ s"
+msgstr ""
 
 #: lib/installer.php:837
 msgid "Invalid Theme Specified"
@@ -17784,17 +17784,17 @@ msgstr "معلمة مسار غير متوقعة"
 #: lib/installer.php:968
 #, fuzzy, php-format
 msgid "Failed to apply specified profile %s != %s"
-msgstr "أخفق تطبيق الملف الشخصي المحدد٪ s! =٪ s"
+msgstr ""
 
 #: lib/installer.php:1015
 #, fuzzy, php-format
 msgid "Failed to apply specified mode: %s"
-msgstr "أخفق تطبيق الوضع المحدد:٪ s"
+msgstr ""
 
 #: lib/installer.php:1037
 #, fuzzy, php-format
 msgid "Failed to apply specified automation override: %s"
-msgstr "فشل في تطبيق تجاوز التشغيل التلقائي المحدد:٪ s"
+msgstr ""
 
 #: lib/installer.php:1058
 msgid "Failed to apply specified cron interval"
@@ -17803,7 +17803,7 @@ msgstr "فشل في تطبيق الفاصل الزمني cron المحدد"
 #: lib/installer.php:1107
 #, fuzzy, php-format
 msgid "Failed to apply '%s' as Automation Range"
-msgstr "فشل في تطبيق نطاق الأتمتة المحدد"
+msgstr ""
 
 #: lib/installer.php:1190
 msgid "No matching snmp option exists"
@@ -17824,12 +17824,12 @@ msgstr "يرجى الإبلاغ عن هذا إلى Cacti Group."
 #: lib/installer.php:1724
 #, fuzzy, php-format
 msgid "Unknown Reason: %s"
-msgstr "سبب غير معروف:٪ s"
+msgstr ""
 
 #: lib/installer.php:1732
 #, fuzzy, php-format
 msgid "You are attempting to install Cacti %s onto a 0.6.x database. Unfortunately, this can not be performed."
-msgstr "أنت تحاول تثبيت Cacti٪ s على قاعدة بيانات 0.6.x. لسوء الحظ ، لا يمكن القيام بذلك."
+msgstr ""
 
 #: lib/installer.php:1733
 msgid "To be able continue, you <b>MUST</b> create a new database, import \"cacti.sql\" into it:"
@@ -17895,7 +17895,7 @@ msgstr "اتفاقية الترخيص"
 #: lib/installer.php:1903
 #, fuzzy, php-format
 msgid "This version of Cacti (%s) does not appear to have a valid version code, please contact the Cacti Development Team to ensure this is corrected.  If you are seeing this error in a release, please raise a report immediately on GitHub"
-msgstr "لا يبدو أن هذا الإصدار من Cacti (٪ s) يحتوي على رمز إصدار صالح ، يرجى الاتصال بفريق تطوير Cacti للتأكد من أن ذلك مقسم. إذا كنت ترى هذا الخطأ في إصدار ، يرجى رفع تقرير فورًا على GitHub"
+msgstr ""
 
 #: lib/installer.php:1906
 msgid "Thanks for taking the time to download and install Cacti, the complete graphing solution for your network. Before you can start making cool graphs, there are a few pieces of data that Cacti needs to know."
@@ -17909,7 +17909,7 @@ msgstr "تأكد من أنك قد قرأت و اتبعت الخطوات المط
 #: lib/installer.php:1910
 #, fuzzy, php-format
 msgid "This process will guide you through the steps for upgrading from version '%s'. "
-msgstr "سترشدك هذه العملية إلى خطوات الترقية من الإصدار &#39;٪ s&#39;."
+msgstr ""
 
 #: lib/installer.php:1911
 #, php-format
@@ -17955,7 +17955,7 @@ msgstr "يحتوي تكوين Cacti على المسار الصحيح النسب�
 #: lib/installer.php:2037
 #, fuzzy, php-format
 msgid "PHP - Recommendations (%s)"
-msgstr "PHP - التوصيات"
+msgstr ""
 
 #: lib/installer.php:2041
 #, fuzzy
@@ -18074,7 +18074,7 @@ msgstr "نوع التثبيت"
 #: lib/installer.php:2239
 #, fuzzy, php-format
 msgid "Upgrade from <strong>%s</strong> to <strong>%s</strong>"
-msgstr "الترقية من <strong>٪ s</strong> إلى <strong>٪ s</strong>"
+msgstr ""
 
 #: lib/installer.php:2241
 msgid "In the event of issues, It is highly recommended that you clear your browser cache, closing then reopening your browser (not just the tab Cacti is on) and retrying, before raising an issue with The Cacti Group"
@@ -18091,7 +18091,7 @@ msgstr "إذا كنت لا تزال تواجه مشكلات بعد مسح ذاك
 #: lib/installer.php:2250
 #, fuzzy, php-format
 msgid "Downgrade from <strong>%s</strong> to <strong>%s</strong>"
-msgstr "الرجوع إلى إصدار سابق من <strong>٪ s</strong> إلى <strong>٪ s</strong>"
+msgstr ""
 
 #: lib/installer.php:2251
 msgid "You appear to be downgrading to a previous version.  Database changes made for the newer version will not be reversed and <i>could</i> cause issues."
@@ -18132,27 +18132,27 @@ msgstr "معلومات اتصال قاعدة البيانات المحلية"
 #: lib/installer.php:2328 lib/installer.php:2340
 #, fuzzy, php-format
 msgid "Database: <b>%s</b>"
-msgstr "قاعدة البيانات: <b>٪ s</b>"
+msgstr ""
 
 #: lib/installer.php:2329 lib/installer.php:2341
 #, fuzzy, php-format
 msgid "Database User: <b>%s</b>"
-msgstr "مستخدم قاعدة البيانات: <b>٪ s</b>"
+msgstr ""
 
 #: lib/installer.php:2330 lib/installer.php:2342
 #, fuzzy, php-format
 msgid "Database Hostname: <b>%s</b>"
-msgstr "اسم مضيف قاعدة البيانات: <b>٪ s</b>"
+msgstr ""
 
 #: lib/installer.php:2331 lib/installer.php:2343
 #, fuzzy, php-format
 msgid "Port: <b>%s</b>"
-msgstr "المنفذ: <b>٪ s</b>"
+msgstr ""
 
 #: lib/installer.php:2332 lib/installer.php:2344
 #, fuzzy, php-format
 msgid "Server Operating System Type: <b>%s</b>"
-msgstr "نوع نظام تشغيل الخادم: <b>٪ s</b>"
+msgstr ""
 
 #: lib/installer.php:2337
 msgid "Central Database Connection Information"
@@ -18262,7 +18262,7 @@ msgstr "إذا تم تمكين SELinux على الخادم الخاص بك ، ي
 #: lib/installer.php:2587
 #, fuzzy, php-format
 msgid "The user '%s' should have MODIFY permission to enable read/write."
-msgstr "يجب أن يكون لدى المستخدم &#39;٪ s&#39; إذن MODIFY لتمكين القراءة / الكتابة."
+msgstr ""
 
 #: lib/installer.php:2597
 msgid "An example of how to set folder permissions is shown here, though you may need to adjust this depending on your operating system, user accounts and desired permissions."
@@ -18316,7 +18316,7 @@ msgstr "سيعيد خيار البرنامج النصي هذا تمكين أي �
 
 #: lib/installer.php:2628
 msgid "It is strongly suggested that you update your config.php to enable this feature by uncommenting the <b>$input_whitelist</b> variable and then running the three CLI script options above after the web based install has completed."
-msgstr "يُقترح بشدة أن تقوم بتحديث config.php الخاص بك لتمكين هذه الميزة عن طريق إلغاء <b>التعليق على</b> المتغير <b>$ input_whitelist</b> ثم تشغيل خيارات البرنامج النصي CLI الثلاثة أعلاه بعد اكتمال التثبيت المستند إلى الويب."
+msgstr ""
 
 #: lib/installer.php:2630
 msgid "Check the Checkbox below to acknowledge that you have read and understand this security concern"
@@ -18449,7 +18449,7 @@ msgstr "إعداد الجدول"
 #: lib/installer.php:2843
 #, fuzzy, php-format
 msgid "You have more tables than your PHP configuration will allow us to display/convert.  Please modify the max_input_vars setting in php.ini to a value above %s"
-msgstr "لديك جداول أكثر مما يسمح لنا تكوين PHP بعرضه / تحويله. الرجاء تعديل إعداد max_input_vars في php.ini إلى قيمة أعلى من٪ s"
+msgstr ""
 
 #: lib/installer.php:2846
 msgid "Conversion of tables may take some time especially on larger tables.  The conversion of these tables will occur in the background but will not prevent the installer from completing.  This may slow down some servers if there are not enough resources for MySQL to handle the conversion."
@@ -18520,7 +18520,7 @@ msgstr "خادم Cacti جاهز تقريبًا. يرجى التحقق من أن�
 #: lib/installer.php:2936
 #, fuzzy, php-format
 msgid "Press '%s' then click '%s' to complete the installation process after selecting your Device Templates."
-msgstr "اضغط على &#39;٪ s&#39; ، ثم انقر فوق &#39;٪ s&#39; لإكمال عملية التثبيت بعد تحديد &quot;قوالب الأجهزة&quot;."
+msgstr ""
 
 #: lib/installer.php:2964
 msgid "The following General Install Options will be applied."
@@ -18578,7 +18578,7 @@ msgstr ""
 #: lib/installer.php:3012
 #, fuzzy, php-format
 msgid "%d Tables to be Upgraded"
-msgstr "نوع البند المراد إضافته."
+msgstr ""
 
 #: lib/installer.php:3012 lib/installer.php:3014 lib/installer.php:3056
 #, fuzzy
@@ -18655,7 +18655,7 @@ msgstr "الجداول"
 #: lib/installer.php:3075
 #, fuzzy, php-format
 msgid "Installing Cacti Server v%s"
-msgstr "تثبيت Cacti Server v٪ s"
+msgstr ""
 
 #: lib/installer.php:3076
 msgid "Your Cacti Server is now installing"
@@ -18664,7 +18664,7 @@ msgstr "يتم تثبيت خادم Cacti الآن"
 #: lib/installer.php:3165
 #, fuzzy, php-format
 msgid "Spawning background process: %s %s"
-msgstr "عملية التفريخ في الخلفية:٪ s٪ s"
+msgstr ""
 
 #: lib/installer.php:3192
 msgid "Complete"
@@ -18673,12 +18673,12 @@ msgstr "مكتمّل"
 #: lib/installer.php:3193
 #, fuzzy, php-format
 msgid "Your Cacti Server v%s has been installed/updated.  You may now start using the software."
-msgstr "تم تثبيت / تحديث Cacti Server v٪ s. يمكنك الآن البدء في استخدام البرنامج."
+msgstr ""
 
 #: lib/installer.php:3198
 #, fuzzy, php-format
 msgid "Your Cacti Server v%s has been installed/updated with errors"
-msgstr "تم تثبيت / تحديث خادم Cacti Server v٪ s مع وجود أخطاء"
+msgstr ""
 
 #: lib/installer.php:3318
 msgid "Get Help"
@@ -18695,37 +18695,37 @@ msgstr "البدء"
 #: lib/installer.php:3359
 #, fuzzy, php-format
 msgid "Starting %s Process for v%s"
-msgstr "بدء عملية٪ s لـ v٪ s"
+msgstr ""
 
 #: lib/installer.php:3388
 #, fuzzy, php-format
 msgid "Finished %s Process for v%s"
-msgstr "انتهت معالجة٪ s لـ v٪ s"
+msgstr ""
 
 #: lib/installer.php:3428
 #, fuzzy, php-format
 msgid "Found %s templates to install"
-msgstr "تم العثور على قوالب٪ s للتثبيت"
+msgstr ""
 
 #: lib/installer.php:3438
 #, fuzzy, php-format
 msgid "About to import Package #%s '%s'."
-msgstr "على وشك استيراد الحزمة #٪ s '٪ s'."
+msgstr ""
 
 #: lib/installer.php:3447
 #, fuzzy, php-format
 msgid "Import of Package #%s '%s' under Profile '%s' succeeded"
-msgstr "نجح استيراد الحزمة #٪ s '٪ s' ضمن ملف التعريف '٪ s'"
+msgstr ""
 
 #: lib/installer.php:3453
 #, fuzzy, php-format
 msgid "Import of Package #%s '%s' under Profile '%s' failed"
-msgstr "فشل استيراد الحزمة #٪ s '٪ s' ضمن ملف التعريف '٪ s'"
+msgstr ""
 
 #: lib/installer.php:3469
 #, fuzzy, php-format
 msgid "Mapping Automation Template for Device Template '%s'"
-msgstr "قوالب أتمتة لـ [حذف قالب]"
+msgstr ""
 
 #: lib/installer.php:3490
 msgid "No templates were selected for import"
@@ -18738,17 +18738,17 @@ msgstr "في انتظار التكوين"
 #: lib/installer.php:3532
 #, fuzzy, php-format
 msgid "Setting default data source profile to %s (%s)"
-msgstr "ملف تعريف مصدر البيانات الافتراضي لهذا القالب البيانات."
+msgstr ""
 
 #: lib/installer.php:3557
 #, fuzzy, php-format
 msgid "Failed to find selected profile (%s), no changes were made"
-msgstr "أخفق تطبيق الملف الشخصي المحدد٪ s! =٪ s"
+msgstr ""
 
 #: lib/installer.php:3568
 #, fuzzy, php-format
 msgid "Updating automation network (%s), mode \"%s\" => \"%s\", subnet \"%s\" => %s\""
-msgstr "تحديث شبكة الأتمتة (٪ s) ، الوضع \"٪ s\" => \"٪ s\" ، الشبكة الفرعية \"٪ s\" =>٪ s \""
+msgstr ""
 
 #: lib/installer.php:3583
 msgid "Failed to find automation network, no changes were made"
@@ -18761,27 +18761,27 @@ msgstr "إضافة إعدادات snmp إضافية للأتمتة"
 #: lib/installer.php:3593
 #, fuzzy, php-format
 msgid "Selecting Automation Option Set %s"
-msgstr "حذف قالب (قوالب) التنفيذ التلقائي"
+msgstr ""
 
 #: lib/installer.php:3607
 #, fuzzy, php-format
 msgid "Updating Automation Option Set %s"
-msgstr "أتمتة SNMP خيارات"
+msgstr ""
 
 #: lib/installer.php:3611
 #, fuzzy, php-format
 msgid "Successfully updated Automation Option Set %s"
-msgstr "تم بنجاح تحديث مجموعة خيارات الأتمتة٪ s"
+msgstr ""
 
 #: lib/installer.php:3613
 #, fuzzy, php-format
 msgid "Resequencing Automation Option Set %s"
-msgstr "تشغيل التنفيذ على الجهاز (الأجهزة)"
+msgstr ""
 
 #: lib/installer.php:3620
 #, fuzzy, php-format
 msgid "Failed to updated Automation Option Set %s"
-msgstr "فشل في تطبيق نطاق الأتمتة المحدد"
+msgstr ""
 
 #: lib/installer.php:3623
 msgid "Failed to find any automation option set"
@@ -18790,7 +18790,7 @@ msgstr "تعذّر العثور على البيانات لنسخها!"
 #: lib/installer.php:3653
 #, fuzzy, php-format
 msgid "Device Template for First Cacti Device is %s"
-msgstr "قوالب الأجهزة [تحرير:٪ s]"
+msgstr ""
 
 #: lib/installer.php:3665
 #, php-format
@@ -18809,7 +18809,7 @@ msgstr "يضاف إلى الصبار"
 #: lib/installer.php:3680
 #, fuzzy, php-format
 msgid "Output: %s."
-msgstr "حقول الإخراج"
+msgstr ""
 
 #: lib/installer.php:3700
 msgid "Creating Graphs for Default Device"
@@ -18846,12 +18846,12 @@ msgstr "توليد زوج مفاتيح RSA"
 #: lib/installer.php:3758
 #, fuzzy, php-format
 msgid "Found %s tables to convert"
-msgstr "تم العثور على جداول٪ s ليتم تحويلها"
+msgstr ""
 
 #: lib/installer.php:3767
 #, fuzzy, php-format
 msgid "Converting Table #%s '%s'"
-msgstr "تحويل الجدول #٪ s '٪ s'"
+msgstr ""
 
 #: lib/installer.php:3784
 msgid "No tables where found or selected for conversion"
@@ -18860,22 +18860,22 @@ msgstr "لم يتم العثور على جداول أو تحديدها للتح�
 #: lib/installer.php:3795
 #, fuzzy, php-format
 msgid "Switched from %s to %s"
-msgstr "تم التبديل من٪ s إلى٪ s"
+msgstr ""
 
 #: lib/installer.php:3799
 #, fuzzy, php-format
 msgid "NOTE: Using temporary file for db cache: %s"
-msgstr "ملاحظة: استخدام ملف مؤقت لذاكرة التخزين المؤقت db:٪ s"
+msgstr ""
 
 #: lib/installer.php:3822
 #, fuzzy, php-format
 msgid "Upgrading from v%s (DB %s) to v%s"
-msgstr "الترقية من v٪ s (DB٪ s) إلى v٪ s"
+msgstr ""
 
 #: lib/installer.php:3831
 #, fuzzy, php-format
 msgid "WARNING: Failed to find upgrade function for v%s"
-msgstr "تحذير: فشل في العثور على وظيفة الترقية لـ v٪ s"
+msgstr ""
 
 #: lib/installer.php:3893
 msgid "Install aborted due to no EULA acceptance"
@@ -18884,17 +18884,17 @@ msgstr "تم إحباط التثبيت بسبب عدم قبول اتفاقية �
 #: lib/installer.php:3920
 #, fuzzy, php-format
 msgid "Background was already started at %s, this attempt at %s was skipped"
-msgstr "بدأت الخلفية بالفعل في٪ s ، وتم تخطي هذه المحاولة عند٪ s"
+msgstr ""
 
 #: lib/installer.php:3946
 #, fuzzy, php-format
 msgid "Exception occurred during installation: #%s - %s"
-msgstr "حدث استثناء أثناء التثبيت: #"
+msgstr ""
 
 #: lib/installer.php:3956
 #, fuzzy, php-format
 msgid "Installation was started at %s, completed at %s"
-msgstr "تم بدء التثبيت على٪ s ، وقد اكتمل في٪ s"
+msgstr ""
 
 #: lib/installer.php:3997
 msgid "Both"
@@ -18903,12 +18903,12 @@ msgstr "كلاهما"
 #: lib/installer.php:3997
 #, fuzzy, php-format
 msgid "No - %s"
-msgstr "%s %s"
+msgstr ""
 
 #: lib/installer.php:4005
 #, fuzzy, php-format
 msgid "%s - N/A"
-msgstr "%s %s"
+msgstr ""
 
 #: lib/installer.php:4005 lib/installer.php:4007
 msgid "Web"
@@ -18917,7 +18917,7 @@ msgstr "شبكة الويب"
 #: lib/installer.php:4007 lib/installer.php:4010
 #, fuzzy, php-format
 msgid "%s - No"
-msgstr "%s %s"
+msgstr ""
 
 #: lib/installer.php:4010
 msgid "Cli"
@@ -18926,12 +18926,12 @@ msgstr "كلاسيكي"
 #: lib/installer.php:4015
 #, fuzzy, php-format
 msgid "Setting PHP Option %s = %s"
-msgstr "تعيين خيار PHP٪ s =٪ s"
+msgstr ""
 
 #: lib/installer.php:4023
 #, fuzzy, php-format
 msgid "Failed to set PHP option %s, is %s (should be %s)"
-msgstr "فشل تعيين خيار PHP٪ s ، هو٪ s (يجب أن يكون٪ s)"
+msgstr ""
 
 #: lib/installer.php:4043
 #, fuzzy
@@ -18957,47 +18957,47 @@ msgstr "لا يوجد اسم مستخدم محدد"
 #: lib/ldap.php:412
 #, fuzzy, php-format
 msgid "Protocol Error, Unable to set version (%s) on Server (%s)"
-msgstr "خطأ في البروتوكول ، غير قادر على تعيين الإصدار"
+msgstr ""
 
 #: lib/ldap.php:416
 #, fuzzy, php-format
 msgid "Protocol Error, Unable to set referrals option (%s) on Server (%s)"
-msgstr "خطأ بروتوكول ، غير قادر على تعيين خيار الإحالات"
+msgstr ""
 
 #: lib/ldap.php:420
 #, fuzzy, php-format
 msgid "Protocol Error, unable to start TLS communications (%s) on Server (%s)"
-msgstr "خطأ في البروتوكول ، غير قادر على بدء اتصالات TLS"
+msgstr ""
 
 #: lib/ldap.php:424
 #, fuzzy, php-format
 msgid "Protocol Error, General failure (%s)"
-msgstr "خطأ في البروتوكول ، فشل عام (٪ s)"
+msgstr ""
 
 #: lib/ldap.php:428
 #, fuzzy, php-format
 msgid "Protocol Error, Unable to bind, LDAP result: (%s) on Server (%s)"
-msgstr "خطأ في البروتوكول ، غير قادر على الربط ، نتيجة LDAP:٪ s"
+msgstr ""
 
 #: lib/ldap.php:432
 #, fuzzy, php-format
 msgid "Unable to Connect to Server (%s)"
-msgstr "غير قادر على الإتصال بالسيرفر"
+msgstr ""
 
 #: lib/ldap.php:436
 #, fuzzy, php-format
 msgid "Connection Timeout to Server (%s)"
-msgstr "انتهى وقت الاتصال"
+msgstr ""
 
 #: lib/ldap.php:440
 #, fuzzy, php-format
 msgid "Insufficient Access to Server (%s)"
-msgstr "وصول غير كافية"
+msgstr ""
 
 #: lib/ldap.php:444
 #, fuzzy, php-format
 msgid "Group DN could not be found to compare on Server (%s)"
-msgstr "تعذر العثور على المجموعة DN للمقارنة"
+msgstr ""
 
 #: lib/ldap.php:448
 msgid "More than one matching user found"
@@ -19014,7 +19014,7 @@ msgstr "يتعذر العثور على المستخدمين DN"
 #: lib/ldap.php:460
 #, fuzzy, php-format
 msgid "Unable to create LDAP connection object to Server (%s)"
-msgstr "غير قادر على إنشاء كائن اتصال LDAP"
+msgstr ""
 
 #: lib/ldap.php:464
 msgid "Specific DN and Password required"
@@ -19028,7 +19028,7 @@ msgstr "أدخلت كلمة مرور غير صالحة. فشل عملية الد
 #: lib/ldap.php:473
 #, fuzzy, php-format
 msgid "Unexpected error %s (Ldap Error: %s) on Server (%s)"
-msgstr "خطأ غير متوقع٪ s (خطأ في LDAP:٪ s)"
+msgstr ""
 
 #: lib/ping.php:149
 msgid "ICMP Ping timed out"
@@ -19037,7 +19037,7 @@ msgstr "انتهت المهلة المحددة لـ ICMP"
 #: lib/ping.php:232 lib/ping.php:250
 #, fuzzy, php-format
 msgid "ICMP Ping Success (%s ms)"
-msgstr "نجاح بروتوكول ICMP Ping (٪ s ms)"
+msgstr ""
 
 #: lib/ping.php:237 lib/ping.php:255
 msgid "ICMP ping Timed out"
@@ -19058,12 +19058,12 @@ msgstr ""
 #: lib/ping.php:421
 #, fuzzy, php-format
 msgid "UDP ping error: %s"
-msgstr "خطأ في اختبار بروتوكول UDP:٪ s"
+msgstr ""
 
 #: lib/ping.php:461
 #, fuzzy, php-format
 msgid "UDP Ping Success (%s ms)"
-msgstr "نجاح اختبار UDP Ping (٪ s ms)"
+msgstr ""
 
 #: lib/ping.php:527
 msgid "IPv6 support appears to be missing!"
@@ -19072,22 +19072,22 @@ msgstr ""
 #: lib/ping.php:553
 #, fuzzy, php-format
 msgid "TCP Ping Success Connection Refused (%s ms)"
-msgstr "نجاح اختبار TCP Ping (٪ s ms)"
+msgstr ""
 
 #: lib/ping.php:556
 #, fuzzy, php-format
 msgid "TCP Ping Failed: socket_connect(), reason: %s"
-msgstr "TCP ping: socket_connect () ، والسبب:٪ s"
+msgstr ""
 
 #: lib/ping.php:579
 #, fuzzy, php-format
 msgid "TCP Ping Failed: socket_select() failed, reason: %s"
-msgstr "TCP ping: فشل socket_select () ، والسبب:٪ s"
+msgstr ""
 
 #: lib/ping.php:594
 #, fuzzy, php-format
 msgid "TCP Ping Success (%s ms)"
-msgstr "نجاح اختبار TCP Ping (٪ s ms)"
+msgstr ""
 
 #: lib/ping.php:604
 msgid "TCP ping timed out"
@@ -19100,12 +19100,12 @@ msgstr "لم يتم تنفيذ Ping بسبب الإعداد."
 #: lib/plugins.php:681
 #, fuzzy, php-format
 msgid "'%s' versions '%s' above or in range are required to install '%s'. "
-msgstr "يلزم وجود٪ s من الإصدار٪ s أو أحدث لـ٪ s."
+msgstr ""
 
 #: lib/plugins.php:685
 #, fuzzy, php-format
 msgid "'%s' must first be installed before '%s' is installed. "
-msgstr "مطلوب٪ s لـ٪ s ، ولم يتم تثبيته."
+msgstr ""
 
 #: lib/plugins.php:708
 msgid "Plugin cannot be installed."
@@ -19194,12 +19194,12 @@ msgstr ""
 #: lib/plugins.php:1717
 #, fuzzy, php-format
 msgid "The Plugin '%s' has been archived successfully."
-msgstr "إزالة سجل Cacti بنجاح"
+msgstr ""
 
 #: lib/plugins.php:1719
 #, fuzzy, php-format
 msgid "The Plugin '%s' archiving process has failed.  Check the Cacti log for errors."
-msgstr "فشل واحد أو أكثر من الإصلاحات RRDfile. انظر سجل Cacti عن الأخطاء."
+msgstr ""
 
 #: lib/plugins.php:1722
 #, php-format
@@ -19214,7 +19214,7 @@ msgstr "الإضافات"
 #: lib/plugins.php:1749 lib/plugins.php:1755
 #, fuzzy, php-format
 msgid "Requires: Cacti >= %s"
-msgstr "يتطلب: الصبار&gt; =٪ s"
+msgstr ""
 
 #: lib/plugins.php:1752
 msgid "Legacy Plugin"
@@ -19235,7 +19235,7 @@ msgstr ""
 #: lib/plugins.php:1956
 #, fuzzy, php-format
 msgid "The Cacti plugin %s has not releases"
-msgstr "لم يعمل Cacti Poller بعد."
+msgstr ""
 
 #: lib/plugins.php:2011 lib/plugins.php:2149
 msgid "Unable to get archive from GitHub/GitLab location."
@@ -19264,7 +19264,7 @@ msgstr ""
 #: lib/reports.php:144
 #, fuzzy, php-format
 msgid "Device '%s' successfully added to Report."
-msgstr "يضاف إلى الصبار"
+msgstr ""
 
 #: lib/reports.php:147
 #, fuzzy
@@ -19279,12 +19279,12 @@ msgstr "لم تتم إضافة الجهاز \"%s\" إلى التقرير لأن�
 #: lib/reports.php:625
 #, fuzzy, php-format
 msgid "Problems sending Report '%s' Problem with e-mail Subsystem Error is '%s'"
-msgstr "مشاكل في إرسال التقرير '٪ s' مشكلة خطأ النظام الفرعي للبريد الإلكتروني هي '٪ s'"
+msgstr ""
 
 #: lib/reports.php:634
 #, fuzzy, php-format
 msgid "Report '%s' Sent Successfully"
-msgstr "تم إرسال تقرير '٪ s' بنجاح"
+msgstr ""
 
 #: lib/reports.php:1109 lib/reports.php:1448
 msgid "(No Graph Template)"
@@ -19317,17 +19317,17 @@ msgstr "محاذاة الرسم البياني:"
 #: lib/reports.php:2011
 #, fuzzy, php-format
 msgid "Created Report Graph Item '<i>%s</i>'"
-msgstr "تم إنشاء عنصر رسم تقرير فني &#39; <i>٪ s</i> &#39;"
+msgstr ""
 
 #: lib/reports.php:2013
 #, fuzzy, php-format
 msgid "Failed Adding Report Graph Item '<i>%s</i>' Already Exists"
-msgstr "أخفق إضافة عنصر رسومي تقرير &#39; <i>٪ s</i> &#39; موجود بالفعل"
+msgstr ""
 
 #: lib/reports.php:2016
 #, fuzzy, php-format
 msgid "Skipped Report Graph Item '<i>%s</i>' Already Exists"
-msgstr "تم تخطي عنصر Graph Report &#39; <i>٪ s</i> &#39; بالفعل"
+msgstr ""
 
 #: lib/rrd.php:398
 #, php-format
@@ -19342,37 +19342,37 @@ msgstr "الأمر RRDtool:"
 #: lib/rrd.php:3299
 #, fuzzy, php-format
 msgid "The required RRDfile step size is '%s' but observed step is '%s'"
-msgstr "حجم خطوة RRD المطلوب هو &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3359
 #, fuzzy, php-format
 msgid "Type for Data Source '%s' should be '%s'"
-msgstr "يجب أن يكون نوع مصدر البيانات &#39;٪ s&#39; هو &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3365
 #, fuzzy, php-format
 msgid "Heartbeat for Data Source '%s' should be '%s'"
-msgstr "يجب أن يكون نبض القلب لمصدر البيانات &#39;٪ s&#39; هو &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3377
 #, fuzzy, php-format
 msgid "RRD minimum for Data Source '%s' should be '%s'"
-msgstr "يجب أن يكون الحد الأدنى لتقليل وقت الاستجابة (RRD) لمصدر البيانات &#39;٪ s&#39; هو &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3386
 #, fuzzy, php-format
 msgid "DS '%s' missing in Cacti definition"
-msgstr "DS &#39;٪ s&#39; مفقود في تعريف Cacti"
+msgstr ""
 
 #: lib/rrd.php:3400 lib/rrd.php:3401
 #, fuzzy, php-format
 msgid "Cacti RRA '%s' has same CF/steps (%s, %s) as '%s'"
-msgstr "Cacti RRA &#39;٪ s&#39; له نفس CF / steps (٪ s،٪ s) كـ &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3415 lib/rrd.php:3416
 #, fuzzy, php-format
 msgid "File RRA '%s' has same CF/steps (%s, %s) as '%s'"
-msgstr "الملف RRA &#39;٪ s&#39; له نفس CF / steps (٪ s،٪ s) كـ &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3450
 #, php-format
@@ -19382,22 +19382,22 @@ msgstr ""
 #: lib/rrd.php:3454
 #, fuzzy, php-format
 msgid "The XFF for Cacti RRA id is '%s' but should be '%s'"
-msgstr "يجب أن يكون XFF لمعرف cacti RRA &#39;٪ s&#39; &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3458
 #, fuzzy, php-format
 msgid "The number of rows for Cacti RRA id '%s' is incorrect.  The number of rows are '%s' but should be '%s'"
-msgstr "يجب أن يكون عدد الصفوف لمعرف Cacti RRA &#39;٪ s&#39; هو &#39;٪ s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3476
 #, fuzzy, php-format
 msgid "The RRA '%s' missing in the existing Cacti RRDfile"
-msgstr "RRA &#39;٪ s&#39; مفقودة في RRDfile"
+msgstr ""
 
 #: lib/rrd.php:3483
 #, fuzzy, php-format
 msgid "RRA '%s' missing in Cacti definition"
-msgstr "RRA &#39;٪ s&#39; مفقودة في تعريف Cacti"
+msgstr ""
 
 #: lib/rrd.php:3504
 msgid "RRD File Information"
@@ -19450,7 +19450,7 @@ msgstr "CDP نقاط بيانات غير معروفة (0)"
 #: lib/rrd.php:3663
 #, fuzzy
 msgid "Errors Found"
-msgstr "لم يتمّ العثور على %s"
+msgstr ""
 
 #: lib/rrd.php:3675
 #, fuzzy
@@ -19460,7 +19460,7 @@ msgstr "حقول مصدر البيانات"
 #: lib/rrd.php:3700 lib/rrd.php:3703
 #, fuzzy, php-format
 msgid "rename %s to %s"
-msgstr "إعادة تسمية٪ s إلى٪ s"
+msgstr ""
 
 #: lib/rrd.php:3770
 msgid "Error while parsing the XML of rrdtool dump"
@@ -19469,12 +19469,12 @@ msgstr "خطأ أثناء تحليل XML من تفريغ rrdtool"
 #: lib/rrd.php:3803 lib/rrd.php:3865 lib/rrd.php:3928
 #, fuzzy, php-format
 msgid "ERROR while writing XML file: %s"
-msgstr "خطأ أثناء كتابة ملف XML:٪ s"
+msgstr ""
 
 #: lib/rrd.php:3815 lib/rrd.php:3877 lib/rrd.php:3940
 #, fuzzy, php-format
 msgid "ERROR: RRDfile %s not writeable"
-msgstr "خطأ: RRDfile٪ s غير قابل للكتابة"
+msgstr ""
 
 #: lib/rrd.php:3847 lib/rrd.php:3910
 msgid "Error while parsing the XML of RRDtool dump"
@@ -19483,17 +19483,17 @@ msgstr "خطأ أثناء تحليل XML تفريغ RRDtool"
 #: lib/rrd.php:4159
 #, fuzzy, php-format
 msgid "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) removed from RRD file"
-msgstr "RRA (CF =٪ s، ROWS =٪ d، PDP_PER_ROW =٪ d، XFF =٪ 1.2f) تمت إزالتها من ملف RRD"
+msgstr ""
 
 #: lib/rrd.php:4199
 #, fuzzy, php-format
 msgid "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) adding to RRD file"
-msgstr "RRA (CF =٪ s، ROWS =٪ d، PDP_PER_ROW =٪ d، XFF =٪ 1.2f) إضافة إلى ملف RRD"
+msgstr ""
 
 #: lib/rrd.php:4291 lib/rrd.php:4305
 #, fuzzy, php-format
 msgid "Website does not have write access to %s, may be unable to create/update RRDs"
-msgstr "لا يمتلك موقع الويب حق الوصول للكتابة إلى٪ s ، وقد يتعذر إنشاء / تحديث ملفات RRD"
+msgstr ""
 
 #: lib/rrd.php:4301
 msgid "(Custom)"
@@ -19526,7 +19526,7 @@ msgstr "محاولة تكوين رسم بياني من قالب الرسم ال�
 #: lib/template.php:2243 lib/template.php:2277
 #, fuzzy, php-format
 msgid "Created: %s"
-msgstr "تم الإنشاء:٪ s"
+msgstr ""
 
 #: lib/template.php:2259 lib/template.php:2288
 msgid "ERROR: Whitelist Validation Failed. Check Data Input Method"
@@ -19535,7 +19535,7 @@ msgstr "خطأ: فشل التحقق من الصحة البيضاء. تحقق م�
 #: lib/template.php:2267
 #, fuzzy, php-format
 msgid "Graph Not created for %s due to bad data"
-msgstr "خلق الرسم البياني"
+msgstr ""
 
 #: lib/template.php:2296
 #, php-format
@@ -19559,7 +19559,7 @@ msgstr "MySQL 5.6+ و MariaDB 10.0+ هي إصدارات رائعة ، وهي إ�
 #: lib/utility.php:1125
 #, fuzzy, php-format
 msgid "It is STRONGLY recommended that you enable InnoDB in any %s version greater than 5.5.3."
-msgstr "من المستحسن تمكين InnoDB في أي إصدار٪ s أكبر من 5.1."
+msgstr ""
 
 #: lib/utility.php:1138 lib/utility.php:1175
 msgid "When using Cacti with languages other than English, it is important to use the utf8mb4_unicode_ci collation type as some characters take more than a single byte."
@@ -19573,12 +19573,12 @@ msgstr "عند استخدام Cacti بلغات أخرى غير اللغة الإ
 #: lib/utility.php:1163
 #, fuzzy, php-format
 msgid "It is recommended that you enable InnoDB in any %s version greater than 5.1."
-msgstr "من المستحسن تمكين InnoDB في أي إصدار٪ s أكبر من 5.1."
+msgstr ""
 
 #: lib/utility.php:1196
 #, fuzzy, php-format
 msgid "Depending on the number of logins and use of spine data collector, %s will need many connections.  The calculation for spine is: total_connections = total_processes * (total_threads + script_servers + 1), then you must leave headroom for user connections, which will change depending on the number of concurrent login accounts."
-msgstr "استنادًا إلى عدد عمليات تسجيل الدخول واستخدام أداة تجميع بيانات العمود الفقري ، سيحتاج٪ s إلى العديد من الاتصالات. الحساب للعمود الفقري هو: total_connections = total_processes * (total_threads + script_servers + 1) ، ثم يجب عليك ترك مساحة خالية لاتصالات المستخدم ، والتي ستتغير اعتمادًا على عدد حسابات تسجيل الدخول المتزامنة."
+msgstr ""
 
 #: lib/utility.php:1201
 msgid "Keeping the table cache larger means less file open/close operations when using innodb_file_per_table."
@@ -19591,7 +19591,7 @@ msgstr "مع إمكانات الاستقصاء عن بعد ، ستتم مزام�
 #: lib/utility.php:1212
 #, php-format
 msgid "If using the Cacti Performance Booster and choosing a memory storage engine, you have to be careful to flush your Performance Booster buffer before the system runs out of memory table space.  This is done two ways, first reducing the size of your output column to just the right size.  This column is in the tables poller_output, and poller_output_boost.  The second thing you can do is allocate more memory to memory tables.  We have arbitrarily chosen a recommended value of 10%% of system memory, but if you are using SSD disk drives, or have a smaller system, you may ignore this recommendation or choose a different storage engine.  You may see the expected consumption of the Performance Booster tables under Console -> System Utilities -> View Boost Status."
-msgstr "في حالة استخدام Cacti Performance Booster واختيار محرك تخزين ذاكرة ، يجب أن تكون حذراً لتدفق المخزن المؤقت Performance Booster قبل نفاد مساحة ذاكرة النظام. يتم ذلك بطريقتين ، أولاً تقليل حجم عمود الإخراج الخاص بك إلى الحجم الصحيح فقط. هذا العمود موجود في الجداول poller_output ، و poller_output_boost. الشيء الثاني الذي يمكنك القيام به هو تخصيص المزيد من الذاكرة إلى جداول الذاكرة. لقد اخترنا بشكل عشوائي القيمة الموصى بها بنسبة 10 ٪٪ من ذاكرة النظام ، ولكن إذا كنت تستخدم محركات أقراص SSD أو لديك نظام أصغر ، فيمكنك تجاهل هذه التوصية أو اختيار محرك تخزين مختلف. قد ترى الاستهلاك المتوقع لجداول Booster Performance ضمن Console -&gt; System Utilities -&gt; View Boost Status."
+msgstr ""
 
 #: lib/utility.php:1218
 msgid "When executing subqueries, having a larger temporary table size, keep those temporary tables in memory."
@@ -19608,7 +19608,7 @@ msgstr ""
 #: lib/utility.php:1236
 #, fuzzy, php-format
 msgid "When using InnoDB storage it is important to keep your table spaces separate.  This makes managing the tables simpler for long time users of %s.  If you are running with this currently off, you can migrate to the per file storage by enabling the feature, and then running an alter statement on all InnoDB tables."
-msgstr "عند استخدام تخزين InnoDB ، من المهم الاحتفاظ بمساحات الطاولة منفصلة. وهذا يجعل إدارة الجداول أبسط للمستخدمين منذ وقت طويل من٪ s. إذا كنت تستخدم حاليًا ، فبإمكانك الترحيل إلى التخزين لكل ملف من خلال تمكين الميزة ، ثم تشغيل عبارة توضيحية على جميع جداول InnoDB."
+msgstr ""
 
 #: lib/utility.php:1242
 msgid "When using innodb_file_per_table, it is important to set the innodb_file_format to Barracuda.  This setting will allow longer indexes important for certain Cacti tables."
@@ -19621,12 +19621,12 @@ msgstr "إذا كانت جداولك تحتوي على فهارس كبيرة ج�
 #: lib/utility.php:1254
 #, fuzzy, php-format
 msgid "InnoDB will hold as much tables and indexes in system memory as is possible.  Therefore, you should make the innodb_buffer_pool large enough to hold as much of the tables and index in memory.  Checking the size of the /var/lib/mysql/cacti directory will help in determining this value.  We are recommending 25%% of your systems total memory, but your requirements will vary depending on your systems size.  If you database is very large or remote, you can consider increasing this size.  If remote, it can by as high as 80% of the systems memory.  However, cautions must be taken to reduce the swappiness of the system, or to remove swap to keep the system from swapping."
-msgstr "يحتفظ InnoDB بالكثير من الجداول والفهارس في ذاكرة النظام قدر الإمكان. لذلك ، يجب أن تجعل innodb_buffer_pool كبيرًا بما يكفي لاستيعاب الكثير من الجداول والفهرس في الذاكرة. سيساعدك فحص حجم / var / lib / mysql / cacti directory في تحديد هذه القيمة. نوصي بـ 25 ٪٪ من الذاكرة الإجمالية لنظامك ، ولكن ستختلف متطلباتك حسب حجم الأنظمة لديك."
+msgstr ""
 
 #: lib/utility.php:1260
 #, fuzzy
 msgid "This settings should remain ON unless your Cacti instances is running on either ZFS or FusionI/O which both have internal journaling to accommodate abrupt system crashes.  However, if you have very good power, and your systems rarely go down and you have backups, turning this setting to OFF can net you almost a 50% increase in database performance."
-msgstr "يجب أن تظل هذه الإعدادات قيد التشغيل ما لم يتم تشغيل مثيلات Cacti إما على ZFS أو FusionI / O وكلاهما يحتوي على دفتر يومية داخلي لاستيعاب أعطال النظام المفاجئة. ومع ذلك ، إذا كانت لديك طاقة جيدة جدًا ، ونادرًا ما تنخفض أنظمتك وكان لديك نسخ احتياطية ، فإن تحويل هذا الإعداد إلى إيقاف التشغيل يمكن أن يؤدي إلى زيادة أداء قاعدة البيانات بنسبة 50٪ تقريبًا."
+msgstr ""
 
 #: lib/utility.php:1265
 msgid "This is where metadata is stored. If you had a lot of tables, it would be useful to increase this."
@@ -19643,7 +19643,7 @@ msgstr "الحد الأقصى لأداء الإدخال / الإخراج يحد�
 #: lib/utility.php:1285
 #, fuzzy, php-format
 msgid "Setting this value to 2 means that you will flush all transactions every second rather than at commit.  This allows %s to perform writing less often."
-msgstr "يعني تعيين هذه القيمة إلى 2 أنه سيتم مسح كافة المعاملات كل ثانية بدلاً من الالتزام. يسمح هذا لـ٪ s بأداء الكتابة بشكل أقل."
+msgstr ""
 
 #: lib/utility.php:1290
 msgid "With modern SSD type storage, having multiple io threads is advantageous for applications with high io characteristics."
@@ -19652,7 +19652,7 @@ msgstr "مع التخزين الحديث لنوع SSD ، فإن وجود عدة 
 #: lib/utility.php:1298 lib/utility.php:1340
 #, fuzzy, php-format
 msgid "As of %s %s, the you can control how often %s flushes transactions to disk.  The default is 1 second, but in high I/O systems setting to a value greater than 1 can allow disk I/O to be more sequential"
-msgstr "اعتبارًا من٪ s٪ s ، يمكنك التحكم في عدد المرات التي يتم فيها صرف المعاملات إلى القرص. الافتراضي هو 1 ثانية ، ولكن في إعداد أنظمة I / O عالية لقيمة أكبر من 1 يمكن أن تسمح I / O القرص أن يكون أكثر تسلسلي"
+msgstr ""
 
 #: lib/utility.php:1303
 msgid "With modern SSD type storage, having multiple read io threads is advantageous for applications with high io characteristics.  Depending on your MariaDB/MySQL versions, this value can go as high as 64.  But try to keep the number less than your total SMT threads on the database server."
@@ -19665,12 +19665,12 @@ msgstr "مع تخزين نوع SSD الحديث ، وجود عدة سلاسل io
 #: lib/utility.php:1314
 #, fuzzy, php-format
 msgid "%s will divide the innodb_buffer_pool into memory regions to improve performance for versions of MariaDB less than 10.5.  The max value is 64, but should not exceed more than the number of CPU cores/threads.  When your innodb_buffer_pool is less than 1GB, you should use the pool size divided by 128MB.  Continue to use this equation up to the max the number of CPU cores or 64."
-msgstr "سينقسم٪ s innodb_buffer_pool إلى مناطق الذاكرة لتحسين الأداء. الحد الأقصى للقيمة هو 64. عندما يكون حجم innodb_buffer_pool أقل من 1 غيغابايت ، يجب استخدام حجم التجمع مقسومًا على 128 ميجابايت. استمر في استخدام هذه المعادلة حتى 64 كحد أقصى."
+msgstr ""
 
 #: lib/utility.php:1314
 #, fuzzy, php-format
 msgid "%s will divide the innodb_buffer_pool into memory regions to improve performance for versions of MySQL upto and including MySQL 8.0.  The max value is 64, but should not exceed more than the number of CPU cores/threads.  When your innodb_buffer_pool is less than 1GB, you should use the pool size divided by 128MB.  Continue to use this equation up to the max of the number of CPU cores or 64."
-msgstr "سينقسم٪ s innodb_buffer_pool إلى مناطق الذاكرة لتحسين الأداء. الحد الأقصى للقيمة هو 64. عندما يكون حجم innodb_buffer_pool أقل من 1 غيغابايت ، يجب استخدام حجم التجمع مقسومًا على 128 ميجابايت. استمر في استخدام هذه المعادلة حتى 64 كحد أقصى."
+msgstr ""
 
 #: lib/utility.php:1320 lib/utility.php:1356
 msgid "If you have SSD disks, use this suggestion.  If you have physical hard drives, use 200 * the number of active drives in the array.  If using NVMe or PCIe Flash, much larger numbers as high as 100000 can be used."
@@ -19703,7 +19703,7 @@ msgstr "عند استخدام MariaDB 10.2.4 وما فوق ، يمكنك است�
 #: lib/utility.php:1405
 #, fuzzy, php-format
 msgid "%s Tuning"
-msgstr "ضبط٪ s"
+msgstr ""
 
 #: lib/utility.php:1405
 msgid "Note: Many changes below require a database restart"
@@ -19728,17 +19728,17 @@ msgstr "التعليقات"
 #: lib/utility.php:2003
 #, fuzzy, php-format
 msgid "PHP %s is the minimum version"
-msgstr "PHP٪ s هو إصدار mimimum"
+msgstr ""
 
 #: lib/utility.php:2005
 #, fuzzy, php-format
 msgid "A minimum of %s memory limit"
-msgstr "حد لا يقل عن٪ s من ذاكرة MB"
+msgstr ""
 
 #: lib/utility.php:2007
 #, fuzzy, php-format
 msgid "A minimum of %s m execution time"
-msgstr "حد أدنى من٪ sm وقت التنفيذ"
+msgstr ""
 
 #: lib/utility.php:2009
 msgid "A valid timezone that matches MySQL and the system"
@@ -19940,7 +19940,7 @@ msgstr "كم مرة تريد أن يتم تحديث هذه الصفحة تلقا
 #: links.php:593
 #, fuzzy, php-format
 msgid "External Links [edit: %s]"
-msgstr "روابط خارجية [تحرير:٪ s]"
+msgstr ""
 
 #: links.php:595
 msgid "External Links [new]"
@@ -19972,12 +19972,12 @@ msgstr "الخروج من الصبار"
 #: logout.php:60
 #, fuzzy, php-format
 msgid "You have been logged out of Cacti due to %s."
-msgstr "لقد تم تسجيل خروجك من Cacti بسبب انتهاء مهلة الجلسة."
+msgstr ""
 
 #: logout.php:61
 #, fuzzy, php-format
 msgid "Please close your browser or %sLogin Again%s"
-msgstr "الرجاء إغلاق المتصفح أو٪ sLogin Again٪ s"
+msgstr ""
 
 #: logout.php:62
 #, fuzzy
@@ -20008,7 +20008,7 @@ msgstr "لا استقبال إشعارات SNMP"
 #: managers.php:291
 #, fuzzy, php-format
 msgid "SNMP Notification Receiver [edit: %s]"
-msgstr "مستقبل إعلام بروتوكول SNMP [تحرير:٪ s]"
+msgstr ""
 
 #: managers.php:293
 msgid "SNMP Notification Receiver [new]"
@@ -20193,22 +20193,22 @@ msgstr "ماذا تريد أن تصدر؟"
 #: package.php:667
 #, fuzzy, php-format
 msgid "%s Device Package"
-msgstr "اسم الجهاز"
+msgstr ""
 
 #: package.php:670
 #, fuzzy, php-format
 msgid "%s Graph Template Package"
-msgstr "اسم قالب الرسم البياني"
+msgstr ""
 
 #: package.php:673
 #, fuzzy, php-format
 msgid "%s Data Query Package"
-msgstr "اسم استعلام البيانات"
+msgstr ""
 
 #: package.php:700 templates_export.php:168
 #, fuzzy, php-format
 msgid "Available Templates [%s]"
-msgstr "القوالب المتاحة [٪ s]"
+msgstr ""
 
 #: package.php:705
 #, fuzzy
@@ -20218,7 +20218,7 @@ msgstr "القوالب المتاحة [٪ s]"
 #: package.php:709
 #, fuzzy, php-format
 msgid "%s to Export"
-msgstr "تصدير"
+msgstr ""
 
 #: package.php:710
 #, fuzzy
@@ -20346,7 +20346,7 @@ msgstr ""
 #: package_import.php:203 package_import.php:527
 #, fuzzy, php-format
 msgid "The Package %s Imported Successfully"
-msgstr "إزالة سجل Cacti بنجاح"
+msgstr ""
 
 #: package_import.php:205 package_import.php:529
 #, php-format
@@ -20356,7 +20356,7 @@ msgstr ""
 #: package_import.php:298
 #, fuzzy, php-format
 msgid "Package %s"
-msgstr "ملفات الحزمة"
+msgstr ""
 
 #: package_import.php:305
 #, fuzzy
@@ -20447,7 +20447,7 @@ msgstr ""
 #: package_import.php:766
 #, fuzzy, php-format
 msgid "<b>Package</b> %s"
-msgstr "ملفات الحزمة"
+msgstr ""
 
 #: package_import.php:769
 msgid "Press 'Ok' to start Trusting the Signer, or escape to cancel."
@@ -20803,7 +20803,7 @@ msgstr "جعل النطاق المحدد الافتراضي"
 #: package_repos.php:289
 #, fuzzy, php-format
 msgid "Package Repository [edit: %s]"
-msgstr "الجهاز [تحرير:٪ s]"
+msgstr ""
 
 #: package_repos.php:291
 msgid "Package Repository [new]"
@@ -21291,7 +21291,7 @@ msgstr "لم يتم العثور على أي إضافات"
 #: plugins.php:1351 plugins.php:1385
 #, fuzzy, php-format
 msgid "Not Compatible, '%s'"
-msgstr "غير متوافق ،٪ s"
+msgstr ""
 
 #: plugins.php:1353 plugins.php:1387
 msgid "Plugin Error"
@@ -21431,7 +21431,7 @@ msgstr "غير مثبت"
 #: plugins.php:1744 plugins.php:1877
 #, fuzzy, php-format
 msgid "Plugin directory '%s' is missing setup.php"
-msgstr "دليل المكون الإضافي &#39;٪ s&#39; مفقود setup.php"
+msgstr ""
 
 #: plugins.php:1746 plugins.php:1879
 msgid "Plugin is lacking an INFO file"
@@ -21440,7 +21440,7 @@ msgstr "البرنامج المساعد يفتقر إلى ملف INFO"
 #: plugins.php:1751
 #, fuzzy, php-format
 msgid "Unable to Install Plugin!  %s"
-msgstr "غير قادر على إلغاء التثبيت. هذا المكون الإضافي مطلوب بواسطة:٪ s"
+msgstr ""
 
 #: plugins.php:1753
 msgid "Install Plugin"
@@ -21449,7 +21449,7 @@ msgstr "تثبيت الاضافات"
 #: plugins.php:1760
 #, fuzzy, php-format
 msgid "Plugin '%s' can not be archived before it's been Installed."
-msgstr "لا يمكن تثبيت المكون الإضافي."
+msgstr ""
 
 #: plugins.php:1771
 msgid "Remove Plugin Data Tables and Settings"
@@ -21458,7 +21458,7 @@ msgstr ""
 #: plugins.php:1799 plugins.php:1825 plugins.php:1843
 #, fuzzy, php-format
 msgid "Unable to Uninstall.  This Plugin is required by: '%s'"
-msgstr "غير قادر على إلغاء التثبيت. هذا المكون الإضافي مطلوب بواسطة:٪ s"
+msgstr ""
 
 #: plugins.php:1801 plugins.php:1827 plugins.php:1845
 msgid "Uninstall Plugin"
@@ -21479,7 +21479,7 @@ msgstr ""
 #: plugins.php:1814
 #, fuzzy
 msgid "Check Plugins Configuration"
-msgstr "التحقق من التكوين ... <br>"
+msgstr ""
 
 #: plugins.php:1818
 msgid "A Plugin can not be archived when it has Configuration Issues."
@@ -21516,7 +21516,7 @@ msgstr "لا يمكن أن تتضمن أدلة المكونات الإضافية
 #: plugins.php:1870
 #, fuzzy, php-format
 msgid "Plugin directory is not correct.  Should be '%s' but is '%s'"
-msgstr "دليل المكونات الإضافية غير صحيح. يجب أن يكون &#39;٪ s&#39; ولكنه &#39;٪ s&#39;"
+msgstr ""
 
 #: plugins.php:1881
 msgid "Plugin is integrated into Cacti core"
@@ -21534,27 +21534,27 @@ msgstr "تمكين البرنامج المساعد"
 #: poller.php:405
 #, fuzzy, php-format
 msgid "WARNING: %s is out of sync with the Poller Interval for Poller[%d]!  The Poller Interval is %d seconds, with a maximum of a %d seconds, but %d seconds have passed since the last poll!"
-msgstr "تحذير:٪ s غير متزامنة مع فاصل Poller! الفاصل الزمني لـ Poller هو &#39;٪ d&#39; من الثواني ، بحد أقصى &#39;٪ d&#39; من الثواني ، ولكن مرت٪ d ثانية منذ آخر استطلاع!"
+msgstr ""
 
 #: poller.php:579
 #, fuzzy, php-format
 msgid "WARNING: There are %d processes detected as overrunning a polling cycle for Poller[%d], please investigate."
-msgstr "تحذير: هناك &quot;٪ d&quot; تم الكشف عنه على أنه اجتياز دورة الاقتراع ، يرجى التحقق من ذلك."
+msgstr ""
 
 #: poller.php:637
 #, fuzzy, php-format
 msgid "WARNING: Poller Output Table not empty for Poller[%d].  Issues: %d, %s."
-msgstr "تحذير: جدول إخراج Poller غير فارغ. المشكلات:٪ d،٪ s."
+msgstr ""
 
 #: poller.php:671
 #, fuzzy, php-format
 msgid "ERROR: The spine path: %s is invalid for Poller[%d].  Poller can not continue!"
-msgstr "خطأ: مسار العمود الفقري:٪ s غير صالح. بولير لا يمكن أن يستمر!"
+msgstr ""
 
 #: poller.php:819
 #, fuzzy, php-format
 msgid "Maximum runtime of %d seconds exceeded for Poller[%d]. Exiting."
-msgstr "تم تجاوز الحد الأقصى لوقت التشغيل٪ d من الثواني. الخروج."
+msgstr ""
 
 #: poller.php:944
 msgid "WARNING: Cacti Polling Cycle Exceeded Poller Interval by "
@@ -21591,7 +21591,7 @@ msgstr "ملاحظة: تمت إضافة جامع بيانات ثاني Cacti. Th
 #: poller_automation.php:54
 #, fuzzy, php-format
 msgid "WARNING: Main Cacti database %s offline or in recovery"
-msgstr "تحذير: قاعدة بيانات Cacti الرئيسية غير متصلة بالإنترنت أو قيد الاسترداد"
+msgstr ""
 
 #: poller_automation.php:1037 poller_automation.php:1091
 msgid "Cacti Primary Admin"
@@ -21792,12 +21792,12 @@ msgstr ""
 #: pollers.php:343
 #, fuzzy, php-format
 msgid "You have already used this hostname '%s'.  Please enter a non-duplicate hostname."
-msgstr "لقد استخدمت بالفعل اسم المضيف هذا '٪ s'. الرجاء إدخال اسم مضيف غير مكرر."
+msgstr ""
 
 #: pollers.php:349
 #, fuzzy, php-format
 msgid "You have already used this database hostname '%s'.  Please enter a non-duplicate database hostname."
-msgstr "لقد استخدمت بالفعل اسم مضيف قاعدة البيانات هذا '٪ s'. الرجاء إدخال اسم مضيف قاعدة بيانات غير مكرر."
+msgstr ""
 
 #: pollers.php:569
 msgid "Data Collector Statistics cleared."
@@ -21896,7 +21896,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لتمكين جامع البي�
 #: pollers.php:654 sites.php:460
 #, fuzzy, php-format
 msgid "Site [edit: %s]"
-msgstr "الموقع [تحرير:٪ s]"
+msgstr ""
 
 #: pollers.php:658 sites.php:462
 msgid "Site [new]"
@@ -22073,7 +22073,7 @@ msgstr ""
 #: rrdcheck.php:240 rrdcheck.php:241
 #, fuzzy, php-format
 msgid "%d days"
-msgstr "أيام"
+msgstr ""
 
 #: rrdcheck.php:245 rrdcheck.php:248
 msgid "Messages"
@@ -22177,7 +22177,7 @@ msgstr "ملاحظة: يتم حفظ إعدادات المسار في علامة 
 #: settings.php:138
 #, fuzzy, php-format
 msgid "Cacti Settings (%s)%s"
-msgstr "إعدادات الصبار (٪ s)"
+msgstr ""
 
 #: settings.php:248
 msgid "Changing Permission Model Warning"
@@ -22513,7 +22513,7 @@ msgstr "لم يتم العثور على مواقع"
 #: spikekill.php:40
 #, fuzzy, php-format
 msgid "FATAL: Spike Kill method '%s' is Invalid"
-msgstr "FATAL: Spire Kill method &#39;٪ s&#39; غير صالح"
+msgstr ""
 
 #: spikekill.php:117
 #, fuzzy
@@ -22564,7 +22564,7 @@ msgstr "1 التغيير"
 #: support.php:81
 #, fuzzy, php-format
 msgid "Technical Support [%s]"
-msgstr "الدعم الفني [٪ s]"
+msgstr ""
 
 #: support.php:288
 #, fuzzy
@@ -22580,7 +22580,7 @@ msgstr "طول الفهرس"
 #: support.php:309
 #, fuzzy, php-format
 msgid "%d Chars"
-msgstr "٪ d التغييرات"
+msgstr ""
 
 #: support.php:319 support.php:377
 #, fuzzy
@@ -22811,7 +22811,7 @@ msgstr "وقت الاقتراع"
 #: support.php:903 support.php:944
 #, fuzzy
 msgid "No host found"
-msgstr "لم يتمّ العثور على %s"
+msgstr ""
 
 #: support.php:919
 msgid "Worst 20 failed/total polls ratio"
@@ -22865,12 +22865,12 @@ msgstr "إعدادات الضبط"
 #: support.php:1168
 #, fuzzy, php-format
 msgid "ERROR: Installed RRDtool version does not exceed configured version.<br>Please visit the %s and select the correct RRDtool Utility Version."
-msgstr "خطأ: الإصدار RRDtool المثبتة لا يتجاوز الإصدار المكوّن. <br> يرجى زيارة٪ s وتحديد إصدار الأداة المساعدة RRDtool الصحيح."
+msgstr ""
 
 #: support.php:1174
 #, fuzzy, php-format
 msgid "ERROR: RRDtool 1.2.x+ does not support the GIF images format, but %d\" graph(s) and/or templates have GIF set as the image format."
-msgstr "خطأ: لا يدعم RRDtool 1.2.x + تنسيق صور GIF ، ولكن٪ d &quot;graph (s) و / أو القوالب تم تعيين GIF كتنسيق الصورة."
+msgstr ""
 
 #: support.php:1189
 msgid "General Information"
@@ -22908,7 +22908,7 @@ msgstr "نسخة مختلفة من الصبار والعمود الفقري!"
 #: support.php:1297
 #, fuzzy, php-format
 msgid "Action[%s]"
-msgstr "أفعال]"
+msgstr ""
 
 #: support.php:1302
 msgid "No items to poll"
@@ -22941,12 +22941,12 @@ msgstr "خوادم PHP"
 #: support.php:1370 support.php:1372 support.php:1378 support.php:1380
 #, fuzzy, php-format
 msgid "Main Server: Current: %s, Min Required: %s"
-msgstr "الحالي: %s ، الحد الأدنى المطلوب: %s"
+msgstr ""
 
 #: support.php:1388 support.php:1390
 #, fuzzy, php-format
 msgid "Local Server: Current: %s, Min Required: %s"
-msgstr "الحالي: %s ، الحد الأدنى المطلوب: %s"
+msgstr ""
 
 #: support.php:1395
 msgid "Minimum Connections:"
@@ -22985,7 +22985,7 @@ msgstr "ذاكرة النظام"
 #: support.php:1646 support.php:1656
 #, fuzzy, php-format
 msgid "%s GB"
-msgstr "٪ s GBytes"
+msgstr ""
 
 #: support.php:1584
 msgid "MySQL/MariaDB Memory Statistics (Source: MySQL Tuner)"
@@ -23057,7 +23057,7 @@ msgstr "لقد قمت بتعيين حد الذاكرة إلى &quot;غير مح�
 #: support.php:1738
 #, fuzzy, php-format
 msgid "It is highly suggested that you alter you php.ini memory_limit to %s or higher."
-msgstr "من المقترح للغاية أن تغيّر لك php.ini memory_limit إلى٪ s أو أعلى."
+msgstr ""
 
 #: support.php:1739
 msgid "This suggested memory value is calculated based on the number of data source present and is only to be used as a suggestion, actual values may vary system to system based on requirements."
@@ -23295,7 +23295,7 @@ msgstr "إلغاء نشر شجرة"
 #: tree.php:768
 #, fuzzy, php-format
 msgid "Trees [edit: %s]"
-msgstr "الأشجار [تحرير:٪ s]"
+msgstr ""
 
 #: tree.php:781
 msgid "Trees [new]"
@@ -23320,7 +23320,7 @@ msgstr "الانتهاء من تحرير شجرة"
 #: tree.php:813
 #, fuzzy, php-format
 msgid "This tree has been locked for Editing on %1$s by %2$s."
-msgstr "تم قفل هذه الشجرة للتعديل على٪ 1 $ s بواسطة٪ 2 $ s."
+msgstr ""
 
 #: tree.php:819
 msgid "To edit the tree, you must first unlock it and then lock it as yourself"
@@ -23746,7 +23746,7 @@ msgstr "أذونات المستخدم"
 #: user_admin.php:1725 user_group_admin.php:1581
 #, fuzzy, php-format
 msgid "User Settings %s"
-msgstr "إعدادات المستخدم٪ s"
+msgstr ""
 
 #: user_admin.php:1810 user_group_admin.php:1666
 msgid "Permissions"
@@ -23775,7 +23775,7 @@ msgstr "شجرة Perms"
 #: user_admin.php:1865
 #, fuzzy, php-format
 msgid "User Management %s"
-msgstr "إدارة المستخدم٪ s"
+msgstr ""
 
 #: user_admin.php:2075
 msgid "User Management"
@@ -23853,7 +23853,7 @@ msgstr "لم يتم العثور على مستخدمين"
 #: user_admin.php:2533 user_group_admin.php:2217
 #, fuzzy, php-format
 msgid "Graph Permissions %s"
-msgstr "أذونات الرسم البياني٪ s"
+msgstr ""
 
 #: user_admin.php:2595 user_admin.php:2694
 msgid "Show All"
@@ -23862,12 +23862,12 @@ msgstr "عرض الكل"
 #: user_admin.php:2658
 #, fuzzy, php-format
 msgid "Group Membership %s"
-msgstr "أعضاء المجموعة"
+msgstr ""
 
 #: user_admin.php:2758 user_group_admin.php:2343
 #, fuzzy, php-format
 msgid "Devices Permission %s"
-msgstr "إذن الأجهزة٪ s"
+msgstr ""
 
 #: user_admin.php:2816 user_admin.php:2915 user_admin.php:3014
 #: user_admin.php:3113 user_group_admin.php:2279 user_group_admin.php:2401
@@ -23878,12 +23878,12 @@ msgstr "إظهار الاستثناءات"
 #: user_admin.php:2879 user_group_admin.php:2464
 #, fuzzy, php-format
 msgid "Template Permission %s"
-msgstr "إذن قالب٪ s"
+msgstr ""
 
 #: user_admin.php:2978 user_admin.php:3077 user_group_admin.php:2563
 #, fuzzy, php-format
 msgid "Tree Permission %s"
-msgstr "إذن شجرة٪ s"
+msgstr ""
 
 #: user_domains.php:228
 #, fuzzy
@@ -23956,7 +23956,7 @@ msgstr "جعل النطاق المحدد الافتراضي"
 #: user_domains.php:283
 #, fuzzy, php-format
 msgid "User Domain [edit: %s]"
-msgstr "مجال المستخدم [تحرير:٪ s]"
+msgstr ""
 
 #: user_domains.php:285
 msgid "User Domain [new]"
@@ -24036,7 +24036,7 @@ msgstr "الوضع"
 
 #: user_domains.php:382
 msgid "Mode which cacti will attempt to authenticate against the LDAP server.<blockquote><i>No Searching</i> - No Distinguished Name (DN) searching occurs, just attempt to bind with the provided Distinguished Name (DN) format.<br><br><i>Anonymous Searching</i> - Attempts to search for username against LDAP directory via anonymous binding to locate the users Distinguished Name (DN).<br><br><i>Specific Searching</i> - Attempts search for username against LDAP directory via Specific Distinguished Name (DN) and Specific Password for binding to locate the users Distinguished Name (DN)."
-msgstr "الوضع الذي سيحاول الصبار المصادقة على خادم LDAP. <blockquote style=\";text-align:right;direction:rtl\"> <i>لا بحث</i> - لا يوجد بحث عن الاسم المميز (DN) ، فقط حاول الربط مع تنسيق الاسم المميز المميز (DN). <br><br> <i>البحث المجهول</i> - محاولات للبحث عن اسم المستخدم مقابل دليل LDAP عبر ربط مجهول لتحديد موقع المستخدمين المميزين (DN). <br><br> <i>البحث النوعي</i> - محاولات البحث عن اسم المستخدم مقابل دليل LDAP عبر الاسم المميز المميز (DN) وكلمة المرور الخاصة للربط لتحديد موقع الاسم المميز (DN)."
+msgstr ""
 
 #: user_domains.php:388
 msgid "Distinguished Name (DN)"
@@ -24378,7 +24378,7 @@ msgstr "الطلاب"
 #: user_group_admin.php:1684
 #, fuzzy, php-format
 msgid "User Group Management [edit: %s]"
-msgstr "إدارة مجموعة المستخدمين [تحرير:٪ s]"
+msgstr ""
 
 #: user_group_admin.php:1686
 msgid "User Group Management [new]"
@@ -24487,12 +24487,12 @@ msgstr "عرض الطلب"
 #: utilities.php:418
 #, fuzzy, php-format
 msgid "Log [Total Lines: %d - Non-Matching Items Hidden]"
-msgstr "السجل [إجمالي الخطوط:٪ d - العناصر غير المطابقة المخفية]"
+msgstr ""
 
 #: utilities.php:420
 #, fuzzy, php-format
 msgid "Log [Total Lines: %d - All Items Shown]"
-msgstr "سجل [مجموع الخطوط:٪ d - كل العناصر المعروضة]"
+msgstr ""
 
 #: utilities.php:517
 msgid "Clear Cacti Log"
@@ -24617,7 +24617,7 @@ msgstr "إعادة بناء بولير"
 #: utilities.php:1247
 #, fuzzy
 msgid "The Poller Cache will be re-generated if you select this option. Use this option only in the event of a database crash if you are experiencing issues after the crash and have already run the database repair tools.  Alternatively, if you are having problems with a specific Device, simply re-save that Device to rebuild its Poller Cache.  There is also a command line interface equivalent to this command that is recommended for large systems."
-msgstr "سيتم إعادة إنشاء Poller Cache إذا قمت بتحديد هذا الخيار. استخدم هذا الخيار فقط في حالة تعطل قاعدة البيانات إذا كنت تواجه مشكلات بعد التعطل وكنت قد قمت بالفعل بتشغيل أدوات إصلاح قاعدة البيانات. بدلاً من ذلك ، إذا كنت تواجه مشكلات مع جهاز معين ، فما عليك سوى إعادة حفظ هذا الجهاز لإعادة إنشاء ذاكرته المؤقتة. هناك أيضًا واجهة سطر الأوامر تعادل هذا الأمر الموصى به للأنظمة الكبيرة. <i class=\"deviceDown\">ملاحظة: في الأنظمة الكبيرة ، قد يستغرق هذا الأمر عدة دقائق إلى ساعات لإكماله ، وبالتالي لا يجب تشغيله من Cacti UI. يمكنك ببساطة تشغيل &#39;php -q cli / rebuild_poller_cache.php --help&#39; في سطر الأوامر لمزيد من المعلومات.</i>"
+msgstr ""
 
 #: utilities.php:1249
 msgid "NOTE: On large systems, this command may take several minutes to hours to complete and therefore should not be run from the Cacti UI.  You can simply run 'php -q cli/rebuild_poller_cache.php --help' at the command line for more information."
@@ -24762,7 +24762,7 @@ msgstr "متوسط عدد وحدات البايت / السجل:"
 #: utilities.php:1649
 #, fuzzy, php-format
 msgid "%d Bytes"
-msgstr "٪ d بايت"
+msgstr ""
 
 #: utilities.php:1649
 msgid "Max Record Length:"
@@ -24811,7 +24811,7 @@ msgstr "%d ثواني"
 #: utilities.php:1688
 #, fuzzy, php-format
 msgid "%0.2f percent of update frequency)"
-msgstr "٪ 0.2f في المائة من تردد التحديث)"
+msgstr ""
 
 #: utilities.php:1696
 msgid "RRD Updates:"
@@ -24846,7 +24846,7 @@ msgstr "موقتات وقت التشغيل المفصلة:"
 #: utilities.php:1779 utilities.php:1781
 #, fuzzy, php-format
 msgid "Process: %d"
-msgstr "1 عملية"
+msgstr ""
 
 #: utilities.php:1779
 #, php-format
@@ -24933,7 +24933,7 @@ msgstr "إدخالات السجل"
 #: utilities.php:2310
 #, fuzzy, php-format
 msgid "Severity Level: %s"
-msgstr "مستوى الخطورة:٪ s"
+msgstr ""
 
 #: vdef.php:256
 #, fuzzy
@@ -24982,7 +24982,7 @@ msgstr "انقر فوق &quot;متابعة&quot; لحذف VDEF التالي."
 #: vdef.php:304
 #, fuzzy, php-format
 msgid "VDEF Name: %s"
-msgstr "اسم VDEF:٪ s"
+msgstr ""
 
 #: vdef.php:312
 msgid "Remove VDEF Item"
@@ -24995,7 +24995,7 @@ msgstr "معاينة VDEF"
 #: vdef.php:394
 #, fuzzy, php-format
 msgid "VDEF Items [edit: %s]"
-msgstr "عناصر VDEF [تحرير:٪ s]"
+msgstr ""
 
 #: vdef.php:396
 msgid "VDEF Items [new]"
@@ -25020,7 +25020,7 @@ msgstr "أدخل قيمة لهذا البند VDEF."
 #: vdef.php:547
 #, fuzzy, php-format
 msgid "VDEFs [edit: %s]"
-msgstr "VDEFs [تحرير:٪ s]"
+msgstr ""
 
 #: vdef.php:549
 msgid "VDEFs [new]"

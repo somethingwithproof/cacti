@@ -31,7 +31,7 @@ msgstr "Cacti được thiết kế để trở thành một giải pháp đồ 
 #: about.php:46
 #, fuzzy, php-format
 msgid "Please see the official %sCacti website%s for information on how to use Cacti, get support, and updates."
-msgstr "Vui lòng xem trang web %sCacti chính thức %s để biết thông tin, hỗ trợ và cập nhật."
+msgstr ""
 
 #: about.php:50
 #, fuzzy
@@ -67,7 +67,7 @@ msgstr "Cám ơn"
 #: about.php:88
 #, fuzzy, php-format
 msgid "A very special thanks to %sTobi Oetiker%s, the creator of %sRRDtool%s and the very popular %sMRTG%s."
-msgstr "Một lời cảm ơn rất đặc biệt đến %sTobi Oetiker %s, người tạo ra %sRRDtool %s và %sMRTG %s rất phổ biến."
+msgstr ""
 
 #: about.php:91
 #, fuzzy
@@ -173,7 +173,7 @@ msgstr "Các đồ thị tổng hợp được chọn đại diện cho các y�
 #: aggregate_graphs.php:810
 #, fuzzy
 msgid "In order to migrate the Aggregate Graphs below to a Template based Aggregate, they must only be using one Graph Template."
-msgstr "Để di chuyển Biểu đồ tổng hợp bên dưới sang Tập hợp dựa trên mẫu, trước tiên hãy tạo Mẫu tổng hợp cho Mẫu biểu đồ &#39; %s&#39;."
+msgstr ""
 
 #: aggregate_graphs.php:818
 #, fuzzy
@@ -362,12 +362,12 @@ msgstr "Không liên kết với Uẩn"
 #: aggregate_graphs.php:970
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Aggregate Graph on Tree %s."
-msgstr "Nhấp vào &#39;Tiếp tục&#39; để xóa (các) Mẫu biểu đồ tổng hợp sau."
+msgstr ""
 
 #: aggregate_graphs.php:971
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Aggregate Graphs on Tree %s."
-msgstr "Nhấp vào &#39;Tiếp tục&#39; để đặt (các) Biểu đồ Tổng hợp sau dưới nhánh Cây."
+msgstr ""
 
 #: aggregate_graphs.php:972
 #, fuzzy
@@ -433,7 +433,7 @@ msgstr "Hiển thị chi tiết mặt hàng"
 #: aggregate_graphs.php:1150
 #, fuzzy
 msgid "Aggregate Preview Does Not Exist"
-msgstr "Xem trước tổng hợp [ %s]"
+msgstr ""
 
 #: aggregate_graphs.php:1158
 #, fuzzy, php-format
@@ -1015,7 +1015,7 @@ msgstr "Vui lòng nhập mật khẩu hiện tại của bạn và mới <br> M�
 #: auth_changepassword.php:412 auth_resetpassword.php:263
 #, fuzzy
 msgid "Please enter your new Cacti password."
-msgstr "Vui lòng nhập mật khẩu hiện tại của bạn và mới <br> Mật khẩu xương rồng."
+msgstr ""
 
 #: auth_changepassword.php:415 include/global_form.php:1698
 #: lib/functions.php:4080 lib/html.php:3070
@@ -1072,7 +1072,7 @@ msgstr "Người dùng đã được Xác thực, nhưng Tài khoản Mẫu bị
 #: auth_login.php:141
 #, fuzzy, php-format
 msgid "Access Denied!  Guest user id %s does not exist.  Please contact your Administrator."
-msgstr "Truy cập bị từ chối, vui lòng liên hệ với bạn Quản trị viên Cacti."
+msgstr ""
 
 #: auth_login.php:180
 #, fuzzy
@@ -1338,7 +1338,7 @@ msgstr ""
 #: auth_resetpassword.php:261
 #, fuzzy
 msgid "Please enter your Cacti username or email address."
-msgstr "Vui lòng nhập mật khẩu hiện tại của bạn và mới <br> Mật khẩu xương rồng."
+msgstr ""
 
 #: auth_resetpassword.php:265
 msgid "Reset password problem."
@@ -1388,12 +1388,12 @@ msgstr "Thêm thủ công thông qua giao diện tự động hóa thiết bị.
 #: automation_devices.php:125
 #, fuzzy, php-format
 msgid "Device %s Added to Cacti"
-msgstr "Đã thêm vào xương rồng"
+msgstr ""
 
 #: automation_devices.php:127
 #, fuzzy, php-format
 msgid "Device %s Not Added to Cacti"
-msgstr "Chưa được thêm vào Cacti"
+msgstr ""
 
 #: automation_devices.php:137
 #, fuzzy
@@ -3362,7 +3362,7 @@ msgstr "Nhấp vào &#39;Tiếp tục&#39; để xóa các Truy vấn dữ liệ
 #: automation_templates.php:791
 #, fuzzy, php-format
 msgid "Tree Rule Name: '%s'"
-msgstr "Mục quy tắc cây"
+msgstr ""
 
 #: automation_templates.php:798
 #, fuzzy
@@ -3979,7 +3979,7 @@ msgstr "Họ và tên"
 #: changelog.php:99
 #, fuzzy, php-format
 msgid "Change Log [%s]"
-msgstr "Nhật ký thay đổi"
+msgstr ""
 
 #: changelog.php:160 support.php:1018
 #, php-format
@@ -4282,7 +4282,7 @@ msgstr "Mẫu màu [mới]"
 #: color_templates.php:762
 #, fuzzy, php-format
 msgid "Color Template '%s' had %d Aggregate Templates pushed out and %d Non-Templated Aggregates pushed out"
-msgstr "Mẫu màu '%s' có% d Mẫu tổng hợp được đẩy ra và% d Các mẫu tổng hợp không được đẩy ra"
+msgstr ""
 
 #: color_templates.php:764
 #, fuzzy, php-format
@@ -4602,7 +4602,7 @@ msgstr "Kết quả"
 #: data_debug.php:854
 #, fuzzy
 msgid "<not set>"
-msgstr "Chưa thiết lập"
+msgstr ""
 
 #: data_debug.php:891 data_debug.php:945
 #, fuzzy
@@ -4616,7 +4616,7 @@ msgstr "Ban hành"
 #: data_debug.php:910
 #, fuzzy, php-format
 msgid "For attribute '%s', issue found '%s'"
-msgstr "Đối với attrbitute ' %s', vấn đề được tìm thấy ' %s'"
+msgstr ""
 
 #: data_debug.php:925
 #, fuzzy
@@ -5000,7 +5000,7 @@ msgstr "Biểu đồ liên kết / Mẫu dữ liệu [chỉnh sửa: %s]"
 #: data_queries.php:638
 #, fuzzy
 msgid "Associated Graph/Data Templates [new]"
-msgstr "Biểu đồ liên kết / Mẫu dữ liệu [chỉnh sửa: %s]"
+msgstr ""
 
 #: data_queries.php:673
 #, fuzzy
@@ -5243,7 +5243,7 @@ msgstr "(Một số yếu tố chỉ đọc)"
 #: data_source_profiles.php:524
 #, fuzzy, php-format
 msgid "RRA [edit: %s %s]"
-msgstr "RRA [chỉnh sửa: %s %s]"
+msgstr ""
 
 #: data_source_profiles.php:614
 #, fuzzy, php-format
@@ -5299,7 +5299,7 @@ msgstr "Xóa mục hồ sơ nguồn dữ liệu"
 #: data_source_profiles.php:799
 #, fuzzy, php-format
 msgid "%s KBytes per Data Sources and %s Bytes for the Header"
-msgstr "%s KBytes trên mỗi nguồn dữ liệu và %s byte cho tiêu đề"
+msgstr ""
 
 #: data_source_profiles.php:808
 #, fuzzy, php-format
@@ -5521,19 +5521,19 @@ msgstr[0] "Biểu đồ sau đang sử dụng các nguồn dữ liệu này:"
 #, fuzzy
 msgid "Leave the Graph Untouched"
 msgid_plural "Leave all Graphs untouched."
-msgstr[0] "Để <strong>đồ thị</strong> không bị ảnh hưởng."
+msgstr[0] ""
 
 #: data_sources.php:555
 #, fuzzy
 msgid "Delete all Graph Items that reference this Data Source."
 msgid_plural "Delete all Graph Items that reference these Data Sources"
-msgstr[0] "Xóa tất cả các <strong>Mục đồ thị</strong> tham chiếu Nguồn dữ liệu này."
+msgstr[0] ""
 
 #: data_sources.php:559
 #, fuzzy
 msgid "Delete all Graphs that reference this Data Source."
 msgid_plural "Delete all Graphs that reference these Data Sources"
-msgstr[0] "Xóa tất cả các <strong>đồ thị</strong> tham chiếu Nguồn dữ liệu này."
+msgstr[0] ""
 
 #: data_sources.php:566
 #, fuzzy
@@ -5678,7 +5678,7 @@ msgstr "Bật chế độ thông tin nguồn dữ liệu."
 #: data_sources.php:864
 #, fuzzy, php-format
 msgid "Edit Graph: '%s'."
-msgstr "Chỉnh sửa mẫu biểu đồ."
+msgstr ""
 
 #: data_sources.php:869 graphs.php:2280
 #, fuzzy
@@ -6013,7 +6013,7 @@ msgstr "Giá trị sẽ được lấy từ thiết bị nếu trường này b�
 #: data_templates.php:1007
 #, fuzzy
 msgid "Custom Data Warning Message"
-msgstr "Dữ liệu tùy chỉnh [nhập dữ liệu: %s]"
+msgstr ""
 
 #: data_templates.php:1008
 #, fuzzy
@@ -6182,7 +6182,7 @@ msgstr "HÌNH ẢNH KHÔNG TỒN TẠI"
 #: graph.php:115 graph.php:409
 #, fuzzy, php-format
 msgid "Graph Utility View for Graph: %s"
-msgstr "Chế độ xem tiện ích"
+msgstr ""
 
 #: graph.php:160 lib/html.php:585
 #, fuzzy
@@ -6304,7 +6304,7 @@ msgstr "Bộ lọc này sẽ giới hạn Nguồn dữ liệu hiển thị trong
 #: graph_templates.php:1163 graph_templates.php:1178
 #, fuzzy, php-format
 msgid "Sync of Graph Template '%s' Resulted in %s Repairs!"
-msgstr "Đồng bộ hóa Mẫu Đồ thị '%s' Đã dẫn đến %s Sửa chữa!"
+msgstr ""
 
 #: graph_templates.php:1165 graph_templates.php:1180
 #, fuzzy, php-format
@@ -6553,7 +6553,7 @@ msgstr "Mục đồ thị liên kết"
 #: graph_templates.php:1991
 #, fuzzy, php-format
 msgid "Item #%s"
-msgstr "Mặt hàng"
+msgstr ""
 
 #: graph_view.php:444
 #, fuzzy
@@ -7021,12 +7021,12 @@ msgstr "Đặt biểu đồ trên báo cáo"
 #: graphs.php:1912
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Graph on Tree %s."
-msgstr "Nhấp vào &#39;Tiếp tục&#39; để xóa Cây sau."
+msgstr ""
 
 #: graphs.php:1913
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Graphs on Tree %s."
-msgstr "Nhấp vào &#39;Tiếp tục&#39; để xóa Cây sau."
+msgstr ""
 
 #: graphs.php:1914
 #, fuzzy
@@ -7106,7 +7106,7 @@ msgstr "Mẫu đồ thị đã chọn"
 #: graphs.php:2320
 #, fuzzy, php-format
 msgid "Choose a Graph Template to apply to this Graph. Please note that you may only change Graph Templates to a 100%% compatible Graph Template, which means that it includes identical Data Sources."
-msgstr "Chọn một mẫu biểu đồ để áp dụng cho biểu đồ này. Xin lưu ý rằng bạn chỉ có thể thay đổi Mẫu biểu đồ thành Mẫu biểu đồ tương thích 100%, có nghĩa là nó bao gồm các nguồn dữ liệu giống hệt nhau."
+msgstr ""
 
 #: graphs.php:2328
 #, fuzzy
@@ -7141,12 +7141,12 @@ msgstr "Đồ thị mới cho [Tất cả thiết bị]"
 #: graphs.php:2685
 #, fuzzy
 msgid "Graph Management [ Non Device Based ]"
-msgstr "Quản lý nhóm người dùng [chỉnh sửa: %s]"
+msgstr ""
 
 #: graphs.php:2688
 #, fuzzy, php-format
 msgid "Graph Management [ %s ]"
-msgstr "Quản lý đồ thị"
+msgstr ""
 
 #: graphs.php:2756 graphs.php:2759
 #, fuzzy
@@ -7181,7 +7181,7 @@ msgstr "Cài đặt mặc định đã lưu"
 #: graphs_new.php:338
 #, fuzzy, php-format
 msgid "New Graphs for [ %s ] (%s %s)"
-msgstr "Đồ thị mới cho [ %s]"
+msgstr ""
 
 #: graphs_new.php:340
 #, fuzzy
@@ -7247,17 +7247,17 @@ msgstr "Chọn tất cả các hàng"
 #: graphs_new.php:678
 #, fuzzy, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id of '%s'"
-msgstr "Lỗi phân tích cú pháp tệp XML tài nguyên truy vấn dữ liệu cho Truy vấn dữ liệu '%s' với id '%s'"
+msgstr ""
 
 #: graphs_new.php:695
 #, fuzzy, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id '%s'.  Field Name '%s' missing a 'direction' attribute"
-msgstr "Lỗi phân tích cú pháp tệp XML tài nguyên truy vấn dữ liệu cho Truy vấn dữ liệu '%s' với id '%s'"
+msgstr ""
 
 #: graphs_new.php:699
 #, fuzzy, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id '%s'"
-msgstr "Lỗi phân tích cú pháp tệp XML tài nguyên truy vấn dữ liệu cho Truy vấn dữ liệu '%s' với id '%s'"
+msgstr ""
 
 #: graphs_new.php:740
 #, fuzzy, php-format
@@ -7389,12 +7389,12 @@ msgstr "LRI: Thiết bị ["
 #: host.php:217
 #, fuzzy, php-format
 msgid "Device Reindex Completed in %0.2f seconds.  There were %d items updated."
-msgstr "Reindex thiết bị đã hoàn thành trong% 0,2f giây. Có% d mục được cập nhật."
+msgstr ""
 
 #: host.php:360
 #, fuzzy, php-format
 msgid "Unable to add some Devices to Report '%s'"
-msgstr "Không thể kết nối đến máy chủ"
+msgstr ""
 
 #: host.php:479
 #, fuzzy
@@ -7534,12 +7534,12 @@ msgstr "Đặt thiết bị trên cây"
 #: host.php:564
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Device on Tree %s."
-msgstr "Nhấp vào &#39;Tiếp tục&#39; để xóa (các) Mẫu thiết bị sau."
+msgstr ""
 
 #: host.php:565
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Devices on Tree %s."
-msgstr "Nhấp vào &#39;Tiếp tục&#39; để xóa Cây sau."
+msgstr ""
 
 #: host.php:566
 #, fuzzy
@@ -7673,7 +7673,7 @@ msgstr "Phương pháp lập chỉ mục lại"
 #: host.php:982
 #, fuzzy, php-format
 msgid " [%d Items, %d Rows]"
-msgstr "[% d Mục,% d Hàng]"
+msgstr ""
 
 #: host.php:982
 msgid "Fail"
@@ -8940,7 +8940,7 @@ msgstr "Mỗi% d giờ"
 #: include/global_arrays.php:771
 #, fuzzy, php-format
 msgid "Every %d Day"
-msgstr "Mỗi% 1 ngày"
+msgstr ""
 
 #: include/global_arrays.php:783
 #, fuzzy, php-format
@@ -8970,7 +8970,7 @@ msgstr "Hàng ngày"
 #: include/global_arrays.php:899
 #, fuzzy
 msgid "1 Thread"
-msgstr "% d Chủ đề"
+msgstr ""
 
 #: include/global_arrays.php:943
 #, fuzzy
@@ -10834,7 +10834,7 @@ msgstr "Mục quy tắc cây"
 #: include/global_arrays.php:3048 include/global_arrays.php:3066
 #, fuzzy
 msgid "years"
-msgstr "% d Năm"
+msgstr ""
 
 #: include/global_arrays.php:3049 include/global_arrays.php:3067
 #: lib/api_device.php:1717
@@ -11009,7 +11009,7 @@ msgstr "Đã chỉ định số lượng OID có thể nhận được trong m�
 #: include/global_form.php:161
 #, fuzzy, php-format
 msgid "%d OID"
-msgstr "OID tối đa"
+msgstr ""
 
 #: include/global_form.php:162 include/global_form.php:163
 #: include/global_form.php:164 include/global_form.php:165
@@ -11046,7 +11046,7 @@ msgstr "Tự động phát hiện / Đặt vào chỉ mục lại đầu tiên"
 #: include/global_form.php:188
 #, fuzzy, php-format
 msgid "%d Repetition"
-msgstr "Tùy chọn lưới"
+msgstr ""
 
 #: include/global_form.php:189 include/global_form.php:190
 #: include/global_form.php:191 include/global_form.php:192
@@ -11058,7 +11058,7 @@ msgstr "Tùy chọn lưới"
 #: include/global_form.php:203
 #, fuzzy, php-format
 msgid "%d Repetitions"
-msgstr "Tùy chọn lưới"
+msgstr ""
 
 #: include/global_form.php:212
 #, fuzzy
@@ -11230,7 +11230,7 @@ msgstr "Kết quả kiểm tra xác minh khoảng trắng cho Phương thức nh
 #: include/global_form.php:451 include/global_form.php:462
 #, fuzzy, php-format
 msgid "Field [%s]"
-msgstr "Lĩnh vực]"
+msgstr ""
 
 #: include/global_form.php:452
 #, fuzzy, php-format
@@ -11664,7 +11664,7 @@ msgstr "Trình định dạng trục phải (--right-form-formatter &lt;formatna
 #: include/global_form.php:912
 #, fuzzy
 msgid "When you setup the right axis labeling, apply a rule to the data format.  Supported formats include \"numeric\" where data is treated as numeric, \"timestamp\" where values are interpreted as UNIX timestamps (number of seconds since January 1970) and expressed using strftime format (default is \"%Y-%m-%d %H:%M:%S\").  See also --units-length and --right-axis-format.  Finally \"duration\" where values are interpreted as duration in milliseconds.  Formatting follows the rules of valstrfduration qualified PRINT/GPRINT."
-msgstr "Khi bạn thiết lập ghi nhãn trục phải, áp dụng quy tắc cho định dạng dữ liệu. Các định dạng được hỗ trợ bao gồm &quot;số&quot; trong đó dữ liệu được coi là số, &quot;dấu thời gian&quot; nơi các giá trị được hiểu là dấu thời gian UNIX (số giây kể từ tháng 1 năm 1970) và được biểu thị bằng định dạng strftime (mặc định là &quot;% Y-% m-% d% H :%CÔ&quot;). Xem thêm --units-length và --right-format-format. Cuối cùng &quot;thời lượng&quot; trong đó các giá trị được hiểu là thời lượng tính bằng mili giây. Định dạng tuân theo các quy tắc của valstrfduration đủ điều kiện IN / GPRINT."
+msgstr ""
 
 #: include/global_form.php:915
 #, fuzzy
@@ -11679,7 +11679,7 @@ msgstr "Trình định dạng trục trái (--left-trục-formatter &lt;formatna
 #: include/global_form.php:928
 #, fuzzy
 msgid "When you setup the left axis labeling, apply a rule to the data format.  Supported formats include \"numeric\" where data is treated as numeric, \"timestamp\" where values are interpreted as UNIX timestamps (number of seconds since January 1970) and expressed using strftime format (default is \"%Y-%m-%d %H:%M:%S\").  See also --units-length.  Finally \"duration\" where values are interpreted as duration in milliseconds.  Formatting follows the rules of valstrfduration qualified PRINT/GPRINT."
-msgstr "Khi bạn thiết lập ghi nhãn trục trái, hãy áp dụng quy tắc cho định dạng dữ liệu. Các định dạng được hỗ trợ bao gồm &quot;số&quot; trong đó dữ liệu được coi là số, &quot;dấu thời gian&quot; nơi các giá trị được hiểu là dấu thời gian UNIX (số giây kể từ tháng 1 năm 1970) và được biểu thị bằng định dạng strftime (mặc định là &quot;% Y-% m-% d% H :%CÔ&quot;). Xem thêm - chiều dài. Cuối cùng &quot;thời lượng&quot; trong đó các giá trị được hiểu là thời lượng tính bằng mili giây. Định dạng tuân theo các quy tắc của valstrfduration đủ điều kiện IN / GPRINT."
+msgstr ""
 
 #: include/global_form.php:931
 #, fuzzy
@@ -12066,7 +12066,7 @@ msgstr ""
 #: include/global_form.php:1344
 #, fuzzy
 msgid "The type of ping packet to sent.  <br><i>NOTE: ICMP on Linux/UNIX requires root privileges.</i>  <br><i>NOTE: TCP Ping Closed - Even if the tcp ping is not successful, the device can be considered UP.</i>"
-msgstr "Các loại gói ping để gửi. <br> <i>LƯU Ý: ICMP trên Linux / UNIX yêu cầu quyền root.</i>"
+msgstr ""
 
 #: include/global_form.php:1381 include/global_form.php:1931
 msgid "Additional Options"
@@ -13801,7 +13801,7 @@ msgstr "Loại Ping"
 #: include/global_settings.php:985
 #, fuzzy
 msgid "Default Ping type for all new Devices.</i>"
-msgstr "Loại Ping mặc định cho tất cả các Thiết bị mới."
+msgstr ""
 
 #: include/global_settings.php:992
 #, fuzzy
@@ -14244,7 +14244,7 @@ msgstr ""
 #: include/global_settings.php:1354
 #, fuzzy
 msgid "Hide Weekends"
-msgstr "% d Tuần"
+msgstr ""
 
 #: include/global_settings.php:1355
 msgid "Only show business hours during weekdays."
@@ -15873,7 +15873,7 @@ msgstr "Giá trị này biểu thị số lượng gai tối đa cần xóa kh�
 #: include/global_settings.php:2803
 #, fuzzy
 msgid "1 Thousand"
-msgstr "% d Chủ đề"
+msgstr ""
 
 #: include/global_settings.php:2804
 msgid "10 Thousand"
@@ -16027,7 +16027,7 @@ msgstr ""
 #: include/global_settings.php:2899
 #, fuzzy
 msgid "Cacti Server Timezone"
-msgstr "Máy chủ Cacti v %s - Bảo trì"
+msgstr ""
 
 #: include/global_settings.php:2900
 msgid "My Browsers Timezone"
@@ -16685,12 +16685,12 @@ msgstr "Tạo quy tắc cây (đồ thị)"
 #: lib/api_automation.php:2435
 #, fuzzy, php-format
 msgid "Rule Item [edit rule item for %s: %s]"
-msgstr "Mục quy tắc [chỉnh sửa mục quy tắc cho %s: %s]"
+msgstr ""
 
 #: lib/api_automation.php:2437
 #, fuzzy, php-format
 msgid "Rule Item [new rule item for %s: %s]"
-msgstr "Mục quy tắc [mục quy tắc mới cho %s: %s]"
+msgstr ""
 
 #: lib/api_automation.php:3457
 #, fuzzy
@@ -16768,12 +16768,12 @@ msgstr "Cập nhật"
 #: lib/api_automation.php:5309 lib/api_automation.php:5311
 #, fuzzy, php-format
 msgid "Automation Network SNMP Option %s!"
-msgstr "Tùy chọn SNMP tự động hóa"
+msgstr ""
 
 #: lib/api_automation.php:5315 lib/api_automation.php:5317
 #, fuzzy, php-format
 msgid "Automation Network SNMP Option %s Failed!"
-msgstr "Tùy chọn SNMP tự động hóa"
+msgstr ""
 
 #: lib/api_automation.php:5351
 msgid "The Automation Network Rule does not include any SNMP Options!"
@@ -16795,7 +16795,7 @@ msgstr "Mẫu không xác định"
 #: lib/api_automation.php:5404 lib/api_automation.php:5406
 #, fuzzy, php-format
 msgid "Automation Network Rule '%s' %s!"
-msgstr "Mạng tự động mặc định"
+msgstr ""
 
 #: lib/api_automation.php:5410 lib/api_automation.php:5412
 #, php-format
@@ -16932,29 +16932,29 @@ msgstr "Thiết bị bị vô hiệu hóa"
 #: lib/auth.php:2355 lib/auth.php:2357 lib/auth.php:2363 lib/auth.php:2365
 #, fuzzy, php-format
 msgid "Graph:(%s%s)"
-msgstr "Đồ thị"
+msgstr ""
 
 #: lib/auth.php:2378 lib/auth.php:2384 lib/auth.php:2451 lib/auth.php:2453
 #: lib/auth.php:2457 lib/auth.php:2459
 #, fuzzy, php-format
 msgid "Device:(%s%s)"
-msgstr "Thiết bị"
+msgstr ""
 
 #: lib/auth.php:2392 lib/auth.php:2398 lib/auth.php:2467 lib/auth.php:2469
 #: lib/auth.php:2473 lib/auth.php:2475
 #, fuzzy, php-format
 msgid "Template:(%s%s)"
-msgstr "Giao diện"
+msgstr ""
 
 #: lib/auth.php:2405
 #, fuzzy, php-format
 msgid "Graph+Device+Template:(%s%s)"
-msgstr "Mẫu thiết bị:"
+msgstr ""
 
 #: lib/auth.php:2442 lib/auth.php:2444
 #, fuzzy, php-format
 msgid "Device+Template:(%s%s)"
-msgstr "Mẫu thiết bị:"
+msgstr ""
 
 #: lib/auth.php:2488 lib/auth.php:2495 lib/auth.php:2504
 #, fuzzy
@@ -17033,7 +17033,7 @@ msgstr "Lỗi tìm kiếm LDAP: %s"
 #: lib/auth.php:4094 lib/auth.php:5105
 #, fuzzy, php-format
 msgid "Access Denied!  Template user id %s does not exist.  Please contact your Administrator."
-msgstr "Truy cập bị từ chối, vui lòng liên hệ với bạn Quản trị viên Cacti."
+msgstr ""
 
 #: lib/auth.php:4479
 #, fuzzy
@@ -17174,12 +17174,12 @@ msgstr "- Chế độ xem của quản trị viên"
 #: lib/clog_webapi.php:290
 #, fuzzy, php-format
 msgid "Log [Total Lines: %d %s - Filter active]"
-msgstr "Nhật ký [Tổng số dòng:% d %s - Bộ lọc hoạt động]"
+msgstr ""
 
 #: lib/clog_webapi.php:292
 #, fuzzy, php-format
 msgid "Log [Total Lines: %d %s - Unfiltered]"
-msgstr "Nhật ký [Tổng số dòng:% d %s - Chưa được lọc]"
+msgstr ""
 
 #: lib/clog_webapi.php:297 utilities.php:430 utilities.php:791
 #: utilities.php:1042 utilities.php:1045 utilities.php:1141 utilities.php:2008
@@ -17195,7 +17195,7 @@ msgstr "Tập tin"
 #: lib/clog_webapi.php:541 lib/clog_webapi.php:544
 #, fuzzy
 msgid "Head Lines"
-msgstr "% d Dòng"
+msgstr ""
 
 #: lib/clog_webapi.php:541 lib/clog_webapi.php:544 utilities.php:323
 #: utilities.php:326
@@ -17319,7 +17319,7 @@ msgstr "Chạy truy vấn dữ liệu [ %s]."
 #: lib/data_query.php:113
 #, fuzzy, php-format
 msgid "Found Type = '%s' [%s]."
-msgstr "Loại tìm thấy = &#39; %s&#39; [ %s]."
+msgstr ""
 
 #: lib/data_query.php:135
 #, fuzzy, php-format
@@ -17344,7 +17344,7 @@ msgstr "Đã tìm thấy bảng%s để chuyển đổi"
 #: lib/data_query.php:303
 #, fuzzy, php-format
 msgid "Index Change Detected! CurrentIndex: %s, PreviousIndex: %s"
-msgstr "Đã phát hiện thay đổi chỉ mục! Hiện tại: %s, Trước đó: %s"
+msgstr ""
 
 #: lib/data_query.php:323
 #, fuzzy, php-format
@@ -17359,12 +17359,12 @@ msgstr "Đã xóa chỉ mục! Chỉ số trước: %s"
 #: lib/data_query.php:360
 #, fuzzy, php-format
 msgid "Verification of %s Local Data ID's Complete"
-msgstr "Hiệp hội chỉ mục với dữ liệu địa phương hoàn tất"
+msgstr ""
 
 #: lib/data_query.php:363
 #, fuzzy, php-format
 msgid "Found Changed %s and %s Orphaned Local Data ID's to Re-map."
-msgstr "Đã tìm thấy Đã thay đổi%s và%s ID dữ liệu cục bộ mồ côi thành ánh xạ lại."
+msgstr ""
 
 #: lib/data_query.php:366
 #, fuzzy
@@ -17389,7 +17389,7 @@ msgstr "Hiệp hội chỉ mục với dữ liệu địa phương hoàn tất"
 #: lib/data_query.php:392
 #, fuzzy, php-format
 msgid "Update Re-Index Cache complete. There were %s index changes, and %s orphaned indexes."
-msgstr "Cập nhật Re-Index Cache hoàn tất. Đã có"
+msgstr ""
 
 #: lib/data_query.php:396
 #, fuzzy
@@ -17419,7 +17419,7 @@ msgstr "Kiểm tra thay đổi Trường sắp xếp. Không có thay đổi đ�
 #: lib/data_query.php:509
 #, fuzzy, php-format
 msgid "Detected New Sort Field: '%s' Old Sort Field '%s'"
-msgstr "Đã phát hiện trường sắp xếp mới: &#39; %s&#39; Trường sắp xếp cũ &#39; %s&#39;"
+msgstr ""
 
 #: lib/data_query.php:526
 #, fuzzy
@@ -17499,7 +17499,7 @@ msgstr "LRI: Truy vấn dữ liệu không trả về chỉ mục."
 #: lib/data_query.php:715
 #, fuzzy, php-format
 msgid "Executing script for list of indexes '%s', Index Count: %s"
-msgstr "Tập lệnh thực thi cho danh sách các chỉ mục &#39; %s&#39;, Chỉ số đếm: %s"
+msgstr ""
 
 #: lib/data_query.php:717
 #, fuzzy
@@ -17519,7 +17519,7 @@ msgstr "Bấm để hiển thị đầu ra Truy vấn Dữ liệu cho trường 
 #: lib/data_query.php:741
 #, fuzzy, php-format
 msgid "Sort field returned no data for field name %s, skipping"
-msgstr "Trường sắp xếp trả về không có dữ liệu. Không thể tiếp tục lập chỉ mục lại."
+msgstr ""
 
 #: lib/data_query.php:743
 #, fuzzy, php-format
@@ -17529,12 +17529,12 @@ msgstr "Thực hiện truy vấn tập lệnh &#39; %s&#39;"
 #: lib/data_query.php:754 lib/data_query.php:761
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s"
-msgstr "Mục tìm thấy [ %s = &#39; %s&#39;] chỉ mục: %s"
+msgstr ""
 
 #: lib/data_query.php:799 lib/data_query.php:814
 #, fuzzy, php-format
 msgid "Total: %f, Delta: %f, %s"
-msgstr "Tổng cộng:% f, Delta:% f, %s"
+msgstr ""
 
 #: lib/data_query.php:839
 #, fuzzy, php-format
@@ -17554,7 +17554,7 @@ msgstr "Không thể tải phiên SNMP."
 #: lib/data_query.php:886
 #, fuzzy, php-format
 msgid "Tested Bulk Walk Size %d with a response of %2.4f."
-msgstr "Đã kiểm tra Kích thước Đi bộ Hàng loạt %d với phản hồi là %2.4f."
+msgstr ""
 
 #: lib/data_query.php:898
 #, fuzzy, php-format
@@ -17574,7 +17574,7 @@ msgstr "Kích thước Đi bộ Hàng loạt được cố định tại %d."
 #: lib/data_query.php:935
 #, fuzzy, php-format
 msgid "Executing SNMP get for num of indexes @ '%s' Index Count: %s"
-msgstr "Đang thực hiện SNMP lấy số chỉ mục @ &#39; %s&#39; Chỉ số: %s"
+msgstr ""
 
 #: lib/data_query.php:937
 #, fuzzy
@@ -17584,7 +17584,7 @@ msgstr "&lt;oid_num_indexes&gt; bị thiếu trong tệp XML, &#39;Chỉ số đ
 #: lib/data_query.php:940
 #, fuzzy, php-format
 msgid "Executing SNMP walk for list of indexes @ '%s' Index Count: %s"
-msgstr "Đang thực hiện đi bộ SNMP cho danh sách các chỉ mục @ &#39; %s&#39; Chỉ số:"
+msgstr ""
 
 #: lib/data_query.php:944
 #, fuzzy
@@ -17594,27 +17594,27 @@ msgstr "Không có dữ liệu SNMP được trả về"
 #: lib/data_query.php:950
 #, fuzzy, php-format
 msgid "Index found at OID: '%s' value: '%s'"
-msgstr "Chỉ mục được tìm thấy tại OID: &#39; %s&#39; value: &#39; %s&#39;"
+msgstr ""
 
 #: lib/data_query.php:966
 #, fuzzy, php-format
 msgid "List of indexes filtered by value @ '%s' Index Count: %s"
-msgstr "Danh sách lọc các chỉ mục @ &#39; %s&#39; Chỉ số đếm: %s"
+msgstr ""
 
 #: lib/data_query.php:970
 #, fuzzy, php-format
 msgid "Filtered Index by value found at OID: '%s' value: '%s'"
-msgstr "Chỉ mục đã lọc được tìm thấy tại OID: &#39; %s&#39; value: &#39; %s&#39;"
+msgstr ""
 
 #: lib/data_query.php:987
 #, fuzzy, php-format
 msgid "Filtering list of indexes @ '%s' Index Count: %s"
-msgstr "Danh sách lọc các chỉ mục @ &#39; %s&#39; Chỉ số đếm: %s"
+msgstr ""
 
 #: lib/data_query.php:991
 #, fuzzy, php-format
 msgid "Filtered Index found at OID: '%s' value: '%s'"
-msgstr "Chỉ mục đã lọc được tìm thấy tại OID: &#39; %s&#39; value: &#39; %s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1011
 #, fuzzy, php-format
@@ -17624,7 +17624,7 @@ msgstr "Sửa trường &#39;phương thức&#39; sai cho &#39; %s&#39; vì &#39
 #: lib/data_query.php:1018
 #, fuzzy, php-format
 msgid "Inserting index data for field '%s' [value='%s']"
-msgstr "Chèn dữ liệu chỉ mục cho trường &#39; %s&#39; [value = &#39; %s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1023
 #, fuzzy, php-format
@@ -17634,27 +17634,27 @@ msgstr "Trường nhập nằm &#39; %s&#39; [get]"
 #: lib/data_query.php:1032
 #, fuzzy, php-format
 msgid "Found OID rewrite rule: 's/%s/%s/'"
-msgstr "Đã tìm thấy quy tắc viết lại OID: &#39;s / %s / %s /&#39;"
+msgstr ""
 
 #: lib/data_query.php:1043
 #, fuzzy, php-format
 msgid "oid_rewrite at OID: '%s' new OID: '%s'"
-msgstr "oid_rewrite tại OID: &#39; %s&#39; OID mới: &#39; %s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1064
 #, fuzzy, php-format
 msgid "Executing SNMP get for data @ '%s' [value='%s']"
-msgstr "Đang thực hiện SNMP lấy dữ liệu @ &#39; %s&#39; [value = &#39; %s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1076
 #, fuzzy, php-format
 msgid "Field '%s' %s"
-msgstr "Trường &#39; %s&#39; %s"
+msgstr ""
 
 #: lib/data_query.php:1140
 #, fuzzy, php-format
 msgid "Executing SNMP get for %s oids (%s)"
-msgstr "Thực hiện SNMP nhận được %s oids ( %s)"
+msgstr ""
 
 #: lib/data_query.php:1167 lib/data_query.php:1260 lib/data_query.php:1269
 #, fuzzy, php-format
@@ -17664,22 +17664,22 @@ msgstr "Trường sắp xếp trả về không dữ liệu. Không thể tiếp
 #: lib/data_query.php:1171
 #, fuzzy, php-format
 msgid "Found result for data @ '%s' [value='%s']"
-msgstr "Kết quả tìm thấy cho dữ liệu @ &#39; %s&#39; [value = &#39; %s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1179
 #, fuzzy, php-format
 msgid "Setting result for data @ '%s' [key='%s', value='%s']"
-msgstr "Đặt kết quả cho dữ liệu @ &#39; %s&#39; [key = &#39; %s&#39;, value = &#39; %s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1183
 #, fuzzy, php-format
 msgid "Skipped result for data @ '%s' [key='%s', value='%s']"
-msgstr "Bỏ qua kết quả cho dữ liệu @ &#39; %s&#39; [key = &#39; %s&#39;, value = &#39; %s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1197
 #, fuzzy, php-format
 msgid "Got SNMP get result for data @ '%s' [value='%s'] (index: %s)"
-msgstr "Có SNMP nhận kết quả cho dữ liệu @ &#39; %s&#39; [value = &#39; %s&#39;] (index: %s)"
+msgstr ""
 
 #: lib/data_query.php:1227
 #, fuzzy, php-format
@@ -17705,22 +17705,22 @@ msgstr ""
 #: lib/data_query.php:1342
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s [from %s]"
-msgstr "Mục tìm thấy [ %s = &#39; %s&#39;] chỉ mục: %s [từ %s]"
+msgstr ""
 
 #: lib/data_query.php:1386
 #, fuzzy, php-format
 msgid "Found OCTET STRING '%s' decoded value: '%s'"
-msgstr "Đã tìm thấy giá trị giải mã OCTET STRING &#39; %s&#39;: &#39; %s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1392 lib/data_query.php:1443
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s [from regexp oid parse]"
-msgstr "Mục tìm thấy [ %s = &#39; %s&#39;] chỉ mục: %s [từ phân tích chính quy"
+msgstr ""
 
 #: lib/data_query.php:1472
 #, fuzzy, php-format
 msgid "Found item [%s='%s'] index: %s [from regexp oid value parse]"
-msgstr "Mục đã tìm thấy [ %s = &#39; %s&#39;]"
+msgstr ""
 
 #: lib/data_query.php:1710
 #, php-format
@@ -17734,7 +17734,7 @@ msgstr ""
 #: lib/data_query.php:1750
 #, fuzzy, php-format
 msgid "rewrite_value: '%s' => '%s'"
-msgstr "oid_rewrite tại OID: &#39; %s&#39; OID mới: &#39; %s&#39;"
+msgstr ""
 
 #: lib/data_query.php:1856
 #, fuzzy
@@ -17774,7 +17774,7 @@ msgstr "Không thể thay đổi độ dài trường mật khẩu, không thể
 #: lib/dsdebug.php:175
 #, fuzzy, php-format
 msgid "Data Source ID %s does not exist"
-msgstr "Nguồn dữ liệu không tồn tại"
+msgstr ""
 
 #: lib/dsdebug.php:259
 #, fuzzy
@@ -17794,12 +17794,12 @@ msgstr "Nguồn dữ liệu không được đặt là Hoạt động"
 #: lib/dsdebug.php:277
 #, fuzzy, php-format
 msgid "RRDfile Folder (rra) is not writable by Poller.  Folder owner: %s.  Poller runs as: %s"
-msgstr "Thư mục RRD không thể ghi được bằng Poller. Chủ sở hữu RRD:"
+msgstr ""
 
 #: lib/dsdebug.php:282
 #, fuzzy, php-format
 msgid "RRDfile is not writable by Poller.  RRDfile owner: %s.  Poller runs as %s"
-msgstr "Tệp RRD không thể ghi được bằng Poller. Chủ sở hữu RRD:"
+msgstr ""
 
 #: lib/dsdebug.php:291
 #, fuzzy
@@ -17933,7 +17933,7 @@ msgstr "Liên kết %s"
 #: lib/functions.php:5465
 #, fuzzy
 msgid "Mailer Error: No recipient address set!!<br>If using the <i>Test Mail</i> link, please set the <b>Alert e-mail</b> setting."
-msgstr "Lỗi Mailer: Không có địa chỉ <b>TO</b> được đặt !! <br> Nếu sử dụng liên kết <i>Kiểm tra Thư</i> , vui lòng đặt cài đặt <b>e-mail Thông báo</b> ."
+msgstr ""
 
 #: lib/functions.php:5812
 #, fuzzy, php-format
@@ -18030,7 +18030,7 @@ msgstr "Cài đặt"
 #: lib/functions.php:6565 lib/functions.php:6660
 #, fuzzy, php-format
 msgid "Cacti disabled plugin %s due to the following error: %s!  See the Cacti logfile for more details."
-msgstr "Cacti đã tắt plugin %s do lỗi sau: %s! Xem logfile Cacti để biết thêm chi tiết."
+msgstr ""
 
 #: lib/functions.php:6752
 #, php-format
@@ -18058,7 +18058,7 @@ msgstr "- Beta %s"
 #: lib/functions.php:7309
 #, fuzzy, php-format
 msgid "Version %s %s"
-msgstr "Phiên bản %s %s"
+msgstr ""
 
 #: lib/functions.php:7852
 #, php-format
@@ -18134,7 +18134,7 @@ msgstr "Trước"
 #: lib/html.php:671
 #, fuzzy, php-format
 msgid "%d to %d of %s [ %s ]"
-msgstr "% d đến% d của %s [ %s]"
+msgstr ""
 
 #: lib/html.php:674 lib/html.php:703 lib/installer.php:1778
 msgid "Next"
@@ -18143,12 +18143,12 @@ msgstr "Tiếp"
 #: lib/html.php:681
 #, fuzzy, php-format
 msgid "All %d %s"
-msgstr "Tất cả% d %s"
+msgstr ""
 
 #: lib/html.php:700
 #, fuzzy, php-format
 msgid "Current Page: %s"
-msgstr "Giá trị hiện tại"
+msgstr ""
 
 #: lib/html.php:731
 #, php-format
@@ -18732,7 +18732,7 @@ msgstr ""
 #: lib/html.php:3403
 #, fuzzy, php-format
 msgid "Version %s | %s"
-msgstr "Phiên bản %s %s"
+msgstr ""
 
 #: lib/html_filter.php:89
 #, fuzzy
@@ -18918,7 +18918,7 @@ msgstr "Tạo đồ thị từ %s"
 #: lib/html_graph.php:677
 #, fuzzy, php-format
 msgid "Create %s Graphs from %s"
-msgstr "Tạo đồ thị %s từ %s"
+msgstr ""
 
 #: lib/html_graph.php:718
 #, fuzzy, php-format
@@ -19421,22 +19421,22 @@ msgstr "[Mới]"
 #: lib/html_reports.php:1572
 #, fuzzy, php-format
 msgid "Details %s"
-msgstr "Chi tiết"
+msgstr ""
 
 #: lib/html_reports.php:1618
 #, fuzzy, php-format
 msgid "Report Items %s"
-msgstr "Không có mục báo cáo"
+msgstr ""
 
 #: lib/html_reports.php:1664
 #, fuzzy, php-format
 msgid "Scheduled Events %s"
-msgstr "Sự kiện theo lịch trình"
+msgstr ""
 
 #: lib/html_reports.php:1676
 #, fuzzy, php-format
 msgid "Report Preview %s"
-msgstr "Xem trước báo cáo"
+msgstr ""
 
 #: lib/html_reports.php:1712
 msgid "Item Details"
@@ -19445,7 +19445,7 @@ msgstr "Chi tiết mục"
 #: lib/html_reports.php:1727
 #, fuzzy, php-format
 msgid "Graph: %s"
-msgstr "Đồ thị"
+msgstr ""
 
 #: lib/html_reports.php:1730 lib/html_reports.php:1758
 #: lib/html_reports.php:1771 lib/html_reports.php:1772
@@ -19477,7 +19477,7 @@ msgstr ", Sử dụng RegEx: \"%s\""
 #: lib/html_reports.php:1800
 #, fuzzy, php-format
 msgid "Tree: %s"
-msgstr "Cây:"
+msgstr ""
 
 #: lib/html_reports.php:1811
 #, fuzzy, php-format
@@ -19487,7 +19487,7 @@ msgstr "(Từ thiết bị: %s)"
 #: lib/html_reports.php:1813
 #, fuzzy, php-format
 msgid ", Branch: %s"
-msgstr "Chi nhánh:"
+msgstr ""
 
 #: lib/html_reports.php:1816
 #, fuzzy
@@ -19625,7 +19625,7 @@ msgstr "Đã chọn"
 #: lib/html_utility.php:589 lib/html_utility.php:828
 #, fuzzy, php-format
 msgid "The regular expression \"%s\" is not valid. Error is %s"
-msgstr "Thuật ngữ tìm kiếm &quot; %s&quot; không hợp lệ. Lỗi là %s"
+msgstr ""
 
 #: lib/html_utility.php:1040
 msgid "Cacti regular expressions are limited to 50 characters only for security reasons."
@@ -19668,7 +19668,7 @@ msgstr "Tải xuống"
 #: lib/html_validate.php:97
 #, fuzzy, php-format
 msgid "Validation error for variable %s with a value of %s.  See backtrace below for more details."
-msgstr "Lỗi xác thực cho biến %s với giá trị %s. Xem backtrace dưới đây để biết thêm chi tiết."
+msgstr ""
 
 #: lib/html_validate.php:115
 msgid "Validation Error"
@@ -19787,7 +19787,7 @@ msgstr "Con đường không thể ghi"
 #: lib/installer.php:786
 #, fuzzy, php-format
 msgid "Failed to set specified %sRRDTool version: %s"
-msgstr "Không thể đặt phiên bản %sRRDTool được chỉ định: %s"
+msgstr ""
 
 #: lib/installer.php:837
 #, fuzzy
@@ -19816,7 +19816,7 @@ msgstr "Tham số đường dẫn không mong đợi"
 #: lib/installer.php:968
 #, fuzzy, php-format
 msgid "Failed to apply specified profile %s != %s"
-msgstr "Không thể áp dụng hồ sơ được chỉ định %s! = %s"
+msgstr ""
 
 #: lib/installer.php:1015
 #, fuzzy, php-format
@@ -19836,7 +19836,7 @@ msgstr "Không thể áp dụng khoảng thời gian xác định"
 #: lib/installer.php:1107
 #, fuzzy, php-format
 msgid "Failed to apply '%s' as Automation Range"
-msgstr "Không thể áp dụng Phạm vi tự động hóa được chỉ định"
+msgstr ""
 
 #: lib/installer.php:1190
 #, fuzzy
@@ -19952,7 +19952,7 @@ msgstr "Cảm ơn bạn đã dành thời gian để tải xuống và cài đ�
 #: lib/installer.php:1907
 #, fuzzy, php-format
 msgid "Make sure you have read and followed the required steps needed to install Cacti before continuing. Install information can be found for <a href=\"%1$s\">Unix</a> and <a href=\"%2$s\">Win32</a>-based operating systems."
-msgstr "Hãy chắc chắn rằng bạn đã đọc và làm theo các bước cần thiết để cài đặt Cacti trước khi tiếp tục. Thông tin cài đặt có thể được tìm thấy cho <a href=\"%1$s\">các</a> hệ điều hành dựa trên <a href=\"%1$s\">Unix</a> và <a href=\"%2$s\">Win32</a> ."
+msgstr ""
 
 #: lib/installer.php:1910
 #, fuzzy, php-format
@@ -20012,7 +20012,7 @@ msgstr "Cấu hình Cacti của bạn có đường dẫn chính xác tương đ
 #: lib/installer.php:2037
 #, fuzzy, php-format
 msgid "PHP - Recommendations (%s)"
-msgstr "PHP - Khuyến nghị"
+msgstr ""
 
 #: lib/installer.php:2041
 #, fuzzy
@@ -20148,7 +20148,7 @@ msgstr "Loại cài đặt"
 #: lib/installer.php:2239
 #, fuzzy, php-format
 msgid "Upgrade from <strong>%s</strong> to <strong>%s</strong>"
-msgstr "Nâng cấp từ <strong> %s</strong> lên <strong> %s</strong>"
+msgstr ""
 
 #: lib/installer.php:2241
 #, fuzzy
@@ -20168,7 +20168,7 @@ msgstr "Nếu sau khi xóa bộ nhớ cache và khởi động lại trình duy�
 #: lib/installer.php:2250
 #, fuzzy, php-format
 msgid "Downgrade from <strong>%s</strong> to <strong>%s</strong>"
-msgstr "Hạ cấp từ <strong> %s</strong> xuống <strong> %s</strong>"
+msgstr ""
 
 #: lib/installer.php:2251
 #, fuzzy
@@ -20684,7 +20684,7 @@ msgstr "Máy chủ Cacti của bạn gần như đã sẵn sàng. Vui lòng ki�
 #: lib/installer.php:2936
 #, fuzzy, php-format
 msgid "Press '%s' then click '%s' to complete the installation process after selecting your Device Templates."
-msgstr "Nhấn &#39; %s&#39;, sau đó nhấp vào &#39; %s&#39; để hoàn tất quá trình cài đặt sau khi chọn Mẫu thiết bị của bạn."
+msgstr ""
 
 #: lib/installer.php:2964
 msgid "The following General Install Options will be applied."
@@ -20742,7 +20742,7 @@ msgstr ""
 #: lib/installer.php:3012
 #, fuzzy, php-format
 msgid "%d Tables to be Upgraded"
-msgstr "Loại mục sẽ được thêm vào."
+msgstr ""
 
 #: lib/installer.php:3012 lib/installer.php:3014 lib/installer.php:3056
 #, fuzzy
@@ -20829,7 +20829,7 @@ msgstr "Máy chủ Cacti của bạn hiện đang cài đặt"
 #: lib/installer.php:3165
 #, fuzzy, php-format
 msgid "Spawning background process: %s %s"
-msgstr "Quá trình sinh sản nền tảng:%s%s"
+msgstr ""
 
 #: lib/installer.php:3192
 msgid "Complete"
@@ -20860,12 +20860,12 @@ msgstr "Bắt đầu"
 #: lib/installer.php:3359
 #, fuzzy, php-format
 msgid "Starting %s Process for v%s"
-msgstr "Bắt đầu quá trình%s cho v%s"
+msgstr ""
 
 #: lib/installer.php:3388
 #, fuzzy, php-format
 msgid "Finished %s Process for v%s"
-msgstr "Đã hoàn thành%s Quá trình cho v%s"
+msgstr ""
 
 #: lib/installer.php:3428
 #, fuzzy, php-format
@@ -20875,22 +20875,22 @@ msgstr "Đã tìm thấy mẫu%s để cài đặt"
 #: lib/installer.php:3438
 #, fuzzy, php-format
 msgid "About to import Package #%s '%s'."
-msgstr "Sắp nhập Gói #%s '%s'."
+msgstr ""
 
 #: lib/installer.php:3447
 #, fuzzy, php-format
 msgid "Import of Package #%s '%s' under Profile '%s' succeeded"
-msgstr "Nhập gói #%s '%s' trong Hồ sơ '%s' đã thành công"
+msgstr ""
 
 #: lib/installer.php:3453
 #, fuzzy, php-format
 msgid "Import of Package #%s '%s' under Profile '%s' failed"
-msgstr "Nhập gói #%s '%s' trong Hồ sơ '%s' không thành công"
+msgstr ""
 
 #: lib/installer.php:3469
 #, fuzzy, php-format
 msgid "Mapping Automation Template for Device Template '%s'"
-msgstr "Mẫu tự động hóa cho [Mẫu đã xóa]"
+msgstr ""
 
 #: lib/installer.php:3490
 #, fuzzy
@@ -20905,17 +20905,17 @@ msgstr "Đang chờ cấu hình"
 #: lib/installer.php:3532
 #, fuzzy, php-format
 msgid "Setting default data source profile to %s (%s)"
-msgstr "Hồ sơ nguồn dữ liệu mặc định cho mẫu dữ liệu này."
+msgstr ""
 
 #: lib/installer.php:3557
 #, fuzzy, php-format
 msgid "Failed to find selected profile (%s), no changes were made"
-msgstr "Không thể áp dụng hồ sơ được chỉ định %s! = %s"
+msgstr ""
 
 #: lib/installer.php:3568
 #, fuzzy, php-format
 msgid "Updating automation network (%s), mode \"%s\" => \"%s\", subnet \"%s\" => %s\""
-msgstr "Cập nhật mạng tự động (%s), chế độ \"%s\" => \"%s\", mạng con \"%s\" =>%s \""
+msgstr ""
 
 #: lib/installer.php:3583
 #, fuzzy
@@ -20930,12 +20930,12 @@ msgstr "Thêm cài đặt snmp bổ sung cho tự động hóa"
 #: lib/installer.php:3593
 #, fuzzy, php-format
 msgid "Selecting Automation Option Set %s"
-msgstr "Xóa (các) Mẫu tự động hóa"
+msgstr ""
 
 #: lib/installer.php:3607
 #, fuzzy, php-format
 msgid "Updating Automation Option Set %s"
-msgstr "Tùy chọn SNMP tự động hóa"
+msgstr ""
 
 #: lib/installer.php:3611
 #, fuzzy, php-format
@@ -20945,12 +20945,12 @@ msgstr "Tùy chọn tự động cập nhật thành công Đặt%s"
 #: lib/installer.php:3613
 #, fuzzy, php-format
 msgid "Resequencing Automation Option Set %s"
-msgstr "Chạy tự động hóa trên thiết bị"
+msgstr ""
 
 #: lib/installer.php:3620
 #, fuzzy, php-format
 msgid "Failed to updated Automation Option Set %s"
-msgstr "Không thể áp dụng Phạm vi tự động hóa được chỉ định"
+msgstr ""
 
 #: lib/installer.php:3623
 #, fuzzy
@@ -20979,7 +20979,7 @@ msgstr "Đã thêm vào xương rồng"
 #: lib/installer.php:3680
 #, fuzzy, php-format
 msgid "Output: %s."
-msgstr "Trường đầu ra"
+msgstr ""
 
 #: lib/installer.php:3700
 #, fuzzy
@@ -21029,7 +21029,7 @@ msgstr "Đã tìm thấy bảng%s để chuyển đổi"
 #: lib/installer.php:3767
 #, fuzzy, php-format
 msgid "Converting Table #%s '%s'"
-msgstr "Bảng chuyển đổi #%s '%s'"
+msgstr ""
 
 #: lib/installer.php:3784
 #, fuzzy
@@ -21039,7 +21039,7 @@ msgstr "Không có bảng nơi tìm thấy hoặc được chọn để chuyển
 #: lib/installer.php:3795
 #, fuzzy, php-format
 msgid "Switched from %s to %s"
-msgstr "Chuyển từ%s sang%s"
+msgstr ""
 
 #: lib/installer.php:3799
 #, fuzzy, php-format
@@ -21049,7 +21049,7 @@ msgstr "LƯU Ý: Sử dụng tệp tạm thời cho bộ đệm db:%s"
 #: lib/installer.php:3822
 #, fuzzy, php-format
 msgid "Upgrading from v%s (DB %s) to v%s"
-msgstr "Nâng cấp từ v%s (DB%s) lên v%s"
+msgstr ""
 
 #: lib/installer.php:3831
 #, fuzzy, php-format
@@ -21064,17 +21064,17 @@ msgstr "Cài đặt bị hủy bỏ do không chấp nhận EULA"
 #: lib/installer.php:3920
 #, fuzzy, php-format
 msgid "Background was already started at %s, this attempt at %s was skipped"
-msgstr "Bối cảnh đã được bắt đầu ở%s, lần thử này ở%s đã bị bỏ qua"
+msgstr ""
 
 #: lib/installer.php:3946
 #, fuzzy, php-format
 msgid "Exception occurred during installation: #%s - %s"
-msgstr "Ngoại lệ xảy ra trong khi cài đặt: #"
+msgstr ""
 
 #: lib/installer.php:3956
 #, fuzzy, php-format
 msgid "Installation was started at %s, completed at %s"
-msgstr "Cài đặt đã được bắt đầu ở %s, hoàn thành ở %s"
+msgstr ""
 
 #: lib/installer.php:3997
 msgid "Both"
@@ -21083,12 +21083,12 @@ msgstr "Cả hai"
 #: lib/installer.php:3997
 #, fuzzy, php-format
 msgid "No - %s"
-msgstr "Phút"
+msgstr ""
 
 #: lib/installer.php:4005
 #, fuzzy, php-format
 msgid "%s - N/A"
-msgstr "Phút"
+msgstr ""
 
 #: lib/installer.php:4005 lib/installer.php:4007
 msgid "Web"
@@ -21097,7 +21097,7 @@ msgstr "Web"
 #: lib/installer.php:4007 lib/installer.php:4010
 #, fuzzy, php-format
 msgid "%s - No"
-msgstr "Phút"
+msgstr ""
 
 #: lib/installer.php:4010
 #, fuzzy
@@ -21107,12 +21107,12 @@ msgstr "Cổ điển"
 #: lib/installer.php:4015
 #, fuzzy, php-format
 msgid "Setting PHP Option %s = %s"
-msgstr "Đặt tùy chọn PHP%s =%s"
+msgstr ""
 
 #: lib/installer.php:4023
 #, fuzzy, php-format
 msgid "Failed to set PHP option %s, is %s (should be %s)"
-msgstr "Không thể đặt tùy chọn PHP%s, là%s (nên là%s)"
+msgstr ""
 
 #: lib/installer.php:4043
 #, fuzzy
@@ -21142,17 +21142,17 @@ msgstr "Không có tên người dùng được xác định"
 #: lib/ldap.php:412
 #, fuzzy, php-format
 msgid "Protocol Error, Unable to set version (%s) on Server (%s)"
-msgstr "Lỗi giao thức, không thể đặt phiên bản"
+msgstr ""
 
 #: lib/ldap.php:416
 #, fuzzy, php-format
 msgid "Protocol Error, Unable to set referrals option (%s) on Server (%s)"
-msgstr "Lỗi giao thức, không thể đặt tùy chọn giới thiệu"
+msgstr ""
 
 #: lib/ldap.php:420
 #, fuzzy, php-format
 msgid "Protocol Error, unable to start TLS communications (%s) on Server (%s)"
-msgstr "Lỗi giao thức, không thể bắt đầu liên lạc TLS"
+msgstr ""
 
 #: lib/ldap.php:424
 #, fuzzy, php-format
@@ -21162,27 +21162,27 @@ msgstr "Lỗi giao thức, lỗi chung ( %s)"
 #: lib/ldap.php:428
 #, fuzzy, php-format
 msgid "Protocol Error, Unable to bind, LDAP result: (%s) on Server (%s)"
-msgstr "Lỗi giao thức, không thể liên kết, kết quả LDAP: %s"
+msgstr ""
 
 #: lib/ldap.php:432
 #, fuzzy, php-format
 msgid "Unable to Connect to Server (%s)"
-msgstr "Không thể kết nối đến máy chủ"
+msgstr ""
 
 #: lib/ldap.php:436
 #, fuzzy, php-format
 msgid "Connection Timeout to Server (%s)"
-msgstr "Hết thời gian kết nối"
+msgstr ""
 
 #: lib/ldap.php:440
 #, fuzzy, php-format
 msgid "Insufficient Access to Server (%s)"
-msgstr "không đủ mọi quyền để truy cập"
+msgstr ""
 
 #: lib/ldap.php:444
 #, fuzzy, php-format
 msgid "Group DN could not be found to compare on Server (%s)"
-msgstr "Không thể tìm thấy nhóm DN để so sánh"
+msgstr ""
 
 #: lib/ldap.php:448
 #, fuzzy
@@ -21202,7 +21202,7 @@ msgstr "Không thể tìm thấy người dùng DN"
 #: lib/ldap.php:460
 #, fuzzy, php-format
 msgid "Unable to create LDAP connection object to Server (%s)"
-msgstr "Không thể tạo đối tượng kết nối LDAP"
+msgstr ""
 
 #: lib/ldap.php:464
 #, fuzzy
@@ -21217,7 +21217,7 @@ msgstr "Mật khẩu được cung cấp không hợp lệ. Đăng nhập thất
 #: lib/ldap.php:473
 #, fuzzy, php-format
 msgid "Unexpected error %s (Ldap Error: %s) on Server (%s)"
-msgstr "Lỗi không mong muốn %s (Lỗi Ldap: %s)"
+msgstr ""
 
 #: lib/ping.php:149
 #, fuzzy
@@ -21294,12 +21294,12 @@ msgstr "Ping không được thực hiện do cài đặt."
 #: lib/plugins.php:681
 #, fuzzy, php-format
 msgid "'%s' versions '%s' above or in range are required to install '%s'. "
-msgstr "%s Phiên bản %s trở lên là bắt buộc đối với %s."
+msgstr ""
 
 #: lib/plugins.php:685
 #, fuzzy, php-format
 msgid "'%s' must first be installed before '%s' is installed. "
-msgstr "%s được yêu cầu cho %s và nó không được cài đặt."
+msgstr ""
 
 #: lib/plugins.php:708
 #, fuzzy
@@ -21389,12 +21389,12 @@ msgstr ""
 #: lib/plugins.php:1717
 #, fuzzy, php-format
 msgid "The Plugin '%s' has been archived successfully."
-msgstr "Nhật ký xương rồng đã thanh trừng thành công"
+msgstr ""
 
 #: lib/plugins.php:1719
 #, fuzzy, php-format
 msgid "The Plugin '%s' archiving process has failed.  Check the Cacti log for errors."
-msgstr "Một hoặc nhiều sửa chữa RRDfile không thành công. Xem nhật ký Cacti cho các lỗi."
+msgstr ""
 
 #: lib/plugins.php:1722
 #, php-format
@@ -21432,7 +21432,7 @@ msgstr ""
 #: lib/plugins.php:1956
 #, fuzzy, php-format
 msgid "The Cacti plugin %s has not releases"
-msgstr "Cacti Poller chưa chạy."
+msgstr ""
 
 #: lib/plugins.php:2011 lib/plugins.php:2149
 msgid "Unable to get archive from GitHub/GitLab location."
@@ -21461,7 +21461,7 @@ msgstr ""
 #: lib/reports.php:144
 #, fuzzy, php-format
 msgid "Device '%s' successfully added to Report."
-msgstr "Đã thêm vào xương rồng"
+msgstr ""
 
 #: lib/reports.php:147
 #, fuzzy
@@ -21476,7 +21476,7 @@ msgstr "Thiết bị '%s' không được thêm vào Báo cáo vì nó đã tồ
 #: lib/reports.php:625
 #, fuzzy, php-format
 msgid "Problems sending Report '%s' Problem with e-mail Subsystem Error is '%s'"
-msgstr "Sự cố khi gửi Báo cáo '%s' Sự cố với e-mail Lỗi hệ thống con là '%s'"
+msgstr ""
 
 #: lib/reports.php:634
 #, fuzzy, php-format
@@ -21545,22 +21545,22 @@ msgstr "Lệnh RRDtool:"
 #: lib/rrd.php:3299
 #, fuzzy, php-format
 msgid "The required RRDfile step size is '%s' but observed step is '%s'"
-msgstr "Kích thước bước RRD bắt buộc là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3359
 #, fuzzy, php-format
 msgid "Type for Data Source '%s' should be '%s'"
-msgstr "Loại cho Nguồn dữ liệu &#39; %s&#39; phải là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3365
 #, fuzzy, php-format
 msgid "Heartbeat for Data Source '%s' should be '%s'"
-msgstr "Nhịp tim cho Nguồn dữ liệu &#39; %s&#39; phải là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3377
 #, fuzzy, php-format
 msgid "RRD minimum for Data Source '%s' should be '%s'"
-msgstr "RRD tối thiểu cho Nguồn dữ liệu &#39; %s&#39; phải là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3386
 #, fuzzy, php-format
@@ -21570,12 +21570,12 @@ msgstr "DS &#39; %s&#39; bị thiếu trong định nghĩa Cacti"
 #: lib/rrd.php:3400 lib/rrd.php:3401
 #, fuzzy, php-format
 msgid "Cacti RRA '%s' has same CF/steps (%s, %s) as '%s'"
-msgstr "Cacti RRA &#39; %s&#39; có cùng CF / bước ( %s, %s) là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3415 lib/rrd.php:3416
 #, fuzzy, php-format
 msgid "File RRA '%s' has same CF/steps (%s, %s) as '%s'"
-msgstr "Tệp RRA &#39; %s&#39; có cùng CF / bước ( %s, %s) là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3450
 #, php-format
@@ -21585,12 +21585,12 @@ msgstr ""
 #: lib/rrd.php:3454
 #, fuzzy, php-format
 msgid "The XFF for Cacti RRA id is '%s' but should be '%s'"
-msgstr "XFF cho id RRA của cacti &#39; %s&#39; phải là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3458
 #, fuzzy, php-format
 msgid "The number of rows for Cacti RRA id '%s' is incorrect.  The number of rows are '%s' but should be '%s'"
-msgstr "Số lượng hàng cho id Cacti RRA &#39; %s&#39; phải là &#39; %s&#39;"
+msgstr ""
 
 #: lib/rrd.php:3476
 #, fuzzy, php-format
@@ -21663,7 +21663,7 @@ msgstr "CDP Điểm dữ liệu không xác định (0)"
 #: lib/rrd.php:3663
 #, fuzzy
 msgid "Errors Found"
-msgstr "Không %s Tìm thấy"
+msgstr ""
 
 #: lib/rrd.php:3675
 #, fuzzy
@@ -21673,7 +21673,7 @@ msgstr "Trường nguồn dữ liệu"
 #: lib/rrd.php:3700 lib/rrd.php:3703
 #, fuzzy, php-format
 msgid "rename %s to %s"
-msgstr "đổi tên %s thành %s"
+msgstr ""
 
 #: lib/rrd.php:3770
 #, fuzzy
@@ -21698,12 +21698,12 @@ msgstr "Lỗi trong khi phân tích cú pháp XML của RRDtool dump"
 #: lib/rrd.php:4159
 #, fuzzy, php-format
 msgid "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) removed from RRD file"
-msgstr "RRA (CF = %s, ROWS =% d, PDP_PER_law =% d, XFF =% 1.2f) đã bị xóa khỏi tệp RRD"
+msgstr ""
 
 #: lib/rrd.php:4199
 #, fuzzy, php-format
 msgid "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) adding to RRD file"
-msgstr "RRA (CF = %s, ROWS =% d, PDP_PER_law =% d, XFF =% 1.2f) thêm vào tệp RRD"
+msgstr ""
 
 #: lib/rrd.php:4291 lib/rrd.php:4305
 #, fuzzy, php-format
@@ -21756,7 +21756,7 @@ msgstr "LRI: Xác thực danh sách trắng không thành công. Kiểm tra phư
 #: lib/template.php:2267
 #, fuzzy, php-format
 msgid "Graph Not created for %s due to bad data"
-msgstr "Tạo đồ thị"
+msgstr ""
 
 #: lib/template.php:2296
 #, php-format
@@ -21850,12 +21850,12 @@ msgstr "Nếu các bảng của bạn có các chỉ mục rất lớn, bạn ph
 #: lib/utility.php:1254
 #, fuzzy, php-format
 msgid "InnoDB will hold as much tables and indexes in system memory as is possible.  Therefore, you should make the innodb_buffer_pool large enough to hold as much of the tables and index in memory.  Checking the size of the /var/lib/mysql/cacti directory will help in determining this value.  We are recommending 25%% of your systems total memory, but your requirements will vary depending on your systems size.  If you database is very large or remote, you can consider increasing this size.  If remote, it can by as high as 80% of the systems memory.  However, cautions must be taken to reduce the swappiness of the system, or to remove swap to keep the system from swapping."
-msgstr "InnoDB sẽ giữ càng nhiều bảng và chỉ mục trong bộ nhớ hệ thống càng tốt. Do đó, bạn nên làm cho innodb_buffer_pool đủ lớn để chứa càng nhiều bảng và chỉ mục trong bộ nhớ. Kiểm tra kích thước của thư mục / var / lib / mysql / cacti sẽ giúp xác định giá trị này. Chúng tôi khuyến nghị 25 %% tổng bộ nhớ hệ thống của bạn, nhưng yêu cầu của bạn sẽ thay đổi tùy thuộc vào kích thước hệ thống của bạn."
+msgstr ""
 
 #: lib/utility.php:1260
 #, fuzzy
 msgid "This settings should remain ON unless your Cacti instances is running on either ZFS or FusionI/O which both have internal journaling to accommodate abrupt system crashes.  However, if you have very good power, and your systems rarely go down and you have backups, turning this setting to OFF can net you almost a 50% increase in database performance."
-msgstr "Cài đặt này sẽ duy trì BẬT trừ khi các phiên bản Cacti của bạn đang chạy trên ZFS hoặc FusionI / O, cả hai đều có nhật ký nội bộ để khắc phục sự cố hệ thống đột ngột. Tuy nhiên, nếu bạn có sức mạnh rất tốt và hệ thống của bạn hiếm khi ngừng hoạt động và bạn có các bản sao lưu, việc chuyển cài đặt này thành TẮT có thể giúp bạn tăng hiệu suất cơ sở dữ liệu lên gần 50%."
+msgstr ""
 
 #: lib/utility.php:1265
 #, fuzzy
@@ -21885,7 +21885,7 @@ msgstr "Với lưu trữ loại SSD hiện đại, việc có nhiều luồng io
 #: lib/utility.php:1298 lib/utility.php:1340
 #, fuzzy, php-format
 msgid "As of %s %s, the you can control how often %s flushes transactions to disk.  The default is 1 second, but in high I/O systems setting to a value greater than 1 can allow disk I/O to be more sequential"
-msgstr "Kể từ %s %s, bạn có thể kiểm soát tần suất %s xóa các giao dịch vào đĩa. Mặc định là 1 giây, nhưng trong các hệ thống I / O cao, cài đặt giá trị lớn hơn 1 có thể cho phép I / O của đĩa được tuần tự hơn"
+msgstr ""
 
 #: lib/utility.php:1303
 #, fuzzy
@@ -22245,12 +22245,12 @@ msgstr "Thoát khỏi xương rồng"
 #: logout.php:60
 #, fuzzy, php-format
 msgid "You have been logged out of Cacti due to %s."
-msgstr "Bạn đã đăng xuất khỏi Cacti do hết thời gian phiên."
+msgstr ""
 
 #: logout.php:61
 #, fuzzy, php-format
 msgid "Please close your browser or %sLogin Again%s"
-msgstr "Vui lòng đóng trình duyệt của bạn hoặc %sLogin lần nữa %s"
+msgstr ""
 
 #: logout.php:62
 #, fuzzy
@@ -22366,12 +22366,12 @@ msgstr "Nhấp vào &#39;Tiếp tục&#39; để xóa Trình nhận thông báo 
 #: managers.php:1029
 #, fuzzy
 msgid "Delete Notification Receiver"
-msgstr "%s Người nhận thông báo"
+msgstr ""
 
 #: managers.php:1030
 #, fuzzy
 msgid "Delete Notification Receivers"
-msgstr "%s Người nhận thông báo"
+msgstr ""
 
 #: managers.php:1033
 #, fuzzy
@@ -22411,7 +22411,7 @@ msgstr "Vô hiệu hóa nhận thông báo SNMP"
 #: managers.php:1042
 #, fuzzy
 msgid "Enable Notification Receivers"
-msgstr "%s Người nhận thông báo"
+msgstr ""
 
 #: managers.php:1080
 #, fuzzy
@@ -22480,17 +22480,17 @@ msgstr "Bạn muốn xuất khẩu gì?"
 #: package.php:667
 #, fuzzy, php-format
 msgid "%s Device Package"
-msgstr "Tên thiết bị"
+msgstr ""
 
 #: package.php:670
 #, fuzzy, php-format
 msgid "%s Graph Template Package"
-msgstr "Tên mẫu biểu đồ"
+msgstr ""
 
 #: package.php:673
 #, fuzzy, php-format
 msgid "%s Data Query Package"
-msgstr "Tên truy vấn dữ liệu"
+msgstr ""
 
 #: package.php:700 templates_export.php:168
 #, fuzzy, php-format
@@ -22500,12 +22500,12 @@ msgstr "Mẫu có sẵn [ %s]"
 #: package.php:705
 #, fuzzy
 msgid "Available Templates"
-msgstr "Mẫu có sẵn [ %s]"
+msgstr ""
 
 #: package.php:709
 #, fuzzy, php-format
 msgid "%s to Export"
-msgstr "Xuất ra"
+msgstr ""
 
 #: package.php:710
 #, fuzzy
@@ -22635,7 +22635,7 @@ msgstr ""
 #: package_import.php:203 package_import.php:527
 #, fuzzy, php-format
 msgid "The Package %s Imported Successfully"
-msgstr "Nhật ký xương rồng đã thanh trừng thành công"
+msgstr ""
 
 #: package_import.php:205 package_import.php:529
 #, php-format
@@ -22645,7 +22645,7 @@ msgstr ""
 #: package_import.php:298
 #, fuzzy, php-format
 msgid "Package %s"
-msgstr "Gói tập tin"
+msgstr ""
 
 #: package_import.php:305
 #, fuzzy
@@ -22670,7 +22670,7 @@ msgstr "Chọn cách sắp xếp các mục trong cây này."
 #: package_import.php:339
 #, fuzzy
 msgid "Template Items to be Imported"
-msgstr "Mục mẫu màu [chỉnh sửa mục báo cáo: %s]"
+msgstr ""
 
 #: package_import.php:343
 #, fuzzy
@@ -22721,7 +22721,7 @@ msgstr ""
 #: package_import.php:766
 #, fuzzy, php-format
 msgid "<b>Package</b> %s"
-msgstr "Gói tập tin"
+msgstr ""
 
 #: package_import.php:769
 msgid "Press 'Ok' to start Trusting the Signer, or escape to cancel."
@@ -23299,7 +23299,7 @@ msgstr "Gỡ cài đặt Plugin này sẽ xóa tất cả Dữ liệu và Cài �
 #: plugins.php:587
 #, fuzzy
 msgid "Are you sure you want to Restore this Archive?"
-msgstr "Bạn có chắc chắn muốn xóa Quy tắc &#39; %s&#39; không?"
+msgstr ""
 
 #: plugins.php:589
 #, fuzzy
@@ -23309,7 +23309,7 @@ msgstr "Gỡ cài đặt Plugin này sẽ xóa tất cả Dữ liệu và Cài �
 #: plugins.php:590
 #, fuzzy
 msgid "Are you sure you want to Delete this Archive?"
-msgstr "Bạn có chắc chắn muốn xóa Quy tắc &#39; %s&#39; không?"
+msgstr ""
 
 #: plugins.php:592
 msgid "Plugin Management"
@@ -23332,7 +23332,7 @@ msgstr "Đã lắp đặt"
 #: plugins.php:614
 #, fuzzy
 msgid "Installed and Inactive"
-msgstr "Cài đặt máy chủ Cacti v %s"
+msgstr ""
 
 #: plugins.php:617
 #, fuzzy
@@ -23593,7 +23593,7 @@ msgstr ""
 #: plugins.php:1480 plugins.php:1597
 #, fuzzy
 msgid "Compatible, Loadable"
-msgstr "Không tương thích, %s"
+msgstr ""
 
 #: plugins.php:1482
 msgid "Upgrade this Plugin from the available Cacti Plugins"
@@ -23602,7 +23602,7 @@ msgstr ""
 #: plugins.php:1483 plugins.php:1492
 #, fuzzy
 msgid "Compatible, Upgrade"
-msgstr "Không tương thích, %s"
+msgstr ""
 
 #: plugins.php:1485
 msgid "Downgrade this Plugin from the available Cacti Plugins"
@@ -23633,7 +23633,7 @@ msgstr ""
 #: plugins.php:1496 plugins.php:1610
 #, fuzzy
 msgid "Not Compatible, Dependencies"
-msgstr "Không tương thích, %s"
+msgstr ""
 
 #: plugins.php:1499
 msgid "Unable to Load due to a bad Cacti version."
@@ -23642,7 +23642,7 @@ msgstr ""
 #: plugins.php:1500 plugins.php:1614
 #, fuzzy
 msgid "Not Compatible, Cacti Version"
-msgstr "Không tương thích, %s"
+msgstr ""
 
 #: plugins.php:1507
 msgid "View the Plugins ChangeLog"
@@ -23672,7 +23672,7 @@ msgstr ""
 #: plugins.php:1606
 #, fuzzy
 msgid "Compatible, Upgradable"
-msgstr "Không tương thích, %s"
+msgstr ""
 
 #: plugins.php:1609
 msgid "Unable to Restore the archive due to Plugin Dependencies not being met."
@@ -23712,7 +23712,7 @@ msgstr "Cài đặt Plugin"
 #: plugins.php:1760
 #, fuzzy, php-format
 msgid "Plugin '%s' can not be archived before it's been Installed."
-msgstr "Plugin không thể được cài đặt."
+msgstr ""
 
 #: plugins.php:1771
 msgid "Remove Plugin Data Tables and Settings"
@@ -23744,7 +23744,7 @@ msgstr ""
 #: plugins.php:1814
 #, fuzzy
 msgid "Check Plugins Configuration"
-msgstr "Kiểm tra cấu hình ... <br>"
+msgstr ""
 
 #: plugins.php:1818
 msgid "A Plugin can not be archived when it has Configuration Issues."
@@ -23784,7 +23784,7 @@ msgstr "Thư mục plugin không thể bao gồm dấu cách"
 #: plugins.php:1870
 #, fuzzy, php-format
 msgid "Plugin directory is not correct.  Should be '%s' but is '%s'"
-msgstr "Thư mục plugin không đúng. Nên là &#39; %s&#39; nhưng là &#39; %s&#39;"
+msgstr ""
 
 #: plugins.php:1881
 #, fuzzy
@@ -23804,27 +23804,27 @@ msgstr "Sử dụng Plugin"
 #: poller.php:405
 #, fuzzy, php-format
 msgid "WARNING: %s is out of sync with the Poller Interval for Poller[%d]!  The Poller Interval is %d seconds, with a maximum of a %d seconds, but %d seconds have passed since the last poll!"
-msgstr "CẢNH BÁO: %s không đồng bộ với Khoảng thời gian của Poller! Khoảng thời gian của Poller là &#39;% d&#39; giây, với tối đa &#39;% d&#39; giây, nhưng% d giây đã trôi qua kể từ cuộc thăm dò cuối cùng!"
+msgstr ""
 
 #: poller.php:579
 #, fuzzy, php-format
 msgid "WARNING: There are %d processes detected as overrunning a polling cycle for Poller[%d], please investigate."
-msgstr "CẢNH BÁO: Có &#39;% d&#39; được phát hiện là vượt quá chu kỳ bỏ phiếu, vui lòng điều tra."
+msgstr ""
 
 #: poller.php:637
 #, fuzzy, php-format
 msgid "WARNING: Poller Output Table not empty for Poller[%d].  Issues: %d, %s."
-msgstr "CẢNH BÁO: Bảng đầu ra của xe đẩy không trống. Các vấn đề:% d, %s."
+msgstr ""
 
 #: poller.php:671
 #, fuzzy, php-format
 msgid "ERROR: The spine path: %s is invalid for Poller[%d].  Poller can not continue!"
-msgstr "LRI: Đường dẫn cột sống: %s không hợp lệ. Xe đẩy không thể tiếp tục!"
+msgstr ""
 
 #: poller.php:819
 #, fuzzy, php-format
 msgid "Maximum runtime of %d seconds exceeded for Poller[%d]. Exiting."
-msgstr "Thời gian chạy tối đa% d giây vượt quá. Thoát hiểm."
+msgstr ""
 
 #: poller.php:944
 #, fuzzy
@@ -23863,7 +23863,7 @@ msgstr "LƯU Ý: Một bộ thu thập dữ liệu Cacti thứ hai đã được
 #: poller_automation.php:54
 #, fuzzy, php-format
 msgid "WARNING: Main Cacti database %s offline or in recovery"
-msgstr "CẢNH BÁO: Cơ sở dữ liệu chính của Cacti ngoại tuyến hoặc đang trong quá trình phục hồi"
+msgstr ""
 
 #: poller_automation.php:1037 poller_automation.php:1091
 #, fuzzy
@@ -24408,7 +24408,7 @@ msgstr ""
 #: rrdcheck.php:240 rrdcheck.php:241
 #, fuzzy, php-format
 msgid "%d days"
-msgstr "ngày"
+msgstr ""
 
 #: rrdcheck.php:245 rrdcheck.php:248
 msgid "Messages"
@@ -24527,7 +24527,7 @@ msgstr "LƯU Ý: Cài đặt đường dẫn trên Tab này chỉ được lưu 
 #: settings.php:138
 #, fuzzy, php-format
 msgid "Cacti Settings (%s)%s"
-msgstr "Cài đặt xương rồng ( %s)"
+msgstr ""
 
 #: settings.php:248
 msgid "Changing Permission Model Warning"
@@ -24941,7 +24941,7 @@ msgstr "Truy vấn dữ liệu"
 #: support.php:53
 #, fuzzy
 msgid "Background Processes"
-msgstr "% d Quá trình"
+msgstr ""
 
 #: support.php:54
 #, fuzzy
@@ -25208,7 +25208,7 @@ msgstr "Thời gian bỏ phiếu"
 #: support.php:903 support.php:944
 #, fuzzy
 msgid "No host found"
-msgstr "Không %s Tìm thấy"
+msgstr ""
 
 #: support.php:919
 msgid "Worst 20 failed/total polls ratio"
@@ -25354,12 +25354,12 @@ msgstr "Máy chủ PHP"
 #: support.php:1370 support.php:1372 support.php:1378 support.php:1380
 #, fuzzy, php-format
 msgid "Main Server: Current: %s, Min Required: %s"
-msgstr "Hiện tại: %s, Yêu cầu Tối thiểu: %s"
+msgstr ""
 
 #: support.php:1388 support.php:1390
 #, fuzzy, php-format
 msgid "Local Server: Current: %s, Min Required: %s"
-msgstr "Hiện tại: %s, Yêu cầu Tối thiểu: %s"
+msgstr ""
 
 #: support.php:1395
 #, fuzzy
@@ -26317,12 +26317,12 @@ msgstr ""
 #: user_admin.php:2126
 #, fuzzy
 msgid "> 2 Months Ago"
-msgstr "% d Tháng"
+msgstr ""
 
 #: user_admin.php:2127
 #, fuzzy
 msgid "> 4 Months Ago"
-msgstr "% d Tháng"
+msgstr ""
 
 #: user_admin.php:2138
 msgid "Basic"
@@ -26377,7 +26377,7 @@ msgstr "Hiển thị tất cả"
 #: user_admin.php:2658
 #, fuzzy, php-format
 msgid "Group Membership %s"
-msgstr "Thành viên nhóm"
+msgstr ""
 
 #: user_admin.php:2758 user_group_admin.php:2343
 #, fuzzy, php-format
@@ -27233,7 +27233,7 @@ msgstr "Rebuild Pug Cache"
 #: utilities.php:1247
 #, fuzzy
 msgid "The Poller Cache will be re-generated if you select this option. Use this option only in the event of a database crash if you are experiencing issues after the crash and have already run the database repair tools.  Alternatively, if you are having problems with a specific Device, simply re-save that Device to rebuild its Poller Cache.  There is also a command line interface equivalent to this command that is recommended for large systems."
-msgstr "Bộ đệm Poller sẽ được tạo lại nếu bạn chọn tùy chọn này. Chỉ sử dụng tùy chọn này trong trường hợp xảy ra sự cố cơ sở dữ liệu nếu bạn gặp sự cố sau sự cố và đã chạy các công cụ sửa chữa cơ sở dữ liệu. Ngoài ra, nếu bạn gặp sự cố với một Thiết bị cụ thể, chỉ cần lưu lại Thiết bị đó để xây dựng lại Bộ đệm ẩn của thiết bị. Ngoài ra còn có một giao diện dòng lệnh tương đương với lệnh này được khuyến nghị cho các hệ thống lớn. <i class=\"deviceDown\">LƯU Ý: Trên các hệ thống lớn, lệnh này có thể mất vài phút đến vài giờ để hoàn thành và do đó không nên chạy từ Giao diện người dùng Cacti. Bạn chỉ có thể chạy &#39;php -q cli / construcild_poller_cache.php --help&#39; tại dòng lệnh để biết thêm thông tin.</i>"
+msgstr ""
 
 #: utilities.php:1249
 msgid "NOTE: On large systems, this command may take several minutes to hours to complete and therefore should not be run from the Cacti UI.  You can simply run 'php -q cli/rebuild_poller_cache.php --help' at the command line for more information."
@@ -27465,7 +27465,7 @@ msgstr "% d giây"
 #: utilities.php:1688
 #, fuzzy, php-format
 msgid "%0.2f percent of update frequency)"
-msgstr "% 0,2f phần trăm tần suất cập nhật)"
+msgstr ""
 
 #: utilities.php:1696
 #, fuzzy
@@ -27505,7 +27505,7 @@ msgstr "Bộ đếm thời gian chạy chi tiết:"
 #: utilities.php:1779 utilities.php:1781
 #, fuzzy, php-format
 msgid "Process: %d"
-msgstr "1 quá trình"
+msgstr ""
 
 #: utilities.php:1779
 #, php-format

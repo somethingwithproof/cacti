@@ -30,7 +30,7 @@ msgstr "Cacti розроблено як повне графічне рішенн
 #: about.php:46
 #, fuzzy, php-format
 msgid "Please see the official %sCacti website%s for information on how to use Cacti, get support, and updates."
-msgstr "Відвідайте офіційний %sвеб-сайт Cacti%s, щоб отримати інформацію, підтримку та оновлення."
+msgstr ""
 
 #: about.php:50
 #, fuzzy
@@ -66,7 +66,7 @@ msgstr "Дякуємо"
 #: about.php:88
 #, php-format
 msgid "A very special thanks to %sTobi Oetiker%s, the creator of %sRRDtool%s and the very popular %sMRTG%s."
-msgstr "Особлива подяка %sТобі Етікеру%s, творцю %sRRDtool%s і дуже популярних %sMRTG%s."
+msgstr ""
 
 #: about.php:91
 msgid "The users of Cacti"
@@ -158,7 +158,7 @@ msgstr "Вибрані агрегатні графіки представляю�
 #: aggregate_graphs.php:810
 #, fuzzy
 msgid "In order to migrate the Aggregate Graphs below to a Template based Aggregate, they must only be using one Graph Template."
-msgstr "Щоб перенести наведені нижче агрегатні графіки до агрегату на основі шаблону, спочатку створіть агрегатний шаблон для шаблону графіка \"%s\"."
+msgstr ""
 
 #: aggregate_graphs.php:818
 msgid "The selected Aggregate Graphs does not appear to have any matching Aggregate Templates."
@@ -342,12 +342,12 @@ msgstr "Розірвати асоціацію з Aggregate"
 #: aggregate_graphs.php:970
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Aggregate Graph on Tree %s."
-msgstr "Натисніть «Продовжити», щоб видалити наступні шаблони сукупного графіка."
+msgstr ""
 
 #: aggregate_graphs.php:971
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Aggregate Graphs on Tree %s."
-msgstr "Клацніть «Продовжити», щоб розмістити наступні агрегатні графіки під гілкою дерева."
+msgstr ""
 
 #: aggregate_graphs.php:972
 #, fuzzy
@@ -3126,7 +3126,7 @@ msgstr "Натисніть «Продовжити», щоб видалити н�
 #: automation_templates.php:791
 #, fuzzy, php-format
 msgid "Tree Rule Name: '%s'"
-msgstr "Елементи правила дерева"
+msgstr ""
 
 #: automation_templates.php:798
 #, fuzzy
@@ -3694,7 +3694,7 @@ msgstr "Повний"
 #: changelog.php:99
 #, fuzzy, php-format
 msgid "Change Log [%s]"
-msgstr "Журнал змін"
+msgstr ""
 
 #: changelog.php:160 support.php:1018
 #, php-format
@@ -3964,7 +3964,7 @@ msgstr "Кольоровий шаблон [новий]"
 #: color_templates.php:762
 #, php-format
 msgid "Color Template '%s' had %d Aggregate Templates pushed out and %d Non-Templated Aggregates pushed out"
-msgstr "Кольоровий шаблон \"%s\" мав стільки агрегатних шаблонів: %d і %d агрегатів без шаблонів"
+msgstr ""
 
 #: color_templates.php:764
 #, php-format
@@ -4250,7 +4250,7 @@ msgstr "Випуск"
 #: data_debug.php:910
 #, php-format
 msgid "For attribute '%s', issue found '%s'"
-msgstr "Для атрибута \"%s\" виявлено проблему \"%s\""
+msgstr ""
 
 #: data_debug.php:925
 msgid "Apply Suggested Fixes"
@@ -4803,7 +4803,7 @@ msgstr "(Деякі елементи лише для читання)"
 #: data_source_profiles.php:524
 #, php-format
 msgid "RRA [edit: %s %s]"
-msgstr "RRA [редагувати: %s %s]"
+msgstr ""
 
 #: data_source_profiles.php:614
 #, php-format
@@ -4852,7 +4852,7 @@ msgstr "Видалити елемент профілю джерела даних
 #: data_source_profiles.php:799
 #, php-format
 msgid "%s KBytes per Data Sources and %s Bytes for the Header"
-msgstr "%s Кбайт на джерело даних і %s байт для заголовка"
+msgstr ""
 
 #: data_source_profiles.php:808
 #, php-format
@@ -5655,7 +5655,7 @@ msgstr "ГРАФІК НЕ ІСНУЄ"
 #: graph.php:115 graph.php:409
 #, fuzzy, php-format
 msgid "Graph Utility View for Graph: %s"
-msgstr "Утилітарний Перегляд Графіку"
+msgstr ""
 
 #: graph.php:160 lib/html.php:585
 msgid "Graph Details, Zooming and Debugging Utilities"
@@ -5759,7 +5759,7 @@ msgstr "Цей фільтр обмежить джерела даних, види
 #: graph_templates.php:1163 graph_templates.php:1178
 #, php-format
 msgid "Sync of Graph Template '%s' Resulted in %s Repairs!"
-msgstr "Синхронізація шаблону графіка \"%s\" призвела до %s ремонтів!"
+msgstr ""
 
 #: graph_templates.php:1165 graph_templates.php:1180
 #, php-format
@@ -6435,12 +6435,12 @@ msgstr "Розмістити графіки у звіті"
 #: graphs.php:1912
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Graph on Tree %s."
-msgstr "Натисніть «Продовжити», щоб видалити наступне дерево."
+msgstr ""
 
 #: graphs.php:1913
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Graphs on Tree %s."
-msgstr "Натисніть «Продовжити», щоб створити копію наступного сайту."
+msgstr ""
 
 #: graphs.php:1914
 #, fuzzy
@@ -6511,7 +6511,7 @@ msgstr "Вибраний шаблон графіка"
 #: graphs.php:2320
 #, php-format
 msgid "Choose a Graph Template to apply to this Graph. Please note that you may only change Graph Templates to a 100%% compatible Graph Template, which means that it includes identical Data Sources."
-msgstr "Виберіть шаблон графіка для застосування до цього графіка. Зауважте, що ви можете змінювати лише шаблони графіків на 100%% сумісні шаблони графіків, що означає, що вони містять ідентичні джерела даних."
+msgstr ""
 
 #: graphs.php:2328
 msgid "Choose the Device that this Graph belongs to."
@@ -6574,7 +6574,7 @@ msgstr "Налаштування за замовчуванням збереже�
 #: graphs_new.php:338
 #, php-format
 msgid "New Graphs for [ %s ] (%s %s)"
-msgstr "Нові графіки для [ %s ] (%s %s)"
+msgstr ""
 
 #: graphs_new.php:340
 msgid "New Graphs for [ All Devices ]"
@@ -6630,17 +6630,17 @@ msgstr "Виберіть Усі рядки"
 #: graphs_new.php:678
 #, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id of '%s'"
-msgstr "Помилка аналізу XML-файлу ресурсу запиту даних для запиту даних \"%s\" з ідентифікатором \"%s\""
+msgstr ""
 
 #: graphs_new.php:695
 #, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id '%s'.  Field Name '%s' missing a 'direction' attribute"
-msgstr "Помилка аналізу XML-файлу ресурсу запиту даних для запиту даних \"%s\" з ідентифікатором \"%s\". У назві поля \"%s\" відсутній атрибут \"напрямок\"."
+msgstr ""
 
 #: graphs_new.php:699
 #, php-format
 msgid "Error Parsing Data Query Resource XML file for Data Query '%s' with id '%s'"
-msgstr "Помилка аналізу XML-файлу ресурсу запиту даних для запиту даних \"%s\" з ідентифікатором \"%s\""
+msgstr ""
 
 #: graphs_new.php:740
 #, php-format
@@ -6686,12 +6686,12 @@ msgstr "Встановити за замовчуванням"
 #: help.php:44
 #, fuzzy, php-format
 msgid "WARNING: Cacti Page:%s for User:%s Generated a Fatal Error %d!"
-msgstr "ПОПЕРЕДЖЕННЯ. Сторінка Cacti: %s створила фатальну помилку %d!"
+msgstr ""
 
 #: help.php:74
 #, php-format
 msgid "The Document page '%s' count not be reached.  The Cacti Documentation site is not reachable.  The http error was '%s'.  Consider downloading an official release to obtain the latest documentation and hosting the documentation locally."
-msgstr "Кількість сторінок документа \"%s\" не досягнуто. Сайт Cacti Documentation недоступний. Помилка http: \"%s\". Подумайте про завантаження офіційного випуску, щоб отримати найновішу документацію та розмістити її на локальному хостингу."
+msgstr ""
 
 #: help.php:88
 msgid "Cacti GitHub Site"
@@ -6754,7 +6754,7 @@ msgstr "ПОМИЛКА: Недійсний ідентифікатор прист
 #: host.php:217
 #, php-format
 msgid "Device Reindex Completed in %0.2f seconds.  There were %d items updated."
-msgstr "Повторне індексування пристрою завершено за %0.2f секунд. Оновлено %d елементів."
+msgstr ""
 
 #: host.php:360
 #, php-format
@@ -6896,12 +6896,12 @@ msgstr "Помістити пристрій у звіт"
 #: host.php:564
 #, fuzzy, php-format
 msgid "Click 'Continue' to Place the following Device on Tree %s."
-msgstr "Клацніть 'Продовжити', щоб видалити наступні Шаблони Пристроїв."
+msgstr ""
 
 #: host.php:565
 #, fuzzy, php-format
 msgid "Click 'Continue' to Duplicate following Devices on Tree %s."
-msgstr "Натисніть «Продовжити», щоб створити копію наступного сайту."
+msgstr ""
 
 #: host.php:566
 #, fuzzy
@@ -6942,7 +6942,7 @@ msgstr "Переглянути кеш Poller"
 #: host.php:733
 #, php-format
 msgid " [ In state since '%s', Uptime since '%s' ]"
-msgstr "[ У стані з '%s', час безвідмовної роботи з '%s' ]"
+msgstr ""
 
 #: host.php:748
 msgid "Create Graphs for this Device"
@@ -7016,7 +7016,7 @@ msgstr "Метод Переіндексування"
 #: host.php:982
 #, php-format
 msgid " [%d Items, %d Rows]"
-msgstr " [%d Елементів, %d Рядків]"
+msgstr ""
 
 #: host.php:982
 msgid "Fail"
@@ -10492,7 +10492,7 @@ msgstr "Форматувач правої осі (--right-axis-formatter &lt;for
 
 #: include/global_form.php:912
 msgid "When you setup the right axis labeling, apply a rule to the data format.  Supported formats include \"numeric\" where data is treated as numeric, \"timestamp\" where values are interpreted as UNIX timestamps (number of seconds since January 1970) and expressed using strftime format (default is \"%Y-%m-%d %H:%M:%S\").  See also --units-length and --right-axis-format.  Finally \"duration\" where values are interpreted as duration in milliseconds.  Formatting follows the rules of valstrfduration qualified PRINT/GPRINT."
-msgstr "Коли ви встановлюєте позначення правої осі, застосуйте правило до формату даних. Підтримувані формати включають «числовий», де дані розглядаються як числові, «часову позначку», де значення інтерпретуються як часові позначки UNIX (кількість секунд із січня 1970 р.) і виражаються за допомогою формату strftime (за замовчуванням — «%Y-%m-%d %H» :%РС\"). Дивіться також --units-length і --right-axis-format. Нарешті, «тривалість», де значення інтерпретуються як тривалість у мілісекундах. Форматування відповідає правилам valstrfduration qualified PRINT/GPRINT."
+msgstr ""
 
 #: include/global_form.php:915
 #, fuzzy
@@ -10505,7 +10505,7 @@ msgstr "Форматувач лівої осі (--left-axis-formatter &lt;format
 
 #: include/global_form.php:928
 msgid "When you setup the left axis labeling, apply a rule to the data format.  Supported formats include \"numeric\" where data is treated as numeric, \"timestamp\" where values are interpreted as UNIX timestamps (number of seconds since January 1970) and expressed using strftime format (default is \"%Y-%m-%d %H:%M:%S\").  See also --units-length.  Finally \"duration\" where values are interpreted as duration in milliseconds.  Formatting follows the rules of valstrfduration qualified PRINT/GPRINT."
-msgstr "Коли ви налаштовуєте маркування лівої осі, застосуйте правило до формату даних. Підтримувані формати включають «числовий», де дані розглядаються як числові, «часову позначку», де значення інтерпретуються як часові позначки UNIX (кількість секунд із січня 1970 р.) і виражаються за допомогою формату strftime (за замовчуванням — «%Y-%m-%d %H» :%РС\"). Дивіться також --units-length. Нарешті, «тривалість», де значення інтерпретуються як тривалість у мілісекундах. Форматування відповідає правилам valstrfduration qualified PRINT/GPRINT."
+msgstr ""
 
 #: include/global_form.php:931
 msgid "Legend Options"
@@ -10832,7 +10832,7 @@ msgstr "Якщо пристрій вийде з ладу, використову
 #: include/global_form.php:1344
 #, fuzzy
 msgid "The type of ping packet to sent.  <br><i>NOTE: ICMP on Linux/UNIX requires root privileges.</i>  <br><i>NOTE: TCP Ping Closed - Even if the tcp ping is not successful, the device can be considered UP.</i>"
-msgstr "Тип пакета ping для відправлення.<br> <i>ПРИМІТКА: ICMP у Linux/UNIX потребує привілеїв root.</i>"
+msgstr ""
 
 #: include/global_form.php:1381 include/global_form.php:1931
 msgid "Additional Options"
@@ -12297,7 +12297,7 @@ msgstr "Тип ping"
 
 #: include/global_settings.php:985
 msgid "Default Ping type for all new Devices.</i>"
-msgstr "Тип Ping за замовчуванням для всіх нових пристроїв."
+msgstr ""
 
 #: include/global_settings.php:992
 msgid "Default Ping Port for all new Devices.  With TCP, Cacti will attempt to Syn the port.  With UDP, Cacti requires either a successful connection, or a 'port not reachable' error to determine if the Device is up or not."
@@ -13984,7 +13984,7 @@ msgstr "Метод видалення"
 
 #: include/global_settings.php:2692
 msgid "There are two removal methods.  The first, Standard Deviation, will remove any sample that is X number of standard deviations away from the average of samples.  The second method, Variance, will remove any sample that is X% more than the Variance average.  The Variance method takes into account a certain number of 'outliers'.  Those are exceptional samples, like the spike, that need to be excluded from the Variance Average calculation."
-msgstr "Є два способи видалення. Перше, стандартне відхилення, видаляє будь-який зразок, який на X кількість стандартних відхилень від середнього значення зразків. Другий метод, Variance, видаляє будь-яку вибірку, яка на X% перевищує середнє значення Variance. Метод дисперсії враховує певну кількість «викидів». Це виняткові зразки, такі як сплеск, які потрібно виключити з розрахунку середнього відхилення."
+msgstr ""
 
 #: include/global_settings.php:2696
 msgid "Standard Deviation"
@@ -14041,7 +14041,7 @@ msgstr "Відсоток дисперсії"
 #: include/global_settings.php:2734
 #, php-format
 msgid "This value represents the percentage above the adjusted sample average once outliers have been removed from the sample.  For example, a Variance Percentage of 100%% on an adjusted average of 50 would remove any sample above the quantity of 100 from the graph."
-msgstr "Це значення являє собою відсоток вище скоригованого середнього вибіркового значення після видалення викидів із вибірки. Наприклад, відсоток дисперсії 100%% на скоригованому середньому 50 видалить з графіка будь-яку вибірку, яка перевищує 100."
+msgstr ""
 
 #: include/global_settings.php:2757
 msgid "Variance Number of Outliers"
@@ -14789,12 +14789,12 @@ msgstr "Створити правило дерева (графік)"
 #: lib/api_automation.php:2435
 #, php-format
 msgid "Rule Item [edit rule item for %s: %s]"
-msgstr "Елемент правила [редагувати елемент правила для %s: %s]"
+msgstr ""
 
 #: lib/api_automation.php:2437
 #, php-format
 msgid "Rule Item [new rule item for %s: %s]"
-msgstr "Елемент правила [новий елемент правила для %s: %s]"
+msgstr ""
 
 #: lib/api_automation.php:3457
 msgid "Added by Cacti Automation"
@@ -14836,7 +14836,7 @@ msgstr "Недійсне розширення файлу."
 #: lib/api_automation.php:5273 lib/api_automation.php:5275
 #, php-format
 msgid "Automation Network SNMP Rule '%s' %s!"
-msgstr "Правило SNMP мережі автоматизації '%s' %s!"
+msgstr ""
 
 #: lib/api_automation.php:5273 lib/api_automation.php:5275
 #: lib/api_automation.php:5309 lib/api_automation.php:5311
@@ -14854,7 +14854,7 @@ msgstr "Оновлено"
 #: lib/api_automation.php:5279 lib/api_automation.php:5281
 #, php-format
 msgid "Automation Network SNMP Rule '%s' %s Failed!"
-msgstr "Правило SNMP мережі автоматизації '%s' %s не вдалося!"
+msgstr ""
 
 #: lib/api_automation.php:5279 lib/api_automation.php:5281
 #: lib/api_automation.php:5315 lib/api_automation.php:5317
@@ -14868,12 +14868,12 @@ msgstr "Оновити"
 #: lib/api_automation.php:5309 lib/api_automation.php:5311
 #, fuzzy, php-format
 msgid "Automation Network SNMP Option %s!"
-msgstr "Автоматизація параметрів SNMP"
+msgstr ""
 
 #: lib/api_automation.php:5315 lib/api_automation.php:5317
 #, fuzzy, php-format
 msgid "Automation Network SNMP Option %s Failed!"
-msgstr "Автоматизація параметрів SNMP"
+msgstr ""
 
 #: lib/api_automation.php:5351
 msgid "The Automation Network Rule does not include any SNMP Options!"
@@ -14895,12 +14895,12 @@ msgstr "Невідомий шаблон"
 #: lib/api_automation.php:5404 lib/api_automation.php:5406
 #, fuzzy, php-format
 msgid "Automation Network Rule '%s' %s!"
-msgstr "Мережа автоматизації за замовчуванням"
+msgstr ""
 
 #: lib/api_automation.php:5410 lib/api_automation.php:5412
 #, php-format
 msgid "Automation Network Rule '%s' %s Failed!"
-msgstr "Правило мережі автоматизації '%s' %s не вдалося виконати!"
+msgstr ""
 
 #: lib/api_automation.php:5418
 msgid "Automation Network Rule Import data is either for another object type or not JSON formatted."
@@ -15018,29 +15018,29 @@ msgstr "Пристрій: (Приховати вимкнено)"
 #: lib/auth.php:2355 lib/auth.php:2357 lib/auth.php:2363 lib/auth.php:2365
 #, php-format
 msgid "Graph:(%s%s)"
-msgstr "Графік:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2378 lib/auth.php:2384 lib/auth.php:2451 lib/auth.php:2453
 #: lib/auth.php:2457 lib/auth.php:2459
 #, php-format
 msgid "Device:(%s%s)"
-msgstr "Пристрій: (%s%)"
+msgstr ""
 
 #: lib/auth.php:2392 lib/auth.php:2398 lib/auth.php:2467 lib/auth.php:2469
 #: lib/auth.php:2473 lib/auth.php:2475
 #, php-format
 msgid "Template:(%s%s)"
-msgstr "Шаблон:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2405
 #, php-format
 msgid "Graph+Device+Template:(%s%s)"
-msgstr "Графік+Пристрій+Шаблон:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2442 lib/auth.php:2444
 #, php-format
 msgid "Device+Template:(%s%s)"
-msgstr "Пристрій+шаблон:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2488 lib/auth.php:2495 lib/auth.php:2504
 msgid "Restricted By: "
@@ -15236,12 +15236,12 @@ msgstr " - Перегляд адміністратора"
 #: lib/clog_webapi.php:290
 #, php-format
 msgid "Log [Total Lines: %d %s - Filter active]"
-msgstr "Журнал [Усього рядків: %d %s – фільтр активний]"
+msgstr ""
 
 #: lib/clog_webapi.php:292
 #, php-format
 msgid "Log [Total Lines: %d %s - Unfiltered]"
-msgstr "Журнал [Загальна кількість рядків: %d %s - без фільтрів]"
+msgstr ""
 
 #: lib/clog_webapi.php:297 utilities.php:430 utilities.php:791
 #: utilities.php:1042 utilities.php:1045 utilities.php:1141 utilities.php:2008
@@ -15368,7 +15368,7 @@ msgstr "Виконується запит даних [%s]."
 #: lib/data_query.php:113
 #, php-format
 msgid "Found Type = '%s' [%s]."
-msgstr "Знайдений тип = '%s' [%s]."
+msgstr ""
 
 #: lib/data_query.php:135
 #, php-format
@@ -15391,7 +15391,7 @@ msgstr "Знайдено %s ідентифікаторів локальних д
 #: lib/data_query.php:303
 #, php-format
 msgid "Index Change Detected! CurrentIndex: %s, PreviousIndex: %s"
-msgstr "Виявлено зміну індексу! Поточний індекс: %s, попередній індекс: %s"
+msgstr ""
 
 #: lib/data_query.php:323
 #, php-format
@@ -15411,7 +15411,7 @@ msgstr "Перевірку ідентифікатора локальних да�
 #: lib/data_query.php:363
 #, php-format
 msgid "Found Changed %s and %s Orphaned Local Data ID's to Re-map."
-msgstr "Знайдено змінені ідентифікатори локальних даних %s і %s для повторного відображення."
+msgstr ""
 
 #: lib/data_query.php:366
 msgid "Done remapping Graphs to their new Indexes"
@@ -15432,7 +15432,7 @@ msgstr "Зв’язок індексу з локальними даними за
 #: lib/data_query.php:392
 #, fuzzy, php-format
 msgid "Update Re-Index Cache complete. There were %s index changes, and %s orphaned indexes."
-msgstr "Оновлення кешу повторного індексування завершено. Там були"
+msgstr ""
 
 #: lib/data_query.php:396
 msgid "Update Poller Cache for Query complete"
@@ -15457,7 +15457,7 @@ msgstr "Перевірка зміни поля сортування. Змін н
 #: lib/data_query.php:509
 #, php-format
 msgid "Detected New Sort Field: '%s' Old Sort Field '%s'"
-msgstr "Виявлено нове поле сортування: '%s' Старе поле сортування '%s'"
+msgstr ""
 
 #: lib/data_query.php:526
 msgid "ERROR: New Sort Field not suitable.  Sort Field will not change."
@@ -15527,7 +15527,7 @@ msgstr "ПОМИЛКА: Запит даних не повернув індекс
 #: lib/data_query.php:715
 #, php-format
 msgid "Executing script for list of indexes '%s', Index Count: %s"
-msgstr "Виконання сценарію для списку індексів \"%s\", кількість індексів: %s"
+msgstr ""
 
 #: lib/data_query.php:717
 msgid "Click to show Data Query output for 'index'"
@@ -15556,12 +15556,12 @@ msgstr "Виконання запиту сценарію \"%s\""
 #: lib/data_query.php:754 lib/data_query.php:761
 #, php-format
 msgid "Found item [%s='%s'] index: %s"
-msgstr "Знайдено елемент [%s='%s'] індекс: %s"
+msgstr ""
 
 #: lib/data_query.php:799 lib/data_query.php:814
 #, php-format
 msgid "Total: %f, Delta: %f, %s"
-msgstr "Усього: %f, дельта: %f, %s"
+msgstr ""
 
 #: lib/data_query.php:839
 #, php-format
@@ -15579,7 +15579,7 @@ msgstr "Не вдалося завантажити сеанс SNMP."
 #: lib/data_query.php:886
 #, php-format
 msgid "Tested Bulk Walk Size %d with a response of %2.4f."
-msgstr "Випробуваний розмір масової прогулянки %d з відповіддю %2.4f."
+msgstr ""
 
 #: lib/data_query.php:898
 #, php-format
@@ -15598,7 +15598,7 @@ msgstr "Розмір масового проходження фіксовано 
 #: lib/data_query.php:935
 #, php-format
 msgid "Executing SNMP get for num of indexes @ '%s' Index Count: %s"
-msgstr "Виконання SNMP get для кількості індексів @ '%s' Кількість індексів: %s"
+msgstr ""
 
 #: lib/data_query.php:937
 msgid "&lt;oid_num_indexes&gt; missing in XML file, 'Index Count Changed' emulated by counting oid_index entries"
@@ -15607,7 +15607,7 @@ msgstr "&lt;номер_індексу_індексу&gt; відсутній у �
 #: lib/data_query.php:940
 #, php-format
 msgid "Executing SNMP walk for list of indexes @ '%s' Index Count: %s"
-msgstr "Виконання обходу SNMP для списку індексів @ '%s' Кількість індексів: %s"
+msgstr ""
 
 #: lib/data_query.php:944
 msgid "No SNMP data returned"
@@ -15616,27 +15616,27 @@ msgstr "Немає даних SNMP"
 #: lib/data_query.php:950
 #, php-format
 msgid "Index found at OID: '%s' value: '%s'"
-msgstr "Індекс знайдено за OID: '%s' значення: '%s'"
+msgstr ""
 
 #: lib/data_query.php:966
 #, fuzzy, php-format
 msgid "List of indexes filtered by value @ '%s' Index Count: %s"
-msgstr "Список фільтрації індексів @ '%s' Кількість індексів: %s"
+msgstr ""
 
 #: lib/data_query.php:970
 #, fuzzy, php-format
 msgid "Filtered Index by value found at OID: '%s' value: '%s'"
-msgstr "Відфільтрований індекс знайдено за OID: '%s' значення: '%s'"
+msgstr ""
 
 #: lib/data_query.php:987
 #, php-format
 msgid "Filtering list of indexes @ '%s' Index Count: %s"
-msgstr "Список фільтрації індексів @ '%s' Кількість індексів: %s"
+msgstr ""
 
 #: lib/data_query.php:991
 #, php-format
 msgid "Filtered Index found at OID: '%s' value: '%s'"
-msgstr "Відфільтрований індекс знайдено за OID: '%s' значення: '%s'"
+msgstr ""
 
 #: lib/data_query.php:1011
 #, php-format
@@ -15646,7 +15646,7 @@ msgstr "Виправлення неправильного поля «method» д
 #: lib/data_query.php:1018
 #, php-format
 msgid "Inserting index data for field '%s' [value='%s']"
-msgstr "Вставлення даних індексу для поля \"%s\" [value='%s']"
+msgstr ""
 
 #: lib/data_query.php:1023
 #, php-format
@@ -15656,27 +15656,27 @@ msgstr "Розташоване поле введення \"%s\" [get]"
 #: lib/data_query.php:1032
 #, php-format
 msgid "Found OID rewrite rule: 's/%s/%s/'"
-msgstr "Знайдено правило перезапису OID: 's/%s/%s/'"
+msgstr ""
 
 #: lib/data_query.php:1043
 #, php-format
 msgid "oid_rewrite at OID: '%s' new OID: '%s'"
-msgstr "oid_rewrite в OID: '%s' новий OID: '%s'"
+msgstr ""
 
 #: lib/data_query.php:1064
 #, php-format
 msgid "Executing SNMP get for data @ '%s' [value='%s']"
-msgstr "Виконання SNMP get для даних @ '%s' [value='%s']"
+msgstr ""
 
 #: lib/data_query.php:1076
 #, php-format
 msgid "Field '%s' %s"
-msgstr "Поле \"%s\" %s"
+msgstr ""
 
 #: lib/data_query.php:1140
 #, php-format
 msgid "Executing SNMP get for %s oids (%s)"
-msgstr "Виконання SNMP get для %s oids (%s)"
+msgstr ""
 
 #: lib/data_query.php:1167 lib/data_query.php:1260 lib/data_query.php:1269
 #, php-format
@@ -15686,22 +15686,22 @@ msgstr "Поле сортування не повернуло дані для OI
 #: lib/data_query.php:1171
 #, php-format
 msgid "Found result for data @ '%s' [value='%s']"
-msgstr "Знайдено результат для даних @ '%s' [value='%s']"
+msgstr ""
 
 #: lib/data_query.php:1179
 #, php-format
 msgid "Setting result for data @ '%s' [key='%s', value='%s']"
-msgstr "Результат налаштування для даних @ '%s' [key='%s', value='%s']"
+msgstr ""
 
 #: lib/data_query.php:1183
 #, php-format
 msgid "Skipped result for data @ '%s' [key='%s', value='%s']"
-msgstr "Пропущений результат для даних @ '%s' [key='%s', value='%s']"
+msgstr ""
 
 #: lib/data_query.php:1197
 #, php-format
 msgid "Got SNMP get result for data @ '%s' [value='%s'] (index: %s)"
-msgstr "Отримано результат отримання SNMP для даних @ '%s' [value='%s'] (індекс: %s)"
+msgstr ""
 
 #: lib/data_query.php:1227
 #, php-format
@@ -15727,22 +15727,22 @@ msgstr "Немає індексу[%s] у value_index_parse, пропуск."
 #: lib/data_query.php:1342
 #, php-format
 msgid "Found item [%s='%s'] index: %s [from %s]"
-msgstr "Знайдено елемент [%s='%s'] індекс: %s [від %s]"
+msgstr ""
 
 #: lib/data_query.php:1386
 #, php-format
 msgid "Found OCTET STRING '%s' decoded value: '%s'"
-msgstr "Знайдено розшифроване значення ОКТЕТУ \"%s\": \"%s\""
+msgstr ""
 
 #: lib/data_query.php:1392 lib/data_query.php:1443
 #, php-format
 msgid "Found item [%s='%s'] index: %s [from regexp oid parse]"
-msgstr "Знайдено елемент [%s='%s'] індекс: %s [з regexp oid parse]"
+msgstr ""
 
 #: lib/data_query.php:1472
 #, php-format
 msgid "Found item [%s='%s'] index: %s [from regexp oid value parse]"
-msgstr "Знайдено елемент [%s='%s'] індекс: %s [з аналізу значення oid regexp]"
+msgstr ""
 
 #: lib/data_query.php:1710
 #, php-format
@@ -15756,7 +15756,7 @@ msgstr "Не вдалося проаналізувати карту перекл
 #: lib/data_query.php:1750
 #, fuzzy, php-format
 msgid "rewrite_value: '%s' => '%s'"
-msgstr "oid_rewrite в OID: '%s' новий OID: '%s'"
+msgstr ""
 
 #: lib/data_query.php:1856
 #, fuzzy
@@ -15808,12 +15808,12 @@ msgstr "Джерело даних не встановлено як активн�
 #: lib/dsdebug.php:277
 #, php-format
 msgid "RRDfile Folder (rra) is not writable by Poller.  Folder owner: %s.  Poller runs as: %s"
-msgstr "Папка RRDfile (rra) недоступна для запису в Poller. Власник папки: %s. Poller працює як: %s"
+msgstr ""
 
 #: lib/dsdebug.php:282
 #, php-format
 msgid "RRDfile is not writable by Poller.  RRDfile owner: %s.  Poller runs as %s"
-msgstr "Poller не може записувати файл RRD. Власник файлу RRD: %s. Poller працює як %s"
+msgstr ""
 
 #: lib/dsdebug.php:291
 msgid "RRDfile does not match Data Source"
@@ -15858,7 +15858,7 @@ msgstr "Помилка перевірки форми: Змінна '%s' не д�
 #: lib/functions.php:898
 #, php-format
 msgid "Form Validation Failed: Variable '%s' with Value '%s' Failed REGEX '%s'"
-msgstr "Помилка перевірки форми: Змінна '%s' зі значенням '%s' не вдалася. Регулярний вираз '%s'"
+msgstr ""
 
 #: lib/functions.php:914
 msgid "One or more fields failed validation"
@@ -16021,12 +16021,12 @@ msgstr "Встановити"
 #: lib/functions.php:6565 lib/functions.php:6660
 #, php-format
 msgid "Cacti disabled plugin %s due to the following error: %s!  See the Cacti logfile for more details."
-msgstr "Cacti вимкнено плагін %s через таку помилку: %s! Додаткову інформацію див. у файлі журналу Cacti."
+msgstr ""
 
 #: lib/functions.php:6752
 #, php-format
 msgid "WARNING: PollerID:%s has an invalid hostname:%s.  Is it not reachable via DNS!"
-msgstr "ПОПЕРЕДЖЕННЯ: PollerID:%s має недійсне ім'я хоста:%s. Він недоступний через DNS!"
+msgstr ""
 
 #: lib/functions.php:6781
 #, php-format
@@ -16035,9 +16035,6 @@ msgid ""
 "Reason: %s.\n"
 "See Cacti Log for details."
 msgstr ""
-"Не вдалося зв’язатися з віддаленим агентом %s\n"
-"Причина: %s.\n"
-"Див. журнал Cacti для отримання детальної інформації."
 
 #: lib/functions.php:7247
 #, fuzzy, php-format
@@ -16052,12 +16049,12 @@ msgstr "- Бета %s"
 #: lib/functions.php:7309
 #, php-format
 msgid "Version %s %s"
-msgstr "Версія %s %s"
+msgstr ""
 
 #: lib/functions.php:7852
 #, php-format
 msgid "WARNING: Key Cacti Include File \"%s\" missing.  Please locate and replace this file as we checked in \"%s\""
-msgstr "ПОПЕРЕДЖЕННЯ: Ключовий файл включення кактусів \"%s\" відсутній. Будь ласка, знайдіть та замініть цей файл, оскільки ми перевірили \"%s\""
+msgstr ""
 
 #: lib/functions.php:8996
 msgid "System Device"
@@ -16119,7 +16116,7 @@ msgstr "Попередній"
 #: lib/html.php:671
 #, php-format
 msgid "%d to %d of %s [ %s ]"
-msgstr "%d до %d з %s [ %s ]"
+msgstr ""
 
 #: lib/html.php:674 lib/html.php:703 lib/installer.php:1778
 msgid "Next"
@@ -16128,7 +16125,7 @@ msgstr "Далі"
 #: lib/html.php:681
 #, php-format
 msgid "All %d %s"
-msgstr "Усі %d %s"
+msgstr ""
 
 #: lib/html.php:700
 #, php-format
@@ -16642,7 +16639,7 @@ msgstr "Дати Zoom до 1 січня 1993 року не підтримуют�
 #: lib/html.php:3403
 #, php-format
 msgid "Version %s | %s"
-msgstr "Версія %s | %s"
+msgstr ""
 
 #: lib/html_filter.php:89
 msgid "Apply filter to table"
@@ -16806,7 +16803,7 @@ msgstr "Створити графік із %s"
 #: lib/html_graph.php:677
 #, php-format
 msgid "Create %s Graphs from %s"
-msgstr "Створіть %s графіки з %s"
+msgstr ""
 
 #: lib/html_graph.php:718
 #, php-format
@@ -17435,7 +17432,7 @@ msgstr "Вибрано"
 #: lib/html_utility.php:589 lib/html_utility.php:828
 #, php-format
 msgid "The regular expression \"%s\" is not valid. Error is %s"
-msgstr "Регулярний вираз \"%s\" недійсний. Помилка: %s"
+msgstr ""
 
 #: lib/html_utility.php:1040
 msgid "Cacti regular expressions are limited to 50 characters only for security reasons."
@@ -17473,7 +17470,7 @@ msgstr "Завантажити"
 #: lib/html_validate.php:97
 #, php-format
 msgid "Validation error for variable %s with a value of %s.  See backtrace below for more details."
-msgstr "Помилка підтвердження для змінної %s зі значенням %s. Щоб отримати докладніші відомості, перегляньте зворотне трасування нижче."
+msgstr ""
 
 #: lib/html_validate.php:115
 msgid "Validation Error"
@@ -17572,7 +17569,7 @@ msgstr "Шлях не можна було записувати"
 #: lib/installer.php:786
 #, php-format
 msgid "Failed to set specified %sRRDTool version: %s"
-msgstr "Не вдалося встановити вказану версію %sRRDTool: %s"
+msgstr ""
 
 #: lib/installer.php:837
 msgid "Invalid Theme Specified"
@@ -17597,7 +17594,7 @@ msgstr "Неочікуваний параметр шляху"
 #: lib/installer.php:968
 #, php-format
 msgid "Failed to apply specified profile %s != %s"
-msgstr "Не вдалося застосувати вказаний профіль %s != %s"
+msgstr ""
 
 #: lib/installer.php:1015
 #, php-format
@@ -17886,7 +17883,7 @@ msgstr "Тип установки"
 #: lib/installer.php:2239
 #, php-format
 msgid "Upgrade from <strong>%s</strong> to <strong>%s</strong>"
-msgstr "Оновлення з <strong>%s</strong> до <strong>%s</strong>"
+msgstr ""
 
 #: lib/installer.php:2241
 msgid "In the event of issues, It is highly recommended that you clear your browser cache, closing then reopening your browser (not just the tab Cacti is on) and retrying, before raising an issue with The Cacti Group"
@@ -17903,7 +17900,7 @@ msgstr "Якщо після очищення кеш-пам’яті та пер�
 #: lib/installer.php:2250
 #, php-format
 msgid "Downgrade from <strong>%s</strong> to <strong>%s</strong>"
-msgstr "Повернутися з <strong>%s</strong> до <strong>%s</strong>"
+msgstr ""
 
 #: lib/installer.php:2251
 msgid "You appear to be downgrading to a previous version.  Database changes made for the newer version will not be reversed and <i>could</i> cause issues."
@@ -18328,7 +18325,7 @@ msgstr "Ваш сервер Cacti майже готовий. Будь ласка
 #: lib/installer.php:2936
 #, php-format
 msgid "Press '%s' then click '%s' to complete the installation process after selecting your Device Templates."
-msgstr "Натисніть «%s», а потім натисніть «%s», щоб завершити процес встановлення після вибору шаблонів пристроїв."
+msgstr ""
 
 #: lib/installer.php:2964
 msgid "The following General Install Options will be applied."
@@ -18385,7 +18382,7 @@ msgstr "Немає пакетів пристроїв для встановлен
 #: lib/installer.php:3012
 #, fuzzy, php-format
 msgid "%d Tables to be Upgraded"
-msgstr "Тип елемента, який потрібно додати."
+msgstr ""
 
 #: lib/installer.php:3012 lib/installer.php:3014 lib/installer.php:3056
 #, fuzzy
@@ -18471,7 +18468,7 @@ msgstr "Ваш Cacti Server зараз встановлюється"
 #: lib/installer.php:3165
 #, php-format
 msgid "Spawning background process: %s %s"
-msgstr "Фоновий процес створення: %s %s"
+msgstr ""
 
 #: lib/installer.php:3192
 msgid "Complete"
@@ -18502,12 +18499,12 @@ msgstr "Почати"
 #: lib/installer.php:3359
 #, php-format
 msgid "Starting %s Process for v%s"
-msgstr "Запуск %s процесу для v%s"
+msgstr ""
 
 #: lib/installer.php:3388
 #, php-format
 msgid "Finished %s Process for v%s"
-msgstr "Завершено %s процес для v%s"
+msgstr ""
 
 #: lib/installer.php:3428
 #, php-format
@@ -18517,17 +18514,17 @@ msgstr "Знайдено %s шаблонів для встановлення"
 #: lib/installer.php:3438
 #, php-format
 msgid "About to import Package #%s '%s'."
-msgstr "Збирається імпортувати пакет №%s \"%s\"."
+msgstr ""
 
 #: lib/installer.php:3447
 #, php-format
 msgid "Import of Package #%s '%s' under Profile '%s' succeeded"
-msgstr "Імпорт пакета №%s \"%s\" у профіль \"%s\" виконано успішно"
+msgstr ""
 
 #: lib/installer.php:3453
 #, php-format
 msgid "Import of Package #%s '%s' under Profile '%s' failed"
-msgstr "Не вдалося імпортувати пакет №%s \"%s\" у профіль \"%s\"."
+msgstr ""
 
 #: lib/installer.php:3469
 #, php-format
@@ -18545,7 +18542,7 @@ msgstr "Оновлення файлу віддаленої конфігурац�
 #: lib/installer.php:3532
 #, php-format
 msgid "Setting default data source profile to %s (%s)"
-msgstr "Встановлення профілю джерела даних за замовчуванням на %s (%s)"
+msgstr ""
 
 #: lib/installer.php:3557
 #, php-format
@@ -18555,7 +18552,7 @@ msgstr "Не вдалося знайти вибраний профіль (%s), �
 #: lib/installer.php:3568
 #, php-format
 msgid "Updating automation network (%s), mode \"%s\" => \"%s\", subnet \"%s\" => %s\""
-msgstr "Оновлення мережі автоматизації (%s), режим \"%s\" => \"%s\", підмережа \"%s\" => %s\""
+msgstr ""
 
 #: lib/installer.php:3583
 msgid "Failed to find automation network, no changes were made"
@@ -18611,12 +18608,12 @@ msgstr "ПОПЕРЕДЖЕННЯ: Не вдалося додати пристр�
 #: lib/installer.php:3675
 #, fuzzy
 msgid "Default Device Added to Cacti."
-msgstr "Пристрій %s додано до Cacti"
+msgstr ""
 
 #: lib/installer.php:3680
 #, fuzzy, php-format
 msgid "Output: %s."
-msgstr "Поля виводу"
+msgstr ""
 
 #: lib/installer.php:3700
 msgid "Creating Graphs for Default Device"
@@ -18658,7 +18655,7 @@ msgstr "Знайдено %s таблиць для перетворення"
 #: lib/installer.php:3767
 #, php-format
 msgid "Converting Table #%s '%s'"
-msgstr "Таблиця перетворення №%s '%s'"
+msgstr ""
 
 #: lib/installer.php:3784
 msgid "No tables where found or selected for conversion"
@@ -18667,7 +18664,7 @@ msgstr "Не знайдено та не вибрано жодної таблиц
 #: lib/installer.php:3795
 #, php-format
 msgid "Switched from %s to %s"
-msgstr "Змінено з %s на %s"
+msgstr ""
 
 #: lib/installer.php:3799
 #, php-format
@@ -18677,7 +18674,7 @@ msgstr "ПРИМІТКА. Використання тимчасового фай
 #: lib/installer.php:3822
 #, php-format
 msgid "Upgrading from v%s (DB %s) to v%s"
-msgstr "Оновлення з v%s (БД %s) до v%s"
+msgstr ""
 
 #: lib/installer.php:3831
 #, php-format
@@ -18691,17 +18688,17 @@ msgstr "Встановлення скасовано через неприйня�
 #: lib/installer.php:3920
 #, php-format
 msgid "Background was already started at %s, this attempt at %s was skipped"
-msgstr "Фоновий режим уже розпочато в %s, ця спроба в %s була пропущена"
+msgstr ""
 
 #: lib/installer.php:3946
 #, php-format
 msgid "Exception occurred during installation: #%s - %s"
-msgstr "Виняток стався під час встановлення: #%s - %s"
+msgstr ""
 
 #: lib/installer.php:3956
 #, php-format
 msgid "Installation was started at %s, completed at %s"
-msgstr "Встановлення розпочато о %s, завершено о %s"
+msgstr ""
 
 #: lib/installer.php:3997
 msgid "Both"
@@ -18733,12 +18730,12 @@ msgstr "Клі"
 #: lib/installer.php:4015
 #, php-format
 msgid "Setting PHP Option %s = %s"
-msgstr "Налаштування параметра PHP %s = %s"
+msgstr ""
 
 #: lib/installer.php:4023
 #, php-format
 msgid "Failed to set PHP option %s, is %s (should be %s)"
-msgstr "Не вдалося встановити параметр PHP %s, це %s (має бути %s)"
+msgstr ""
 
 #: lib/installer.php:4043
 msgid "No Remote Data Collectors found for full synchronization"
@@ -18763,17 +18760,17 @@ msgstr "Ім'я користувача не визначено"
 #: lib/ldap.php:412
 #, php-format
 msgid "Protocol Error, Unable to set version (%s) on Server (%s)"
-msgstr "Помилка протоколу, неможливо встановити версію (%s) на сервері (%s)"
+msgstr ""
 
 #: lib/ldap.php:416
 #, php-format
 msgid "Protocol Error, Unable to set referrals option (%s) on Server (%s)"
-msgstr "Помилка протоколу, неможливо встановити параметр рефералів (%s) на сервері (%s)"
+msgstr ""
 
 #: lib/ldap.php:420
 #, php-format
 msgid "Protocol Error, unable to start TLS communications (%s) on Server (%s)"
-msgstr "Помилка протоколу, неможливо розпочати зв’язок TLS (%s) на сервері (%s)"
+msgstr ""
 
 #: lib/ldap.php:424
 #, php-format
@@ -18783,7 +18780,7 @@ msgstr "Помилка протоколу, загальна помилка (%s)"
 #: lib/ldap.php:428
 #, php-format
 msgid "Protocol Error, Unable to bind, LDAP result: (%s) on Server (%s)"
-msgstr "Помилка протоколу, неможливо прив’язати, результат LDAP: (%s) на сервері (%s)"
+msgstr ""
 
 #: lib/ldap.php:432
 #, php-format
@@ -18833,7 +18830,7 @@ msgstr "Надано недійсний пароль. Помилка логін�
 #: lib/ldap.php:473
 #, php-format
 msgid "Unexpected error %s (Ldap Error: %s) on Server (%s)"
-msgstr "Неочікувана помилка %s (Помилка Ldap: %s) на сервері (%s)"
+msgstr ""
 
 #: lib/ping.php:149
 msgid "ICMP Ping timed out"
@@ -18905,12 +18902,12 @@ msgstr "Пінг не виконано через налаштування."
 #: lib/plugins.php:681
 #, fuzzy, php-format
 msgid "'%s' versions '%s' above or in range are required to install '%s'. "
-msgstr "%s Для %s потрібна версія %s або вище."
+msgstr ""
 
 #: lib/plugins.php:685
 #, fuzzy, php-format
 msgid "'%s' must first be installed before '%s' is installed. "
-msgstr "%s потрібен для %s, і його не встановлено."
+msgstr ""
 
 #: lib/plugins.php:708
 msgid "Plugin cannot be installed."
@@ -18924,12 +18921,12 @@ msgstr "Каталог плагінів '%s' потрібно переймену
 #: lib/plugins.php:751
 #, php-format
 msgid "The Plugin in the directory '%s' does not include an version function '%s()'.  This function must exist for the plugin to be installed."
-msgstr "Плагін у каталозі '%s' не містить функції версії '%s()'. Ця функція має існувати для встановлення плагіна."
+msgstr ""
 
 #: lib/plugins.php:784
 #, php-format
 msgid "The Plugin in the directory '%s' does not include an install function '%s()'.  This function must exist for the plugin to be installed."
-msgstr "Плагін у каталозі '%s' не містить функції встановлення '%s()'. Ця функція має існувати для встановлення плагіна."
+msgstr ""
 
 #: lib/plugins.php:982
 #, php-format
@@ -18949,22 +18946,22 @@ msgstr "Архів плагіна '%s' видалено."
 #: lib/plugins.php:1491
 #, php-format
 msgid "Restore failed!  The Plugin '%s' archive Restore failed.  Unable to create directory '%s'."
-msgstr "Помилка відновлення! Помилка відновлення архіву плагіна '%s'. Не вдалося створити каталог '%s'."
+msgstr ""
 
 #: lib/plugins.php:1493
 #, php-format
 msgid "Restore failed!  The available Plugin '%s' Load failed.  Unable to create directory '%s'."
-msgstr "Помилка відновлення! Не вдалося завантажити доступний плагін '%s'. Не вдалося створити каталог '%s'."
+msgstr ""
 
 #: lib/plugins.php:1592
 #, php-format
 msgid "Restore failed!  The archived Plugin '%s' Restore failed. Unable to create directory %s"
-msgstr "Помилка відновлення! Відновлення архівованого плагіна '%s' не вдалося. Не вдалося створити каталог %s"
+msgstr ""
 
 #: lib/plugins.php:1594
 #, php-format
 msgid "Load failed!  The available Plugin '%s' Load failed. Unable to create directory %s"
-msgstr "Не вдалося завантажити! Завантаження доступного плагіна '%s' не вдалося. Не вдалося створити каталог %s"
+msgstr ""
 
 #: lib/plugins.php:1614
 #, php-format
@@ -19004,7 +19001,7 @@ msgstr "Пакет %s успішно імпортовано"
 #: lib/plugins.php:1719
 #, fuzzy, php-format
 msgid "The Plugin '%s' archiving process has failed.  Check the Cacti log for errors."
-msgstr "Помилка відновлення одного або кількох файлів RRD. Перегляньте журнал Cacti щодо помилок."
+msgstr ""
 
 #: lib/plugins.php:1722
 #, php-format
@@ -19040,7 +19037,7 @@ msgstr "На GitHub/GitLab не знайдено жодних плагінів."
 #: lib/plugins.php:1956
 #, fuzzy, php-format
 msgid "The Cacti plugin %s has not releases"
-msgstr "Cacti Poller ще не запускався."
+msgstr ""
 
 #: lib/plugins.php:2011 lib/plugins.php:2149
 msgid "Unable to get archive from GitHub/GitLab location."
@@ -19059,7 +19056,7 @@ msgstr "Не вдалося отримати дані репозиторію р�
 #: lib/plugins.php:2238
 #, php-format
 msgid "There were '%s' Plugins found at The Cacti Groups GitHub site and '%s' Plugins Tags/Releases were retrieved and updated in %0.2f seconds."
-msgstr "На сайті GitHub групи Cacti було знайдено плагіни '%s', а теги/релізи плагінів '%s' було отримано та оновлено за %0.2f секунд."
+msgstr ""
 
 #: lib/plugins.php:2240
 #, php-format
@@ -19083,7 +19080,7 @@ msgstr "Пристрій \"%s\" не додано до звіту, оскіль�
 #: lib/reports.php:625
 #, php-format
 msgid "Problems sending Report '%s' Problem with e-mail Subsystem Error is '%s'"
-msgstr "Проблеми з надсиланням звіту \"%s\" Проблема з електронною поштою Помилка підсистеми \"%s\""
+msgstr ""
 
 #: lib/reports.php:634
 #, php-format
@@ -19136,7 +19133,7 @@ msgstr "Пропущений елемент графіка звіту \" <i>%s</
 #: lib/rrd.php:398
 #, php-format
 msgid "WARNING: RRDtool Crashed execution the following command line %s.  %s"
-msgstr "ПОПЕРЕДЖЕННЯ: RRDtool аварійно завершив виконання наступного командного рядка %s. %s"
+msgstr ""
 
 #: lib/rrd.php:401
 #, fuzzy
@@ -19146,22 +19143,22 @@ msgstr "Команда RRDtool:"
 #: lib/rrd.php:3299
 #, fuzzy, php-format
 msgid "The required RRDfile step size is '%s' but observed step is '%s'"
-msgstr "Необхідний розмір кроку RRD – \"%s\""
+msgstr ""
 
 #: lib/rrd.php:3359
 #, php-format
 msgid "Type for Data Source '%s' should be '%s'"
-msgstr "Тип джерела даних \"%s\" має бути \"%s\""
+msgstr ""
 
 #: lib/rrd.php:3365
 #, php-format
 msgid "Heartbeat for Data Source '%s' should be '%s'"
-msgstr "Пульс для джерела даних \"%s\" має бути \"%s\""
+msgstr ""
 
 #: lib/rrd.php:3377
 #, php-format
 msgid "RRD minimum for Data Source '%s' should be '%s'"
-msgstr "Мінімум RRD для джерела даних \"%s\" має бути \"%s\""
+msgstr ""
 
 #: lib/rrd.php:3386
 #, php-format
@@ -19171,27 +19168,27 @@ msgstr "DS '%s' відсутній у визначенні Cacti"
 #: lib/rrd.php:3400 lib/rrd.php:3401
 #, php-format
 msgid "Cacti RRA '%s' has same CF/steps (%s, %s) as '%s'"
-msgstr "Cacti RRA \"%s\" має той самий CF/кроки (%s, %s), що й \"%s\""
+msgstr ""
 
 #: lib/rrd.php:3415 lib/rrd.php:3416
 #, php-format
 msgid "File RRA '%s' has same CF/steps (%s, %s) as '%s'"
-msgstr "Файл RRA \"%s\" має той самий CF/кроки (%s, %s), що й \"%s\""
+msgstr ""
 
 #: lib/rrd.php:3450
 #, php-format
 msgid "The pdp_per_row of '%s' is invalid for RRA '%s' should be '%s'.  Consider deleting and allowing Cacti to re-create RRDfile."
-msgstr "Значення pdp_per_row для '%s' є недійсним для RRA '%s', має бути '%s'. Спробуйте видалити його та дозволити Cacti повторно створити RRDfile."
+msgstr ""
 
 #: lib/rrd.php:3454
 #, fuzzy, php-format
 msgid "The XFF for Cacti RRA id is '%s' but should be '%s'"
-msgstr "XFF для Cacti RRA id '%s' має бути '%s'"
+msgstr ""
 
 #: lib/rrd.php:3458
 #, fuzzy, php-format
 msgid "The number of rows for Cacti RRA id '%s' is incorrect.  The number of rows are '%s' but should be '%s'"
-msgstr "Кількість рядків для Cacti RRA id '%s' має бути '%s'"
+msgstr ""
 
 #: lib/rrd.php:3476
 #, fuzzy, php-format
@@ -19254,7 +19251,7 @@ msgstr "CDP Невідомо Точки даних (0)"
 #: lib/rrd.php:3663
 #, fuzzy
 msgid "Errors Found"
-msgstr "%s не знайдено"
+msgstr ""
 
 #: lib/rrd.php:3675
 #, fuzzy
@@ -19264,7 +19261,7 @@ msgstr "Рекомендації щодо ремонту джерела дани
 #: lib/rrd.php:3700 lib/rrd.php:3703
 #, php-format
 msgid "rename %s to %s"
-msgstr "перейменувати %s на %s"
+msgstr ""
 
 #: lib/rrd.php:3770
 msgid "Error while parsing the XML of rrdtool dump"
@@ -19287,12 +19284,12 @@ msgstr "Помилка під час аналізу XML дампа RRDtool"
 #: lib/rrd.php:4159
 #, php-format
 msgid "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) removed from RRD file"
-msgstr "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) видалено з файлу RRD"
+msgstr ""
 
 #: lib/rrd.php:4199
 #, php-format
 msgid "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) adding to RRD file"
-msgstr "RRA (CF=%s, ROWS=%d, PDP_PER_ROW=%d, XFF=%1.2f) додавання до файлу RRD"
+msgstr ""
 
 #: lib/rrd.php:4291 lib/rrd.php:4305
 #, php-format
@@ -19339,12 +19336,12 @@ msgstr "ПОМИЛКА: Помилка перевірки білого спис�
 #: lib/template.php:2267
 #, fuzzy, php-format
 msgid "Graph Not created for %s due to bad data"
-msgstr "Графік Не створено для"
+msgstr ""
 
 #: lib/template.php:2296
 #, php-format
 msgid "NOTE: Graph not added for Data Query %s and index %s due to Data Source verification failure"
-msgstr "ПРИМІТКА: Графік не додано для запиту даних %s та індексу %s через помилку перевірки джерела даних."
+msgstr ""
 
 #: lib/timespan_settings.php:136
 #, php-format
@@ -19395,7 +19392,7 @@ msgstr "Завдяки можливостям віддаленого опиту�
 #: lib/utility.php:1212
 #, php-format
 msgid "If using the Cacti Performance Booster and choosing a memory storage engine, you have to be careful to flush your Performance Booster buffer before the system runs out of memory table space.  This is done two ways, first reducing the size of your output column to just the right size.  This column is in the tables poller_output, and poller_output_boost.  The second thing you can do is allocate more memory to memory tables.  We have arbitrarily chosen a recommended value of 10%% of system memory, but if you are using SSD disk drives, or have a smaller system, you may ignore this recommendation or choose a different storage engine.  You may see the expected consumption of the Performance Booster tables under Console -> System Utilities -> View Boost Status."
-msgstr "Якщо ви використовуєте Cacti Performance Booster і обираєте механізм зберігання пам’яті, ви повинні бути обережними, щоб очистити буфер Performance Booster до того, як система вичерпає простір таблиці пам’яті. Це можна зробити двома способами, спочатку зменшивши розмір вихідного стовпця до потрібного розміру. Цей стовпець є в таблицях poller_output і poller_output_boost. Друге, що ви можете зробити, це виділити більше пам'яті для таблиць пам'яті. Ми довільно вибрали рекомендоване значення 10%% системної пам’яті, але якщо ви використовуєте диски SSD або маєте меншу систему, ви можете проігнорувати цю рекомендацію або вибрати інший механізм зберігання. Ви можете побачити очікуване споживання таблиць Performance Booster у Console -> System Utilities -> View Boost Status."
+msgstr ""
 
 #: lib/utility.php:1218
 msgid "When executing subqueries, having a larger temporary table size, keep those temporary tables in memory."
@@ -19404,11 +19401,11 @@ msgstr "Виконуючи підзапити, маючи більший роз�
 #: lib/utility.php:1224
 #, fuzzy
 msgid "If this number is negative, reduce the innodb_buffer_pool_size until the join_buffer_size turns positive, but allocate approximately from between 25%-50% of memory to the innodb_buffer_pool_size if the database is hosted on the Cacti server, or upto 80% of the systems memory if the database is separate from the Cacti web server.  However, try to not go below the default of 262,144.  When performing joins, if they are below this size, they will be kept in memory and never written to a temporary file.  As this is a per connection memory allocation, care must be taken not to increase it too high.  The sum of the join_buffer_size + sort_buffer_size + read_buffer_size + read_rnd_buffer_size + thread_stack + binlog_cache_size + Core MySQL/MariaDB memory should be below 80% if the database is hosted on the Cacti web server and less if you intend to have very large RRDfiles or hundreds of thousands to millions long term."
-msgstr "Під час виконання об’єднань, якщо вони менші за цей розмір, вони зберігатимуться в пам’яті та ніколи не будуть записані у тимчасовий файл. Оскільки це виділення пам’яті для кожного з’єднання, слід бути обережним, щоб не збільшити його занадто великим. Сума join_buffer_size + sort_buffer_size + read_buffer_size + read_rnd_buffer_size + thread_stack + binlog_cache_size + пам'ять Core MySQL/MariaDB має бути нижче 80%. Якщо рекомендація є негативною, ви повинні зменшити це та/або sort_buffer_size, доки рекомендація не впишеться в допустиму пам’ять."
+msgstr ""
 
 #: lib/utility.php:1230
 msgid "If this number is negative, reduce the innodb_buffer_pool_size until the sort_buffer_size turns positive, but allocate approximately from between 25%-50% of memory to the innodb_buffer_pool_size if the database is hosted on the Cacti server, or upto 80% of the system memory if the database is separate from the Cacti web server.  However, try to not go below the default setting of 2,097,152.  A sort buffer performs sorts for some queries using ORDER BY or GROUP BY. Configuring sort_buffer_size decides how much memory will be allocated for sort queries.  The sort_buffer_size may need to be adjusted from the default if the workload requires a significant number of sort queries. The sort_buffer_size is defined on a per-session variable.  Use the same equation as that of the join_buffer_size to determine the per connection possible memory."
-msgstr "Якщо це число від'ємне, зменште innodb_buffer_pool_size, доки sort_buffer_size не стане додатним, але виділіть приблизно від 25%-50% пам'яті до innodb_buffer_pool_size, якщо база даних розміщена на сервері Cacti, або до 80% o системної пам'яті, якщо база даних окрема від веб-сервера Cacti. Однак намагайтеся не опускатися нижче значення за замовчуванням, яке становить 2 097 152. Буфер сортування виконує сортування для деяких запитів за допомогою ORDER BY або GROUP BY. Налаштування sort_buffer_size визначає, скільки пам'яті буде виділено для запитів сортування. sort_buffer_size може потребувати коригування порівняно зі значенням за замовчуванням, якщо робоче навантаження вимагає значної кількості запитів сортування. sort_buffer_size визначається для змінної для кожного сеансу. Використовуйте те саме рівняння, що й для join_buffer_size, щоб визначити можливий обсяг пам'яті для одного з'єднання."
+msgstr ""
 
 #: lib/utility.php:1236
 #, php-format
@@ -19426,7 +19423,7 @@ msgstr "Якщо ваші таблиці мають дуже великі інд
 #: lib/utility.php:1254
 #, fuzzy, php-format
 msgid "InnoDB will hold as much tables and indexes in system memory as is possible.  Therefore, you should make the innodb_buffer_pool large enough to hold as much of the tables and index in memory.  Checking the size of the /var/lib/mysql/cacti directory will help in determining this value.  We are recommending 25%% of your systems total memory, but your requirements will vary depending on your systems size.  If you database is very large or remote, you can consider increasing this size.  If remote, it can by as high as 80% of the systems memory.  However, cautions must be taken to reduce the swappiness of the system, or to remove swap to keep the system from swapping."
-msgstr "InnoDB буде зберігати якомога більше таблиць та індексів у системній пам’яті. Таким чином, ви повинні зробити innodb_buffer_pool достатньо великим, щоб утримувати якомога більше таблиць та індексів у пам’яті. Перевірка розміру каталогу /var/lib/mysql/cacti допоможе визначити це значення. Ми рекомендуємо 25%% загальної пам’яті вашої системи, але ваші вимоги залежатимуть від розміру вашої системи."
+msgstr ""
 
 #: lib/utility.php:1260
 #, fuzzy
@@ -19457,7 +19454,7 @@ msgstr "Завдяки сучасному сховищу типу SSD наявн
 #: lib/utility.php:1298 lib/utility.php:1340
 #, php-format
 msgid "As of %s %s, the you can control how often %s flushes transactions to disk.  The default is 1 second, but in high I/O systems setting to a value greater than 1 can allow disk I/O to be more sequential"
-msgstr "Починаючи з %s %s, ви можете контролювати, як часто %s знімає транзакції на диск. За замовчуванням — 1 секунда, але в системах із високим рівнем вводу-виводу встановлення значення більше 1 може дозволити дисковому вводу-виводу бути більш послідовним"
+msgstr ""
 
 #: lib/utility.php:1303
 msgid "With modern SSD type storage, having multiple read io threads is advantageous for applications with high io characteristics.  Depending on your MariaDB/MySQL versions, this value can go as high as 64.  But try to keep the number less than your total SMT threads on the database server."
@@ -19556,7 +19553,7 @@ msgstr "Корисна назва для цього VDEF."
 #: link.php:79
 #, php-format
 msgid "External Link ID '%s' with Title '%s' attempted to inject an invalid URL and was blocked!"
-msgstr "Зовнішнє посилання з ідентифікатором '%s' та заголовком '%s' намагалося вставити недійсну URL-адресу та було заблоковано!"
+msgstr ""
 
 #: links.php:76
 msgid "Your contentfile is not a valid URL.  Please enter a value URL"
@@ -19777,12 +19774,12 @@ msgstr "Вийти з Cacti"
 #: logout.php:60
 #, fuzzy, php-format
 msgid "You have been logged out of Cacti due to %s."
-msgstr "Ви вийшли з Cacti через тайм-аут сеансу."
+msgstr ""
 
 #: logout.php:61
 #, php-format
 msgid "Please close your browser or %sLogin Again%s"
-msgstr "Закрийте браузер або %sувійдіть знову%s"
+msgstr ""
 
 #: logout.php:62
 #, fuzzy
@@ -19885,12 +19882,12 @@ msgstr "Натисніть «Продовжити», щоб видалити н�
 #: managers.php:1029
 #, fuzzy
 msgid "Delete Notification Receiver"
-msgstr "%s Одержувачі сповіщень"
+msgstr ""
 
 #: managers.php:1030
 #, fuzzy
 msgid "Delete Notification Receivers"
-msgstr "%s Одержувачі сповіщень"
+msgstr ""
 
 #: managers.php:1033
 #, fuzzy
@@ -19930,7 +19927,7 @@ msgstr "Вимкнути приймач сповіщень SNMP"
 #: managers.php:1042
 #, fuzzy
 msgid "Enable Notification Receivers"
-msgstr "%s Одержувачі сповіщень"
+msgstr ""
 
 #: managers.php:1080
 #, fuzzy
@@ -19998,17 +19995,17 @@ msgstr "Що б ви хотіли експортувати?"
 #: package.php:667
 #, fuzzy, php-format
 msgid "%s Device Package"
-msgstr "Ім'я пристрою"
+msgstr ""
 
 #: package.php:670
 #, fuzzy, php-format
 msgid "%s Graph Template Package"
-msgstr "Назва шаблону графіка"
+msgstr ""
 
 #: package.php:673
 #, fuzzy, php-format
 msgid "%s Data Query Package"
-msgstr "Назва запиту даних"
+msgstr ""
 
 #: package.php:700 templates_export.php:168
 #, php-format
@@ -20022,7 +20019,7 @@ msgstr "Доступні шаблони"
 #: package.php:709
 #, fuzzy, php-format
 msgid "%s to Export"
-msgstr "Експорт"
+msgstr ""
 
 #: package.php:710
 #, fuzzy
@@ -20161,7 +20158,7 @@ msgstr "Помилка імпорту пакета %s"
 #: package_import.php:298
 #, fuzzy, php-format
 msgid "Package %s"
-msgstr "Пакет"
+msgstr ""
 
 #: package_import.php:305
 #, fuzzy
@@ -20190,7 +20187,7 @@ msgstr "Виберіть спосіб сортування елементів у
 #: package_import.php:339
 #, fuzzy
 msgid "Template Items to be Imported"
-msgstr "Елементи кольорового шаблону [редагувати елемент звіту: %s]"
+msgstr ""
 
 #: package_import.php:343
 #, fuzzy
@@ -20216,7 +20213,7 @@ msgstr "Не вдалося отримати відкритий ключ для 
 #: package_import.php:427
 #, fuzzy, php-format
 msgid "You have not Trusted this Package Author '%s'.  If you wish to import, check the Automatically Trust Author checkbox.  Otherwise, feel free to reach the author at the following Email address '%s'."
-msgstr "Ви не довіряєте цьому автору пакету. Якщо ви бажаєте імпортувати, установіть прапорець Автоматично довіряти автору"
+msgstr ""
 
 #: package_import.php:738
 msgid "Repo File Missing or Damaged"
@@ -20238,12 +20235,12 @@ msgstr "Підпис для одного або кількох пакетів н
 #: package_import.php:762
 #, php-format
 msgid "<b>Author:</b> &lt;%s&gt; %s.<br>"
-msgstr "<b>Автор:</b> &lt;%s&gt; %s.<br>"
+msgstr ""
 
 #: package_import.php:766
 #, fuzzy, php-format
 msgid "<b>Package</b> %s"
-msgstr "Файли пакетів"
+msgstr ""
 
 #: package_import.php:769
 msgid "Press 'Ok' to start Trusting the Signer, or escape to cancel."
@@ -20252,7 +20249,7 @@ msgstr "Натисніть «ОК», щоб розпочати функцію «
 #: package_import.php:773
 #, fuzzy
 msgid "Some Packages Not Trusted"
-msgstr "Помилка імпорту пакета %s"
+msgstr ""
 
 #: package_import.php:781
 msgid "All Packages Trusted"
@@ -20429,7 +20426,7 @@ msgstr "Ніяких пакетів, незнайдено"
 #: package_import.php:1946
 #, php-format
 msgid "The Repo '%s' is NOT Reachable on GitHub or the '%s' file is missing or it could be an invalid branch.  Valid Package Locations are normally: https://github.com/Author/RepoName/."
-msgstr "Репозиторій '%s' НЕ доступний на GitHub, файл '%s' відсутній або це може бути недійсна гілка. Зазвичай дійсні розташування пакета: https://github.com/Author/RepoName/."
+msgstr ""
 
 #: package_import.php:1974
 #, php-format
@@ -20762,12 +20759,12 @@ msgstr "Архівовано"
 #: plugins.php:165
 #, php-format
 msgid "The action '%s' on Plugin '%s' can not be performed due to the Plugin in it's current state."
-msgstr "Дію '%s' для плагіна '%s' неможливо виконати через поточний стан плагіна."
+msgstr ""
 
 #: plugins.php:169
 #, php-format
 msgid "The action '%s' '%s' on Plugin '%s' can not be taken as the Plugin is integrated."
-msgstr "Дію '%s' '%s' для плагіна '%s' неможливо виконати, оскільки плагін інтегровано."
+msgstr ""
 
 #: plugins.php:218
 msgid "The fetch latest plugins process has been launched into background."
@@ -20814,7 +20811,7 @@ msgstr "Видалення цього плагіна призведе до ви�
 #: plugins.php:587
 #, fuzzy
 msgid "Are you sure you want to Restore this Archive?"
-msgstr "Ви впевнені, що бажаєте видалити правило \"%s\"?"
+msgstr ""
 
 #: plugins.php:589
 #, fuzzy
@@ -20824,7 +20821,7 @@ msgstr "Видалення цього плагіна призведе до ви�
 #: plugins.php:590
 #, fuzzy
 msgid "Are you sure you want to Delete this Archive?"
-msgstr "Ви впевнені, що бажаєте видалити правило \"%s\"?"
+msgstr ""
 
 #: plugins.php:592
 msgid "Plugin Management"
@@ -20847,7 +20844,7 @@ msgstr "Встановлена"
 #: plugins.php:614
 #, fuzzy
 msgid "Installed and Inactive"
-msgstr "Встановлення Cacti Server v%s"
+msgstr ""
 
 #: plugins.php:617
 #, fuzzy
@@ -21091,7 +21088,7 @@ msgstr "Завантажте цей плагін з доступних плаг�
 #: plugins.php:1480 plugins.php:1597
 #, fuzzy
 msgid "Compatible, Loadable"
-msgstr "Несумісний, %s"
+msgstr ""
 
 #: plugins.php:1482
 msgid "Upgrade this Plugin from the available Cacti Plugins"
@@ -21100,7 +21097,7 @@ msgstr "Оновіть цей плагін з доступних плагіні�
 #: plugins.php:1483 plugins.php:1492
 #, fuzzy
 msgid "Compatible, Upgrade"
-msgstr "Несумісний, %s"
+msgstr ""
 
 #: plugins.php:1485
 msgid "Downgrade this Plugin from the available Cacti Plugins"
@@ -21131,7 +21128,7 @@ msgstr "Не вдається відновити архів через неви�
 #: plugins.php:1496 plugins.php:1610
 #, fuzzy
 msgid "Not Compatible, Dependencies"
-msgstr "Несумісний, %s"
+msgstr ""
 
 #: plugins.php:1499
 msgid "Unable to Load due to a bad Cacti version."
@@ -21140,7 +21137,7 @@ msgstr "Не вдається завантажити через погану в�
 #: plugins.php:1500 plugins.php:1614
 #, fuzzy
 msgid "Not Compatible, Cacti Version"
-msgstr "Несумісний, %s"
+msgstr ""
 
 #: plugins.php:1507
 msgid "View the Plugins ChangeLog"
@@ -21170,7 +21167,7 @@ msgstr "Оновити плагін з архіву"
 #: plugins.php:1606
 #, fuzzy
 msgid "Compatible, Upgradable"
-msgstr "Несумісний, %s"
+msgstr ""
 
 #: plugins.php:1609
 msgid "Unable to Restore the archive due to Plugin Dependencies not being met."
@@ -21209,7 +21206,7 @@ msgstr "Встановити плагін"
 #: plugins.php:1760
 #, fuzzy, php-format
 msgid "Plugin '%s' can not be archived before it's been Installed."
-msgstr "Неможливо встановити плагін."
+msgstr ""
 
 #: plugins.php:1771
 msgid "Remove Plugin Data Tables and Settings"
@@ -21239,7 +21236,7 @@ msgstr "заархівуйте плагін у його поточному ст�
 #: plugins.php:1814
 #, fuzzy
 msgid "Check Plugins Configuration"
-msgstr "Перевірка конфігурації...<br>"
+msgstr ""
 
 #: plugins.php:1818
 msgid "A Plugin can not be archived when it has Configuration Issues."
@@ -21276,7 +21273,7 @@ msgstr "Каталоги плагінів не можуть містити пр�
 #: plugins.php:1870
 #, php-format
 msgid "Plugin directory is not correct.  Should be '%s' but is '%s'"
-msgstr "Неправильний каталог плагінів. Має бути \"%s\", але це \"%s\""
+msgstr ""
 
 #: plugins.php:1881
 msgid "Plugin is integrated into Cacti core"
@@ -21293,27 +21290,27 @@ msgstr "Увімкнути плагін локально"
 #: poller.php:405
 #, fuzzy, php-format
 msgid "WARNING: %s is out of sync with the Poller Interval for Poller[%d]!  The Poller Interval is %d seconds, with a maximum of a %d seconds, but %d seconds have passed since the last poll!"
-msgstr "ПОПЕРЕДЖЕННЯ: %s не синхронізовано з інтервалом опитувальника для ідентифікатора опитувальника %d! Інтервал опитування становить %d секунд, максимум %d секунд, але з моменту останнього опитування минуло %d секунд!"
+msgstr ""
 
 #: poller.php:579
 #, fuzzy, php-format
 msgid "WARNING: There are %d processes detected as overrunning a polling cycle for Poller[%d], please investigate."
-msgstr "ЗАСТЕРЕЖЕННЯ. Виявлено %d процесів, що перевищують цикл опитування для ідентифікатора опитувальника %d, перевірте це."
+msgstr ""
 
 #: poller.php:637
 #, fuzzy, php-format
 msgid "WARNING: Poller Output Table not empty for Poller[%d].  Issues: %d, %s."
-msgstr "ПОПЕРЕДЖЕННЯ: таблиця виводу опитувальника не пуста для ідентифікатора опитувальника %d. Випуски: %d, %s."
+msgstr ""
 
 #: poller.php:671
 #, fuzzy, php-format
 msgid "ERROR: The spine path: %s is invalid for Poller[%d].  Poller can not continue!"
-msgstr "ПОМИЛКА: головний шлях: %s недійсний для ідентифікатора опитувальника %d. Poller не може продовжувати!"
+msgstr ""
 
 #: poller.php:819
 #, fuzzy, php-format
 msgid "Maximum runtime of %d seconds exceeded for Poller[%d]. Exiting."
-msgstr "Перевищено максимальний час роботи в %d секунд для ідентифікатора опитувальника %d. Вихід."
+msgstr ""
 
 #: poller.php:944
 msgid "WARNING: Cacti Polling Cycle Exceeded Poller Interval by "
@@ -21322,7 +21319,7 @@ msgstr "ПОПЕРЕДЖЕННЯ: цикл опитування Cacti перев
 #: poller.php:970
 #, php-format
 msgid "WARNING: PollerID:%s with Name:%s is in Heartbeat Status"
-msgstr "ПОПЕРЕДЖЕННЯ: PollerID:%s з іменем:%s має статус серцебиття"
+msgstr ""
 
 #: poller.php:972
 msgid "Poller in Heartbeat Mode"
@@ -21331,12 +21328,12 @@ msgstr "Опитувальник у режимі серцебиття"
 #: poller.php:1253
 #, php-format
 msgid "WARNING: 24 hours Poller[%d] avg. run time is %f seconds (more than %d &#37; of time limit)"
-msgstr "ПОПЕРЕДЖЕННЯ: Середній час виконання Poller[%d] за 24 години становить %f секунд (більше ніж %d % від ліміту часу)"
+msgstr ""
 
 #: poller.php:1269
 #, php-format
 msgid "WARNING: In last hour Poller[%d] run time %d times reached more than %d &#37; of time limit"
-msgstr "ПОПЕРЕДЖЕННЯ: За останню годину час виконання Poller[%d] (%d разів) перевищив %d % ліміту часу"
+msgstr ""
 
 #: poller.php:1291
 msgid "Cacti System Notification"
@@ -21349,7 +21346,7 @@ msgstr "ПРИМІТКА: додано другий збирач даних Cact
 #: poller_automation.php:54
 #, fuzzy, php-format
 msgid "WARNING: Main Cacti database %s offline or in recovery"
-msgstr "ПОПЕРЕДЖЕННЯ: Основна база даних Cacti вимкнена або відновлюється"
+msgstr ""
 
 #: poller_automation.php:1037 poller_automation.php:1091
 msgid "Cacti Primary Admin"
@@ -21927,7 +21924,7 @@ msgstr "ПРИМІТКА. Параметри шляху на цій вкладц
 #: settings.php:138
 #, php-format
 msgid "Cacti Settings (%s)%s"
-msgstr "Налаштування Cacti (%s)%s"
+msgstr ""
 
 #: settings.php:248
 msgid "Changing Permission Model Warning"
@@ -22295,7 +22292,7 @@ msgstr "Запити даних"
 #: support.php:53
 #, fuzzy
 msgid "Background Processes"
-msgstr "%d Процеси"
+msgstr ""
 
 #: support.php:54
 #, fuzzy
@@ -22349,7 +22346,7 @@ msgstr "Оновлення сторінки"
 #: support.php:385 support.php:783
 #, fuzzy
 msgid "Process ID"
-msgstr "Процес: %d"
+msgstr ""
 
 #: support.php:388
 msgid "The Connection ID of the running process."
@@ -22556,7 +22553,7 @@ msgstr "Час голосування"
 #: support.php:903 support.php:944
 #, fuzzy
 msgid "No host found"
-msgstr "%s не знайдено"
+msgstr ""
 
 #: support.php:919
 msgid "Worst 20 failed/total polls ratio"
@@ -22686,12 +22683,12 @@ msgstr "Сервери PHP"
 #: support.php:1370 support.php:1372 support.php:1378 support.php:1380
 #, php-format
 msgid "Main Server: Current: %s, Min Required: %s"
-msgstr "Основний сервер: поточний: %s, мінімальна необхідна кількість: %s"
+msgstr ""
 
 #: support.php:1388 support.php:1390
 #, php-format
 msgid "Local Server: Current: %s, Min Required: %s"
-msgstr "Локальний сервер: поточний: %s, мінімальний необхідний: %s"
+msgstr ""
 
 #: support.php:1395
 msgid "Minimum Connections:"
@@ -23538,12 +23535,12 @@ msgstr "> 1 місяць тому"
 #: user_admin.php:2126
 #, fuzzy
 msgid "> 2 Months Ago"
-msgstr "%d Місяців"
+msgstr ""
 
 #: user_admin.php:2127
 #, fuzzy
 msgid "> 4 Months Ago"
-msgstr "%d Місяців"
+msgstr ""
 
 #: user_admin.php:2138
 msgid "Basic"
@@ -24347,7 +24344,7 @@ msgstr "Перебудуйте кеш Poller"
 #: utilities.php:1247
 #, fuzzy
 msgid "The Poller Cache will be re-generated if you select this option. Use this option only in the event of a database crash if you are experiencing issues after the crash and have already run the database repair tools.  Alternatively, if you are having problems with a specific Device, simply re-save that Device to rebuild its Poller Cache.  There is also a command line interface equivalent to this command that is recommended for large systems."
-msgstr "Кеш Poller буде створено повторно, якщо вибрати цей параметр. Використовуйте цей параметр лише у разі збою бази даних, якщо у вас виникли проблеми після збою та ви вже запустили інструменти відновлення бази даних. Крім того, якщо у вас виникли проблеми з певним пристроєм, просто повторно збережіть цей пристрій, щоб відновити його кеш Poller. Існує також інтерфейс командного рядка, еквівалентний цій команді, рекомендований для великих систем. <i class=\"deviceDown\">ПРИМІТКА. У великих системах виконання цієї команди може тривати від кількох хвилин до годин, тому її не слід запускати з інтерфейсу Cacti. Ви можете просто запустити 'php -q cli/rebuild_poller_cache.php --help' у командному рядку для отримання додаткової інформації.</i>"
+msgstr ""
 
 #: utilities.php:1249
 msgid "NOTE: On large systems, this command may take several minutes to hours to complete and therefore should not be run from the Cacti UI.  You can simply run 'php -q cli/rebuild_poller_cache.php --help' at the command line for more information."
@@ -24566,7 +24563,7 @@ msgstr "Детальна статистика виконання"
 #: utilities.php:1733
 #, php-format
 msgid "Records: %s (ds rows), Time: %s (secs), GetRows: %s (secs), ResultsCycle: %s (secs), FileAndTemplate: %s (secs), LastUpdate: %s (secs), RRDUpdate: %s (secs), Delete: %s (secs)"
-msgstr "Записи: %s (ds рядків), Час: %s (сек), GetRows: %s (сек), ResultsCycle: %s (сек), FileAndTemplate: %s (сек), LastUpdate: %s (сек), RRDUpdate: %s (сек), Видалення: %s (сек)"
+msgstr ""
 
 #: utilities.php:1744
 msgid "Previous Runtime Timers:"
@@ -24580,12 +24577,12 @@ msgstr "Процес: %d"
 #: utilities.php:1779
 #, php-format
 msgid "Status: <span class=\"deviceUp\"><b>Running</b></span>, Remaining: %s (dses), CurrentRuntime: %s (secs), PrevRuntime: %s (secs), PrevProcessed: %10s (ds rows)"
-msgstr "Статус: <span class=\"deviceUp\"><b>Виконується</b></span> , Залишилося: %s (dses), Поточний час виконання: %s (секунд), Попередній час виконання: %s (секунд), Попередньо оброблено: %10s (рядки ds)"
+msgstr ""
 
 #: utilities.php:1781
 #, php-format
 msgid "Status: <span class=\"deviceRecovering\"><b>Idle</b></span>, PrevRuntime: %s (secs), PrevProcessed: %10s (ds rows)"
-msgstr "Статус: <span class=\"deviceRecovering\"><b>неактивний</b></span> , попередній час виконання: %s (секунд), попередній оброблений: %10s (ds рядків)"
+msgstr ""
 
 #: utilities.php:1787
 msgid "Run Time Configuration"

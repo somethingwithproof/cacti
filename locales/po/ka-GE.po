@@ -4010,7 +4010,7 @@ msgstr "შედეგები"
 
 #: data_debug.php:854
 msgid "<not set>"
-msgstr "<დაყენებული არაა>"
+msgstr ""
 
 #: data_debug.php:891 data_debug.php:945
 msgid "Data Source Repair Recommendations"
@@ -14481,29 +14481,29 @@ msgstr "მოწყობილობა: (გათიშულების �
 #: lib/auth.php:2355 lib/auth.php:2357 lib/auth.php:2363 lib/auth.php:2365
 #, php-format
 msgid "Graph:(%s%s)"
-msgstr "გრაფიკი:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2378 lib/auth.php:2384 lib/auth.php:2451 lib/auth.php:2453
 #: lib/auth.php:2457 lib/auth.php:2459
 #, php-format
 msgid "Device:(%s%s)"
-msgstr "მოწყობილობა: (%s%s)"
+msgstr ""
 
 #: lib/auth.php:2392 lib/auth.php:2398 lib/auth.php:2467 lib/auth.php:2469
 #: lib/auth.php:2473 lib/auth.php:2475
 #, php-format
 msgid "Template:(%s%s)"
-msgstr "ნიმუში:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2405
 #, php-format
 msgid "Graph+Device+Template:(%s%s)"
-msgstr "გრაფიკი+მოწყობილობა+შაბლონი:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2442 lib/auth.php:2444
 #, php-format
 msgid "Device+Template:(%s%s)"
-msgstr "მოწყობილობა+შაბლონი:(%s%s)"
+msgstr ""
 
 #: lib/auth.php:2488 lib/auth.php:2495 lib/auth.php:2504
 msgid "Restricted By: "
@@ -15126,7 +15126,7 @@ msgstr ""
 #: lib/data_query.php:1076
 #, php-format
 msgid "Field '%s' %s"
-msgstr "ველი '%s' %s"
+msgstr ""
 
 #: lib/data_query.php:1140
 #, php-format
@@ -15501,7 +15501,7 @@ msgstr "- ბეტა %s"
 #: lib/functions.php:7309
 #, php-format
 msgid "Version %s %s"
-msgstr "ვერსია %s %s"
+msgstr ""
 
 #: lib/functions.php:7852
 #, php-format
@@ -15576,7 +15576,7 @@ msgstr "შემდეგი"
 #: lib/html.php:681
 #, php-format
 msgid "All %d %s"
-msgstr "ყველა %d %s"
+msgstr ""
 
 #: lib/html.php:700
 #, php-format
@@ -19567,7 +19567,7 @@ msgstr ""
 #: package_import.php:762
 #, php-format
 msgid "<b>Author:</b> &lt;%s&gt; %s.<br>"
-msgstr "<b>ავტორი:</b> &lt;%s&gt; %s.<br>"
+msgstr ""
 
 #: package_import.php:766
 #, php-format
@@ -21132,7 +21132,7 @@ msgstr ""
 #: settings.php:138
 #, php-format
 msgid "Cacti Settings (%s)%s"
-msgstr "Cacti-ის მორგება (%s)%s"
+msgstr ""
 
 #: settings.php:248
 msgid "Changing Permission Model Warning"
