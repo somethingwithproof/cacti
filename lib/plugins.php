@@ -707,9 +707,14 @@ function api_plugin_install(string $plugin) : bool {
 
 	if (!file_exists(CACTI_PATH_PLUGINS . "/$plugin/setup.php")) {
 		cacti_log('ERROR: Plugin \'' . preg_replace('/[^a-zA-Z0-9_\-]/', '', $plugin) . '\' setup.php not found, cannot install', false, 'PLUGIN');
-		raise_message('plugin_missing', __('Plugin setup file not found.'), MESSAGE_LEVEL_ERROR);
-		header('Location: plugins.php');
-		exit;
+
+		if (CACTI_WEB) {
+			raise_message('plugin_missing', __('Plugin setup file not found.'), MESSAGE_LEVEL_ERROR);
+			header('Location: plugins.php');
+			exit;
+		}
+
+		return false;
 	}
 
 	require_once(CACTI_PATH_PLUGINS . "/$plugin/setup.php");

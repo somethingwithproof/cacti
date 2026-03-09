@@ -13,9 +13,10 @@
 */
 
 /**
- * Test for issue #6788: include_once replaced with require_once for core
- * library files and plugin setup loaders so missing files produce immediate
- * fatal errors rather than silent undefined-function failures downstream.
+ * Regression tests for require_once hardening (PR #6792): include_once
+ * replaced with require_once for core library files and plugin setup loaders
+ * so missing files produce immediate fatal errors rather than silent
+ * undefined-function failures downstream.
  */
 
 test('include/global.php uses require_once for all core library includes', function () {
