@@ -39,3 +39,27 @@ repos:
     rev: v8.23.1
     hooks:
       - id: gitleaks
+
+  - repo: local
+    hooks:
+      - id: osv-scanner
+        name: OSV dependency vulnerability scan
+        entry: osv-scanner
+        args: ['--lockfile', 'composer.lock']
+        language: system
+        files: composer\.lock$
+        pass_filenames: false
+
+      - id: semgrep
+        name: Semgrep PHP security scan
+        entry: semgrep
+        args: ['--config', 'p/php', '--error', '--quiet', '--no-rewrite-rule-ids']
+        language: system
+        types: [php]
+
+      - id: shellharden
+        name: Shell script safety check
+        entry: shellharden
+        args: ['--check']
+        language: system
+        types: [shell]
