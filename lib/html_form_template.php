@@ -167,7 +167,7 @@ function draw_nontemplated_fields_graph_item(int $graph_template_id, int $local_
 			if (!db_column_exists('graph_templates_item', $item['column_name'])) {
 				raise_message_javascript(
 					__('Attempted SQL Injection'),
-					__('There was a SQL Injection attempted on the page'),
+					__('There was an SQL Injection attempted on the page'),
 					__('A client attempted to create a SQL Injection into Cacti likely from an external host with the address %s', get_client_addr())
 				);
 
