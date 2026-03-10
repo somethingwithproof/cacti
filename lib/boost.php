@@ -257,6 +257,20 @@ function boost_poller_on_demand(array &$results) : bool {
 				return false;
 			}
 
+			// Hard cap: if the boost table already holds more than twice the
+			// configured maximum, skip buffering this batch and fall through to
+			// direct RRD updates.  This prevents unbounded table growth when the
+			// boost process falls behind the poll rate.
+			$max_records    = (int) read_config_option('boost_rrd_update_max_records');
+			$current_rows   = boost_get_total_rows();
+
+			if ($max_records > 0 && $current_rows >= $max_records * 2) {
+				cacti_log("WARNING: poller_output_boost has $current_rows rows (hard cap " . ($max_records * 2) . '). Bypassing boost for this cycle.', false, 'BOOST');
+				restore_error_handler();
+
+				return true;
+			}
+
 			$max_allowed_packet = db_fetch_row("SHOW VARIABLES LIKE 'max_allowed_packet'");
 			$max_allowed_packet = $max_allowed_packet['Value'];
 
