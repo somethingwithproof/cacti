@@ -1567,12 +1567,6 @@ $settings['poller'] = [
 			60 => __('%d Seconds', 60)
 		]
 	],
-	'poller_refresh_output_table' => [
-		'friendly_name' => __('Refresh Poller Table Per Cycle'),
-		'description'   => __('This setting is for a single poller systems only to rebuild the poller output table on each polling cycle to prevent the memory table from swapping on very large systems with large databases that could use swap.'),
-		'method'        => 'checkbox',
-		'default'       => '',
-	],
 	'poller_replication_header' => [
 		'friendly_name' => __('Data Collector Replication'),
 		'collapsible'   => 'true',

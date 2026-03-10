@@ -655,21 +655,10 @@ while ($poller_runs_completed < $poller_runs) {
 		db_execute_prepared('DELETE po ' . $issues_sql, $issues_param);
 	}
 
-	/**
-	 * adjust for recent memory table problems in MariaDB and memory tables
-	 * being pushed into swap
-	 */
-	if ($poller_id == 1 && read_config_option('poller_refresh_output_table') == 'on' && $total_pollers == 1) {
-		db_execute('CREATE TABLE IF NOT EXISTS po LIKE poller_output');
-		db_execute('RENAME TABLE poller_output TO poold, po TO poller_output');
-		db_execute('DROP TABLE IF EXISTS poold');
-		db_execute('ALTER TABLE poller_output ENGINE=MEMORY');
-
-		// catch the unlikely event that the poller_output_boost is missing
-		if (!db_table_exists('poller_output_boost')) {
-			db_execute('CREATE TABLE poller_output_boost LIKE poller_output');
-			db_execute('ALTER TABLE poller_output_boost ENGINE=InnoDB');
-		}
+	// catch the unlikely event that the poller_output_boost is missing
+	if (!db_table_exists('poller_output_boost')) {
+		db_execute('CREATE TABLE poller_output_boost LIKE poller_output');
+		db_execute('ALTER TABLE poller_output_boost ENGINE=InnoDB ROW_FORMAT=Dynamic');
 	}
 
 	/**
