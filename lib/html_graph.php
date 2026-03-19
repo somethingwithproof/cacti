@@ -1431,7 +1431,6 @@ function html_graph_list_view() : void {
 	<?php
 	print $report_text;
 
-	$graph_list_js  = [];
 	$graph_list_js  = sanitize_graph_id_list((string) grv('graph_list'));
 	$graph_list_csv = implode(',', $graph_list_js);
 
