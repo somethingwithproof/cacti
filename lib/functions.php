@@ -8525,17 +8525,41 @@ function get_client_addr() : string|false {
 /**
  * cacti_is_https - Determine whether the current request was made over HTTPS.
  *
- * Checks $_SERVER['HTTPS'] which is set by the web server. Values of 'off',
- * '0', '' or unset mean HTTP; anything else (typically 'on' or '1') means HTTPS.
+ * Checks $_SERVER['HTTPS'] first, then falls back to the X-Forwarded-Proto
+ * header for environments behind a reverse proxy or load balancer that
+ * terminates SSL. Values of 'off', '0', '' or unset mean HTTP; anything
+ * else (typically 'on' or '1') means HTTPS.
+ *
+ * NOTE: The X-Forwarded-Proto header is only honoured when
+ * $config['proxy_headers'] is explicitly enabled in config.php.
+ * Without this gate the header is attacker-controlled on direct
+ * connections and must be ignored.
  *
  * @return bool True when the connection is HTTPS, false otherwise.
  */
 function cacti_is_https() : bool {
-	if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === '' || $_SERVER['HTTPS'] === '0') {
-		return false;
+	global $config;
+
+	if (isset($_SERVER['HTTPS'])) {
+		$https = cacti_strtolower($_SERVER['HTTPS']);
+
+		if ($https !== 'off' && $https !== '' && $https !== '0') {
+			return true;
+		}
 	}
 
-	return strtolower($_SERVER['HTTPS']) !== 'off';
+	/* Only honour X-Forwarded-Proto when proxy_headers is enabled in
+	 * config.php.  Without this gate the header is attacker-controlled
+	 * on direct connections. */
+	if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && !empty($config['proxy_headers'])) {
+		/* Proxy chains may produce "https, http"; use the first value. */
+		$proto = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0]);
+		$proto = cacti_strtolower($proto);
+
+		return $proto === 'https';
+	}
+
+	return false;
 }
 
 /**
