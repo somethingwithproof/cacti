@@ -76,11 +76,11 @@ function imageOptionsChanged(action) {
 	}
 
 	if (action === 'countdown') {
-		url = 'graph_realtime.php?action=countdown&top=0&left=0&local_graph_id='+local_graph_id+'&ds_step='+ds_step+'&count='+count+'&size='+size+'&graph_nolegend='+isThumb;
+		url = `graph_realtime.php?action=countdown&top=0&left=0&local_graph_id=${local_graph_id}&ds_step=${ds_step}&count=${count}&size=${size}&graph_nolegend=${isThumb}`;
 	} else if (action === 'initial') {
-		url = 'graph_realtime.php?action=initial&top=0&left=0&local_graph_id='+local_graph_id+'&graph_start=-'+(parseInt(graph_start) > 0 ? graph_start:'60')+'&ds_step='+ds_step+'&count='+count+'&size='+size;
+		url = `graph_realtime.php?action=initial&top=0&left=0&local_graph_id=${local_graph_id}&graph_start=-${parseInt(graph_start) > 0 ? graph_start:'60'}&ds_step=${ds_step}&count=${count}&size=${size}`;
 	} else {
-		url = 'graph_realtime.php?action='+action+'&top=0&left=0&local_graph_id='+local_graph_id+'&graph_start=-'+(parseInt(graph_start) > 0 ? graph_start:'60')+'&ds_step='+ds_step+'&count='+count+'&size='+size+'&graph_nolegend='+isThumb;
+		url = `graph_realtime.php?action=${action}&top=0&left=0&local_graph_id=${local_graph_id}&graph_start=-${parseInt(graph_start) > 0 ? graph_start:'60'}&ds_step=${ds_step}&count=${count}&size=${size}&graph_nolegend=${isThumb}`;
 	}
 
 	Pace.stop;
@@ -89,9 +89,9 @@ function imageOptionsChanged(action) {
 		.done(function(data) {
 			var image_format = (data.image_format === 'svg+xml') ? 'svg+xml' : 'png';
 			if ($('#rimage').length) {
-				$('#rimage').empty().attr('src', 'data:image/'+image_format+';base64,'+data.data);
+				$('#rimage').empty().attr('src', `data:image/${image_format};base64,${data.data}`);
 			} else {
-				$('#image').empty().html('<img id="rimage" class="realtimeimage" src="data:image/'+image_format+';base64,'+data.data+'"/>');
+				$('#image').empty().html(`<img id="rimage" class="realtimeimage" src="data:image/${image_format};base64,${data.data}"/>`);
 			}
 
 			realtimePopout = $('#rtfilter').outerHeight() + 60 + $('#rimage').outerHeight() + 30 > window.innerHeight || $('#rimage').outerWidth() + 40 > window.innerWidth ? true : false;
@@ -169,15 +169,15 @@ function stopRealtime() {
 	for (key in realtimeArray) {
 		var graph_id = key;
 
-		$('#wrapper_'+graph_id).html(keepRealtime[graph_id]).trigger('change');
-		$('#graph_'+graph_id+'_realtime').empty().html("<img class='drillDown' alt='' title='"+realtimeClickOn+"' src='"+urlPath+"images/chart_curve_go.png'>").find('img').tooltip();
+		$(`#wrapper_${graph_id}`).html(keepRealtime[graph_id]).trigger('change');
+		$(`#graph_${graph_id}_realtime`).empty().html(`<img class='drillDown' alt='' title='${realtimeClickOn}' src='${urlPath}images/chart_curve_go.png'>`).find('img').tooltip();
 
 		// Disable right click
 		$(this).children().on('contextmenu', function(event) {
 			return false;
 		});
 
-		$('graph_'+graph_id).zoom({
+		$(`graph_${graph_id}`).zoom({
 			inputfieldStartTime : 'date1',
 			inputfieldEndTime : 'date2',
 			serverTimeOffset : timeOffset
@@ -264,24 +264,24 @@ function realtimeGrapher() {
 				var position = $('#wrapper_'+local_graph_id).find('img').position();
 
 				Pace.ignore(function() {
-					if ($('#wrapper_'+local_graph_id).find('img').length) {
-						position = $('#wrapper_'+local_graph_id).find('img').position();
+					if ($(`#wrapper_${local_graph_id}`).find('img').length) {
+						position = $(`#wrapper_${local_graph_id}`).find('img').position();
 					} else {
 						position = $('body').position();
 					}
 
-					$.get(urlPath+'graph_realtime.php?action=countdown&top='+parseInt(position.top)+'&left='+parseInt(position.left)+(isThumb ? '&graph_nolegend=true':'&graph_nolegend=false')+'&graph_end=0&graph_start=-'+(parseInt(graph_start) > 0 ? graph_start:'60')+'&local_graph_id='+local_graph_id+'&ds_step='+ds_step+'&count='+count+'&size='+size)
+					$.get(`${urlPath}graph_realtime.php?action=countdown&top=${parseInt(position.top)}&left=${parseInt(position.left)}${isThumb ? '&graph_nolegend=true':'&graph_nolegend=false'}&graph_end=0&graph_start=-${parseInt(graph_start) > 0 ? graph_start:'60'}&local_graph_id=${local_graph_id}&ds_step=${ds_step}&count=${count}&size=${size}`)
 						.done(function(data) {
-							var results = $.parseJSON(data);
+							var results = JSON.parse(data);
 
 							if (realtimeArray[results.local_graph_id] === true) {
 								var image_format = (results.image_format === 'svg+xml') ? 'svg+xml' : 'png';
-								$('#graph_'+results.local_graph_id).attr('src', 'data:image/'+image_format+';base64,'+results.data).trigger('change');
+								$(`#graph_${results.local_graph_id}`).attr('src', `data:image/${image_format};base64,${results.data}`).trigger('change');
 
 								if (isThumb) {
-									$('#graph_'+results.local_graph_id).width(rtWidth).height(rtHeight);
+									$(`#graph_${results.local_graph_id}`).width(rtWidth).height(rtHeight);
 								} else {
-									$('#graph_'+results.local_graph_id);
+									$(`#graph_${results.local_graph_id}`);
 								}
 							}
 

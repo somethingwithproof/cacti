@@ -122,7 +122,7 @@ function setSNMPOverride() {
 }
 
 function setButtonData(buttonName, buttonData) {
-	var button = $('#button'+buttonName);
+	var button = $(`#button${buttonName}`);
 	if (button !== null) {
 		button.button();
 		button.data('buttonData', buttonData);
@@ -162,7 +162,7 @@ function setFieldData(fields, fieldData) {
 				if (fieldData.hasOwnProperty(propName)) {
 					propValue = fieldData[propName];
 					if (propValue !== undefined) {
-						element = $('#' + propName);
+						element = $(`#${propName}`);
 						if (element !== null && element.length > 0) {
 							element.prop('checked', propValue != 0);
 						}
@@ -170,7 +170,7 @@ function setFieldData(fields, fieldData) {
 				}
 			}
 		} else if (fieldData[field.name]) {
-			element = $("#" + fieldId);
+			element = $(`#${fieldId}`);
 			if (element !== null && element.length > 0) {
 				if (field.type == 'textbox') {
 					element[0].value = fieldData[field.name];
@@ -203,17 +203,17 @@ function getFieldData(fields, fieldData) {
 					prefix = field.prefix;
 				}
 
-				$('input[name^="' + prefix + '"]').each(function(index,element) {
+				$(`input[name^="${prefix}"]`).each(function(index,element) {
 					fieldData[element.id] = $(element).is(':checked');
 				});
 			}
 		} else {
 			if (field.prefix) {
-				$('input[name^="' + field.prefix + '"]').each(function(index, element) {
+				$(`input[name^="${field.prefix}"]`).each(function(index, element) {
 					fieldData[element.id] = element.value;
 				});
 			} else {
-				element = $('#' + fieldId);
+				element = $(`#${fieldId}`);
 				if (element !== null && element.length > 0) {
 					if (field.type == 'textbox') {
 						fieldData[field.name] = element[0].value;
@@ -279,7 +279,7 @@ function toggleSection(key, initial) {
 }
 
 function disableButton(buttonName) {
-	button = $('#button'+buttonName);
+	button = $(`#button${buttonName}`);
 	if (button !== null) {
 		button.button();
 		button.button('disable');
@@ -287,7 +287,7 @@ function disableButton(buttonName) {
 }
 
 function enableButton(buttonName) {
-	button = $('#button'+buttonName);
+	button = $(`#button${buttonName}`);
 	if (button !== null) {
 		button.button();
 		button.button('enable');
@@ -300,7 +300,7 @@ function collapseHeadings(headingStates) {
 		if (!headingStates.hasOwnProperty(key)) continue;
 
 		var enabled = headingStates[key];
-		var element = $('#' + key);
+		var element = $(`#${key}`);
 		if (element !== null && element.length > 0) {
 			fa_icon = 'ti ti-alert-triangle-filled';
 			if (enabled == DB_STATUS_ERROR) {
@@ -317,13 +317,13 @@ function collapseHeadings(headingStates) {
 				toggleHeader(element, false);
 			}
 
-			element.append('<div class="cactiInstallValid"><i class="' + fa_icon + '"></i></div>');
+			element.append(`<div class="cactiInstallValid"><i class="${fa_icon}"></i></div>`);
 
 			element.on('click', function(e) {
 				toggleHeader(e.currentTarget);
 			});
 		} else {
-			window.alert('missing section "' + key + '"');
+			window.alert(`missing section "${key}"`);
 		}
 	}
 }
@@ -336,7 +336,7 @@ function hideHeadings(headingStates) {
 		}
 
 		var enabled = headingStates[key];
-		var element = $('#' + key);
+		var element = $(`#${key}`);
 		if (element !== null && element.length > 0) {
 			if (!enabled) {
 				element.hide();
@@ -346,7 +346,7 @@ function hideHeadings(headingStates) {
 				toggleHeader(element, false);
 			}
 		} else {
-			window.alert('missing section "' + key + '"');
+			window.alert(`missing section "${key}"`);
 		}
 	}
 }
@@ -627,9 +627,9 @@ function prepareStepTemplateInstall(installData) {
 
 function setAddressBar(data, replace) {
 	if (replace) {
-		window.history.replaceState('' , 'Cacti Installation - Step ' + data.Step, 'install.php?data=' + prepareInstallData(data.Step, true));
+		window.history.replaceState('', `Cacti Installation - Step ${data.Step}`, `install.php?data=${prepareInstallData(data.Step, true)}`);
 	} else {
-		window.history.pushState('' , 'Cacti Installation - Step ' + data.Step, 'install.php?data=' + prepareInstallData(data.Step, true));
+		window.history.pushState('', `Cacti Installation - Step ${data.Step}`, `install.php?data=${prepareInstallData(data.Step, true)}`);
 	}
 }
 
@@ -642,7 +642,7 @@ function performStep(installStep, suppressRefresh, forceReload) {
 	}
 
 	installData = prepareInstallData(installStep);
-	installJson = JSON.parse('{"data":'+installData+', "__csrf_magic":"'+csrfMagicToken+'"}');
+	installJson = JSON.parse(`{"data":${installData}, "__csrf_magic":"${csrfMagicToken}"}`);
 	url = 'step_json.php'; //?data=' + installData;
 
 	$.post(url, installJson)
@@ -654,7 +654,7 @@ function performStep(installStep, suppressRefresh, forceReload) {
 			$('#installData').data('installData', data);
 
 			if (forceReload) {
-				document.location = location.pathname + '?reload=' + Date.now();
+				document.location = `${location.pathname}?reload=${Date.now()}`;
 			}
 
 			setAddressBar(data, false);
@@ -669,7 +669,7 @@ function performStep(installStep, suppressRefresh, forceReload) {
 				debugData.Html = '';
 				debug = $('#installDebug');
 				debug.empty();
-				debug.html('<h5 style="border: 1px dashed grey">' + JSON.stringify(debugData) + '</h5>');
+				debug.html(`<h5 style="border: 1px dashed grey">${JSON.stringify(debugData)}</h5>`);
  			}
 
 			setButtonData('Previous',data.Prev);
@@ -735,7 +735,7 @@ function performStep(installStep, suppressRefresh, forceReload) {
 							for (var propName in propArray) {
 								if (propArray.hasOwnProperty(propName)) {
 									propValue = propArray[propName];
-									element = $("#" + propName.replace(/\//g,'_').replace(/\./g,'_'));
+									element = $(`#${propName.replace(/\//g,'_').replace(/\./g,'_')}`);
 									if (element !== null && element.length > 0) {
 										element.trigger('focus');
 										break;
@@ -768,7 +768,7 @@ function performTestConnection() {
 		$('#buttonTest').after('<label id="labelTest" class="installTestLabel"></label>');
 	}
 
-	installJson = JSON.parse('{"data":{"step":"' + STEP_TEST_REMOTE + '"}, "__csrf_magic":"'+csrfMagicToken+'"}');
+	installJson = JSON.parse(`{"data":{"step":"${STEP_TEST_REMOTE}"}, "__csrf_magic":"${csrfMagicToken}"}`);
 	url = 'step_json.php'; //?data=' + installData;
 
 	$.post(url, installJson)
@@ -809,7 +809,7 @@ function createItemSelectMenu() {
 }
 
 $.urlParam = function(name){
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    var results = new RegExp(`[\\?&]${name}=([^&#]*)`).exec(window.location.href);
     if (results==null){
        return null;
     }
