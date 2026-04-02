@@ -169,11 +169,11 @@ function stopRealtime() {
 	for (key in realtimeArray) {
 		var graph_id = key;
 
-		$('#wrapper_'+graph_id).html(keepRealtime[graph_id]).change();
+		$('#wrapper_'+graph_id).html(keepRealtime[graph_id]).trigger('change');
 		$('#graph_'+graph_id+'_realtime').empty().html("<img class='drillDown' alt='' title='"+realtimeClickOn+"' src='"+urlPath+"images/chart_curve_go.png'>").find('img').tooltip();
 
 		// Disable right click
-		$(this).children().bind('contextmenu', function(event) {
+		$(this).children().on('contextmenu', function(event) {
 			return false;
 		});
 
@@ -276,7 +276,7 @@ function realtimeGrapher() {
 
 							if (realtimeArray[results.local_graph_id] === true) {
 								var image_format = (results.image_format === 'svg+xml') ? 'svg+xml' : 'png';
-								$('#graph_'+results.local_graph_id).attr('src', 'data:image/'+image_format+';base64,'+results.data).change();
+								$('#graph_'+results.local_graph_id).attr('src', 'data:image/'+image_format+';base64,'+results.data).trigger('change');
 
 								if (isThumb) {
 									$('#graph_'+results.local_graph_id).width(rtWidth).height(rtHeight);
