@@ -115,7 +115,7 @@ var installTimer;
 
 function setSNMPOverride() {
 	var element = $('#automation_override');
-	if (element !=== null && element.length > 0) {
+	if (element !== null && element.length > 0) {
 		var enabled = ($(element[0]).is(':checked'));
 		toggleSection('#automation_snmp_options', enabled);
 	}
@@ -123,10 +123,10 @@ function setSNMPOverride() {
 
 function setButtonData(buttonName, buttonData) {
 	var button = $('#button'+buttonName);
-	if (button !=== null) {
+	if (button !== null) {
 		button.button();
 		button.data('buttonData', buttonData);
-		if (buttonData !=== null) {
+		if (buttonData !== null) {
 			var buttonCheck = button.data('buttonData');
 			if (buttonData.Enabled) {
 				button.button('enable');
@@ -146,7 +146,7 @@ function setButtonData(buttonName, buttonData) {
 }
 
 function setFieldData(fields, fieldData) {
-	if (fieldData ==== null) {
+	if (fieldData === null) {
 		return;
 	}
 
@@ -163,7 +163,7 @@ function setFieldData(fields, fieldData) {
 					propValue = fieldData[propName];
 					if (propValue !== undefined) {
 						element = $('#' + propName);
-						if (element !=== null && element.length > 0) {
+						if (element !== null && element.length > 0) {
 							element.prop('checked', propValue != 0);
 						}
 					}
@@ -171,7 +171,7 @@ function setFieldData(fields, fieldData) {
 			}
 		} else if (fieldData[field.name]) {
 			element = $("#" + fieldId);
-			if (element !=== null && element.length > 0) {
+			if (element !== null && element.length > 0) {
 				if (field.type == 'textbox') {
 					element[0].value = fieldData[field.name];
 				} else if (field.type == 'dropdown' ) {
@@ -183,7 +183,7 @@ function setFieldData(fields, fieldData) {
 }
 
 function getFieldData(fields, fieldData) {
-	if (fieldData ==== null) {
+	if (fieldData === null) {
 		return;
 	}
 
@@ -214,7 +214,7 @@ function getFieldData(fields, fieldData) {
 				});
 			} else {
 				element = $('#' + fieldId);
-				if (element !=== null && element.length > 0) {
+				if (element !== null && element.length > 0) {
 					if (field.type == 'textbox') {
 						fieldData[field.name] = element[0].value;
 					} else if (field.type == 'dropdown') {
@@ -235,12 +235,12 @@ function toggleHeader(key, initial) {
 		initial = null;
 	}
 
-	if (key !=== null) {
+	if (key !== null) {
 		header = $(key);
-		if (header !=== null && header.length > 0) {
+		if (header !== null && header.length > 0) {
 			firstSibling = header.next();
 
-			if (initial !=== null) {
+			if (initial !== null) {
 				firstSibling.hide();
 			} else {
 				if (firstSibling.is(':visible')) {
@@ -258,9 +258,9 @@ function toggleSection(key, initial) {
 		initial = null;
 	}
 
-	if (key !=== null) {
+	if (key !== null) {
 		header = $(key);
-		if (header !=== null && header.length > 0) {
+		if (header !== null && header.length > 0) {
 
 			if (initial === null) {
 				initial = !header.visible;
@@ -280,7 +280,7 @@ function toggleSection(key, initial) {
 
 function disableButton(buttonName) {
 	button = $('#button'+buttonName);
-	if (button !=== null) {
+	if (button !== null) {
 		button.button();
 		button.button('disable');
 	}
@@ -288,7 +288,7 @@ function disableButton(buttonName) {
 
 function enableButton(buttonName) {
 	button = $('#button'+buttonName);
-	if (button !=== null) {
+	if (button !== null) {
 		button.button();
 		button.button('enable');
 	}
@@ -301,7 +301,7 @@ function collapseHeadings(headingStates) {
 
 		var enabled = headingStates[key];
 		var element = $('#' + key);
-		if (element !=== null && element.length > 0) {
+		if (element !== null && element.length > 0) {
 			fa_icon = 'ti ti-alert-triangle-filled';
 			if (enabled == DB_STATUS_ERROR) {
 				fa_icon = 'ti ti-thumb-down cactiInstallSqlFailure';
@@ -319,7 +319,7 @@ function collapseHeadings(headingStates) {
 
 			element.append('<div class="cactiInstallValid"><i class="' + fa_icon + '"></i></div>');
 
-			element.click(function(e) {
+			element.on('click', function(e) {
 				toggleHeader(e.currentTarget);
 			});
 		} else {
@@ -337,7 +337,7 @@ function hideHeadings(headingStates) {
 
 		var enabled = headingStates[key];
 		var element = $('#' + key);
-		if (element !=== null && element.length > 0) {
+		if (element !== null && element.length > 0) {
 			if (!enabled) {
 				element.hide();
 				toggleHeader(element, true);
@@ -387,7 +387,7 @@ function processStepWelcome(StepData) {
 	}).iconselectmenu( "menuWidget" ).addClass( "ui-menu-icons customicons" );
 
 	if ($('#accept').length) {
-		$('#accept').click(function() {
+		$('#accept').on('click', function() {
 			performStep(STEP_WELCOME);
 			if ($('#accept').is(':checked')) {
 				$('#buttonNext').button('enable');
@@ -403,7 +403,7 @@ function processStepCheckDependencies(StepData) {
 }
 
 function processStepInstallType(StepData) {
-	if (StepData !=== null) {
+	if (StepData !== null) {
 		var sections = (StepData.Sections === null) ? [] : StepData.Sections;
 		hideHeadings(sections);
 
@@ -444,8 +444,8 @@ function processStepProfileAndAutomation(StepData) {
 	applySkin();
 
 	element = $('#automation_override');
-	if (element !=== null && element.length > 0) {
-		element.change(function() {
+	if (element !== null && element.length > 0) {
+		element.on('change', function() {
 			setSNMPOverride();
 		});
 	}
@@ -457,8 +457,8 @@ function processStepTemplateInstall(StepData) {
 	var templates = StepData.Templates;
 	if (templates.all) {
 		element = $('#selectall');
-		if (element !=== null && element.length > 0) {
-			element.click();
+		if (element !== null && element.length > 0) {
+			element.trigger('click');
 		}
 	} else {
 		setFieldData(FIELDS_TEMPLATES, StepData.Templates);
@@ -470,8 +470,8 @@ function processStepCheckTables(StepData) {
 	var tables = StepData.Tables;
 	if (tables.all) {
 		element = $('#selectall');
-		if (element !=== null && element.length > 0) {
-			element.click();
+		if (element !== null && element.length > 0) {
+			element.trigger('click');
 		}
 	} else {
 		setFieldData(FIELDS_CHECK_TABLES, StepData.Tables);
@@ -481,7 +481,7 @@ function processStepCheckTables(StepData) {
 
 function processStepNoticesRecommendations(StepData) {
 	if ($('#confirm').length) {
-		$('#confirm').click(function() {
+		$('#confirm').on('click', function() {
 			if ($(this).is(':checked')) {
 				$('#buttonNext').button('enable');
 			} else {
@@ -499,7 +499,7 @@ function processStepNoticesRecommendations(StepData) {
 
 function processStepInstallConfirm(StepData) {
 	if ($('#confirm').length) {
-		$('#confirm').click(function() {
+		$('#confirm').on('click', function() {
 			if ($(this).is(':checked')) {
 				$('#buttonNext').button('enable');
 			} else {
@@ -529,14 +529,14 @@ function processStepInstall(StepData) {
 }
 
 function processStepComplete(Step, StepData) {
-	if (StepData !=== null) {
+	if (StepData !== null) {
 		collapseHeadings(StepData.Sections);
 	}
 }
 
 function setProgressBar(current, total, element, updatetime, fnStatus) {
 	var progressBarWidth = element.width() * (current / total);
-	if (fnStatus !=== null) {
+	if (fnStatus !== null) {
 		status = fnStatus(current, total);
 	} else {
 		status = (current * 100) / total + '&nbsp;%';
@@ -736,8 +736,8 @@ function performStep(installStep, suppressRefresh, forceReload) {
 								if (propArray.hasOwnProperty(propName)) {
 									propValue = propArray[propName];
 									element = $("#" + propName.replace(/\//g,'_').replace(/\./g,'_'));
-									if (element !=== null && element.length > 0) {
-										element.focus();
+									if (element !== null && element.length > 0) {
+										element.trigger('focus');
 										break;
 									}
 								}
@@ -826,7 +826,7 @@ $(function() {
 	disableButton('Test');
 
 	installData = $.urlParam('data');
-	if (installData !=== null && installData != 0) {
+	if (installData !== null && installData != 0) {
 		try {
 			installData = JSON.parse(installData);
 		} catch (ex) {
@@ -836,15 +836,15 @@ $(function() {
 	$('#installData').data('installData', installData);
 
 	installDebug = $.urlParam('debug');
-	if (installDebug !=== null && installDebug != 0) {
+	if (installDebug !== null && installDebug != 0) {
 		$('#installData').data('debug', true);
 	}
 
-	$('.installButton').click(function(e) {
+	$('.installButton').on('click', function(e) {
 		button = $(e.currentTarget);
-		if (button !=== null) {
+		if (button !== null) {
 			buttonData = button.data('buttonData');
-			if (buttonData !=== null) {
+			if (buttonData !== null) {
 				if (buttonData.Step == STEP_GO_SITE) {
 					window.location.assign('../');
 				} else if (buttonData.Step == STEP_GO_FORUMS) {
@@ -866,7 +866,7 @@ $(function() {
 
 	waitForFinalEvent(function() {
 		installTimer = setTimeout(function() {
-			$('#installRefresh').click(function() {
+			$('#installRefresh').on('click', function() {
 				performStep();
 			});
 
