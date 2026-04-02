@@ -54,11 +54,11 @@ function realtimeDetectBrowser() {
 }
 
 function imageOptionsChanged(action) {
-	var graph_start    = $('#graph_start').val();
+	const graph_start  = $('#graph_start').val();
 	var graph_end      = 0;
-	var ds_step        = $('#ds_step').val();
+	const ds_step      = $('#ds_step').val();
 	var size           = $('#size').val();
-	var isThumb        = $('#thumbnails').is(':checked');
+	const isThumb      = $('#thumbnails').is(':checked');
 	var url            = '';
 
 	if (size == null) {
@@ -87,7 +87,7 @@ function imageOptionsChanged(action) {
 
 	$.getJSON(url)
 		.done(function(data) {
-			var image_format = (data.image_format === 'svg+xml') ? 'svg+xml' : 'png';
+			const image_format = (data.image_format === 'svg+xml') ? 'svg+xml' : 'png';
 			if ($('#rimage').length) {
 				$('#rimage').empty().attr('src', `data:image/${image_format};base64,${data.data}`);
 			} else {
@@ -232,12 +232,12 @@ function realtimeGrapher() {
 		originalRefresh = refreshMSeconds;
 	}
 
-	var graph_start = $('#graph_start').val();
+	const graph_start = $('#graph_start').val();
 	var graph_end   = 0;
-	var ds_step     = $('#ds_step').val();
+	const ds_step     = $('#ds_step').val();
 	var size        = $('#size').val();
-    var isThumb     = $('#thumbnails').is(':checked');
-	var totalGraphs = countRealtimeGraphs();
+    const isThumb     = $('#thumbnails').is(':checked');
+	const totalGraphs = countRealtimeGraphs();
 	var key;
 
 	if (size == null) {
@@ -272,10 +272,10 @@ function realtimeGrapher() {
 
 					$.get(`${urlPath}graph_realtime.php?action=countdown&top=${parseInt(position.top)}&left=${parseInt(position.left)}${isThumb ? '&graph_nolegend=true':'&graph_nolegend=false'}&graph_end=0&graph_start=-${parseInt(graph_start) > 0 ? graph_start:'60'}&local_graph_id=${local_graph_id}&ds_step=${ds_step}&count=${count}&size=${size}`)
 						.done(function(data) {
-							var results = JSON.parse(data);
+							const results = JSON.parse(data);
 
 							if (realtimeArray[results.local_graph_id] === true) {
-								var image_format = (results.image_format === 'svg+xml') ? 'svg+xml' : 'png';
+								const image_format = (results.image_format === 'svg+xml') ? 'svg+xml' : 'png';
 								$(`#graph_${results.local_graph_id}`).attr('src', `data:image/${image_format};base64,${results.data}`).trigger('change');
 
 								if (isThumb) {

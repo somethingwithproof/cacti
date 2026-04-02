@@ -114,9 +114,9 @@ const FIELDS_TEMPLATES = {
 var installTimer;
 
 function setSNMPOverride() {
-	var element = $('#automation_override');
+	const element = $('#automation_override');
 	if (element !== null && element.length > 0) {
-		var enabled = ($(element[0]).is(':checked'));
+		const enabled = ($(element[0]).is(':checked'));
 		toggleSection('#automation_snmp_options', enabled);
 	}
 }
@@ -150,12 +150,12 @@ function setFieldData(fields, fieldData) {
 		return;
 	}
 
-	for (var fieldId in fields) {
+	for (const fieldId in fields) {
 		if (!fields.hasOwnProperty(fieldId)) {
 			continue;
 		}
 
-		var field = fields[fieldId];
+		const field = fields[fieldId];
 
 		if (field.type == "checkbox") {
 			for (var propName in fieldData) {
@@ -187,12 +187,12 @@ function getFieldData(fields, fieldData) {
 		return;
 	}
 
-	for (var fieldId in fields) {
+	for (const fieldId in fields) {
 		if (!fields.hasOwnProperty(fieldId)) {
 			continue;
 		}
 
-		var field = fields[fieldId];
+		const field = fields[fieldId];
 
 		if (field.type == 'checkbox') {
 			if (field.name) {
@@ -295,12 +295,12 @@ function enableButton(buttonName) {
 }
 
 function collapseHeadings(headingStates) {
-	for (var key in headingStates) {
+	for (const key in headingStates) {
 		// skip loop if the property is from prototype
 		if (!headingStates.hasOwnProperty(key)) continue;
 
-		var enabled = headingStates[key];
-		var element = $(`#${key}`);
+		const enabled = headingStates[key];
+		const element = $(`#${key}`);
 		if (element !== null && element.length > 0) {
 			fa_icon = 'ti ti-alert-triangle-filled';
 			if (enabled == DB_STATUS_ERROR) {
@@ -329,14 +329,14 @@ function collapseHeadings(headingStates) {
 }
 
 function hideHeadings(headingStates) {
-	for (var key in headingStates) {
+	for (const key in headingStates) {
 		// skip loop if the property is from prototype
 		if (!headingStates.hasOwnProperty(key)) {
 			continue;
 		}
 
-		var enabled = headingStates[key];
-		var element = $(`#${key}`);
+		const enabled = headingStates[key];
+		const element = $(`#${key}`);
 		if (element !== null && element.length > 0) {
 			if (!enabled) {
 				element.hide();
@@ -404,7 +404,7 @@ function processStepCheckDependencies(StepData) {
 
 function processStepInstallType(StepData) {
 	if (StepData != null) {
-		var sections = (StepData.Sections == null) ? [] : StepData.Sections;
+		const sections = (StepData.Sections == null) ? [] : StepData.Sections;
 		hideHeadings(sections);
 
 		$('.cactiInstallSectionTitle').each(function() {
@@ -454,7 +454,7 @@ function processStepProfileAndAutomation(StepData) {
 }
 
 function processStepTemplateInstall(StepData) {
-	var templates = StepData.Templates;
+	const templates = StepData.Templates;
 	if (templates.all) {
 		element = $('#selectall');
 		if (element !== null && element.length > 0) {
@@ -467,7 +467,7 @@ function processStepTemplateInstall(StepData) {
 }
 
 function processStepCheckTables(StepData) {
-	var tables = StepData.Tables;
+	const tables = StepData.Tables;
 	if (tables.all) {
 		element = $('#selectall');
 		if (element !== null && element.length > 0) {
