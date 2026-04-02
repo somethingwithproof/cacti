@@ -126,7 +126,7 @@ function setButtonData(buttonName, buttonData) {
 	if (button !== null) {
 		button.button();
 		button.data('buttonData', buttonData);
-		if (buttonData !== null) {
+		if (buttonData != null) {
 			var buttonCheck = button.data('buttonData');
 			if (buttonData.Enabled) {
 				button.button('enable');
@@ -146,7 +146,7 @@ function setButtonData(buttonName, buttonData) {
 }
 
 function setFieldData(fields, fieldData) {
-	if (fieldData === null) {
+	if (fieldData == null) {
 		return;
 	}
 
@@ -183,7 +183,7 @@ function setFieldData(fields, fieldData) {
 }
 
 function getFieldData(fields, fieldData) {
-	if (fieldData === null) {
+	if (fieldData == null) {
 		return;
 	}
 
@@ -235,7 +235,7 @@ function toggleHeader(key, initial) {
 		initial = null;
 	}
 
-	if (key !== null) {
+	if (key != null) {
 		header = $(key);
 		if (header !== null && header.length > 0) {
 			firstSibling = header.next();
@@ -258,7 +258,7 @@ function toggleSection(key, initial) {
 		initial = null;
 	}
 
-	if (key !== null) {
+	if (key != null) {
 		header = $(key);
 		if (header !== null && header.length > 0) {
 
@@ -403,8 +403,8 @@ function processStepCheckDependencies(StepData) {
 }
 
 function processStepInstallType(StepData) {
-	if (StepData !== null) {
-		var sections = (StepData.Sections === null) ? [] : StepData.Sections;
+	if (StepData != null) {
+		var sections = (StepData.Sections == null) ? [] : StepData.Sections;
 		hideHeadings(sections);
 
 		$('.cactiInstallSectionTitle').each(function() {
@@ -529,14 +529,14 @@ function processStepInstall(StepData) {
 }
 
 function processStepComplete(Step, StepData) {
-	if (StepData !== null) {
+	if (StepData != null) {
 		collapseHeadings(StepData.Sections);
 	}
 }
 
 function setProgressBar(current, total, element, updatetime, fnStatus) {
 	var progressBarWidth = element.width() * (current / total);
-	if (fnStatus !== null) {
+	if (fnStatus != null) {
 		status = fnStatus(current, total);
 	} else {
 		status = (current * 100) / total + '&nbsp;%';
@@ -826,7 +826,7 @@ $(function() {
 	disableButton('Test');
 
 	installData = $.urlParam('data');
-	if (installData !== null && installData != 0) {
+	if (installData != null && installData != 0) {
 		try {
 			installData = JSON.parse(installData);
 		} catch (ex) {
@@ -836,7 +836,7 @@ $(function() {
 	$('#installData').data('installData', installData);
 
 	installDebug = $.urlParam('debug');
-	if (installDebug !== null && installDebug != 0) {
+	if (installDebug != null && installDebug != 0) {
 		$('#installData').data('debug', true);
 	}
 
@@ -844,7 +844,7 @@ $(function() {
 		button = $(e.currentTarget);
 		if (button !== null) {
 			buttonData = button.data('buttonData');
-			if (buttonData !== null) {
+			if (buttonData != null) {
 				if (buttonData.Step == STEP_GO_SITE) {
 					window.location.assign('../');
 				} else if (buttonData.Step == STEP_GO_FORUMS) {

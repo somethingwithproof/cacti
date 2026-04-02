@@ -61,7 +61,7 @@ function imageOptionsChanged(action) {
 	var isThumb        = $('#thumbnails').is(':checked');
 	var url            = '';
 
-	if (size === null) {
+	if (size == null) {
 		size = 100;
 	}
 
@@ -240,7 +240,7 @@ function realtimeGrapher() {
 	var totalGraphs = countRealtimeGraphs();
 	var key;
 
-	if (size === null) {
+	if (size == null) {
 		size = 100;
 	}
 
