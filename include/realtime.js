@@ -61,23 +61,23 @@ function imageOptionsChanged(action) {
 	var isThumb        = $('#thumbnails').is(':checked');
 	var url            = '';
 
-	if (size == null) {
+	if (size === null) {
 		size = 100;
 	}
 
 	local_graph_id = $('#local_graph_id').val();
 
-	if (rtWidth == 0) {
+	if (rtWidth === 0) {
 		rtWidth = $(window).width();
 	}
 
-	if (rtHeight == 0) {
+	if (rtHeight === 0) {
 		rtHeight = $(window).height()+50;
 	}
 
-	if (action == 'countdown') {
+	if (action === 'countdown') {
 		url = 'graph_realtime.php?action=countdown&top=0&left=0&local_graph_id='+local_graph_id+'&ds_step='+ds_step+'&count='+count+'&size='+size+'&graph_nolegend='+isThumb;
-	} else if (action == 'initial') {
+	} else if (action === 'initial') {
 		url = 'graph_realtime.php?action=initial&top=0&left=0&local_graph_id='+local_graph_id+'&graph_start=-'+(parseInt(graph_start) > 0 ? graph_start:'60')+'&ds_step='+ds_step+'&count='+count+'&size='+size;
 	} else {
 		url = 'graph_realtime.php?action='+action+'&top=0&left=0&local_graph_id='+local_graph_id+'&graph_start=-'+(parseInt(graph_start) > 0 ? graph_start:'60')+'&ds_step='+ds_step+'&count='+count+'&size='+size+'&graph_nolegend='+isThumb;
@@ -87,7 +87,7 @@ function imageOptionsChanged(action) {
 
 	$.getJSON(url)
 		.done(function(data) {
-			var image_format = (data.image_format == 'svg+xml') ? 'svg+xml' : 'png';
+			var image_format = (data.image_format === 'svg+xml') ? 'svg+xml' : 'png';
 			if ($('#rimage').length) {
 				$('#rimage').empty().attr('src', 'data:image/'+image_format+';base64,'+data.data);
 			} else {
@@ -122,7 +122,7 @@ function imageOptionsChanged(action) {
 					}
 				}
 
-				if (data.thumbnails == 'true') {
+				if (data.thumbnails === 'true') {
 					$('#thumbnails').prop('checked', true);
 				} else {
 					$('#thumbnails').prop('checked', false);
@@ -137,7 +137,7 @@ function imageOptionsChanged(action) {
 }
 
 function setRealtimeWindowSize() {
-	if (realtimePopout == true) {
+	if (realtimePopout === true) {
 		/* set the window size */
 		var height1 = $('#rtfilter').outerHeight() + 60;
 		var height2 = $('#rimage').outerHeight() + 30;
@@ -155,7 +155,7 @@ function countRealtimeGraphs() {
 	var graphs = 0;
 
 	for (key in realtimeArray) {
-		if (realtimeArray[key] == true) {
+		if (realtimeArray[key] === true) {
 			graphs++;
 		}
 	}
@@ -198,7 +198,7 @@ function setFilters() {
 	var key;
 
 	for (key in realtimeArray) {
-		if (realtimeArray[key] == true) {
+		if (realtimeArray[key] === true) {
 			inRT = true;
 			break;
 		}
@@ -228,7 +228,7 @@ function realtimeGrapher() {
 	clearTimeout(myRefresh);
 	clearTimeout(realtimeTimer);
 
-	if (originalRefresh == 0) {
+	if (originalRefresh === 0) {
 		originalRefresh = refreshMSeconds;
 	}
 
@@ -240,22 +240,22 @@ function realtimeGrapher() {
 	var totalGraphs = countRealtimeGraphs();
 	var key;
 
-	if (size == null) {
+	if (size === null) {
 		size = 100;
 	}
 
-	if (graphsRendered == null || graphsRendered >= totalGraphs || prevTotalGraphs != totalGraphs) {
+	if (graphsRendered === null || graphsRendered >= totalGraphs || prevTotalGraphs !== totalGraphs) {
 		//console.log('Rendering: Total Graphs:' + totalGraphs + ', Rendered Graphs:' + graphsRendered);
 
 		graphsRendered = 0;
 		prevTotalGraphs = totalGraphs;
 
 		for (key in realtimeArray) {
-			if (realtimeArray[key] == true) {
+			if (realtimeArray[key] === true) {
 				local_graph_id = key
 
 				if (isThumb) {
-					if (rtWidth == 0) {
+					if (rtWidth === 0) {
 						rtWidth    = $('#wrapper_'+local_graph_id).find('img').width();
 						rtHeight   = $('#wrapper_'+local_graph_id).find('img').height();
 					}
@@ -274,8 +274,8 @@ function realtimeGrapher() {
 						.done(function(data) {
 							var results = $.parseJSON(data);
 
-							if (realtimeArray[results.local_graph_id] == true) {
-								var image_format = (results.image_format == 'svg+xml') ? 'svg+xml' : 'png';
+							if (realtimeArray[results.local_graph_id] === true) {
+								var image_format = (results.image_format === 'svg+xml') ? 'svg+xml' : 'png';
 								$('#graph_'+results.local_graph_id).attr('src', 'data:image/'+image_format+';base64,'+results.data).change();
 
 								if (isThumb) {
@@ -299,7 +299,7 @@ function realtimeGrapher() {
 		}
 	}
 
-	if (totalGraphs == 0) {
+	if (totalGraphs === 0) {
 		stopRealtime();
 	} else if (graphsRendered < totalGraphs) {
 		destroy(realtimeTimer);
@@ -321,7 +321,7 @@ function destroy(obj) {
 	for (var prop in obj){
 		var property = obj[prop];
 
-		if (property != null && typeof(property) == 'object') {
+		if (property !== null && typeof(property) === 'object') {
             destroy(property);
         } else {
             obj[prop] = null;

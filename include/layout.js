@@ -2447,7 +2447,7 @@ function userMenuNavigationExists(url) {
 
 function loadPageUsingPost(href, postData, returnLocation) {
 	var stack = ''; //getStackTrace(); // new Error().stack;
-	console.error("Function loadPageUsingPost is now depreciated, use postUrl instead\n" + stack);
+	console.error("Function loadPageUsingPost is now deprecated, use postUrl instead\n" + stack);
 	return postUrl({
 		url: href,
 		tabId: returnLocation,
@@ -2458,7 +2458,7 @@ function loadPageUsingPost(href, postData, returnLocation) {
 function setNavigationScroll() {
 	var object = '';
 
-	$('.cactiConsoleNavigationArea, .cactiTreeNavigationArea').unbind('mousemove').on('mousemove', function (pos) {
+	$('.cactiConsoleNavigationArea, .cactiTreeNavigationArea').off('mousemove').on('mousemove', function (pos) {
 		object = '';
 
 		if ($('.cactiConsoleNavigationArea').length) {
@@ -2497,7 +2497,7 @@ function setNavigationScroll() {
 		}
 	});
 
-	$('.cactiConsoleNavigationArea, .cactiTreeNavigationArea').unbind('mouseleave').on('mouseleave', function (pos) {
+	$('.cactiConsoleNavigationArea, .cactiTreeNavigationArea').off('mouseleave').on('mouseleave', function (pos) {
 		if ($('.cactiConsoleNavigationArea').length) {
 			object = '.cactiConsoleNavigationArea';
 		} else if ($('.cactiTreeNavigationArea').length) {
@@ -2515,7 +2515,7 @@ function setNavigationScroll() {
 
 function loadPageNoHeader(href, scroll, force) {
 	var stack = ''; //getStackTrace(); // new Error().stack;
-	console.error("Function loadPageNoHeader is now depreciated, use loadUrl instead\n" + stack);
+	console.error("Function loadPageNoHeader is now deprecated, use loadUrl instead\n" + stack);
 	return loadUrl({
 		url: href,
 		scroll: scroll,
@@ -2526,7 +2526,7 @@ function loadPageNoHeader(href, scroll, force) {
 
 function loadPage(href, force) {
 	var stack = ''; //getStackTrace(); // new Error().stack;
-	console.error("Function loadPage is now depreciated, use loadUrl instead\n" + stack);
+	console.error("Function loadPage is now deprecated, use loadUrl instead\n" + stack);
 	return loadUrl({
 		url: href,
 		force: force,
@@ -3382,7 +3382,7 @@ function cactiReady() {
 	/**
 	 * Unbind key elements to debounce actions
 	 */
-	$('input, select, textarea, a').unbind();
+	$('input, select, textarea, a').off();
 
 	// Use traditional popstate handler
 	window.onpopstate = function (event) {
