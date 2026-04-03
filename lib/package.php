@@ -493,6 +493,8 @@ function find_paths(string $input, string $type = 'cacti_xml') : array {
 	$input = htmlspecialchars_decode($input);
 	$parts = preg_split('/\s+/', $input);
 
+	$real_base = realpath(CACTI_PATH_BASE);
+
 	foreach ($parts as $part) {
 		$opath = htmlspecialchars($part);
 		$part  = str_replace('<path_cacti>', CACTI_PATH_BASE, $part);
@@ -506,6 +508,13 @@ function find_paths(string $input, string $type = 'cacti_xml') : array {
 		$valid = true;
 
 		if (file_exists($part)) {
+			$real_part = realpath($part);
+
+			if ($real_base === false || $real_part === false
+				|| !str_starts_with($real_part . DIRECTORY_SEPARATOR, $real_base . DIRECTORY_SEPARATOR)) {
+				continue;
+			}
+
 			foreach ($excluded_paths as $path) {
 				if (str_contains($part, $path)) {
 					$valid = false;
@@ -516,7 +525,7 @@ function find_paths(string $input, string $type = 'cacti_xml') : array {
 
 			if ($valid) {
 				foreach ($excluded_basenames as $binary) {
-					if (str_contains($binary, basename($part))) {
+					if (str_contains(basename($part), $binary)) {
 						$valid = false;
 
 						break;
