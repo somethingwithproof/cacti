@@ -727,9 +727,39 @@ function get_data_query_array(int $snmp_query_id) : array {
 			return [];
 		}
 
+		try {
+			$allowed_base = realpath(CACTI_PATH_BASE);
+			$resolved     = realpath($xml_file_path);
+		} catch (\ValueError $e) {
+			/* PHP 8.0+ throws ValueError for paths containing null bytes */
+			$safe_path = preg_replace('/[\x00-\x1F\x7F\x{2028}\x{2029}]/u', '', $xml_file_path);
+			cacti_log('SECURITY: Data query XML path caused exception: ' . $safe_path, false, 'SECURITY');
+			query_debug_timer_offset('data_query', __esc('SECURITY: data query XML path caused exception: \'%s\'', $safe_path));
+
+			return [];
+		}
+
+		$sep      = DIRECTORY_SEPARATOR;
+		$base_cmp = rtrim(str_replace(['/', '\\'], $sep, $allowed_base ?: ''), $sep) . $sep;
+		$path_cmp = str_replace(['/', '\\'], $sep, $resolved ?: '') . $sep;
+
+		if ($allowed_base === false || $resolved === false || !str_starts_with($path_cmp, $base_cmp)) {
+			$safe_path = preg_replace('/[\x00-\x1F\x7F\x{2028}\x{2029}]/u', '', $xml_file_path);
+			cacti_log('SECURITY: Data query XML path outside Cacti base: ' . $safe_path, false, 'SECURITY');
+			query_debug_timer_offset('data_query', __esc('SECURITY: data query XML path outside Cacti base: \'%s\'', $safe_path));
+
+			return [];
+		}
+
+		if (!is_file($resolved)) {
+			query_debug_timer_offset('data_query', __esc('Data query XML path is not a file: \'%s\'', $xml_file_path));
+
+			return [];
+		}
+
 		query_debug_timer_offset('data_query', __esc('Found data query XML file at \'%s\'', $xml_file_path));
 
-		$data = implode('',file($xml_file_path));
+		$data = implode('',file($resolved));
 
 		$xml_data = xml2array($data);
 
