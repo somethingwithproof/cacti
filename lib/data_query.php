@@ -721,15 +721,30 @@ function get_data_query_array(int $snmp_query_id) : array {
 		$replace       = [CACTI_PATH_BASE, read_config_option('path_snmpget'), read_config_option('path_php_binary')];
 		$xml_file_path = str_replace($search, $replace, $xml_file_path);
 
-		if (!file_exists($xml_file_path)) {
-			query_debug_timer_offset('data_query', __esc('Could not find data query XML file at \'%s\'', $xml_file_path));
+		/*
+		 * Enforce a path boundary so a tampered xml_path row cannot point outside
+		 * the Cacti installation (e.g. /etc/passwd, ../../sensitive). realpath()
+		 * resolves symlinks and traversal sequences before we compare prefixes.
+		 */
+		$real_xml_path = realpath($xml_file_path);
+		$allowed_base  = realpath(CACTI_PATH_BASE);
+
+		if ($real_xml_path === false || $allowed_base === false
+			|| !str_starts_with($real_xml_path, $allowed_base . DIRECTORY_SEPARATOR)) {
+			query_debug_timer_offset('data_query', __esc('Data query XML path \'%s\' is outside the allowed base directory', $xml_file_path));
 
 			return [];
 		}
 
-		query_debug_timer_offset('data_query', __esc('Found data query XML file at \'%s\'', $xml_file_path));
+		if (!file_exists($real_xml_path)) {
+			query_debug_timer_offset('data_query', __esc('Could not find data query XML file at \'%s\'', $real_xml_path));
 
-		$data = implode('',file($xml_file_path));
+			return [];
+		}
+
+		query_debug_timer_offset('data_query', __esc('Found data query XML file at \'%s\'', $real_xml_path));
+
+		$data = implode('', file($real_xml_path));
 
 		$xml_data = xml2array($data);
 
