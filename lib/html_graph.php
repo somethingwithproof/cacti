@@ -773,6 +773,16 @@ function html_save_graph_settings() : void {
 	}
 }
 
+/**
+ * Render the graph preview view, enforcing view permission and building a filtered graph list.
+ *
+ * Access is gated by is_view_allowed('show_preview'); unauthorized requests are
+ * redirected to permission_denied.php. The rfilter request variable is passed
+ * directly into a MySQL RLIKE clause; callers must ensure it has been validated
+ * and sanitized via get_filter_request_var() before this function is called.
+ *
+ * @return void
+ */
 function html_graph_preview_view() : void {
 	global $is_request_ajax;
 
@@ -1142,6 +1152,16 @@ function draw_listview_filter(bool $render = false) : void {
 	}
 }
 
+/**
+ * Render the graph list view, enforcing view permission and building a filtered graph list.
+ *
+ * Access is gated by is_view_allowed('show_list'); unauthorized requests are
+ * redirected to permission_denied.php. The rfilter request variable is passed
+ * directly into a MySQL RLIKE clause; callers must ensure it has been validated
+ * and sanitized via get_filter_request_var() before this function is called.
+ *
+ * @return void
+ */
 function html_graph_list_view() : void {
 	global $graph_timespans, $alignment, $graph_sources, $item_rows;
 

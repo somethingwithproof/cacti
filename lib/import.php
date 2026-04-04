@@ -490,6 +490,23 @@ function import_get_package_info(string $xmlfile) : mixed {
 	return false;
 }
 
+/**
+ * Read and verify a signed Cacti package file, returning its parsed XML data.
+ *
+ * Opens $xmlfile via the compress.zlib:// stream wrapper, extracts the
+ * embedded binary signature, and verifies it against the Cacti public key
+ * using openssl_verify() (SHA-1 for short keys, SHA-256 for full-length keys).
+ * Returns false without executing any import logic if the signature check fails
+ * and $preview is false, preventing unsigned or tampered packages from being
+ * loaded. The $public_key out-parameter is populated regardless of the
+ * signature result so callers can report which key was used.
+ *
+ * @param string $xmlfile    Path to the .tgz/.xml package file to read
+ * @param string $public_key Out-parameter: populated with the PEM public key found in the package
+ * @param bool   $preview    When true, skip the signature check (safe for display-only previews)
+ *
+ * @return mixed Parsed package data array on success, false on read or signature failure
+ */
 function import_read_package_data(string $xmlfile, string &$public_key, bool $preview = false) : mixed {
 	$public_key = import_package_get_public_key($xmlfile);
 

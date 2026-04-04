@@ -135,6 +135,18 @@ function remote_agent_strip_domain(string $host) : string {
 	}
 }
 
+/**
+ * Verify that the HTTP client is an authorized Cacti poller.
+ *
+ * Authorization requires the client IP to resolve via reverse DNS to a hostname
+ * that matches a registered poller (after domain-suffix stripping), or for the
+ * raw IP to match a registered poller hostname, or to appear in
+ * $remote_agent_whitelist. Requests that arrive without a valid IP (e.g. CLI
+ * invocations) are rejected. An invalid IP that does not pass FILTER_VALIDATE_IP
+ * is also rejected with a log entry.
+ *
+ * @return bool True if the client is an authorized poller, false otherwise
+ */
 function remote_client_authorized() : bool {
 	global $poller_db_cnn_id, $remote_agent_whitelist;
 
@@ -182,6 +194,17 @@ function remote_client_authorized() : bool {
 	return false;
 }
 
+/**
+ * Validate graph request variables and stream RRDtool graph output to the client.
+ *
+ * All numeric inputs (graph_start, graph_end, graph_height, graph_width,
+ * local_graph_id, rra_id) are retrieved via gfrv(), which applies FILTER_VALIDATE_INT
+ * and rejects out-of-range values. graph_theme is sanitized via
+ * sanitize_search_string(). Callers are responsible for invoking
+ * remote_client_authorized() before dispatching to this function.
+ *
+ * @return bool Always returns true after emitting graph output
+ */
 function get_graph_data() : bool {
 	gfrv('graph_start');
 	gfrv('graph_end');
@@ -254,6 +277,16 @@ function get_graph_data() : bool {
 	return true;
 }
 
+/**
+ * Fetch a single SNMP OID value for a host and print the result.
+ *
+ * host_id is retrieved via gfrv() (FILTER_VALIDATE_INT). The OID string is
+ * retrieved via gnrv() without regex filtering; callers should ensure the
+ * endpoint is only reachable by authorized pollers (see remote_client_authorized()).
+ * Prints 'U' if the SNMP session cannot be established.
+ *
+ * @return void
+ */
 function get_snmp_data() : void {
 	$host_id = gfrv('host_id');
 	$oid     = gnrv('oid');

@@ -9684,6 +9684,17 @@ function get_keyup_delay() : int {
 	return $keyup_delay;
 }
 
+/**
+ * Unserialize a string while blocking object instantiation.
+ *
+ * Passes ['allowed_classes' => false] to unserialize() so no __wakeup or
+ * __unserialize methods can execute. Use this instead of bare unserialize()
+ * whenever the source string is not fully trusted.
+ *
+ * @param string $strobj Serialized string to decode
+ *
+ * @return mixed The unserialized value, or false if $strobj is not a valid serialized string
+ */
 function cacti_unserialize(string $strobj) : mixed {
 	return unserialize($strobj, ['allowed_classes' => false]);
 }

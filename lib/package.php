@@ -405,6 +405,19 @@ function get_package_public_key() : mixed {
 	}
 }
 
+/**
+ * Scan package XML data for embedded file paths and return those that exist on disk.
+ *
+ * Parses <xml_path>, <script_path>, and <input_string> elements. Each extracted
+ * path is validated by find_paths(), which enforces that the resolved realpath
+ * stays within allowed Cacti directories. Paths outside those boundaries are
+ * excluded from the returned list.
+ *
+ * @param string $xml_data      Raw XML string from the package being inspected
+ * @param bool   $raise_message If true, raise a UI error message for each missing path
+ *
+ * @return array List of existing file paths referenced by the package
+ */
 function find_dependent_files(string $xml_data, bool $raise_message = false) : array {
 	$files = [];
 	$data  = explode("\n", $xml_data);
@@ -434,6 +447,19 @@ function find_dependent_files(string $xml_data, bool $raise_message = false) : a
 	return $files;
 }
 
+/**
+ * Extract and validate paths from a single template XML line, merging results into $files.
+ *
+ * Delegates path extraction and boundary enforcement to find_paths(). Paths that
+ * resolve outside permitted Cacti directories are silently dropped; if
+ * $raise_message is true, missing paths also generate a UI error message.
+ *
+ * @param string $line          A single line of template XML content to inspect
+ * @param array  $files         Accumulator of already-found valid file paths
+ * @param bool   $raise_message If true, raise a UI error for each path that does not exist
+ *
+ * @return array Updated $files array with any newly found paths appended
+ */
 function process_paths(string $line, array $files, bool $raise_message) : array {
 	$paths = find_paths(trim($line));
 

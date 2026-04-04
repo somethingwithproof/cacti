@@ -1065,6 +1065,24 @@ function reports_generate_html(int $reports_id, int $output = REPORTS_OUTPUT_STD
 	}
 }
 
+/**
+ * Recursively expand a tree branch and all its child branches for a report.
+ *
+ * Renders graph output for $branch_id if the branch contains any graphs
+ * matching $item['graph_name_regexp'] (checked via reports_tree_has_graphs()),
+ * then recurses into every immediate child branch. The graph_name_regexp value
+ * is passed directly into a MySQL REGEXP clause inside reports_expand_tree();
+ * callers must ensure it has been validated before the report is saved.
+ *
+ * @param array  $report    Report parameters row from the reports table
+ * @param array  $item      Report item row, including tree_id and graph_name_regexp
+ * @param int    $branch_id ID of the graph_tree_items branch to expand
+ * @param int    $output    Output format constant (REPORTS_OUTPUT_STDOUT etc.)
+ * @param bool   $format_ok Whether CSS/format file loaded successfully
+ * @param string $theme     Theme name to use for rendered graph HTML
+ *
+ * @return string Accumulated HTML output for this branch and all descendants
+ */
 function expand_branch(array &$report, array &$item, int $branch_id, int $output = REPORTS_OUTPUT_STDOUT, bool $format_ok = false, string $theme = 'modern') : string {
 	$outstr = '';
 

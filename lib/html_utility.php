@@ -1344,11 +1344,15 @@ function update_order_string(bool $inplace = false) : void {
 /**
  * Generates an SQL ORDER BY clause based on the current sorting preferences.
  *
- * This function constructs an ORDER BY clause using the sort column and sort direction
- * specified in the request variables. It also ensures that the column name is properly
- * delimited to prevent SQL injection.
+ * Build an ORDER BY clause from the current page's validated sort request variables.
  *
- * @return string The generated ORDER BY clause.
+ * Column names are backtick-delimited to prevent SQL injection; the delimiter
+ * is omitted only when the column already contains parentheses or backticks
+ * (i.e. SQL expressions stored server-side). The result is cached in
+ * $_SESSION['sort_string'] for the current page token so repeated calls within
+ * a single request are consistent.
+ *
+ * @return string A complete ORDER BY clause ready for direct use in a query
  */
 function get_order_string() : string {
 	$page = get_order_string_page();

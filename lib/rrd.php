@@ -2990,6 +2990,21 @@ function rrdtool_function_format_graph_date(array &$graph_data_array) : string {
 	return $graph_legend;
 }
 
+/**
+ * Build the RRDtool color, border, and font option string for a graph render.
+ *
+ * The theme is resolved from $graph_data_array['graph_theme'] when present,
+ * falling back to get_selected_theme(). The resolved name is used to construct
+ * a file path under CACTI_PATH_INCLUDE/themes/<theme>/rrdtheme.php; only paths
+ * that exist and are readable are included, so arbitrary theme names cannot
+ * force inclusion of files outside the themes directory. Color mode variants
+ * (dark, light, dark-dimmed) are accepted only when present in the cookie and
+ * matched against a fixed allowlist before selecting the color table.
+ *
+ * @param array $graph_data_array Graph render options; 'graph_theme' key selects the theme
+ *
+ * @return string RRDtool CLI option string containing --color, --border, and --font flags
+ */
 function rrdtool_function_theme_font_options(array &$graph_data_array) : string {
 	global $rrdcolors, $rrdfonts, $rrdborder;
 

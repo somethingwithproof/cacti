@@ -38,11 +38,15 @@ function api_user_realm_auth(string $filename = '') : bool {
 }
 
 /**
- * This function executes a hook.
+ * Execute a named plugin hook, passing optional extra arguments to each registered handler.
  *
- * @param string $name Name of hook to fire
+ * Before including any plugin file, the function rejects hook records whose
+ * file path contains '..' to prevent directory-traversal inclusion. Plugin
+ * files are resolved strictly under CACTI_PATH_PLUGINS/<plugin>/.
  *
- * @return array The function args to be passed to the next plugin
+ * @param string $name Name of the hook to fire
+ *
+ * @return array The argument list after all plugins have had a chance to act
  */
 function api_plugin_hook(string $name) : array {
 	global $plugin_hooks, $plugins_integrated;
@@ -110,6 +114,20 @@ function api_plugin_hook(string $name) : array {
 	return $args;
 }
 
+/**
+ * Execute a named plugin hook that accepts and returns a value.
+ *
+ * Unlike api_plugin_hook(), this variant threads a single value through each
+ * registered handler in plugin priority order, with each handler's return
+ * value becoming the input to the next. Plugin files are resolved strictly
+ * under CACTI_PATH_PLUGINS/<plugin>/ via api_plugin_can_install() before
+ * inclusion.
+ *
+ * @param string $name Name of the hook to fire
+ * @param mixed  $parm Initial value to pass into the first handler
+ *
+ * @return mixed The value returned by the last handler, or $parm if no handlers ran
+ */
 function api_plugin_hook_function(string $name, mixed $parm = null) : mixed {
 	global $plugin_hooks, $plugins_integrated;
 
@@ -683,6 +701,20 @@ function api_plugin_can_install(string $plugin, string &$message) : bool {
 	return $proceed;
 }
 
+/**
+ * Install a plugin by loading its setup.php and registering it in plugin_config.
+ *
+ * The plugin directory name is used to construct the path to setup.php under
+ * CACTI_PATH_PLUGINS/<plugin>/. Dependency and capability checks run before any
+ * file is included; if they fail the function raises a message and redirects
+ * rather than returning false. Non-alphanumeric characters are stripped from
+ * the directory name before logging to prevent log injection.
+ *
+ * @param string $plugin Directory name of the plugin to install
+ *
+ * @return bool True on success, false if a version function or directory naming
+ *              check fails before the DB insert
+ */
 function api_plugin_install(string $plugin) : bool {
 	if (!defined('IN_CACTI_INSTALL')) {
 		define('IN_CACTI_INSTALL', 1);
@@ -854,6 +886,19 @@ function api_plugin_realms_found(string $plugin) : mixed {
 	return db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_realms WHERE plugin = ?', [$plugin]) ? true : false;
 }
 
+/**
+ * Uninstall a plugin, removing its hooks, realms, and config rows.
+ *
+ * If setup.php exists under CACTI_PATH_PLUGINS/<plugin>/, it is loaded and
+ * the plugin's own uninstall function is called first. Hook and realm records
+ * are then removed unconditionally. When $tables is true, any database tables
+ * created by the plugin are also dropped via api_plugin_db_changes_remove().
+ *
+ * @param string $plugin Directory name of the plugin to uninstall
+ * @param bool   $tables Whether to drop plugin-created database tables (default true)
+ *
+ * @return void
+ */
 function api_plugin_uninstall(string $plugin, bool $tables = true) : void {
 	$plugin_found = false;
 
@@ -955,6 +1000,16 @@ function api_plugin_is_enabled(string $plugin) : bool {
 	return false;
 }
 
+/**
+ * Disable a plugin by disabling its hooks and setting its status to inactive.
+ *
+ * Sets plugin_config.status to 4 for the given directory name, disables all
+ * associated hook entries, and replicates the config change to remote pollers.
+ *
+ * @param string $plugin Directory name of the plugin to disable
+ *
+ * @return void
+ */
 function api_plugin_disable(string $plugin) : void {
 	api_plugin_disable_hooks($plugin);
 
@@ -1448,6 +1503,22 @@ function api_plugin_archive_remove(string $plugin, string $id) : void {
 	raise_message('plugin_archive_removed', __('The Archive for Plugin \'%s\' has been removed.', $plugin), MESSAGE_LEVEL_INFO);
 }
 
+/**
+ * Restore a plugin from a stored archive or a downloaded release tarball.
+ *
+ * The archive blob is base64-decoded and written to a temporary file in
+ * sys_get_temp_dir(). The restore destination is fixed to
+ * CACTI_PATH_BASE/plugins/<plugin> — PharData extraction is performed into
+ * that directory, so the plugin directory name bounds where files are written.
+ * For GitHub release archives (type != 'archive') the extra top-level
+ * directory added by GitHub is stripped before extraction.
+ *
+ * @param string $plugin Directory name of the plugin to restore
+ * @param string $id     Archive row ID (plugin_archive.id) or tag name (plugin_available.tag_name)
+ * @param string $type   'archive' to restore from plugin_archive, any other value to load from plugin_available
+ *
+ * @return bool True on success, false if the archive is empty or extraction fails
+ */
 function api_plugin_archive_restore(string $plugin, string $id, string $type = 'archive') : bool {
 	if ($type == 'archive') {
 		$archive = db_fetch_cell_prepared('SELECT archive
