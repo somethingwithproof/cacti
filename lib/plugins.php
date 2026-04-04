@@ -886,11 +886,15 @@ function api_plugin_realms_found(string $plugin) : mixed {
 function api_plugin_uninstall(string $plugin, bool $tables = true) : void {
 	$plugin_found = false;
 
-	$real_plugins_u = realpath(CACTI_PATH_PLUGINS);
-	$real_setup_u   = realpath(CACTI_PATH_PLUGINS . "/$plugin/setup.php");
+	if (file_exists(CACTI_PATH_PLUGINS . "/$plugin/setup.php")) {
+		$real_plugins_u = realpath(CACTI_PATH_PLUGINS);
+		$real_setup_u   = realpath(CACTI_PATH_PLUGINS . "/$plugin/setup.php");
+	} else {
+		$real_plugins_u = false;
+		$real_setup_u   = false;
+	}
 
-	if (file_exists(CACTI_PATH_PLUGINS . "/$plugin/setup.php")
-		&& $real_plugins_u !== false && $real_setup_u !== false
+	if ($real_plugins_u !== false && $real_setup_u !== false
 		&& str_starts_with($real_setup_u . DIRECTORY_SEPARATOR, $real_plugins_u . DIRECTORY_SEPARATOR)) {
 		cacti_log(sprintf('NOTE: Loading setup.php for plugin %s (uninstall)', $plugin), false, 'PLUGIN', POLLER_VERBOSITY_DEBUG);
 		require_once($real_setup_u);
@@ -935,11 +939,15 @@ function api_plugin_uninstall(string $plugin, bool $tables = true) : void {
 function api_plugin_check_config(string $plugin) : bool {
 	clearstatcache();
 
-	$real_plugins_c = realpath(CACTI_PATH_PLUGINS);
-	$real_setup_c   = realpath(CACTI_PATH_PLUGINS . "/$plugin/setup.php");
+	if (file_exists(CACTI_PATH_PLUGINS . "/$plugin/setup.php")) {
+		$real_plugins_c = realpath(CACTI_PATH_PLUGINS);
+		$real_setup_c   = realpath(CACTI_PATH_PLUGINS . "/$plugin/setup.php");
+	} else {
+		$real_plugins_c = false;
+		$real_setup_c   = false;
+	}
 
-	if (file_exists(CACTI_PATH_PLUGINS . "/$plugin/setup.php")
-		&& $real_plugins_c !== false && $real_setup_c !== false
+	if ($real_plugins_c !== false && $real_setup_c !== false
 		&& str_starts_with($real_setup_c . DIRECTORY_SEPARATOR, $real_plugins_c . DIRECTORY_SEPARATOR)) {
 		cacti_log(sprintf('NOTE: Loading setup.php for plugin %s (check_config)', $plugin), false, 'PLUGIN', POLLER_VERBOSITY_DEBUG);
 		require_once($real_setup_c);
