@@ -493,7 +493,11 @@ function find_paths(string $input, string $type = 'cacti_xml') : array {
 	$input = htmlspecialchars_decode($input);
 	$parts = preg_split('/\s+/', $input);
 
-	$real_base = realpath(CACTI_PATH_BASE);
+	// Resolve allowed export roots once; realpath() returns false for missing dirs.
+	$allowed_base  = realpath(CACTI_PATH_BASE);
+	$scripts_base  = realpath(CACTI_PATH_SCRIPTS);
+	$rra_base      = realpath(CACTI_PATH_RRA);
+	$resource_base = realpath(CACTI_PATH_RESOURCE);
 
 	foreach ($parts as $part) {
 		$opath = htmlspecialchars($part);
@@ -510,13 +514,22 @@ function find_paths(string $input, string $type = 'cacti_xml') : array {
 		if (file_exists($part)) {
 			$real_part = realpath($part);
 
-			if ($real_base === false || $real_part === false
-				|| !str_starts_with($real_part . DIRECTORY_SEPARATOR, $real_base . DIRECTORY_SEPARATOR)) {
+			if ($real_part === false) {
+				continue;
+			}
+
+			// Reject paths that do not fall under any configured export root.
+			$in_allowed = ($allowed_base  !== false && str_starts_with($real_part, $allowed_base  . DIRECTORY_SEPARATOR))
+				|| ($scripts_base  !== false && str_starts_with($real_part, $scripts_base  . DIRECTORY_SEPARATOR))
+				|| ($rra_base      !== false && str_starts_with($real_part, $rra_base      . DIRECTORY_SEPARATOR))
+				|| ($resource_base !== false && str_starts_with($real_part, $resource_base . DIRECTORY_SEPARATOR));
+
+			if (!$in_allowed) {
 				continue;
 			}
 
 			foreach ($excluded_paths as $path) {
-				if (str_contains($part, $path)) {
+				if (str_contains($real_part, $path)) {
 					$valid = false;
 
 					break;
@@ -525,7 +538,7 @@ function find_paths(string $input, string $type = 'cacti_xml') : array {
 
 			if ($valid) {
 				foreach ($excluded_basenames as $binary) {
-					if (str_contains(basename($part), $binary)) {
+					if (str_contains(basename($real_part), $binary)) {
 						$valid = false;
 
 						break;
@@ -534,7 +547,7 @@ function find_paths(string $input, string $type = 'cacti_xml') : array {
 			}
 
 			if ($valid) {
-				$paths[] = ['opath' => $opath, 'file' => $part];
+				$paths[] = ['opath' => $opath, 'file' => $real_part];
 			}
 		} elseif (str_contains($part, '/') || str_contains($part, '\\')) {
 			$mpaths[] = ['opath' => $opath, 'file' => $part];

@@ -15,13 +15,13 @@
 /*
  * Tests for hardening of lib/package.php find_paths().
  *
- * Issue #6933: str_contains args were reversed in the excluded_basenames loop —
- * str_contains($binary, basename($part)) always returned false. Fixed to
- * str_contains(basename($part), $binary).
- *
- * Issue #6934: find_paths() accepted any file_exists() path with no check that
+ * Issue #6933: find_paths() accepted any file_exists() path with no check that
  * it falls within CACTI_PATH_BASE, allowing sensitive files to be bundled into
  * exported packages. Fixed with a realpath() boundary check.
+ *
+ * Issue #6934: str_contains args were reversed in the excluded_basenames loop —
+ * str_contains($binary, basename($part)) always returned false. Fixed to
+ * str_contains(basename($part), $binary).
  */
 
 function getPackageFindPathsSource(): string {
