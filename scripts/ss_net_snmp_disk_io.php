@@ -160,9 +160,9 @@ function ss_net_snmp_disk_io($host_id_or_hostname = '') {
 					$reads = 'U';
 				} elseif ($previous["dr$index"] > $measure['value']) {
 					if ($reads != 'U') {
-						$reads += intval($measure['value']) + 4294967295 - intval($previous["dr$index"]) - intval($previous["dr$index"]);
+						$reads += intval($measure['value']) + 4294967296 - intval($previous["dr$index"]);
 					} else {
-						$reads = intval($measure['value']) + 4294967295 - intval($previous["dr$index"]) - intval($previous["dr$index"]);
+						$reads = intval($measure['value']) + 4294967296 - intval($previous["dr$index"]);
 					}
 				} else {
 					if ($reads != 'U') {
@@ -206,9 +206,9 @@ function ss_net_snmp_disk_io($host_id_or_hostname = '') {
 					$writes = 'U';
 				} elseif ($previous["dw$index"] > $measure['value']) {
 					if ($writes != 'U') {
-						$writes += intval($measure['value']) + 4294967295 - intval($previous["dw$index"]) - intval($previous["dw$index"]);
+						$writes += intval($measure['value']) + 4294967296 - intval($previous["dw$index"]);
 					} else {
-						$writes = intval($measure['value']) + 4294967295 - intval($previous["dw$index"]) - intval($previous["dw$index"]);
+						$writes = intval($measure['value']) + 4294967296 - intval($previous["dw$index"]);
 					}
 				} else {
 					if ($writes != 'U') {
