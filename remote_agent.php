@@ -254,11 +254,16 @@ function get_graph_data() : bool {
 	return true;
 }
 
+function validate_numeric_oid($oid) : bool {
+	return is_string($oid) && $oid !== '' && strlen($oid) <= 255
+		&& preg_match('/^\.?\d+(?:\.\d+)*$/', $oid);
+}
+
 function get_snmp_data() : void {
 	$host_id = gfrv('host_id');
 	$oid     = gnrv('oid');
 
-	if (!is_string($oid) || !preg_match('/^[0-9.]+$/', $oid)) {
+	if (!validate_numeric_oid($oid)) {
 		print 'U';
 		return;
 	}
@@ -287,7 +292,7 @@ function get_snmp_data_walk() : void {
 	$host_id = gfrv('host_id');
 	$oid     = gnrv('oid');
 
-	if (!is_string($oid) || !preg_match('/^[0-9.]+$/', $oid)) {
+	if (!validate_numeric_oid($oid)) {
 		print 'U';
 		return;
 	}
