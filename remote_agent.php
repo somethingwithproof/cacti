@@ -151,7 +151,8 @@ function remote_client_authorized() : bool {
 		return false;
 	}
 
-	$client_name = gethostbyaddr($client_addr);
+	$ptr_name    = gethostbyaddr($client_addr);
+	$client_name = $ptr_name;
 
 	if ($client_name == $client_addr) {
 		cacti_log('NOTE: Unable to resolve hostname from address ' . $client_addr, false, 'WEBUI', POLLER_VERBOSITY_MEDIUM);
@@ -159,8 +160,8 @@ function remote_client_authorized() : bool {
 		$client_name = remote_agent_strip_domain($client_name);
 	}
 
-	if ($client_name != $client_addr) {
-		$forward_records = @dns_get_record($client_name, DNS_A | DNS_AAAA);
+	if ($ptr_name != $client_addr) {
+		$forward_records = @dns_get_record($ptr_name, DNS_A | DNS_AAAA);
 		$forward_match   = false;
 
 		if (is_array($forward_records)) {
