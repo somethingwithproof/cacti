@@ -26,7 +26,7 @@
     "type": "composer-plugin",
     "license": "GPL-2.0-only",
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-PDO": "*",
         "ext-Phar": "*",
         "ext-dom": "*",
@@ -58,13 +58,15 @@
         "stevenmaguire/oauth2-microsoft": "^2.2"
     },
     "require-dev": {
+        "composer/xdebug-handler": "^3.0",
         "friendsofphp/php-cs-fixer": "^3.86",
         "overtrue/phplint": "^9.6",
+        "pestphp/pest": "^3",
+        "pestphp/pest-plugin-arch": "^3",
+        "pestphp/pest-plugin-type-coverage": "^3",
         "phpstan/phpstan": "^2.1.21",
-        "pestphp/pest": "^2",
-        "pestphp/pest-plugin-drift": "^2.0",
-        "composer/xdebug-handler": "^3.0",
-        "rector/rector": "^2.1.2"
+        "rector/rector": "^2.1.2",
+        "testcontainers/testcontainers": "^0.2"
     },
     "scripts": {
         "lint": "phplint --no-cache --exclude=include/vendor ",
