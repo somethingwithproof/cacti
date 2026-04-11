@@ -652,7 +652,7 @@ function import_package(string $xmlfile, int $profile_id = 1, bool $remove_orpha
 	$allowed_base_resource = realpath(CACTI_PATH_BASE . '/resource');
 
 	foreach ($data['files']['file'] as $f) {
-		$name  = $f['name'];
+		$name            = $f['name'];
 		$normalized_name = str_replace('\\', '/', $name);
 
 		if (strpos($name, chr(0)) !== false || preg_match('#(^|/)\.\.(/|$)#', $normalized_name)) {
