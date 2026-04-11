@@ -1488,7 +1488,7 @@ function ds() {
 		$sql_where1 = "WHERE (dtd.name_cache " . db_qstr_rlike(get_request_var('rfilter')) .
 			" OR dtd.local_data_id " . db_qstr_rlike(get_request_var('rfilter')) .
 			" OR dt.name " . db_qstr_rlike(get_request_var('rfilter')) .
-			" OR dl.id = " . db_qstr(get_request_var('rfilter')) . ")";
+			" OR dl.id = " . (int) get_request_var('rfilter') . ")";
 	} else {
 		$sql_where1 = '';
 	}
