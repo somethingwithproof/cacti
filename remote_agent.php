@@ -155,8 +155,6 @@ function remote_client_authorized() : bool {
 
 	if ($client_name == $client_addr) {
 		cacti_log('NOTE: Unable to resolve hostname from address ' . $client_addr, false, 'WEBUI', POLLER_VERBOSITY_MEDIUM);
-	} else {
-		$client_name = remote_agent_strip_domain($client_name);
 	}
 
 	if ($client_name != $client_addr) {
@@ -187,7 +185,7 @@ function remote_client_authorized() : bool {
 
 	if (cacti_sizeof($pollers) > 1) {
 		foreach ($pollers as $poller) {
-			if (remote_agent_strip_domain($poller['hostname']) == $client_name) {
+			if ($poller['hostname'] == $client_name) {
 				return true;
 			}
 
@@ -201,7 +199,22 @@ function remote_client_authorized() : bool {
 		}
 	}
 
-	cacti_log("Unauthorized remote agent access attempt from $client_name ($client_addr)");
+	// Check if a short-hostname match would have succeeded (migration aid)
+	if ($client_name != $client_addr && str_contains($client_name, '.')) {
+		$short_name = explode('.', $client_name)[0];
+
+		foreach ($pollers as $poller) {
+			$poller_short = str_contains($poller['hostname'], '.') ? explode('.', $poller['hostname'])[0] : $poller['hostname'];
+
+			if ($poller_short == $short_name) {
+				cacti_log("SECURITY: Remote agent '$client_name' ($client_addr) matches poller '{$poller['hostname']}' by short hostname but not FQDN. Update the poller hostname to the FQDN.", false, 'AUTH');
+
+				break;
+			}
+		}
+	}
+
+	cacti_log(sprintf('WARNING: Unauthorized remote agent access attempt from %s (%s)', $client_name, $client_addr), false, 'AUTH');
 
 	return false;
 }

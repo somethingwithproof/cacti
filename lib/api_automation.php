@@ -752,12 +752,17 @@ function automation_get_new_graphs_sql(array $rule) : mixed {
 		'sort_column' => [
 			'filter'  => FILTER_CALLBACK,
 			'default' => 'description',
-			'options' => ['options' => 'sanitize_search_string']
+			'options' => ['options' => function ($v) {
+				return preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $v) ? $v : 'description';
+			}]
 		],
 		'sort_direction' => [
 			'filter'  => FILTER_CALLBACK,
 			'default' => 'ASC',
-			'options' => ['options' => 'sanitize_search_string']
+			'options' => ['options' => function ($v) {
+				$v = strtoupper(trim($v));
+				return in_array($v, ['ASC', 'DESC'], true) ? $v : 'ASC';
+			}]
 		]
 	];
 

@@ -5182,6 +5182,74 @@ function sanitize_unserialize_selected_items(mixed $items) : mixed {
 	return $return_items;
 }
 
+function validate_path_within(string $filename, string $base_dir) : string|false {
+	if (str_contains($filename, "\0")) {
+		return false;
+	}
+
+	$filename = basename($filename);
+
+	if ($filename === '' || $filename === '.' || $filename === '..') {
+		return false;
+	}
+
+	$base_real = realpath($base_dir);
+
+	if ($base_real === false) {
+		return false;
+	}
+
+	$combined = $base_real . '/' . $filename;
+	$resolved = realpath($combined);
+
+	if ($resolved === false || !str_starts_with($resolved, $base_real . '/')) {
+		return false;
+	}
+
+	return $resolved;
+}
+
+function validate_relative_path_within(string $path, string $base_dir) : string|false {
+	if ($path === '' || $path[0] === '/' || str_contains($path, "\0")) {
+		return false;
+	}
+
+	// Reject traversal on both Unix and Windows separators
+	foreach (preg_split('/[\/\\\\]/', $path) as $part) {
+		if ($part === '..') {
+			return false;
+		}
+	}
+
+	$base_real = realpath($base_dir);
+
+	if ($base_real === false) {
+		return false;
+	}
+
+	$combined = $base_real . '/' . $path;
+	$resolved = realpath($combined);
+
+	// If the file exists, verify it resolves within the base (catches symlinks)
+	if ($resolved !== false) {
+		if (!str_starts_with($resolved, $base_real . '/')) {
+			return false;
+		}
+
+		return $resolved;
+	}
+
+	// File doesn't exist yet (write case). Verify the parent directory
+	// resolves within the base to guard against symlink escapes.
+	$parent_real = realpath(dirname($combined));
+
+	if ($parent_real !== false && !str_starts_with($parent_real, $base_real . '/') && $parent_real !== $base_real) {
+		return false;
+	}
+
+	return $combined;
+}
+
 /**
  * verifies all selected graphs only contain numeric and string values
  *

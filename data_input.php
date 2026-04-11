@@ -98,6 +98,17 @@ function form_save() : void {
 		$save['input_string'] = form_input_validate(gnrv('input_string'), 'input_string', '', true, 3);
 		$save['type_id']      = form_input_validate(gnrv('type_id'), 'type_id', '^[0-9]+$', true, 3);
 
+		// Reject shell metacharacters outside of <placeholder> markers to prevent command injection
+		if (!is_error_message()) {
+			$input_string_bare = preg_replace('/<[a-zA-Z_]+>/', '', $save['input_string']);
+
+			if (preg_match('/[;&|`$\\\\\n\r]/', $input_string_bare)) {
+				raise_message('validation_error', __('Input string contains dangerous shell characters'), MESSAGE_LEVEL_ERROR);
+				header('Location: data_input.php?action=edit&id=' . (empty($save['id']) ? '' : $save['id']));
+				exit;
+			}
+		}
+
 		if (!is_error_message()) {
 			$data_input_id = sql_save($save, 'data_input');
 

@@ -55,8 +55,14 @@ $return = validate_redirect_url($_SERVER['HTTP_REFERER'] ?? '', 'index.php');
 
 if (basename($return) != 'auth_changepassword.php') {
 	if (strpos($return, '/plugins/') !== false) {
-		$parts  = explode('/plugins/', $return);
-		$return = CACTI_PATH_URL . 'plugins/' . $parts[1];
+		$parts       = explode('/plugins/', $return);
+		$plugin_path = $parts[1] ?? '';
+
+		if (strpos($plugin_path, '..') !== false) {
+			$return = CACTI_PATH_URL . 'index.php';
+		} else {
+			$return = CACTI_PATH_URL . 'plugins/' . basename(explode('?', $plugin_path)[0]);
+		}
 	} else {
 		$return = CACTI_PATH_URL . basename($return);
 	}

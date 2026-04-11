@@ -959,11 +959,17 @@ class CactiTableFilter {
 
 		if (isset($this->filter_array['sort'])) {
 			$filters['sort_column']['filter']     = FILTER_CALLBACK;
-			$filters['sort_column']['options']    = ['options' => 'sanitize_search_string'];
+			$filters['sort_column']['options']    = ['options' => function ($v) {
+				$sort_default = $this->filter_array['sort']['sort_column'];
+				return preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $v) ? $v : $sort_default;
+			}];
 			$filters['sort_column']['default']    = $this->filter_array['sort']['sort_column'];
 
 			$filters['sort_direction']['filter']  = FILTER_CALLBACK;
-			$filters['sort_direction']['options'] = ['options' => 'sanitize_search_string'];
+			$filters['sort_direction']['options'] = ['options' => function ($v) {
+				$v = strtoupper(trim($v));
+				return in_array($v, ['ASC', 'DESC'], true) ? $v : 'ASC';
+			}];
 			$filters['sort_direction']['default'] = $this->filter_array['sort']['sort_direction'];
 		}
 
