@@ -663,6 +663,7 @@ function package_diff_file() : void {
 
 	if ($validated_path === false) {
 		raise_message('validation_error', __('Invalid file path'), MESSAGE_LEVEL_ERROR);
+
 		return;
 	}
 

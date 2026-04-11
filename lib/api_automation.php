@@ -761,6 +761,7 @@ function automation_get_new_graphs_sql(array $rule) : mixed {
 			'default' => 'ASC',
 			'options' => ['options' => function ($v) {
 				$v = strtoupper(trim($v));
+
 				return in_array($v, ['ASC', 'DESC'], true) ? $v : 'ASC';
 			}]
 		]
