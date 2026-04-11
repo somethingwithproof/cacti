@@ -73,6 +73,10 @@ test('import.php uses a segment-aware fast reject before the ancestor boundary c
  * in isolation without loading the full Cacti bootstrap.
  */
 function importBoundaryAllowed(string $base, string $name): bool {
+	if (strpos($name, chr(0)) !== false) {
+		return false;
+	}
+
 	$filename              = $base . "/$name";
 	$allowed_base_scripts  = realpath($base . '/scripts');
 	$allowed_base_resource = realpath($base . '/resource');
@@ -160,9 +164,9 @@ test('new nested resource/ subdirectory is allowed when its first existing ances
 
 test('trailing slash on scripts/ resolves to directory itself which is within boundary', function () {
 	$base = makeTempBase();
-	// dirname('scripts/') resolves to $base/scripts — inside the boundary.
-	// The actual write would fail (fopen on a directory) but the guard permits it.
-	expect(importBoundaryAllowed($base, 'scripts/'))->toBeTrue();
+	// dirname("$base/scripts/") resolves to $base, so the boundary guard rejects
+	// it before any write attempt.
+	expect(importBoundaryAllowed($base, 'scripts/'))->toBeFalse();
 	removeTempBase($base);
 });
 
@@ -198,7 +202,7 @@ test('excessive traversal segments are blocked', function () {
 
 test('null byte in path is blocked', function () {
 	$base = makeTempBase();
-	// realpath() returns false for paths containing null bytes.
+	// Import hardening rejects NUL before attempting any path resolution.
 	$name = "scripts/\x00../evil";
 	expect(importBoundaryAllowed($base, $name))->toBeFalse();
 	removeTempBase($base);
