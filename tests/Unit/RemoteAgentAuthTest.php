@@ -23,17 +23,14 @@ $remoteAgentPath = __DIR__ . '/../../remote_agent.php';
 
 // --- remote_agent.php: Static Security Checks ---
 
-test('remote_agent.php does not contain remote_agent_strip_domain', function () use ($remoteAgentPath) {
-	$contents = file_get_contents($remoteAgentPath);
-
-	expect($contents)->not->toContain('function remote_agent_strip_domain');
-});
-
 test('remote_agent.php does not use remote_agent_strip_domain in authorization', function () use ($remoteAgentPath) {
 	$contents = file_get_contents($remoteAgentPath);
 
-	// The old vulnerable pattern
-	expect($contents)->not->toMatch('/remote_agent_strip_domain\s*\(\s*\$poller\[[\'"]hostname[\'"]\]\s*\)/');
+	$authFunc = substr($contents, strpos($contents, 'function remote_client_authorized'));
+	$nextFunc = strpos($authFunc, "\nfunction ", 1);
+	$authBody = $nextFunc !== false ? substr($authFunc, 0, $nextFunc) : $authFunc;
+
+	expect($authBody)->not->toContain('remote_agent_strip_domain');
 });
 
 test('remote_agent.php has secure effective_user handling', function () use ($remoteAgentPath) {

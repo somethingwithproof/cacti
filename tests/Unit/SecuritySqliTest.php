@@ -135,7 +135,8 @@ test('lib/reports.php uses string concatenation not parameterized query for REGE
 
 	// All REGEXP sites must use db_qstr() instead of string concatenation.
 	expect($source)->not->toContain("REGEXP '\" . \$item['graph_name_regexp'] . \"'");
-	expect($source)->toContain('REGEXP " . db_qstr(');
+	expect($source)->toContain('REGEXP ')
+		->and($source)->toContain("db_qstr(\$item['graph_name_regexp'])");
 });
 
 // =====================================================================

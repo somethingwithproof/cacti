@@ -130,9 +130,9 @@ function remote_agent_strip_domain(string $host) : string {
 		$parts = explode('.', $host);
 
 		return $parts[0];
-	} else {
-		return $host;
 	}
+
+	return $host;
 }
 
 function remote_client_authorized() : bool {
@@ -228,8 +228,6 @@ function get_graph_data() : bool {
 	gfrv('rra_id');
 	gfrv('graph_theme', FILTER_CALLBACK, ['options' => 'sanitize_search_string']);
 	gfrv('graph_nolegend', FILTER_CALLBACK, ['options' => 'sanitize_search_string']);
-	gfrv('effective_user');
-
 	$local_graph_id   = gfrv('local_graph_id');
 	$rra_id           = gfrv('rra_id');
 
@@ -275,12 +273,8 @@ function get_graph_data() : bool {
 		$graph_data_array['graph_theme'] = grv('graph_theme');
 	}
 
-	// set the effective user
-	if (isrv('effective_user')) {
-		$user = grv('effective_user');
-	} else {
-		$user = 0;
-	}
+	// The remote agent runs as the authenticated session user, not a request override.
+	$user = $_SESSION[SESS_USER_ID] ?? 0;
 
 	$graph_data_array['graphv'] = true;
 
