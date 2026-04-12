@@ -279,6 +279,7 @@ class ChaCha20 extends Salsa20
         // xor'ing and rotation are all on the same line so i'm keeping it on the same
         // line here as well
         // @codingStandardsIgnoreStart
+<<<<<<< HEAD
         $a+= $b; $d = self::leftRotate(self::safe_intval($d) ^ self::safe_intval($a), 16);
         $c+= $d; $b = self::leftRotate(self::safe_intval($b) ^ self::safe_intval($c), 12);
         $a+= $b; $d = self::leftRotate(self::safe_intval($d) ^ self::safe_intval($a), 8);
@@ -795,5 +796,524 @@ class ChaCha20 extends Salsa20
         $x15 += $z15;
 
         return pack('V*', self::safe_intval($x0), self::safe_intval($x1), self::safe_intval($x2), self::safe_intval($x3), self::safe_intval($x4), self::safe_intval($x5), self::safe_intval($x6), self::safe_intval($x7), self::safe_intval($x8), self::safe_intval($x9), self::safe_intval($x10), self::safe_intval($x11), self::safe_intval($x12), self::safe_intval($x13), self::safe_intval($x14), self::safe_intval($x15));
+||||||| 7dd05ee12
+=======
+        $a+= $b; $d = self::leftRotate(intval($d) ^ intval($a), 16);
+        $c+= $d; $b = self::leftRotate(intval($b) ^ intval($c), 12);
+        $a+= $b; $d = self::leftRotate(intval($d) ^ intval($a), 8);
+        $c+= $d; $b = self::leftRotate(intval($b) ^ intval($c), 7);
+        // @codingStandardsIgnoreEnd
+    }
+
+    /**
+     * The doubleround function
+     *
+     * @param int $x0 (by reference)
+     * @param int $x1 (by reference)
+     * @param int $x2 (by reference)
+     * @param int $x3 (by reference)
+     * @param int $x4 (by reference)
+     * @param int $x5 (by reference)
+     * @param int $x6 (by reference)
+     * @param int $x7 (by reference)
+     * @param int $x8 (by reference)
+     * @param int $x9 (by reference)
+     * @param int $x10 (by reference)
+     * @param int $x11 (by reference)
+     * @param int $x12 (by reference)
+     * @param int $x13 (by reference)
+     * @param int $x14 (by reference)
+     * @param int $x15 (by reference)
+     */
+    protected static function doubleRound(&$x0, &$x1, &$x2, &$x3, &$x4, &$x5, &$x6, &$x7, &$x8, &$x9, &$x10, &$x11, &$x12, &$x13, &$x14, &$x15)
+    {
+        // columnRound
+        static::quarterRound($x0, $x4, $x8, $x12);
+        static::quarterRound($x1, $x5, $x9, $x13);
+        static::quarterRound($x2, $x6, $x10, $x14);
+        static::quarterRound($x3, $x7, $x11, $x15);
+        // rowRound
+        static::quarterRound($x0, $x5, $x10, $x15);
+        static::quarterRound($x1, $x6, $x11, $x12);
+        static::quarterRound($x2, $x7, $x8, $x13);
+        static::quarterRound($x3, $x4, $x9, $x14);
+    }
+
+    /**
+     * The Salsa20 hash function function
+     *
+     * On my laptop this loop unrolled / function dereferenced version of parent::salsa20 encrypts 1mb of text in
+     * 0.65s vs the 0.85s that it takes with the parent method.
+     *
+     * If we were free to assume that the host OS would always be 64-bits then the if condition in leftRotate could
+     * be eliminated and we could knock this done to 0.60s.
+     *
+     * For comparison purposes, RC4 takes 0.16s and AES in CTR mode with the Eval engine takes 0.48s.
+     * AES in CTR mode with the PHP engine takes 1.19s. Salsa20 / ChaCha20 do not benefit as much from the Eval
+     * approach due to the fact that there are a lot less variables to de-reference, fewer loops to unroll, etc
+     *
+     * @param string $x
+     */
+    protected static function salsa20($x)
+    {
+        list(, $x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x8, $x9, $x10, $x11, $x12, $x13, $x14, $x15) = unpack('V*', $x);
+        $z0 = $x0;
+        $z1 = $x1;
+        $z2 = $x2;
+        $z3 = $x3;
+        $z4 = $x4;
+        $z5 = $x5;
+        $z6 = $x6;
+        $z7 = $x7;
+        $z8 = $x8;
+        $z9 = $x9;
+        $z10 = $x10;
+        $z11 = $x11;
+        $z12 = $x12;
+        $z13 = $x13;
+        $z14 = $x14;
+        $z15 = $x15;
+
+        // @codingStandardsIgnoreStart
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+
+        // columnRound
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 16);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 12);
+        $x0+= $x4; $x12 = self::leftRotate(intval($x12) ^ intval($x0), 8);
+        $x8+= $x12; $x4 = self::leftRotate(intval($x4) ^ intval($x8), 7);
+
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 16);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 12);
+        $x1+= $x5; $x13 = self::leftRotate(intval($x13) ^ intval($x1), 8);
+        $x9+= $x13; $x5 = self::leftRotate(intval($x5) ^ intval($x9), 7);
+
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 16);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 12);
+        $x2+= $x6; $x14 = self::leftRotate(intval($x14) ^ intval($x2), 8);
+        $x10+= $x14; $x6 = self::leftRotate(intval($x6) ^ intval($x10), 7);
+
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 16);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 12);
+        $x3+= $x7; $x15 = self::leftRotate(intval($x15) ^ intval($x3), 8);
+        $x11+= $x15; $x7 = self::leftRotate(intval($x7) ^ intval($x11), 7);
+
+        // rowRound
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 16);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 12);
+        $x0+= $x5; $x15 = self::leftRotate(intval($x15) ^ intval($x0), 8);
+        $x10+= $x15; $x5 = self::leftRotate(intval($x5) ^ intval($x10), 7);
+
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 16);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 12);
+        $x1+= $x6; $x12 = self::leftRotate(intval($x12) ^ intval($x1), 8);
+        $x11+= $x12; $x6 = self::leftRotate(intval($x6) ^ intval($x11), 7);
+
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 16);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 12);
+        $x2+= $x7; $x13 = self::leftRotate(intval($x13) ^ intval($x2), 8);
+        $x8+= $x13; $x7 = self::leftRotate(intval($x7) ^ intval($x8), 7);
+
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 16);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 12);
+        $x3+= $x4; $x14 = self::leftRotate(intval($x14) ^ intval($x3), 8);
+        $x9+= $x14; $x4 = self::leftRotate(intval($x4) ^ intval($x9), 7);
+        // @codingStandardsIgnoreEnd
+
+        $x0 += $z0;
+        $x1 += $z1;
+        $x2 += $z2;
+        $x3 += $z3;
+        $x4 += $z4;
+        $x5 += $z5;
+        $x6 += $z6;
+        $x7 += $z7;
+        $x8 += $z8;
+        $x9 += $z9;
+        $x10 += $z10;
+        $x11 += $z11;
+        $x12 += $z12;
+        $x13 += $z13;
+        $x14 += $z14;
+        $x15 += $z15;
+
+        return pack('V*', $x0, $x1, $x2, $x3, $x4, $x5, $x6, $x7, $x8, $x9, $x10, $x11, $x12, $x13, $x14, $x15);
+>>>>>>> origin/fix/jquery-deprecations
     }
 }

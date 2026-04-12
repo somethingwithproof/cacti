@@ -26,25 +26,27 @@
 error_reporting(0);
 
 if (!isset($called_by_script_server)) {
-	include_once(dirname(__FILE__) . '/../include/cli_check.php');
-	include_once(dirname(__FILE__) . '/../lib/snmp.php');
-	include_once(dirname(__FILE__) . '/../lib/ping.php');
+	include_once(__DIR__ . '/../include/cli_check.php');
+	include_once(__DIR__ . '/../lib/snmp.php');
+	include_once(__DIR__ . '/../lib/ping.php');
 
 	array_shift($_SERVER['argv']);
 
 	print call_user_func_array('ss_fping', $_SERVER['argv']);
 } else {
-	include_once(dirname(__FILE__) . '/../lib/snmp.php');
-	include_once(dirname(__FILE__) . '/../lib/ping.php');
+	include_once(__DIR__ . '/../lib/snmp.php');
+	include_once(__DIR__ . '/../lib/ping.php');
 }
 
-function ss_fping($hostname = '', $ping_sweeps = 6, $ping_type = 'ICMP', $port = 80) {
-	/* record start time */
+function ss_fping(string $hostname = '', int $ping_sweeps = 6, string $ping_type = 'ICMP', int $port = 80) : string {
+	global $called_by_script_server;
+
+	// record start time
 	$ss_fping_start = microtime(true);
 
 	$ping = new Net_Ping;
 
-	$time           = array();
+	$time           = [];
 	$total_time     = 0;
 	$failed_results = 0;
 
@@ -61,13 +63,13 @@ function ss_fping($hostname = '', $ping_sweeps = 6, $ping_type = 'ICMP', $port =
 	$ping_timeout = db_fetch_cell_prepared('SELECT ping_timeout
 		FROM host
 		WHERE hostname = ?',
-		array($hostname));
+		[$hostname]);
 
 	if (empty($ping_timeout)) {
 		$ping_timeout = read_config_option('ping_timeout');
 	}
 
-	switch (strtoupper($ping_type)) {
+	switch (cacti_strtoupper($ping_type)) {
 		case 'ICMP':
 			$method = PING_ICMP;
 
@@ -80,9 +82,14 @@ function ss_fping($hostname = '', $ping_sweeps = 6, $ping_type = 'ICMP', $port =
 			$method = PING_UDP;
 
 			break;
+		default:
+			$method = PING_ICMP;
+
+			break;
 	}
 
 	$i = 0;
+
 	while ($i < $ping_sweeps) {
 		$start  = microtime(true);
 		$result = $ping->ping(AVAIL_PING, $method, $ping_timeout, 1);
@@ -97,6 +104,7 @@ function ss_fping($hostname = '', $ping_sweeps = 6, $ping_type = 'ICMP', $port =
 		} elseif (is_numeric($ping->ping_status)) {
 			$time[$i]    = $ping->ping_status;
 			$total_time += $ping->ping_status;
+<<<<<<< HEAD
 			if ($ping->ping_status < $min) {
 				$min = $ping->ping_status;
 			}
@@ -110,16 +118,36 @@ function ss_fping($hostname = '', $ping_sweeps = 6, $ping_type = 'ICMP', $port =
 
 			$time[$i]    = $end - $start;
 			$total_time += $end - $start;
+||||||| 7dd05ee12
+			if ($ping->ping_status < $min) $min = $ping->ping_status;
+			if ($ping->ping_status > $max) $max = $ping->ping_status;
+=======
+
+			if ($ping->ping_status < $min) {
+				$min = $ping->ping_status;
+			}
+
+			if ($ping->ping_status > $max) {
+				$max = $ping->ping_status;
+			}
+>>>>>>> origin/fix/jquery-deprecations
 		}
 
 		$i++;
 
-		/* get current time */
+		// get current time
 		$ss_fping_current = microtime(true);
 
-		/* if called from script server, end one second before a timeout occurs */
-		if (isset($called_by_script_server) && ($ss_fping_current - $ss_fping_start + ($ping_timeout/1000) + 1) > $script_timeout) {
+		// if called from script server, end one second before a timeout occurs
+		if (isset($called_by_script_server) && ($ss_fping_current - $ss_fping_start + ($ping_timeout / 1000) + 1) > $script_timeout) {
 			$ping_sweeps = $i;
+
+			break;
+		}
+
+		if ($failed_results > $ping_sweeps / 4) {
+			$ping_sweeps = $failed_results;
+
 			break;
 		}
 	}
@@ -127,17 +155,22 @@ function ss_fping($hostname = '', $ping_sweeps = 6, $ping_type = 'ICMP', $port =
 	if ($failed_results == $ping_sweeps) {
 		return 'min:U avg:U max:U dev:U loss:100.00';
 	} else {
-		$loss = ($failed_results/$ping_sweeps) * 100;
-		$avg  = $total_time/($ping_sweeps-$failed_results);
+		$loss = ($failed_results / $ping_sweeps) * 100;
+		$avg  = $total_time / ($ping_sweeps - $failed_results);
 
-		/* calculate standard deviation */
+		// calculate standard deviation
 		$predev = 0;
-		foreach($time as $sample) {
-			$predev += pow(($sample-$avg),2);
+
+		foreach ($time as $sample) {
+			$predev += ($sample - $avg) ** 2;
 		}
-		$dev = sqrt($predev / cacti_count($time));
+
+		if (cacti_sizeof($time)) {
+			$dev = sqrt($predev / cacti_count($time));
+		} else {
+			$dev = 0;
+		}
 
 		return sprintf('min:%0.4f avg:%0.4f max:%0.4f dev:%0.4f loss:%0.4f', $min, $avg, $max, $dev, $loss);
 	}
 }
-

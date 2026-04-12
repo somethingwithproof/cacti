@@ -448,8 +448,14 @@ class Blowfish extends BlockCipher
     protected static function initialize_static_variables()
     {
         if (is_float(self::$sbox[0x200])) {
+<<<<<<< HEAD
             self::$sbox = array_map([self::class, 'safe_intval'], self::$sbox);
             self::$parray = array_map([self::class, 'safe_intval'], self::$parray);
+||||||| 7dd05ee12
+=======
+            self::$sbox = array_map('intval', self::$sbox);
+            self::$parray = array_map('intval', self::$parray);
+>>>>>>> origin/fix/jquery-deprecations
         }
 
         parent::initialize_static_variables();

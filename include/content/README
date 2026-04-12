@@ -18,11 +18,17 @@
 +-------------------------------------------------------------------------+
 | http://www.cacti.net/                                                   |
 +-------------------------------------------------------------------------+
+<<<<<<< HEAD
 
 All the scripts in this folder are EXAMPLES. 
+||||||| 7dd05ee12
+All the scripts in this folder are EXAMPLES. 
+=======
+>>>>>>> origin/fix/jquery-deprecations
 
-They are just to show what you can do with a 
-little imagination and a little scripting. 
+All the scripts in this folder are EXAMPLES.
+
+They are just to show what you can do with a
+little imagination and a little scripting.
 
 They aren't end-products.
-

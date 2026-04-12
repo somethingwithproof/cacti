@@ -26,14 +26,14 @@
 error_reporting(0);
 
 if (!isset($called_by_script_server)) {
-	include_once(dirname(__FILE__) . '/../include/cli_check.php');
+	include_once(__DIR__ . '/../include/cli_check.php');
 
 	array_shift($_SERVER['argv']);
 
 	print call_user_func_array('ss_gexport', $_SERVER['argv']);
 }
 
-function ss_gexport($cmd = 'index', $arg1 = '', $arg2 = '') {
+function ss_gexport(string $cmd = 'index', string $arg1 = '', string $arg2 = '') : mixed {
 	if ($cmd == 'index') {
 		if (db_table_exists('graph_exports')) {
 			$exports = db_fetch_assoc('SELECT id FROM graph_exports ORDER BY id');
@@ -79,14 +79,14 @@ function ss_gexport($cmd = 'index', $arg1 = '', $arg2 = '') {
 					$value = db_fetch_cell_prepared('SELECT last_runtime
 						FROM graph_exports
 						WHERE id = ?',
-						array($index));
+						[$index]);
 
 					break;
 				case 'totalGraphs':
 					$value = db_fetch_cell_prepared('SELECT total_graphs
 						FROM graph_exports
 						WHERE id = ?',
-						array($index));
+						[$index]);
 
 					break;
 			}

@@ -22,31 +22,31 @@
  +-------------------------------------------------------------------------+
 */
 
-/* inject_form_variables - replaces all variables contained in $form_array with
-     their actual values
-   @arg $form_array - an array that contains all of the information needed to draw
-     the html form. see the arrays contained in include/global_settings.php
-     for the exact syntax of this array
-   @arg $arg1 - an array that represents the |arg1:| variable (see
-     include/global_form.php for more details)
-   @arg $arg2 - an array that represents the |arg2:| variable (see
-     include/global_form.php for more details)
-   @arg $arg3 - an array that represents the |arg3:| variable (see
-     include/global_form.php for more details)
-   @arg $arg4 - an array that represents the |arg4:| variable (see
-     include/global_form.php for more details)
-   @returns - $form_array with all available variables substituted with their
-     proper values */
-function inject_form_variables(&$form_array, $arg1 = array(), $arg2 = array(), $arg3 = array(), $arg4 = array()) {
-	$check_fields = array('id', 'value', 'array', 'friendly_name', 'description', 'sql', 'sql_print', 'form_id', 'items', 'tree_id');
+/**
+ * Replaces all variables contained in $form_array with their actual values
+ *
+ * This function recursively processes the form array and replaces placeholders
+ * with corresponding values from the provided arguments. It supports up to three
+ * levels of argument replacement (arg1, arg2, arg3).
+ *
+ * @param array $form_array The form array to process. This array is passed by reference.
+ * @param mixed $arg1       Represents the |arg1:| variable (see include/global_form.php for more details)
+ * @param mixed $arg2       Represents the |arg2:| variable (see include/global_form.php for more details)
+ * @param mixed $arg3       Represents the |arg3:| variable (see include/global_form.php for more details)
+ * @param mixed $arg4       Represents the |arg4:| variable (see include/global_form.php for more details)
+ *
+ * @return array The processed form array with injected variables.
+ */
+function inject_form_variables(array &$form_array, mixed $arg1 = [], mixed $arg2 = [], mixed $arg3 = [], mixed $arg4 = []) : array {
+	$check_fields = ['id', 'value', 'array', 'friendly_name', 'description', 'sql', 'sql_print', 'form_id', 'items', 'tree_id'];
 
-	/* loop through each available field */
+	// loop through each available field
 	if (cacti_sizeof($form_array)) {
 		foreach ($form_array as $field_name => $field_array) {
-			/* loop through each sub-field that we are going to check for variables */
+			// loop through each sub-field that we are going to check for variables
 			foreach ($check_fields as $field_to_check) {
 				if (isset($field_array[$field_to_check]) && is_array($form_array[$field_name][$field_to_check])) {
-					/* if the field/sub-field combination is an array, resolve it recursively */
+					// if the field/sub-field combination is an array, resolve it recursively
 					$form_array[$field_name][$field_to_check] = inject_form_variables($form_array[$field_name][$field_to_check], $arg1);
 				} elseif (isset($field_array[$field_to_check]) && !is_array($field_array[$field_to_check])) {
 					$count = 0;
@@ -55,9 +55,9 @@ function inject_form_variables(&$form_array, $arg1 = array(), $arg2 = array(), $
 					 * for each arg1:arg2:arg3 variables.
 					 */
 					while (true) {
-						$matches = array();
+						$matches = [];
 
-						//if (preg_match('/\|(arg[123]):([a-zA-Z0-9_]*)\|/', $form_array[$field_name][$field_to_check], $matches)) {
+						// if (preg_match('/\|(arg[123]):([a-zA-Z0-9_]*)\|/', $form_array[$field_name][$field_to_check], $matches)) {
 						if (preg_match('/\|(arg[123]):([a-zA-Z0-9_]*)\|/', $field_array[$field_to_check], $matches)) {
 							$string   = $field_array[$field_to_check];
 
@@ -65,32 +65,31 @@ function inject_form_variables(&$form_array, $arg1 = array(), $arg2 = array(), $
 							$matches1 = $matches[1];
 							$matches2 = $matches[2];
 
-							/* an empty field name in the variable means don't treat this as an array */
+							// an empty field name in the variable means don't treat this as an array
 							if ($matches2 == '') {
-								if (is_array($$matches1)) {
-									/* the existing value is already an array, leave it alone */
-									$form_array[$field_name][$field_to_check] = $$matches1;
+								if (is_array(${$matches1})) { // @phpstan-ignore-line
+									// the existing value is already an array, leave it alone
+									$form_array[$field_name][$field_to_check] = ${$matches1};
 								} else {
-									/* the existing value is probably a single variable */
-									$form_array[$field_name][$field_to_check] = str_replace($matches0, $$matches1, $field_array[$field_to_check]);
+									// the existing value is probably a single variable
+									$form_array[$field_name][$field_to_check] = str_replace($matches0, ${$matches1}, $field_array[$field_to_check]);
 								}
 							} else {
 								/* copy the value down from the array/key specified in the variable
 								 * replace up to three times for arg1:arg2:arg3 variables
 								 */
-								if (isset($$matches1)) {
-									if (is_array($$matches1)) {
-										$array = $$matches1;
-										if (is_array($array) && isset($array[$matches2]) && $array[$matches2] != '') {
-											$string = str_replace($matches0, $array[$matches2], $string);
-										} else {
-											$string = str_replace($matches0, '', $string);
-										}
+								if (is_array(${$matches1})) { // @phpstan-ignore-line
+									$array = ${$matches1};
+
+									if (isset($array[$matches2]) && $array[$matches2] != '') {
+										$string = str_replace($matches0, $array[$matches2], $string);
+									} else {
+										$string = str_replace($matches0, '', $string);
 									}
 								}
 
 								// Double check to see if the replacement went as planned
-								$matches = array();
+								$matches = [];
 								preg_match('/\|(arg[123]):([a-zA-Z0-9_]*)\|/', $string, $matches);
 
 								if (!cacti_sizeof($matches)) {
@@ -104,7 +103,7 @@ function inject_form_variables(&$form_array, $arg1 = array(), $arg2 = array(), $
 										// Then update the field array string value to recheck
 
 										$form_array[$field_name][$field_to_check] = $string;
-										$field_array[$field_to_check] = $string;
+										$field_array[$field_to_check]             = $string;
 									} elseif (isset($form_array[$field_name]['default'])) {
 										// We did not find a match for this field value, use the default
 
@@ -122,9 +121,12 @@ function inject_form_variables(&$form_array, $arg1 = array(), $arg2 = array(), $
 							 * in the special case of 'sql' for example.
 							 */
 							$additional = preg_match('/\|(arg[123]):([a-zA-Z0-9_]*)\|/', $string);
+
 							if (empty($additional)) {
 								break;
-							} elseif ($count >= 3) {
+							}
+
+							if ($count >= 3) {
 								break;
 							} else {
 								$count++;
@@ -142,17 +144,24 @@ function inject_form_variables(&$form_array, $arg1 = array(), $arg2 = array(), $
 	return $form_array;
 }
 
-/* form_alternate_row_color - starts an HTML row with an alternating color scheme
-   @arg $row_color1 - the first color to use
-   @arg $row_color2 - the second color to use
-   @arg $row_value - the value of the row which will be used to evaluate which color
-     to display for this particular row. must be an integer
-   @arg $row_id - used to allow js and ajax actions on this object
-   @returns - the background color used for this particular row */
-function form_alternate_row_color($row_color1, $row_color2, $row_value, $row_id = '') {
+/**
+ * Generates a table row with alternating row colors and returns the current color.
+ *
+ * This function prints an HTML table row (`<tr>`) with a class that alternates between
+ * 'odd', 'even', and 'even-alternate' based on the provided row value. It also returns
+ * the current color used for the row.
+ *
+ * @param string $row_color1 The color for odd rows.
+ * @param string $row_color2 The color for even rows. If empty or 'E5E5E5', the class 'even' is used.
+ * @param int    $row_value  The current row number, used to determine if the row is odd or even.
+ * @param string $row_id     Optional. The ID to assign to the row. If not provided, no ID is assigned.
+ *
+ * @return string The current color used for the row.
+ */
+function form_alternate_row_color(string $row_color1, string $row_color2, int $row_value, string $row_id = '') : string {
 	if ($row_value % 2 == 1) {
-			$class='odd';
-			$current_color = $row_color1;
+		$class         = 'odd';
+		$current_color = $row_color1;
 	} else {
 		if ($row_color2 == '' || $row_color2 == 'E5E5E5') {
 			$class = 'even';
@@ -171,11 +180,16 @@ function form_alternate_row_color($row_color1, $row_color2, $row_value, $row_id 
 	return $current_color;
 }
 
-/* form_alternate_row - starts an HTML row with an alternating color scheme
-   @arg $light - Alternate odd style
-   @arg $row_id - The id of the row
-   @arg $reset - Reset to top of table */
-function form_alternate_row($row_id = '', $light = false, $disabled = false) {
+/**
+ * Generates an HTML table row with alternating classes for styling.
+ *
+ * @param string $row_id   The ID to assign to the table row. If not provided, no ID will be assigned.
+ * @param bool   $light    If true, the row will use the 'even-alternate' class for even rows.
+ * @param bool   $disabled If true, the row will not be selectable.
+ *
+ * @return void
+ */
+function form_alternate_row(string $row_id = '', bool $light = false, bool $disabled = false) : void {
 	static $i = 1;
 
 	if ($i % 2 == 1) {
@@ -188,9 +202,9 @@ function form_alternate_row($row_id = '', $light = false, $disabled = false) {
 
 	$i++;
 
-	if ($row_id != '' && !$disabled && substr($row_id, 0, 4) != 'row_') {
+	if ($row_id != '' && !$disabled && !str_starts_with($row_id, 'row_')) {
 		print "<tr class='$class selectable tableRow' id='$row_id'>\n";
-	} elseif (substr($row_id, 0, 4) == 'row_') {
+	} elseif (str_starts_with($row_id, 'row_')) {
 		print "<tr class='$class tableRow' id='$row_id'>\n";
 	} elseif ($row_id != '') {
 		print "<tr class='$class tableRow' id='$row_id'>\n";
@@ -199,33 +213,93 @@ function form_alternate_row($row_id = '', $light = false, $disabled = false) {
 	}
 }
 
-/* form_selectable_ecell - a wrapper to form_selectable_cell that escapes the contents
-   @arg $contents - the readable portion of the
-   @arg $id - the id of the object that will be highlighted
-   @arg $width - the width of the table element
-   @arg $style_or_class - the style or class to apply to the table element
-   @arg $title - optional title for the column */
-function form_selectable_ecell($contents, $id, $width = '', $style_or_class = '', $title = '') {
-	form_selectable_cell(html_escape($contents), $id, $width, $style_or_class, $title);
+/**
+ * A wrapper to form_selectable_ecell that escapes the contents
+ *
+ * This function creates a selectable table cell with the provided contents,
+ * ensuring that the contents are properly escaped to prevent XSS attacks.
+ *
+ * @param mixed  $contents   The content to be displayed inside the cell.
+ * @param mixed  $id         The ID attribute for the cell.
+ * @param mixed  $width      The width of the cell. Default is an empty string.
+ * @param string $styleclass The style or class attribute for the cell. Default is an empty string.
+ * @param string $title      The title attribute for the cell. Default is an empty string.
+ *
+ * @return bool
+ */
+function form_selectable_ecell(mixed $contents, mixed $id, mixed $width = '', string $styleclass = '', string $title = '') : bool {
+	return form_selectable_cell(htmle($contents), $id, $width, $styleclass, $title);
 }
 
-/* form_selectable_cell - format's a table row such that it can be highlighted using cacti's js actions
-   @arg $contents - the readable portion of the
-   @arg $id - the id of the object that will be highlighted
-   @arg $width - the width of the table element
-   @arg $style_or_class - the style or class to apply to the table element
-   @arg $title - optional title for the column */
-function form_selectable_cell($contents, $id, $width = '', $style_or_class = '', $title = '') {
+/**
+ * Format's a table row such that it can be highlighted using cacti's js actions
+ *
+ * @param mixed  $contents   The content to be placed inside the table cell.
+ * @param mixed  $id         The ID attribute for the table cell (not used in the function).
+ * @param mixed  $width      The width of the table cell. Default is an empty string.
+ * @param string $styleclass The style or class attribute for the table cell.
+ *                           Default is an empty string. If it contains a colon (:),
+ *                           it is treated as a style attribute; otherwise, as a class attribute.
+ * @param string $title      The tooltip text for the table cell. Default is an empty string.
+ *
+ * @return bool False if an error is encountered
+ */
+function form_selectable_cell(mixed $contents, mixed $id, mixed $width = '', string $styleclass = '', string $title = '') : bool {
+	global $tableCount;
+
+	static $tableColumns = null;
+
+	$table_id = form_get_table_id();
+
+	if (!isset($tableColumns[$table_id])) {
+		$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+	}
+
+	static $col_num = null;
+	static $col_id  = null;
+	static $logged  = null;
+
+	if ($col_num === null) {
+		$col_num = 0;
+		$col_id  = $id;
+	} elseif ($col_id != $id) {
+		$col_num = 0;
+		$col_id  = $id;
+	} else {
+		$col_num++;
+	}
+
+	if (isset($tableColumns[$table_id]) && cacti_sizeof($tableColumns[$table_id])) {
+		$columns = array_keys($tableColumns[$table_id]);
+
+		// Check if the column is visible
+		if (isset($columns[$col_num])) {
+			if ($tableColumns[$table_id][$columns[$col_num]] !== true) {
+				return false;
+			}
+		} elseif (isset($columns["autocol$col_num"])) { // @phpstan-ignore-line
+			if ($tableColumns[$table_id][$columns["autocol$col_num"]] !== true) {
+				return false;
+			}
+		} elseif ($col_num < cacti_sizeof($tableColumns)) {
+			// We can have last item colspan > 1.  So, only log if column count is larger
+			cacti_log("The table with the Table ID $table_id is not using form_selectable_cell() correctly");
+			$logged[$table_id] = true;
+		}
+	}
+
 	$output = '';
 
-	if ($style_or_class != '') {
-		if (strpos($style_or_class, ':') === false) {
-			$output = "class='nowrap " . $style_or_class . "'";
+	if ($styleclass != '') {
+		if (!str_contains($styleclass, ':')) {
+			$output = "class='nowrap " . $styleclass . "'";
+
 			if ($width != '') {
 				$output .= " style='width:$width;'";
 			}
 		} else {
-			$output = "class='nowrap' style='" . $style_or_class;
+			$output = "class='nowrap' style='" . $styleclass;
+
 			if ($width != '') {
 				$output .= ";width:$width;";
 			}
@@ -240,40 +314,309 @@ function form_selectable_cell($contents, $id, $width = '', $style_or_class = '',
 	}
 
 	if ($title != '') {
-		$wrapper = "<span class='cactiTooltipHint' style='padding:0px;margin:0px;' title='" . str_replace(array('"', "'"), '', $title) . "'>" . $contents . "</span>";
+		$wrapper = "<span class='cactiTooltipHint' style='padding:0px;margin:0px;' title='" . str_replace(['"', "'"], '', $title) . "'>" . $contents . '</span>';
 	} else {
 		$wrapper = $contents;
 	}
 
-	print "\t<td " . $output . ">" . $wrapper . "</td>\n";
+	print "\t<td " . $output . '>' . $wrapper . "</td>\n";
+
+	return true;
 }
 
-/* form_checkbox_cell - format's a tables checkbox form element so that the cacti js actions work on it
-   @arg $title - the text that will be displayed if your hover over the checkbox */
-function form_checkbox_cell($title, $id, $disabled = false) {
+function form_get_table_id(mixed $increment = false) : string {
+	static $table_count = 0;
+
+	if ($increment) {
+		$table_count++;
+	}
+
+	if (isset_request_var('action') && get_nfilter_request_var('action') != '' && isset_request_var('tab') && get_nfilter_request_var('tab') != '') {
+		return basename(get_current_page(), '.php') . ':' . $table_count . ':action-tab-' . get_nfilter_request_var('action') . '-' . get_nfilter_request_var('tab') . ':';
+	}
+
+	if (isset_request_var('action') && get_nfilter_request_var('action') != '') {
+		return basename(get_current_page(), '.php') . ':' . $table_count . ':action-' . get_nfilter_request_var('action') . ':';
+	}
+
+	if (isset_request_var('tab') && get_nfilter_request_var('tab') != '') {
+		return basename(get_current_page(), '.php') . ':tab-' . get_nfilter_request_var('tab') . ':';
+	} else {
+		return basename(get_current_page(), '.php') . ':' . $table_count;
+	}
+}
+
+/**
+ * Format's a table row such that it can be highlighted using cacti's js actions
+ *
+ * @param mixed  $contents   The content to be placed inside the table cell.
+ * @param string $table_id   The ID attribute for the table cell (not used in the function).
+ * @param string $columnid   The width of the table cell. Default is an empty string.
+ * @param string $styleclass The style or class attribute for the table cell.
+ *                           Default is an empty string. If it contains a colon (:), it is treated as a style
+ *                           attribute; otherwise, as a class attribute.
+ * @param string $title      The tooltip text for the table cell. Default is an empty string.
+ *
+ * @return bool False if errors are encountered
+ */
+function form_selectable_vcell(mixed $contents, string $table_id = '', string $columnid = '', string $styleclass = '', string $title = '') : bool {
+	global $tableCount;
+
+	static $tableColumns = null;
+
+	if ($table_id == '') {
+		$table_id = form_get_table_id();
+	}
+
+	if (!isset($tableColumns[$table_id])) {
+		$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+	}
+
+	if (isset($tableColumns[$table_id]) && cacti_sizeof($tableColumns[$table_id])) {
+		if (!$tableColumns[$table_id][$columnid]) {
+			return false;
+		}
+	}
+
+	$output = '';
+	$width  = '';	// Width was undefined, adding this until we know what was intended
+
+	if ($styleclass != '') {
+		if (!str_contains($styleclass, ':')) {
+			$output = "class='nowrap " . $styleclass . "'";
+
+			if ($width != '') {
+				$output .= " style='width:$width;'";
+			}
+		} else {
+			$output = "class='nowrap' style='" . $styleclass;
+
+			if ($width != '') {
+				$output .= ";width:$width;";
+			}
+			$output .= "'";
+		}
+	} else {
+		$output = 'class="nowrap"';
+
+		if ($width != '') {
+			$output .= " style='width:$width;'";
+		}
+	}
+
+	if ($title != '') {
+		$wrapper = "<span class='cactiTooltipHint' style='padding:0px;margin:0px;' title='" . str_replace(['"', "'"], '', $title) . "'>" . $contents . '</span>';
+	} else {
+		$wrapper = $contents;
+	}
+
+	print "\t<td " . $output . '>' . $wrapper . "</td>\n";
+
+	return true;
+}
+
+function form_process_visible_display_text(string $table_id, array $display_text) : array {
+	global $tableCount;
+
+	static $tableColumns = null;
+
+	/**
+	 * We have to support more than one table per page
+	 * so maintain a column count per page and store settings
+	 * accordingly.
+	 */
+	$table_id = form_get_table_id(true);
+
+	if (!isset($tableColumns[$table_id])) {
+		$tableCount[$table_id]   = 0;
+
+		// this reset/clear functionality can be removed before production
+		if (isset_request_var('clear') || isset_request_var('reset')) {
+			db_execute_prepared('DELETE FROM settings_user
+				WHERE user_id = ? AND name = ?',
+				[$_SESSION[SESS_USER_ID], "visible_columns_{$table_id}{$tableCount[$table_id]}"]);
+
+			$tableColumns[$table_id] = [];
+		} else {
+			$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+		}
+	} else {
+		$tableCount[$table_id]++;
+
+		// this reset/clear functionality can be removed before production
+		if (isset_request_var('clear') || isset_request_var('reset')) {
+			db_execute_prepared('DELETE FROM settings_user
+				WHERE user_id = ? AND name = ?',
+				[$_SESSION[SESS_USER_ID], "visible_columns_{$table_id}{$tableCount[$table_id]}"]);
+
+			$tableColumns[$table_id] = [];
+		} else {
+			$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+		}
+	}
+
+	// reset if the developer is making changes to the page layout
+	if (cacti_sizeof($tableColumns[$table_id]) && cacti_sizeof($display_text) != cacti_sizeof($tableColumns[$table_id])) {
+		cacti_log('WARNING: Detected a change in base table topology', false, 'DEVELOP', POLLER_VERBOSITY_MEDIUM);
+
+		$tableColumns[$table_id] = [];
+	}
+
+	if (isset_request_var('columns_add')) {
+		$columns = get_nfilter_request_var('columns_add');
+
+		if (is_array($columns)) {
+			foreach ($columns as $column) {
+				if (isset($tableCount[$table_id][$column])) {
+					$tableColumns[$table_id][$column] = true;
+				}
+			}
+		} else {
+			$tableColumns[$table_id][$columns] = true;
+		}
+	}
+
+	if (isset_request_var('columns_remove')) {
+		$columns = get_nfilter_request_var('columns_remove');
+
+		if (is_array($columns)) {
+			foreach ($columns as $column) {
+				if (isset($tableCount[$table_id][$column])) {
+					$tableColumns[$table_id][$column] = false;
+				}
+			}
+		} else {
+			$tableColumns[$table_id][$columns] = false;
+		}
+	}
+
+	if (!cacti_sizeof($tableColumns[$table_id])) {
+		$initialize = true;
+	} else {
+		$initialize = false;
+	}
+
+	$return_array = [];
+	$coldata      = [];
+
+	if (cacti_sizeof($display_text)) {
+		foreach ($display_text as $id => $column) {
+			// Convert the array to a standard array
+			if (is_numeric($id)) {
+				$id = "autocol$id";
+
+				if (isset($column['display'])) {
+					$return_array[$id] = $column;
+				} else {
+					if (is_array($column)) {
+						$return_array[$id]['display'] = $column[0];
+
+						if (isset($column[1])) {
+							$return_array[$id]['sort']   = $column[1];
+						}
+					} else {
+						$return_array[$id]['display'] = $column;
+					}
+				}
+			} elseif (isset($column['display'])) {
+				$return_array[$id] = $column;
+			} else {
+				if (is_array($column)) {
+					$return_array[$id]['display'] = $column[0];
+
+					if (isset($column[1])) {
+						$return_array[$id]['sort']   = $column[1];
+					}
+				} else {
+					$return_array[$id]['display'] = $column;
+				}
+			}
+
+			if (isset($tableColumns[$table_id][$id]) && $tableColumns[$table_id][$id] == true) {
+				$return_array[$id]['visible'] = true;
+				$coldata[$id]                 = true;
+			} elseif (isset($column['nohide']) && $column['nohide'] === true) {
+				$return_array[$id]['visible'] = true;
+				$coldata[$id]                 = true;
+			} elseif ($initialize) {
+				if (isset($column['default'])) {
+					if ($column['default'] === true) {
+						$return_array[$id]['visible'] = true;
+						$coldata[$id]                 = true;
+					} else {
+						$return_array[$id]['visible'] = false;
+						$coldata[$id]                 = false;
+					}
+				} else {
+					$return_array[$id]['visible'] = true;
+					$coldata[$id]                 = true;
+				}
+			} else {
+				$return_array[$id]['visible'] = false;
+				$coldata[$id]                 = false;
+			}
+		}
+	}
+
+	if ($initialize) {
+		set_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}", json_encode($coldata));
+	}
+
+	// cacti_log(json_encode($return_array));
+
+	return $return_array;
+}
+
+/**
+ * Format's a tables checkbox form element so that the cacti js actions work on it
+ *
+ * @param string $title    The title attribute for the checkbox, used for accessibility.
+ * @param string $id       The unique identifier for the checkbox input element.
+ * @param bool   $disabled Whether the checkbox should be disabled. Default is false.
+ * @param bool   $checked  Whether the checkbox should be checked. Default is false.
+ *
+ * @return void
+ */
+function form_checkbox_cell(string $title, string $id, bool $disabled = false, bool $checked = false) : void {
 	print "\t<td class='checkbox' style='width:1%;'>\n";
-	print "\t\t<input type='checkbox' title='" . html_escape($title) . "' class='checkbox" . ($disabled ? ' disabled':'') . "' " . ($disabled ? "disabled='disabled'":'') . " id='chk_" . $id . "' name='chk_" . $id . "'><label class='formCheckboxLabel' for='chk_" . $id . "'></label>\n";
+	print "\t\t<input type='checkbox' title='" . htmle($title) . "' class='checkbox" . ($disabled ? ' disabled' : '') . "' " . ($disabled ? " disabled='disabled'" : '') . ($checked ? " checked='checked'" : '') . " id='chk_" . $id . "' name='chk_" . $id . "'><label class='formCheckboxLabel' for='chk_" . $id . "'></label>\n";
 	print "\t</td>\n";
 }
 
-/* form_end_row - ends a table row that is started with form_alternate_row */
-function form_end_row() {
+/**
+ * Ends a table row that is started with form_alternate_row
+ *
+ * @return void
+ */
+function form_end_row() : void {
 	print "</tr>\n";
 }
 
-/* html_boolean - returns the boolean equivalent of an HTML checkbox value
-   @arg $html_boolean - the value of the HTML checkbox
-   @returns - true or false based on the value of the HTML checkbox */
-function html_boolean($html_boolean) {
+/**
+ * Returns the boolean equivalent of an HTML checkbox value
+ *
+ * This function checks if the given string is equal to 'on' and returns true if it is,
+ * otherwise it returns false.
+ *
+ * @param string $html_boolean The string representation of a boolean value.
+ *
+ * @return bool Returns true if the input string is 'on', otherwise false.
+ */
+function html_boolean(string $html_boolean) : bool {
 	return ($html_boolean == 'on');
 }
 
-/* html_boolean_friendly - returns the natural language equivalent of an HTML
-     checkbox value
-   @arg $html_boolean - the value of the HTML checkbox
-   @returns - 'Selected' or 'Not Selected' based on the value of the HTML
-     checkbox */
-function html_boolean_friendly($html_boolean) {
+/**
+ * Returns the natural language equivalent of an HTML checkbox value
+ *
+ * This function takes an HTML boolean value (typically 'on' or 'off') and
+ * returns a user-friendly string indicating whether the value is selected or not.
+ *
+ * @param string $html_boolean The HTML boolean value to convert. Expected values are 'on' or 'off'.
+ *
+ * @return string Returns 'Selected' if the input is 'on', otherwise returns 'Not Selected'.
+ */
+function html_boolean_friendly(string $html_boolean) : string {
 	if ($html_boolean == 'on') {
 		return __('Selected');
 	} else {
@@ -281,18 +624,25 @@ function html_boolean_friendly($html_boolean) {
 	}
 }
 
-/* get_checkbox_style - finds the proper CSS padding to apply based on the
-     current client browser in use
-   @returns - a CSS style string which should be used with an HTML checkbox
-     control */
-function get_checkbox_style() {
+/**
+ * Finds the proper CSS padding to apply based on the current client browser in use
+ *
+ * This function currently returns an empty string, indicating no specific style is applied.
+ *
+ * @return string An empty string representing the checkbox style.
+ */
+function get_checkbox_style() : string {
 	return '';
 }
 
-/* set_default_action - sets the required 'action' request variable
-   @arg $default - The default action is not set
-   @returns - null */
-function set_default_action($default = '') {
+/**
+ * Sets the required 'action' request variable
+ *
+ * @param string $default The default action is not set
+ *
+ * @return void
+ */
+function set_default_action(string $default = '') : void {
 	if (!isset_request_var('action')) {
 		set_request_var('action', $default);
 	} elseif (is_array(get_nfilter_request_var('action'))) {
@@ -306,10 +656,25 @@ function set_default_action($default = '') {
 	}
 }
 
-/* unset_request_var - unsets the request variable
-   @arg $variable - The variable to unset
-   @returns - null */
-function unset_request_var($variable) {
+/**
+ * alias of unset_request_var
+ *
+ * @param string $variable
+ *
+ * @return void
+ */
+function unsrv(string $variable) : void {
+	unset_request_var($variable);
+}
+
+/**
+ * Unsets the request variable.
+ *
+ * @param string $variable
+ *
+ * @return void
+ */
+function unset_request_var(string $variable) : void {
 	global $_CACTI_REQUEST;
 
 	if (isset($_CACTI_REQUEST[$variable])) {
@@ -321,19 +686,47 @@ function unset_request_var($variable) {
 	}
 }
 
-/* isset_request_var - checks to see if the $_REQUEST variable
-   is set.  Returns true or false.
-   @arg $variable - The variable to check
-   @returns - true or false */
-function isset_request_var($variable) {
+/**
+ * alias of isset_request_var()
+ *
+ * @param string $variable
+ *
+ * @return bool
+ */
+function isrv(string $variable) : bool {
+	return isset_request_var($variable);
+}
+
+/**
+ * checks to see if the $_REQUEST variable is set.
+ *
+ * @param string $variable
+ *
+ * @return bool
+ */
+function isset_request_var(string $variable) : bool {
 	return isset($_REQUEST[$variable]);
 }
 
-/* isempty_request_var - checks to see if the $_REQUEST variable
-   is empty.  Returns true or false.
-   @arg $variable - The variable to check
-   @returns - true or false */
-function isempty_request_var($variable) {
+/**
+ * alias of isempty_request_var()
+ *
+ * @param string $variable
+ *
+ * @return bool
+ */
+function ierv(string $variable) : bool {
+	return isempty_request_var($variable);
+}
+
+/**
+ * checks to see if the $_REQUEST variableis empty.
+ *
+ * @param string $variable
+ *
+ * @return bool
+ */
+function isempty_request_var(string $variable) : bool {
 	if (isset_request_var($variable)) {
 		$value = $_REQUEST[$variable];
 
@@ -345,11 +738,27 @@ function isempty_request_var($variable) {
 	return true;
 }
 
-/* set_request_var - sets a given $_REQUEST variable and Cacti global.
-   @arg $variable - The variable to set
-   @arg $value - The value to set the variable to
-   @returns - null */
-function set_request_var($variable, $value) {
+/**
+ * alias of set_request_var()
+ *
+ * @param string $variable The variable to set
+ * @param mixed  $value    The value to set the variable to
+ *
+ * @return void
+ */
+function srv(string $variable, mixed $value) : void {
+	set_request_var($variable, $value);
+}
+
+/**
+ * Sets a given $_REQUEST variable and Cacti global.
+ *
+ * @param string $variable The variable to set
+ * @param mixed  $value    The value to set the variable to
+ *
+ * @return void
+ */
+function set_request_var(string $variable, mixed $value) : void {
 	global $_CACTI_REQUEST;
 
 	$_CACTI_REQUEST[$variable] = $value;
@@ -358,23 +767,29 @@ function set_request_var($variable, $value) {
 	$_GET[$variable]           = $value;
 }
 
-/* get_request_var - returns the current value of a PHP $_REQUEST variable, optionally
-     returning a default value if the request variable does not exist.  When Cacti
-     has 'log_validation' set on, it will log all instances where a request variable
-     has not first been filtered.
-   @arg $name - the name of the request variable. this should be a valid key in the
-     $_REQUEST array
-   @arg $default - the value to return if the specified name does not exist in the
-     $_REQUEST array
-   @returns - the value of the request variable */
-function get_request_var($name, $default = '') {
+/**
+ * returns the current value of a PHP $_REQUEST variable, optionally
+ * returning a default value if the request variable does not exist.  When Cacti
+ * has 'log_validation' set on, it will log all instances where a request variable
+ * has not first been filtered.
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param mixed  $default the value to return if the specified name does not
+ *                        exist in the $_REQUEST array
+ *
+ * @return mixed
+ */
+function get_request_var(string $name, mixed $default = '') : mixed {
 	global $_CACTI_REQUEST;
 
 	$log_validation = read_config_option('log_validation');
 
 	if (isset($_CACTI_REQUEST[$name])) {
 		return $_CACTI_REQUEST[$name];
-	} elseif (isset_request_var($name)) {
+	}
+
+	if (isset_request_var($name)) {
 		if ($log_validation == 'on') {
 			html_log_input_error($name);
 		}
@@ -387,32 +802,75 @@ function get_request_var($name, $default = '') {
 	}
 }
 
-/* get_request_var_request - deprecated - alias of get_request_var()
-     returning a default value if the request variable does not exist
-   @arg $name - the name of the request variable. this should be a valid key in the
-     $_GET array
-   @arg $default - the value to return if the specified name does not exist in the
-     $_GET array
-   @returns - the value of the request variable */
-function get_request_var_request($name, $default = '') {
+/**
+ * alias of get_request_var()
+ *
+ * @deprecated v1.0
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param mixed  $default the value to return if the specified name does not
+ *                        exist in the $_REQUEST array
+ *
+ * @return mixed
+ */
+function get_request_var_request(string $name, mixed $default = '') : mixed {
 	return get_request_var($name, $default);
 }
 
-/* get_filter_request_var - returns the current value of a PHP $_REQUEST variable and also
-     sanitizing the value using the filter. It will also optionally
-     return a default value if the request variable does not exist
-   @arg $name - the name of the request variable. this should be a valid key in the
-     $_REQUEST array
-   @arg $default - the value to return if the specified name does not exist in the
-     $_REQUEST array
-   @returns - the value of the request variable */
-function get_filter_request_var($name, $filter = FILTER_VALIDATE_INT, $options = array()) {
+/**
+ * alias of get_request_var()
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param mixed  $default the value to return if the specified name does not
+ *                        exist in the $_REQUEST array
+ *
+ * @return mixed
+ */
+function grv(string $name, mixed $default = '') : mixed {
+	return get_request_var($name, $default);
+}
+
+/**
+ * alias of get_filter_request_var()
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param int    $filter  the filter mode to use
+ * @param array  $options used to pass to filter_var function or to hold the
+ *                        default value to be returned
+ *
+ * @return mixed
+ */
+function gfrv(string $name, int $filter = FILTER_VALIDATE_INT, array $options = []) : mixed {
+	return get_filter_request_var($name, $filter, $options);
+}
+
+/**
+ * returns the current value of a PHP $_REQUEST variable and also
+ * sanitizing the value using the filter. It will also optionally
+ * return a default value if the request variable does not exist
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param int    $filter  the filter mode to use
+ * @param array  $options used to pass to filter_var function or to hold the
+ *                        default value to be returned
+ *
+ * @return mixed
+ */
+function get_filter_request_var(string $name, int $filter = FILTER_VALIDATE_INT, array $options = []) : mixed {
+	$custom_error = 'Unknown Error';
+
 	if (isset_request_var($name)) {
 		if (isempty_request_var($name)) {
 			set_request_var($name, get_nfilter_request_var($name));
 
 			return get_request_var($name);
-		} elseif (get_nfilter_request_var($name) == 'undefined') {
+		}
+
+		if (get_nfilter_request_var($name) == 'undefined') {
 			if (isset($options['default'])) {
 				set_request_var($name, $options['default']);
 
@@ -431,26 +889,33 @@ function get_filter_request_var($name, $filter = FILTER_VALIDATE_INT, $options =
 				} else {
 					$value = '';
 				}
-			} elseif (isempty_request_var($name)) {
-				$value = '';
 			} elseif ($filter == FILTER_VALIDATE_IS_REGEX) {
 				if (is_base64_encoded($_REQUEST[$name])) {
+<<<<<<< HEAD
 					$_REQUEST[$name] = mb_convert_encoding(base64_decode($_REQUEST[$name]), 'UTF-8');
+||||||| 7dd05ee12
+					$_REQUEST[$name] = base64_decode($_REQUEST[$name]);
+=======
+					$_REQUEST[$name] = mb_convert_encoding(base64_decode($_REQUEST[$name], true), 'UTF-8');
+>>>>>>> origin/fix/jquery-deprecations
 				}
 
 				$valid = validate_is_regex($_REQUEST[$name]);
+
 				if ($valid === true) {
 					$value = $_REQUEST[$name];
 				} else {
-					$value = false;
+					$value        = false;
 					$custom_error = $valid;
 				}
 			} elseif ($filter == FILTER_VALIDATE_IS_NUMERIC_ARRAY) {
 				$valid = true;
+
 				if (is_array($_REQUEST[$name])) {
-					foreach($_REQUEST[$name] AS $number) {
+					foreach ($_REQUEST[$name] as $number) {
 						if (!is_numeric($number)) {
 							$valid = false;
+
 							break;
 						}
 					}
@@ -464,11 +929,13 @@ function get_filter_request_var($name, $filter = FILTER_VALIDATE_INT, $options =
 					$value = false;
 				}
 			} elseif ($filter == FILTER_VALIDATE_IS_NUMERIC_LIST) {
-				$valid = true;
+				$valid  = true;
 				$values = preg_split('/,/', $_REQUEST[$name], -1, PREG_SPLIT_NO_EMPTY);
-				foreach($values AS $number) {
+
+				foreach ($values as $number) {
 					if (!is_numeric($number)) {
 						$valid = false;
+
 						break;
 					}
 				}
@@ -485,13 +952,18 @@ function get_filter_request_var($name, $filter = FILTER_VALIDATE_INT, $options =
 			}
 		}
 
+<<<<<<< HEAD
 		if ($value === null && isset($options['default']) && $options['default'] === null) {
+||||||| 7dd05ee12
+=======
+		if ($value === null && $options['default'] === null) {
+>>>>>>> origin/fix/jquery-deprecations
 			$value = '';
 		}
 
 		if ($value === false) {
 			if ($filter == FILTER_VALIDATE_IS_REGEX) {
-				raise_message('custom', __('The regular expression "%s" is not valid. Error is %s', html_escape(get_nfilter_request_var($name)), html_escape($custom_error)), MESSAGE_LEVEL_ERROR);
+				raise_message('custom', __('The regular expression "%s" is not valid. Error is %s', htmle(get_nfilter_request_var($name)), htmle($custom_error)), MESSAGE_LEVEL_ERROR);
 				set_request_var($name, '');
 			} else {
 				die_html_input_error($name, get_nfilter_request_var($name));
@@ -507,30 +979,57 @@ function get_filter_request_var($name, $filter = FILTER_VALIDATE_INT, $options =
 
 			return $options['default'];
 		} else {
-			return;
+			return null;
 		}
 	}
+
+	return null;
 }
 
-/* get_nfilter_request_var - returns the value of the request variable deferring
-   any filtering.
-   @arg $name - the name of the request variable. this should be a valid key in the
-     $_POST array
-   @arg $default - the value to return if the specified name does not exist in the
-     $_POST array
-   @returns - the value of the request variable */
-function get_nfilter_request_var($name, $default = '') {
+/**
+ * alias of get_nfilter_request_var()
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param mixed  $default the value to return if the specified name does not
+ *                        exist in the $_REQUEST array
+ *
+ * @return mixed
+ */
+function gnrv(string $name, mixed $default = '') : mixed {
+	return get_nfilter_request_var($name, $default);
+}
+
+/**
+ * returns the current value of a PHP $_REQUEST variable, optionally
+ * returning a default value if the request variable does not exist,
+ * but without using any of the filtering checks.
+ *
+ * This should only be used when the request variable has already been
+ * vetted via other filer request var functoins
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param mixed  $default the value to return if the specified name does not
+ *                        exist in the $_REQUEST array
+ *
+ * @return mixed
+ */
+function get_nfilter_request_var(string $name, mixed $default = '') : mixed {
 	global $_CACTI_REQUEST;
 
 	if (isset($_CACTI_REQUEST[$name])) {
 		return $_CACTI_REQUEST[$name];
-	} elseif (isset($_REQUEST[$name])) {
+	}
+
+	if (isset($_REQUEST[$name])) {
 		return $_REQUEST[$name];
 	} else {
 		return $default;
 	}
 }
 
+<<<<<<< HEAD
 /* get_request_var_post - deprecated - returns the current value of a
      PHP $_POST variable, optionally returning a default value if the
      request variable does not exist.
@@ -540,82 +1039,107 @@ function get_nfilter_request_var($name, $default = '') {
      $_POST array
    @returns - the value of the request variable */
 function get_request_var_post($name, $default = '') {
+||||||| 7dd05ee12
+/* get_request_var_post - depricated - returns the current value of a
+     PHP $_POST variable, optionally returning a default value if the
+     request variable does not exist.
+   @arg $name - the name of the request variable. this should be a valid key in the
+     $_POST array
+   @arg $default - the value to return if the specified name does not exist in the
+     $_POST array
+   @returns - the value of the request variable */
+function get_request_var_post($name, $default = '') {
+=======
+/**
+ * alias of get_nfilteR_request_var
+ *
+ * @deprecated v1.0
+ *
+ * @param string $name    the name of the request variable. this should be a
+ *                        valid key in the $_REQUEST array
+ * @param mixed  $default the value to return if the specified name does not
+ *                        exist in the $_REQUEST array
+ *
+ * @return mixed
+ */
+function get_request_var_post(string $name, mixed $default = '') : mixed {
+>>>>>>> origin/fix/jquery-deprecations
 	return get_nfilter_request_var($name, $default);
 }
 
-/* validate_store_request_vars - validate, sanitize, and store
-   request variables into the custom $_CACTI_REQUEST and desired
-   session variables for Cacti filtering.
-
-
-   @arg $filters - an array keyed with the filter methods.
-   @arg $session_prefix - the prefix for the session variable
-
-   Valid filter include those from PHP filter_var() function syntax.
-   The format of the array is:
-
-     array(
-       'varA' => array(
-          'filter' => value,
-          'pageset' => true,      (optional)
-          'session' => sess_name, (optional)
-          'options' => mixed,
-          'default' => value),
-       'varB' => array(
-          'filter' => value,
-          'pageset' => true,      (optional)
-          'session' => sess_name, (optional)
-          'options' => mixed,
-          'default' => value),
-       ...
-     );
-
-   The 'pageset' attribute is optional, and when set, any changes
-   between what the page returns and what is set in the session
-   result in the page number being returned to 1.
-
-   The 'session' attribute is also optional, and when set, all
-   changes will be stored to the session variable defined and
-   not to session_prefix . '_' . $variable as the default.  This
-   allows for the concept of global session variables such as
-   'sess_default_rows'.
-
-   Validation 'filter' follow PHP conventions including:
-
-     FILTER_VALIDATE_BOOLEAN          - Validate that the variable is boolean
-     FILTER_VALIDATE_EMAIL            - Validate that the variable is an email
-     FILTER_VALIDATE_FLOAT            - Validate that the variable is a float
-     FILTER_VALIDATE_INT              - Validate that the variable is an integer
-     FILTER_VALIDATE_IP               - Validate that the variable is an IP address
-     FILTER_VALIDATE_MAC              - Validate that the variable is a MAC Address
-     FILTER_VALIDATE_REGEXP           - Validate against a REGEX
-     FILTER_VALIDATE_URL              - Validate that the variable is a valid URL
-     FILTER_VALIDATE_IS_REGEX         - Validate if a filter variable is a valid regex
-     FILTER_VALIDATE_IS_NUMERIC_ARRAY - Validate if a filter variable is a numeric array
-     FILTER_VALIDATE_IS_NUMERIC_LIST  - Validate if a filter variable is a comma delimited list of numbers
-
-   Sanitization 'filters' follow PHP conventions including:
-
-     FILTER_SANITIZE_EMAIL              - Sanitize the email address
-     FILTER_SANITIZE_ENCODED            - URL-encode string
-     FILTER_SANITIZE_MAGIC_QUOTES       - Apply addslashes()
-     FILTER_SANITIZE_NUMBER_FLOAT       - Remove all non float values
-     FILTER_SANITIZE_NUMBER_INT         - Remove everything non int
-     FILTER_SANITIZE_SPECIAL_CHARS      - Escape special chars
-     FILTER_SANITIZE_FULL_SPECIAL_CHARS - Equivalent to htmlspecialchars adding ENT_QUOTES
-     FILTER_SANITIZE_STRING             - Strip tags, optionally strip or encode special chars
-     FILTER_SANITIZE_URL                - Remove all characters except letters, digits, etc.
-     FILTER_UNSAFE_RAW                  - Nothing and optional strip or encode
-
-   @returns - the $_REQUEST variable validated and sanitized. */
-function validate_store_request_vars($filters, $sess_prefix = '') {
-	global $_CACTI_REQUEST;
-
-	$changed = 0;
-	$custom_error = '';
+/**
+ * validate, sanitize, and store request variables into the
+ * custom $_CACTI_REQUEST and desired session variables for
+ * Cacti filtering.
+ *
+ * @param array  $filters     - An array keyed with the filter methods.
+ * @param string $sess_prefix - A string to use to prefix the session
+ *                            variable.
+ *
+ *    Valid filter include those from PHP filter_var() function syntax.
+ *    The format of the array is:
+ *      array(
+ *        'varA' => array(
+ *           'filter' => value,
+ *           'pageset' => true,      (optional)
+ *           'session' => sess_name, (optional)
+ *           'options' => mixed,
+ *           'default' => value),
+ *        'varB' => array(
+ *           'filter' => value,
+ *           'pageset' => true,      (optional)
+ *           'session' => sess_name, (optional)
+ *           'options' => mixed,
+ *           'default' => value),
+ *        ...
+ *      );
+ *
+ *    The 'pageset' attribute is optional, and when set, any changes
+ *    between what the page returns and what is set in the session
+ *    result in the page number being returned to 1.
+ *
+ *    The 'session' attribute is also optional, and when set, all
+ *    changes will be stored to the session variable defined and
+ *    not to session_prefix . '_' . $variable as the default.  This
+ *    allows for the concept of global session variables such as
+ *    'sess_default_rows'.
+ *
+ *    Validation 'filter' follow PHP conventions including:
+ *
+ *      FILTER_VALIDATE_BOOLEAN          - Validate that the variable is boolean
+ *      FILTER_VALIDATE_EMAIL            - Validate that the variable is an email
+ *      FILTER_VALIDATE_FLOAT            - Validate that the variable is a float
+ *      FILTER_VALIDATE_INT              - Validate that the variable is an integer
+ *      FILTER_VALIDATE_IP               - Validate that the variable is an IP address
+ *      FILTER_VALIDATE_MAC              - Validate that the variable is a MAC Address
+ *      FILTER_VALIDATE_REGEXP           - Validate against a REGEX
+ *      FILTER_VALIDATE_URL              - Validate that the variable is a valid URL
+ *      FILTER_VALIDATE_IS_REGEX         - Validate if a filter variable is a valid regex
+ *      FILTER_VALIDATE_IS_NUMERIC_ARRAY - Validate if a filter variable is a numeric array
+ *      FILTER_VALIDATE_IS_NUMERIC_LIST  - Validate if a filter variable is a comma delimited list of numbers
+ *
+ *    Sanitization 'filters' follow PHP conventions including:
+ *
+ *      FILTER_SANITIZE_EMAIL              - Sanitize the email address
+ *      FILTER_SANITIZE_ENCODED            - URL-encode string
+ *      FILTER_SANITIZE_MAGIC_QUOTES       - Apply addslashes()
+ *      FILTER_SANITIZE_NUMBER_FLOAT       - Remove all non float values
+ *      FILTER_SANITIZE_NUMBER_INT         - Remove everything non int
+ *      FILTER_SANITIZE_SPECIAL_CHARS      - Escape special chars
+ *      FILTER_SANITIZE_FULL_SPECIAL_CHARS - Equivalent to htmlspecialchars adding ENT_QUOTES
+ *      FILTER_SANITIZE_STRING             - Strip tags, optionally strip or encode special chars
+ *      FILTER_SANITIZE_URL                - Remove all characters except letters, digits, etc.
+ *      FILTER_UNSAFE_RAW                  - Nothing and optional strip or encode
+ *
+ * @return void
+ */
+function validate_store_request_vars(array $filters, string $sess_prefix = '') : void {
+	$changed          = 0;
+	$custom_error     = '';
+	$session_variable = 'sess_fallback';
 
 	if (cacti_sizeof($filters)) {
-		foreach($filters as $variable => $options) {
+		foreach ($filters as $variable => $options) {
 			// Establish the session variable first
 			if ($sess_prefix != '') {
 				if (isset($options['session'])) {
@@ -633,7 +1157,7 @@ function validate_store_request_vars($filters, $sess_prefix = '') {
 				} elseif (isset_request_var('reset')) {
 					kill_session_var($session_variable);
 				} elseif (isset($options['pageset']) && $options['pageset'] == true) {
-					$changed += check_changed($variable, $session_variable);
+					$changed += check_changed($variable, (string) $session_variable);
 				}
 			}
 
@@ -643,7 +1167,8 @@ function validate_store_request_vars($filters, $sess_prefix = '') {
 				} elseif (isset($options['default'])) {
 					set_request_var($variable, $options['default']);
 				} else {
-					cacti_log("Filter Variable: $variable, Must have a default and none is set", false);
+					cacti_log("WARNING: Filter Variable: $variable, Must have a default and none is set", false, 'FILTER');
+					cacti_debug_backtrace('FILTER');
 					set_request_var($variable, '');
 				}
 			} else {
@@ -659,22 +1184,31 @@ function validate_store_request_vars($filters, $sess_prefix = '') {
 					$value = '';
 				} elseif ($options['filter'] == FILTER_VALIDATE_IS_REGEX) {
 					if (is_base64_encoded($_REQUEST[$variable])) {
+<<<<<<< HEAD
 						$_REQUEST[$variable] = mb_convert_encoding(base64_decode($_REQUEST[$variable]), 'UTF-8');
+||||||| 7dd05ee12
+						$_REQUEST[$variable] = base64_decode($_REQUEST[$variable]);
+=======
+						$_REQUEST[$variable] = mb_convert_encoding(base64_decode($_REQUEST[$variable], true), 'UTF-8');
+>>>>>>> origin/fix/jquery-deprecations
 					}
 
 					$valid = validate_is_regex($_REQUEST[$variable]);
+
 					if ($valid === true) {
 						$value = $_REQUEST[$variable];
 					} else {
-						$value = false;
+						$value        = false;
 						$custom_error = $valid;
 					}
 				} elseif ($options['filter'] == FILTER_VALIDATE_IS_NUMERIC_ARRAY) {
 					$valid = true;
+
 					if (is_array($_REQUEST[$variable])) {
-						foreach($_REQUEST[$variable] AS $number) {
+						foreach ($_REQUEST[$variable] as $number) {
 							if (!is_numeric($number)) {
 								$valid = false;
+
 								break;
 							}
 						}
@@ -688,11 +1222,13 @@ function validate_store_request_vars($filters, $sess_prefix = '') {
 						$value = false;
 					}
 				} elseif ($options['filter'] == FILTER_VALIDATE_IS_NUMERIC_LIST) {
-					$valid = true;
+					$valid  = true;
 					$values = preg_split('/,/', $_REQUEST[$variable], -1, PREG_SPLIT_NO_EMPTY);
-					foreach($values AS $number) {
+
+					foreach ($values as $number) {
 						if (!is_numeric($number)) {
 							$valid = false;
+
 							break;
 						}
 					}
@@ -710,10 +1246,10 @@ function validate_store_request_vars($filters, $sess_prefix = '') {
 
 				if ($value === false) {
 					if ($options['filter'] == FILTER_VALIDATE_IS_REGEX) {
-						raise_message('custom', __('The regular expression "%s" is not valid. Error is %s', html_escape(get_nfilter_request_var($variable)), html_escape($custom_error)), MESSAGE_LEVEL_ERROR);
+						raise_message('custom', __('The regular expression "%s" is not valid. Error is %s', htmle(get_nfilter_request_var($variable)), htmle($custom_error)), MESSAGE_LEVEL_ERROR);
 						set_request_var($variable, '');
 					} else {
-						die_html_input_error($variable, get_nfilter_request_var($variable), html_escape($custom_error));
+						die_html_input_error($variable, get_nfilter_request_var($variable), htmle($custom_error));
 					}
 				} else {
 					set_request_var($variable, $value);
@@ -741,28 +1277,61 @@ function validate_store_request_vars($filters, $sess_prefix = '') {
 	}
 }
 
+<<<<<<< HEAD
 /* update_order_string - creates a sort string for standard Cacti tables
    @returns - null */
 function update_order_string($inplace = false) {
+||||||| 7dd05ee12
+/* update_order_string - creates a sort string for standard Cacti tables
+   @returns - null */
+function update_order_string($inplace = false) {
+	$page = get_order_string_page();
+=======
+/**
+ * Creates a sort string for standard Cacti tables
+ *
+ * This function manages the sorting order for data displayed on a page. It can update the order string
+ * in place or based on request variables. The function handles sorting by different columns, including
+ * special handling for IP addresses.
+ *
+ * @param bool $inplace If true, updates the order string in place using the current session data.
+ *
+ * @return void
+ */
+function update_order_string(bool $inplace = false) : void {
+>>>>>>> origin/fix/jquery-deprecations
 	$page = get_order_string_page(false);
 
 	$order = '';
 
-	if (strpos(get_request_var('sort_column'), '(') === false && strpos(get_request_var('sort_column'), '`') === false) {
+	if (!str_contains(get_request_var('sort_column'), '(') && !str_contains(get_request_var('sort_column'), '`')) {
 		$del = '`';
 	} else {
 		$del = '';
 	}
 
+	$database = get_mysql_info();
+	$natural  = false;
+
+	if ($database['database'] == 'MariaDB') {
+		if (cacti_version_compare($database['version'], '10.7', '>')) {
+			$natural = true;
+		}
+	}
+
 	if ($inplace) {
 		$_SESSION['sort_string'][$page] = 'ORDER BY ';
-		foreach($_SESSION['sort_data'][$page] as $column => $direction) {
-			if ($column == 'hostname' || $column == 'ip' || $column == 'ip_address') {
-				$order .= ($order != '' ? ', ':'') . 'INET_ATON(' . $column . ') ' . $direction;
+
+		foreach ($_SESSION['sort_data'][$page] as $column => $direction) {
+			if ($column == 'ip' || $column == 'ip_address') {
+				$order .= ($order != '' ? ', ' : '') . 'INET_ATON(' . $column . ') ' . $direction;
+			} elseif ($column == 'hostname' && $natural) {
+				$order .= ($order != '' ? ', ' : '') . 'NATURAL_SORT_KEY(' . $column . ') ' . $direction;
 			} else {
-				$order .= ($order != '' ? ', ':'') . $column . ' ' . $direction;
+				$order .= ($order != '' ? ', ' : '') . $column . ' ' . $direction;
 			}
 		}
+
 		$_SESSION['sort_string'][$page] .= $order;
 	} else {
 		if (isset_request_var('clear')) {
@@ -777,10 +1346,12 @@ function update_order_string($inplace = false) {
 			$column    = get_request_var('sort_column');
 			$direction = get_request_var('sort_direction');
 
-			if ($column == 'hostname' || $column == 'ip' || $column == 'ip_address') {
-				$_SESSION['sort_string'][$page] ='ORDER BY INET_ATON(' . $column . ") " . $direction;
+			if ($column == 'ip' || $column == 'ip_address') {
+				$_SESSION['sort_string'][$page] = 'ORDER BY INET_ATON(' . $column . ') ' . $direction;
+			} elseif ($column == 'hostname' && $natural) {
+				$_SESSION['sort_string'][$page] = 'ORDER BY NATURAL_SORT_KEY(' . $del . implode($del . '.' . $del, explode('.', get_request_var('sort_column'))) . $del . ') ' . get_request_var('sort_direction');
 			} else {
-				$_SESSION['sort_string'][$page] = 'ORDER BY ' . $del . implode($del . '.'. $del, explode('.', get_request_var('sort_column'))) . $del . ' ' . get_request_var('sort_direction');
+				$_SESSION['sort_string'][$page] = 'ORDER BY ' . $del . implode($del . '.' . $del, explode('.', get_request_var('sort_column'))) . $del . ' ' . get_request_var('sort_direction');
 			}
 		} elseif (isset_request_var('sort_column')) {
 			if (isset_request_var('reset')) {
@@ -789,24 +1360,29 @@ function update_order_string($inplace = false) {
 			}
 
 			$_SESSION['sort_data'][$page][get_request_var('sort_column')] = get_nfilter_request_var('sort_direction');
+
 			$_SESSION['sort_string'][$page] = 'ORDER BY ';
 
-			foreach($_SESSION['sort_data'][$page] as $column => $direction) {
-				if (strpos($column, '(') === false && strpos($column, '`') === false) {
+			foreach ($_SESSION['sort_data'][$page] as $column => $direction) {
+				if (!str_contains($column, '(') && !str_contains($column, '`')) {
 					$del = '`';
 				} else {
 					$del = '';
+
 					break;
 				}
 			}
 
-			foreach($_SESSION['sort_data'][$page] as $column => $direction) {
-				if ($column == 'hostname' || $column == 'ip' || $column == 'ip_address') {
-					$order .= ($order != '' ? ', ':'') . 'INET_ATON(' . $column . ") " . $direction;
+			foreach ($_SESSION['sort_data'][$page] as $column => $direction) {
+				if ($column == 'ip' || $column == 'ip_address') {
+					$order .= ($order != '' ? ', ' : '') . 'INET_ATON(' . $column . ') ' . $direction;
+				} elseif ($column == 'hostname' && $natural) {
+					$order .= ($order != '' ? ', ' : '') . 'NATURAL_SORT_KEY(' . $del . implode($del . '.' . $del, explode('.', $column)) . $del . ') ' . $direction;
 				} else {
-					$order .= ($order != '' ? ', ' . $del:$del) . implode($del . '.' . $del, explode('.', $column)) . $del . ' ' . $direction;
+					$order .= ($order != '' ? ', ' : '') . $del . implode($del . '.' . $del, explode('.', $column)) . $del . ' ' . $direction;
 				}
 			}
+
 			$_SESSION['sort_string'][$page] .= $order;
 		} else {
 			unset($_SESSION['sort_data'][$page]);
@@ -815,9 +1391,27 @@ function update_order_string($inplace = false) {
 	}
 }
 
+<<<<<<< HEAD
 /* get_order_string - returns a valid order string for a table
    @returns - the order string */
 function get_order_string() {
+||||||| 7dd05ee12
+/* get_order_string - returns a valid order string for a table
+   @returns - the order string */
+function get_order_string() {
+	$page = get_order_string_page();
+=======
+/**
+ * Generates an SQL ORDER BY clause based on the current sorting preferences.
+ *
+ * This function constructs an ORDER BY clause using the sort column and sort direction
+ * specified in the request variables. It also ensures that the column name is properly
+ * delimited to prevent SQL injection.
+ *
+ * @return string The generated ORDER BY clause.
+ */
+function get_order_string() : string {
+>>>>>>> origin/fix/jquery-deprecations
 	$page        = get_order_string_page(true);
 	$sort_column = get_nfilter_request_var('sort_column');
 	$sort_dir    = strtoupper(get_nfilter_request_var('sort_direction'));
@@ -842,14 +1436,44 @@ function get_order_string() {
 
 	if (isset($_SESSION['sort_string'][$page])) {
 		return $_SESSION['sort_string'][$page];
+<<<<<<< HEAD
 	} elseif ($sort_column != '') {
 		return 'ORDER BY ' . $del . implode($del . '.' . $del, explode('.', $sort_column)) . $del . ' ' . $sort_dir;
 	} else {
 		return '';
+||||||| 7dd05ee12
+	} else {
+		return 'ORDER BY ' . $del . implode($del . '.' . $del, explode('.', get_request_var('sort_column'))) . $del . ' ' . get_request_var('sort_direction');
+=======
+>>>>>>> origin/fix/jquery-deprecations
 	}
+
+	if ($sort_column != '') {
+		return 'ORDER BY ' . $del . implode($del . '.' . $del, explode('.', $sort_column)) . $del . ' ' . $sort_dir;
+	}
+
+	return '';
 }
 
+<<<<<<< HEAD
 function remove_column_from_order_string($column) {
+||||||| 7dd05ee12
+function remove_column_from_order_string($column) {
+	$page = get_order_string_page();
+=======
+/**
+ * Removes a specified column from the order string in the session data.
+ *
+ * This function retrieves the current page's order string and checks if the specified
+ * column exists in the session's sort data for that page. If the column is found, it
+ * removes the column from the sort data and updates the order string.
+ *
+ * @param string $column The name of the column to be removed from the order string.
+ *
+ * @return void
+ */
+function remove_column_from_order_string(string $column) : void {
+>>>>>>> origin/fix/jquery-deprecations
 	$page = get_order_string_page(false);
 
 	if (isset($_SESSION['sort_data'][$page][$column])) {
@@ -858,7 +1482,26 @@ function remove_column_from_order_string($column) {
 	}
 }
 
+<<<<<<< HEAD
 function get_order_string_page($increment = true) {
+||||||| 7dd05ee12
+function get_order_string_page() {
+	$page = str_replace('.php', '', get_current_page());
+=======
+/**
+ * Generates a unique order string for the current page.
+ *
+ * This function creates a unique identifier for the current page by combining
+ * a static page count, the current page name, and optional request variables
+ * such as 'action' and 'tab'. The page count is incremented with each call to
+ * ensure uniqueness.
+ *
+ * @param bool $increment Increment the page counter if true
+ *
+ * @return string A unique order string for the current page.
+ */
+function get_order_string_page(bool $increment = true) : string {
+>>>>>>> origin/fix/jquery-deprecations
 	static $page_count = 0;
 
 	$page = $page_count . '_' . str_replace('.php', '', get_current_page());
@@ -879,6 +1522,7 @@ function get_order_string_page($increment = true) {
 }
 
 /**
+<<<<<<< HEAD
  * Validate that a redirect URL points to an internal Cacti page.
  * Prevents open redirect attacks by rejecting external URLs.
  *
@@ -965,6 +1609,91 @@ function validate_redirect_url($url = '', $default = 'index.php') {
  * @return bool|string Returns true if the regular expression is valid, otherwise returns an error message string.
  */
 function validate_is_regex($regex) {
+||||||| 7dd05ee12
+function validate_is_regex($regex) {
+=======
+ * Validate the redirect url provider by the HTTP_REFERER from PHP
+ *
+ * @param string $url     The regular expression to validate.
+ * @param string $default The URL to travel to upon failure
+ *
+ * @return string The validated URL, or the provided $default if invalid
+ */
+function validate_redirect_url($url = '', $default = 'index.php') {
+	if ($url === '') {
+		return $default;
+	}
+
+	$url = trim($url);
+
+	// Decode the url to make it readable if encoded
+	if (is_urlencoded($url)) {
+		$url = urldecode($url);
+	}
+
+	// reject URLs with protocol schemes (external redirects, javascript:, data:)
+	$bad_strings = [
+		'javascript:',
+		'data:',
+		'vbscript:',
+		'mailto:',
+		'file:'
+	];
+
+	foreach ($bad_strings as $bstring) {
+		if (stripos($url, $bstring) !== false) {
+			return $default;
+		}
+	}
+
+	// reject protocol-relative URLs
+	if (strpos($url, '//') === 0) {
+		return $default;
+	}
+
+	// reject URLs with newlines (header injection)
+	if (preg_match('/[\r\n]/', $url)) {
+		return $default;
+	}
+
+	// reject path traversal sequences
+	if (stripos($url, '..') !== false) {
+		return $default;
+	}
+
+	// Prevent referring off site
+	$ref_host = parse_url($url, PHP_URL_HOST);
+	$srv_host = null;
+
+	if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] != '') {
+		$srv_host = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST']);
+	}
+
+	if ($ref_host === null || ($srv_host !== null && $ref_host === $srv_host)) {
+		$ref_path  = parse_url($url, PHP_URL_PATH) ?: '';
+		$ref_query = parse_url($url, PHP_URL_QUERY);
+
+		$safe = sanitize_uri($ref_path . ($ref_query !== null ? '?' . $ref_query : ''));
+
+		return $safe;
+	} else {
+		return $default;
+	}
+}
+
+/**
+ * Validates if the given string is a valid regular expression.
+ *
+ * This function checks if the provided regular expression is valid and safe to use.
+ * It prevents exploits by limiting the length of the regular expression to 50 bytes
+ * and disallowing the use of the semicolon character.
+ *
+ * @param string $regex The regular expression to validate.
+ *
+ * @return bool|string Returns true if the regular expression is valid, otherwise returns an error message string.
+ */
+function validate_is_regex(string $regex) : bool|string {
+>>>>>>> origin/fix/jquery-deprecations
 	if ($regex == '') {
 		return true;
 	}
@@ -978,7 +1707,12 @@ function validate_is_regex($regex) {
 		return __('Cacti regular expressions are limited to 50 characters only for security reasons.');
 	}
 
+<<<<<<< HEAD
 	if (strpos($regex, ';') !== false) {
+||||||| 7dd05ee12
+=======
+	if (str_contains($regex, ';')) {
+>>>>>>> origin/fix/jquery-deprecations
 		return __('Cacti regular expressions can not includes the semi-color character.');
 	}
 
@@ -987,8 +1721,9 @@ function validate_is_regex($regex) {
 	$track_errors = ini_get('track_errors');
 	ini_set('track_errors', 1);
 
-    if (@preg_match("'" . $regex . "'", NULL) !== false) {
+	if (@preg_match("'" . $regex . "'", '') !== false) {
 		ini_set('track_errors', $track_errors);
+
 		return true;
 	}
 
@@ -998,13 +1733,13 @@ function validate_is_regex($regex) {
 
 	ini_set('track_errors', $track_errors);
 
-	$errors = array(
+	$errors = [
 		PREG_INTERNAL_ERROR         => __('There was an internal error!'),
 		PREG_BACKTRACK_LIMIT_ERROR  => __('Backtrack limit was exhausted!'),
 		PREG_RECURSION_LIMIT_ERROR  => __('Recursion limit was exhausted!'),
 		PREG_BAD_UTF8_ERROR         => __('Bad UTF-8 error!'),
 		PREG_BAD_UTF8_OFFSET_ERROR  => __('Bad UTF-8 offset error!'),
-	);
+	];
 
 	$error = preg_last_error();
 
@@ -1019,13 +1754,20 @@ function validate_is_regex($regex) {
 	}
 }
 
-/* load_current_session_value - finds the correct value of a variable that is being
-     cached as a session variable on an HTML form
-   @arg $request_var_name - the array index name for the request variable
-   @arg $session_var_name - the array index name for the session variable
-   @arg $default_value - the default value to use if values cannot be obtained using
-     the session or request array */
-function load_current_session_value($request_var_name, $session_var_name, $default_value) {
+/**
+ * Loads the current session value for a given request variable.
+ *
+ * This function checks if a request variable is set. If it is, the value is stored in the session.
+ * If the request variable is not set but the session variable is, the session value is set as the request variable.
+ * If neither is set, the request variable is set to a default value.
+ *
+ * @param string $request_var_name The name of the request variable to check.
+ * @param string $session_var_name The name of the session variable to store the value.
+ * @param mixed  $default_value    The default value to set if neither the request nor session variable is set.
+ *
+ * @return void
+ */
+function load_current_session_value(string $request_var_name, string $session_var_name, mixed $default_value) : void {
 	if (isset_request_var($request_var_name)) {
 		$_SESSION[$session_var_name] = get_request_var($request_var_name);
 	} elseif (isset($_SESSION[$session_var_name])) {
@@ -1036,6 +1778,7 @@ function load_current_session_value($request_var_name, $session_var_name, $defau
 }
 
 /**
+<<<<<<< HEAD
  * get_colored_device_status - given a device's status, return the colored text in HTML
  * format suitable for display
  *
@@ -1047,11 +1790,35 @@ function load_current_session_value($request_var_name, $session_var_name, $defau
  * @return - a string containing html that represents the device's current status
  */
 function get_colored_device_status($disabled, $status, $thold_failure_count = -1, $status_event_count = -1) {
+||||||| 7dd05ee12
+/* get_colored_device_status - given a device's status, return the colored text in HTML
+     format suitable for display
+   @arg $disabled (bool) - true if the device is disabled, false is it is not
+   @arg $status - the status type of the device as defined in global_constants.php
+   @returns - a string containing html that represents the device's current status */
+function get_colored_device_status($disabled, $status) {
+=======
+ * Get the colored device status as an HTML span element.
+ *
+ * This function returns an HTML span element with a class and text representing
+ * the status of a device. The status can be 'Disabled', 'Down (Thold)', 'Down',
+ * 'Recovering', 'Up', 'Error', or 'Unknown'.
+ *
+ * @param bool $disabled            Indicates if the device is disabled.
+ * @param int  $status              The current status of the device.
+ * @param int  $thold_failure_count Optional. The threshold failure count. Default is -1.
+ * @param int  $status_event_count  Optional. The status event count. Default is -1.
+ *
+ * @return string The HTML span element with the appropriate class and status text.
+ */
+function get_colored_device_status(bool $disabled, int $status, int $thold_failure_count = -1, int $status_event_count = -1) : string {
+>>>>>>> origin/fix/jquery-deprecations
 	if ($disabled) {
-		return "<span class='deviceDisabled'>" . __('Disabled') . "</span>";
+		return "<span class='deviceDisabled'>" . __('Disabled') . '</span>';
 	} else {
 		if ($status != HOST_RECOVERING && $thold_failure_count > 0) {
 			if ($status_event_count >= $thold_failure_count) {
+<<<<<<< HEAD
 				return "<span class='deviceDown'>" . __('Down (Thold)') . "</span>";
 			}
 		}
@@ -1072,14 +1839,64 @@ function get_colored_device_status($disabled, $status, $thold_failure_count = -1
 			default:
 				return "<span class='deviceUnknown'>" . __('Unknown') . "</span>";
 				break;
+||||||| 7dd05ee12
+		switch ($status) {
+			case HOST_DOWN:
+				return "<span class='deviceDown'>" . __('Down') . "</span>";
+				break;
+			case HOST_RECOVERING:
+				return "<span class='deviceRecovering'>" . __('Recovering') . "</span>";
+				break;
+			case HOST_UP:
+				return "<span class='deviceUp'>" . __('Up') . "</span>";
+				break;
+			case HOST_ERROR:
+				return "<span class='deviceError'>" . __('Error') . "</span>";
+				break;
+			default:
+				return "<span class='deviceUnknown'>" . __('Unknown') . "</span>";
+				break;
+=======
+				return "<span class='deviceDown'>" . __('Down (Thold)') . '</span>';
+			}
+>>>>>>> origin/fix/jquery-deprecations
 		}
+
+		return match ($status) {
+			HOST_DOWN       => "<span class='deviceDown'>" . __('Down') . '</span>',
+			HOST_RECOVERING => "<span class='deviceRecovering'>" . __('Recovering') . '</span>',
+			HOST_UP         => "<span class='deviceUp'>" . __('Up') . '</span>',
+			HOST_ERROR      => "<span class='deviceError'>" . __('Error') . '</span>',
+			default         => "<span class='deviceUnknown'>" . __('Unknown') . '</span>',
+		};
 	}
 }
 
-/* get_current_graph_start - determine the correct graph start time selected using
-     the timespan selector
-   @returns - the number of seconds relative to now where the graph should begin */
-function get_current_graph_start() {
+/**
+ * Given a device's status, return the colored text in HTML format suitable for display
+ *
+ * @param bool   $disabled  When true, the device is disabled, false is it is not
+ * @param string $site_name The name of the site to display
+ *
+ * @return string Returns a string containing html that represents the site's current
+ *                status and name
+ */
+function get_colored_site_status(bool $disabled, string|null $site_name) : string {
+	$class = '';
+
+	if ($disabled) {
+		$class = 'deviceDown';
+	}
+
+	return "<span class='$class'>" . __esc($site_name) . '</span>';
+}
+
+/**
+ * Determine the correct graph start time selected using the timespan selector
+ *
+ * @return mixed The current graph start time if set and numeric, otherwise a default timespan value.
+ */
+function get_current_graph_start() : mixed {
 	if (isset($_SESSION['sess_current_timespan_begin_now']) && is_numeric($_SESSION['sess_current_timespan_begin_now'])) {
 		return $_SESSION['sess_current_timespan_begin_now'];
 	} else {
@@ -1087,10 +1904,12 @@ function get_current_graph_start() {
 	}
 }
 
-/* get_current_graph_end - determine the correct graph end time selected using
-     the timespan selector
-   @returns - the number of seconds relative to now where the graph should end */
-function get_current_graph_end() {
+/**
+ * Determine the correct graph end time selected using the timespan selector
+ *
+ * @return mixed The current graph end time if set and numeric, otherwise '0'.
+ */
+function get_current_graph_end() : mixed {
 	if (isset($_SESSION['sess_current_timespan_end_now']) && is_numeric($_SESSION['sess_current_timespan_end_now'])) {
 		return $_SESSION['sess_current_timespan_end_now'];
 	} else {
@@ -1098,17 +1917,27 @@ function get_current_graph_end() {
 	}
 }
 
-/* display_tooltip - display the text passed to the function as a tooltip
-   @arg $text - the text to display in the tooltip
-   @returns - null */
-function display_tooltip($text) {
+/**
+ * Generates an HTML tooltip element with the provided text.
+ *
+ * This function creates a tooltip element using a div with the class
+ * "cactiTooltipHint" and a FontAwesome question-circle icon. The tooltip
+ * text is included within a span element that is initially hidden.
+ *
+ * @param string $text The text to be displayed inside the tooltip.
+ *
+ * @return string The HTML string for the tooltip element if text is provided,
+ *                otherwise an empty string.
+ */
+function display_tooltip(string $text) : string {
 	if ($text != '') {
-		return '<div class="cactiTooltipHint fa fa-question-circle"><span style="display:none;">' . $text . "</span></div>\n";
+		return '<div class="cactiTooltipHint ti ti-help"><span style="display:none;">' . $text . "</span></div>\n";
 	} else {
 		return '';
 	}
 }
 
+<<<<<<< HEAD
 /* get_page_list - generates the html necessary to present the user with a list of pages limited
      in length and number of rows per page
    @arg $current_page - the current page number
@@ -1120,13 +1949,48 @@ function display_tooltip($text) {
    @returns - a string containing html that represents the a page list */
 function get_page_list($current_page, $pages_per_screen, $rows_per_page, $total_rows, $url, $page_var = 'page', $return_to = '') {
 
+||||||| 7dd05ee12
+/* get_page_list - generates the html necessary to present the user with a list of pages limited
+     in length and number of rows per page
+   @arg $current_page - the current page number
+   @arg $pages_per_screen - the maximum number of pages allowed on a single screen. odd numbered
+     values for this argument are prefered for equality reasons
+   @arg $current_page - the current page number
+   @arg $total_rows - the total number of available rows
+   @arg $url - the url string to prepend to each page click
+   @returns - a string containing html that represents the a page list */
+function get_page_list($current_page, $pages_per_screen, $rows_per_page, $total_rows, $url, $page_var = 'page', $return_to = '') {
+
+=======
+/**
+ * Generates a paginated list of links for navigating through pages.
+ *
+ * @param int    $current_page     The current page number.
+ * @param int    $pages_per_screen The number of pages to display in the pagination control.
+ * @param int    $rows_per_page    The number of rows per page.
+ * @param int    $total_rows       The total number of rows.
+ * @param string $url              The base URL for the pagination links.
+ * @param string $page_var         The query parameter name for the page number (default is 'page').
+ * @param string $return_to        The ID of the HTML element to update with the new page content (default is '').
+ *
+ * @return string The HTML for the pagination control.
+ */
+function get_page_list(int $current_page, int $pages_per_screen, int $rows_per_page, int $total_rows, string $url, string $page_var = 'page', string $return_to = '') : string {
+>>>>>>> origin/fix/jquery-deprecations
 	// By current design, $pages_per_screen means number of page no in mid of nav bar
 	// when $total_pages is larger than $pages_per_screen + 2(first and last)
 	// So actual $pages_per_screen should be $pages_per_screen+2
 	$pages_per_screen += 2;
 	$url_page_select = "<ul class='pagination'>";
 
+<<<<<<< HEAD
 	if (strpos($url, '?') !== false) {
+||||||| 7dd05ee12
+	if (strpos($url, '?') !== false) {
+		$url . '&';
+=======
+	if (str_contains($url, '?')) {
+>>>>>>> origin/fix/jquery-deprecations
 		$url .= '&';
 	} else {
 		$url .= '?';
@@ -1141,29 +2005,29 @@ function get_page_list($current_page, $pages_per_screen, $rows_per_page, $total_
 	}
 
 	$start_page = max(1, ($current_page - floor(($pages_per_screen - 1) / 2)));
-	$end_page = min($total_pages, ($current_page + floor(($pages_per_screen - 1) / 2)));
+	$end_page   = min($total_pages, ($current_page + floor(($pages_per_screen - 1) / 2)));
 
 	if ($total_pages <= $pages_per_screen) {
 		$start_page = 2;
-		$end_page = $total_pages - 1;
+		$end_page   = $total_pages - 1;
 	} else {
 		$start_page = max(2, ($current_page - floor(($pages_per_screen - 3) / 2)));
-		/*When current_page > (pages_per_screen - 1) / 2*/
+		// When current_page > (pages_per_screen - 1) / 2
 		$end_page = min($total_pages - 1, ($current_page + floor(($pages_per_screen - 3) / 2)));
 
-		/* adjust if we are close to the beginning of the page list */
+		// adjust if we are close to the beginning of the page list
 		if ($current_page <= ceil(($pages_per_screen) / 2)) {
 			$end_page += ($pages_per_screen - $end_page - 1);
 		}
 
-		/* adjust if we are close to the end of the page list */
+		// adjust if we are close to the end of the page list
 		if (($total_pages - $current_page) < ceil(($pages_per_screen) / 2)) {
 			$start_page -= (($pages_per_screen - ($end_page - $start_page)) - 3);
 		}
 
-		/* stay within limits */
+		// stay within limits
 		$start_page = max(2, $start_page);
-		$end_page = min($total_pages - 1, $end_page);
+		$end_page   = min($total_pages - 1, $end_page);
 	}
 
 	if ($total_pages > 0) {
@@ -1174,8 +2038,9 @@ function get_page_list($current_page, $pages_per_screen, $rows_per_page, $total_
 		}
 	}
 
-	for ($page_number=0; (($page_number+$start_page) <= $end_page); $page_number++) {
+	for ($page_number = 0; (($page_number + $start_page) <= $end_page); $page_number++) {
 		$page = $page_number + $start_page;
+
 		if ($page_number < $pages_per_screen) {
 			if ($page_number == 0 && $start_page > 2) {
 				$url_page_select .= $url_ellipsis;
@@ -1203,11 +2068,26 @@ function get_page_list($current_page, $pages_per_screen, $rows_per_page, $total_
 
 	$url_page_select .= '</ul>';
 
-	if ($return_to != '') {
-		$url_page_select .= "<script type='text/javascript'>function goto$page_var(pageNo) { if (typeof url_graph === 'function') { var url_add=url_graph('') } else { var url_add=''; }; $.get('" . sanitize_uri($url) . "header=false&" . $page_var . "='+pageNo+url_add).done(function(data) { $('#$return_to').html(data); applySkin(); }); }</script>";
-	} else {
-		$url_page_select .= "<script type='text/javascript'>function goto{$page_var}(pageNo) { if (typeof url_graph === 'function') { var url_add=url_graph('') } else { var url_add=''; }; document.location='$url$page_var='+pageNo+url_add }</script>";
+	if ($return_to == '') {
+		$return_to = 'main';
 	}
+
+	$url .= $page_var;
+	$url_page_select .= "<script type='text/javascript'>
+	function goto$page_var(pageNo) {
+		if (typeof url_graph === 'function') {
+			var url_add=url_graph('')
+		} else {
+			var url_add='';
+		};
+
+		strURL = '$url='+pageNo+url_add;
+
+		loadUrl({
+			url: strURL,
+			elementId: '$return_to',
+		});
+	}</script>";
 
 	return $url_page_select;
 }

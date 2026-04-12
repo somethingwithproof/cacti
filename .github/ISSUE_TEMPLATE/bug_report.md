@@ -8,7 +8,13 @@ assignees: ''
 ---
 <!--
  #
+<<<<<<< HEAD
  # Copyright (C) 2004-2024 The Cacti Group
+||||||| 7dd05ee12
+
+=======
+ # Copyright (C) 2004-2026 The Cacti Group
+>>>>>>> origin/fix/jquery-deprecations
  #
 -->
 # Describe the bug

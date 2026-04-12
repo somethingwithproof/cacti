@@ -373,12 +373,28 @@ class Twofish extends BlockCipher
     protected static function initialize_static_variables()
     {
         if (is_float(self::$m3[0])) {
+<<<<<<< HEAD
             self::$m0 = array_map([self::class, 'safe_intval'], self::$m0);
             self::$m1 = array_map([self::class, 'safe_intval'], self::$m1);
             self::$m2 = array_map([self::class, 'safe_intval'], self::$m2);
             self::$m3 = array_map([self::class, 'safe_intval'], self::$m3);
             self::$q0 = array_map([self::class, 'safe_intval'], self::$q0);
             self::$q1 = array_map([self::class, 'safe_intval'], self::$q1);
+||||||| 7dd05ee12
+        $this->m0 = array_map('intval', $this->m0);
+        $this->m1 = array_map('intval', $this->m1);
+        $this->m2 = array_map('intval', $this->m2);
+        $this->m3 = array_map('intval', $this->m3);
+        $this->q0 = array_map('intval', $this->q0);
+        $this->q1 = array_map('intval', $this->q1);
+=======
+            self::$m0 = array_map('intval', self::$m0);
+            self::$m1 = array_map('intval', self::$m1);
+            self::$m2 = array_map('intval', self::$m2);
+            self::$m3 = array_map('intval', self::$m3);
+            self::$q0 = array_map('intval', self::$q0);
+            self::$q1 = array_map('intval', self::$q1);
+>>>>>>> origin/fix/jquery-deprecations
         }
 
         parent::initialize_static_variables();

@@ -25,36 +25,53 @@ error_reporting(E_ALL);
 
 define('IN_CACTI_INSTALL', 1);
 
-include_once(dirname(__FILE__) . '/../include/cli_check.php');
-include_once($config['base_path'] . '/install/functions.php');
-include_once($config['base_path'] . '/lib/api_data_source.php');
-include_once($config['base_path'] . '/lib/api_device.php');
-include_once($config['base_path'] . '/lib/api_automation.php');
-include_once($config['base_path'] . '/lib/api_automation_tools.php');
-include_once($config['base_path'] . '/lib/data_query.php');
-include_once($config['base_path'] . '/lib/import.php');
-include_once($config['base_path'] . '/lib/installer.php');
-include_once($config['base_path'] . '/lib/poller.php');
-include_once($config['base_path'] . '/lib/snmp.php');
-include_once($config['base_path'] . '/lib/utility.php');
+include_once(__DIR__ . '/../include/cli_check.php');
+include_once(CACTI_PATH_INSTALL . '/functions.php');
+include_once(CACTI_PATH_LIBRARY . '/api_data_source.php');
+include_once(CACTI_PATH_LIBRARY . '/api_device.php');
+include_once(CACTI_PATH_LIBRARY . '/api_automation.php');
+include_once(CACTI_PATH_LIBRARY . '/api_automation_tools.php');
+include_once(CACTI_PATH_LIBRARY . '/data_query.php');
+include_once(CACTI_PATH_LIBRARY . '/import.php');
+include_once(CACTI_PATH_LIBRARY . '/installer.php');
+include_once(CACTI_PATH_LIBRARY . '/poller.php');
+include_once(CACTI_PATH_LIBRARY . '/snmp.php');
+include_once(CACTI_PATH_LIBRARY . '/utility.php');
+include_once(CACTI_PATH_LIBRARY . '/xml.php');
 
 cacti_log('Checking arguments', false, 'INSTALL:');
-/* process calling arguments */
+// process calling arguments
 $params = $_SERVER['argv'];
 array_shift($params);
 
 global $cli_install;
 
 $cli_install = true;
+<<<<<<< HEAD
 $now = time();
+||||||| 7dd05ee12
+=======
+$now         = time();
+>>>>>>> origin/fix/jquery-deprecations
 
 if (cacti_sizeof($params) == 0) {
 	log_install_always('','no parameters passed' . PHP_EOL);
+<<<<<<< HEAD
 	exit(0);
 }
 
 if (function_exists('register_process_start')) {
 	if (!register_process_start('install', 'master', '0', 600)) {
+||||||| 7dd05ee12
+	exit();
+=======
+
+	exit(0);
+}
+
+if (function_exists('register_process_start')) {
+	if (!register_process_start('install', 'master', 0, 600)) {
+>>>>>>> origin/fix/jquery-deprecations
 		exit(0);
 	}
 } else {
@@ -74,4 +91,8 @@ if (function_exists('register_process_start')) {
 } else {
 	set_config_option('installer_running', '');
 }
+<<<<<<< HEAD
 
+||||||| 7dd05ee12
+=======
+>>>>>>> origin/fix/jquery-deprecations

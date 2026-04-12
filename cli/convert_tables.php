@@ -25,11 +25,11 @@
 
 require(__DIR__ . '/../include/cli_check.php');
 
-/* process calling arguments */
+// process calling arguments
 $parms = $_SERVER['argv'];
 array_shift($parms);
 
-global $debug;
+global $debug, $database_default;
 
 $innodb      = false;
 $utf8        = false;
@@ -40,16 +40,26 @@ $force       = false;
 $rebuild     = false;
 $dynamic     = false;
 $table_name  = '';
-$skip_tables = array();
+$skip_tables = [];
 $installer   = false;
 $local       = false;
 
 if (cacti_sizeof($parms)) {
+<<<<<<< HEAD
 	foreach($parms as $parameter) {
 		if (strpos($parameter, '=')) {
 			list($arg, $value) = explode('=', $parameter, 2);
+||||||| 7dd05ee12
+	foreach($parms as $parameter) {
+		if (strpos($parameter, '=')) {
+			list($arg, $value) = explode('=', $parameter);
+=======
+	foreach ($parms as $parameter) {
+		if (str_contains($parameter, '=')) {
+			[$arg, $value] = explode('=', $parameter, 2);
+>>>>>>> origin/fix/jquery-deprecations
 		} else {
-			$arg = $parameter;
+			$arg   = $parameter;
 			$value = '';
 		}
 
@@ -57,28 +67,40 @@ if (cacti_sizeof($parms)) {
 			case '-d':
 			case '--debug':
 				$debug = true;
+
 				break;
 			case '-r':
 			case '--rebuild':
 				$rebuild = true;
+
 				break;
 			case '--dynamic':
 				$dynamic = true;
+
 				break;
 			case '--local':
 				$local = true;
+
 				break;
 			case '-s':
 			case '--size':
 				$size = $value;
+
 				break;
 			case '-t':
 			case '--table':
 				$table_name = $value;
+
 				break;
 			case '-i':
 			case '--innodb':
 				$innodb = true;
+
+				break;
+			case '-l':
+			case '--latin1':
+				$latin = true;
+
 				break;
 			case '-l':
 			case '--latin1':
@@ -87,108 +109,165 @@ if (cacti_sizeof($parms)) {
 			case '-n':
 			case '--skip-innodb':
 				$skip_tables = explode(' ', $value);
+
 				break;
 			case '-f':
 			case '--force':
 				$force = true;
+
 				break;
 			case '-u':
 			case '--utf8':
 				$utf8 = true;
+
 				break;
 			case '--installer':
 				$installer = true;
 				require_once(__DIR__ . '../install/functions.php');
+
 				break;
 			case '--version':
 			case '-V':
 			case '-v':
 				display_version();
+
 				exit(0);
 			case '--help':
 			case '-H':
 			case '-h':
 				display_help();
+
 				exit(0);
+
 			default:
-				print 'ERROR: Invalid Parameter ' . $parameter . "\n\n";
+				print 'ERROR: Invalid Parameter ' . $parameter . PHP_EOL . PHP_EOL;
 				display_help();
+
 				exit(1);
 		}
 	}
 }
 
 if (cacti_sizeof($skip_tables) && $table_name != '') {
-	print_or_log($installer,  "ERROR: You can not specify a single table and skip tables at the same time.\n\n");
+	print_or_log($installer,  'ERROR: You can not specify a single table and skip tables at the same time.' . PHP_EOL . PHP_EOL);
 	display_help();
+
 	exit;
 }
 
 if (!($innodb || $utf8 || $latin)) {
+<<<<<<< HEAD
 	print_or_log($installer,  "ERROR: Must select either UTF8, LATIN1 or InnoDB conversion.\n\n");
+||||||| 7dd05ee12
+if (!($innodb || $utf8)) {
+	print_or_log($installer,  "ERROR: Must select either UTF8 or InnoDB conversion.\n\n");
+=======
+	print_or_log($installer,  'ERROR: Must select either UTF8, LATIN1 or InnoDB conversion.' . PHP_EOL . PHP_EOL);
+>>>>>>> origin/fix/jquery-deprecations
 	display_help();
+
 	exit;
 }
 
-if (!$local && $config['poller_id'] > 1) {
-	db_switch_remote_to_main();
+if (!$local) {
+	if (POLLER_ID > 1) {
+		db_switch_remote_to_main();
 
-	print_or_log($installer, "NOTE: Repairing Tables for Main Database\n");
+		print_or_log($installer, 'NOTE: Repairing Tables for Main Database' . PHP_EOL);
+	} else {
+		print_or_log($installer, 'NOTE: Repairing Tables for Local Database' . PHP_EOL);
+	}
 } else {
-	print_or_log($installer, "NOTE: Repairing Tables for Local Database\n");
+	print_or_log($installer, 'NOTE: Repairing Tables for Local Database' . PHP_EOL);
 }
 
 if (cacti_sizeof($skip_tables)) {
-	foreach($skip_tables as $table) {
+	foreach ($skip_tables as $table) {
 		if (!db_table_exists($table)) {
-			print_or_log($installer,  "ERROR: Skip Table $table does not Exist.  Can not continue.\n\n");
+			print_or_log($installer,  "ERROR: Skip Table $table does not Exist.  Can not continue." . PHP_EOL . PHP_EOL);
 			display_help();
+
 			exit;
 		}
 	}
 }
 
 $convert = $innodb ? 'InnoDB' : '';
+
 if ($utf8) {
 	$convert .= (strlen($convert) ? ' and ' : '') . ' utf8';
 }
 
-print_or_log($installer,  "Converting Database Tables to $convert with less than '$size' Records\n");
+print_or_log($installer,  "Converting Database Tables to $convert with less than '$size' Records" . PHP_EOL);
 
 if ($innodb) {
 	$engines = db_fetch_assoc('SHOW ENGINES');
 
+<<<<<<< HEAD
 	foreach($engines as $engine) {
 		if (strtolower($engine['Engine']) == 'innodb' && strtolower($engine['Support']) == 'off') {
 			print_or_log($installer,  "InnoDB Engine is not enabled\n");
 			exit;
+||||||| 7dd05ee12
+	foreach($engines as $engine) {
+		if (strtolower($engine['Engine']) == 'innodb' && strtolower($engine['Support'] == 'off')) {
+			print_or_log($installer,  "InnoDB Engine is not enabled\n");
+			exit;
+=======
+	if (cacti_sizeof($engines)) {
+		foreach ($engines as $engine) {
+			if (cacti_strtolower($engine['Engine']) == 'innodb' && cacti_strtolower($engine['Support']) == 'off') {
+				print_or_log($installer,  'InnoDB Engine is not enabled' . PHP_EOL);
+
+				exit;
+			}
+>>>>>>> origin/fix/jquery-deprecations
 		}
 	}
 
-	$file_per_table = db_fetch_row("show global variables like 'innodb_file_per_table'");
+	$file_per_table = db_fetch_row("SHOW GLOBAL VARIABLES LIKE 'innodb_file_per_table'");
 
-	if (strtolower($file_per_table['Value']) != 'on') {
+	if (cacti_strtolower($file_per_table['Value']) != 'on') {
 		print_or_log($installer,  'innodb_file_per_table not enabled');
+
 		exit;
 	}
 }
 
 if (strlen($table_name)) {
+<<<<<<< HEAD
 	$tables = array($table_name);
+||||||| 7dd05ee12
+	$tables = db_fetch_assoc('SHOW TABLE STATUS LIKE \''.$table_name .'\'');
+=======
+	$tables = [$table_name];
+>>>>>>> origin/fix/jquery-deprecations
 } else {
 	$tables = get_cacti_base_tables();
 }
 
 if (cacti_sizeof($tables)) {
+<<<<<<< HEAD
 	foreach($tables AS $table) {
 		$table_data = db_fetch_row_prepared('SELECT *
 			FROM information_schema.TABLES
 			WHERE TABLE_NAME = ?
 			AND TABLE_SCHEMA = ?',
 			array($table, $database_default));
+||||||| 7dd05ee12
+	foreach($tables AS $table) {
+=======
+	foreach ($tables as $table) {
+		$table_data = db_fetch_row_prepared('SELECT *
+			FROM information_schema.TABLES
+			WHERE TABLE_NAME = ?
+			AND TABLE_SCHEMA = ?',
+			[$table, $database_default]);
+>>>>>>> origin/fix/jquery-deprecations
 
 		$canConvert = $rebuild;
 		$canInnoDB  = false;
+
 		if (!$canConvert && $innodb) {
 			if ($table_data['ENGINE'] == 'MyISAM') {
 				$canConvert = true;
@@ -198,7 +277,13 @@ if (cacti_sizeof($tables)) {
 			}
 		}
 
+<<<<<<< HEAD
 		if (in_array($table, $skip_tables)) {
+||||||| 7dd05ee12
+		if (in_array($table['Name'], $skip_tables)) {
+=======
+		if (in_array($table, $skip_tables, true)) {
+>>>>>>> origin/fix/jquery-deprecations
 			$canInnoDB = false;
 		}
 
@@ -223,6 +308,7 @@ if (cacti_sizeof($tables)) {
 				print_or_log($installer,  "Converting Table > '$table'");
 
 				$sql = '';
+
 				if ($utf8) {
 					$sql .= ' CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
 				} elseif ($latin) {
@@ -233,7 +319,13 @@ if (cacti_sizeof($tables)) {
 					$sql .= (strlen($sql) ? ',' : '') . ' ENGINE=Innodb';
 				}
 
+<<<<<<< HEAD
 				$status = db_execute("ALTER TABLE `$table`" . ($dynamic ? ' ROW_FORMAT=Dynamic, ':'') . $sql);
+||||||| 7dd05ee12
+				$status = db_execute('ALTER TABLE `' . $table['Name'] . '`' . ($dynamic ? ' ROW_FORMAT=Dynamic, ':'') . $sql);
+=======
+				$status = db_execute("ALTER TABLE `$table`" . ($dynamic ? ' ROW_FORMAT=Dynamic, ' : '') . $sql);
+>>>>>>> origin/fix/jquery-deprecations
 
 				if ($status === false) {
 					print_or_log($installer,  ' Failed' . PHP_EOL);
@@ -251,7 +343,7 @@ if (cacti_sizeof($tables)) {
 	}
 }
 
-function print_or_log($installer, $text) {
+function print_or_log(bool $installer, string $text) : void {
 	if ($installer) {
 		log_install_and_file(POLLER_VERBOSITY_MEDIUM, rtrim($text), 'CONVERT', true);
 	} else {
@@ -259,7 +351,7 @@ function print_or_log($installer, $text) {
 	}
 }
 
-function record_log($installer, $text) {
+function record_log(bool $installer, string $text) : void {
 	if ($installer) {
 		log_install_and_file(POLLER_VERBOSITY_MEDIUM, rtrim($text), 'CONVERT', true);
 	} else {
@@ -267,16 +359,25 @@ function record_log($installer, $text) {
 	}
 }
 
-/*  display_version - displays version information */
-function display_version() {
+/**
+ * display_version - displays version information
+ *
+ * @return void
+ */
+function display_version() : void {
 	$version = get_cacti_cli_version();
-	print "Cacti Database Conversion Utility, Version $version, " . COPYRIGHT_YEARS . "\n";
+	print "Cacti Database Conversion Utility, Version $version, " . COPYRIGHT_YEARS . PHP_EOL;
 }
 
-/*	display_help - displays the usage of the function */
-function display_help () {
+/**
+ * display_help - displays the usage of the function
+ *
+ * @return void
+ */
+function display_help() : void {
 	display_version();
 
+<<<<<<< HEAD
 	print "\nusage: convert_tables.php [--debug] [--innodb] [--utf8] [--latin1] [--table=N] [--size=N] [--rebuild] [--dynamic]\n\n";
 	print "A utility to convert a Cacti Database from MyISAM to the InnoDB table format.\n";
 	print "MEMORY tables are not converted to InnoDB in this process.\n\n";
@@ -293,4 +394,42 @@ function display_help () {
 	print "     --local   - Perform the action on the Remote Data Collector if run from there\n";
 	print "-f | --force   - Proceed with conversion regardless of table size\n\n";
 	print "-d | --debug   - Display verbose output during execution\n\n";
+||||||| 7dd05ee12
+	print "\nusage: convert_tables.php [--debug] [--innodb] [--utf8] [--table=N] [--size=N] [--rebuild] [--dynamic]\n\n";
+	print "A utility to convert a Cacti Database from MyISAM to the InnoDB table format.\n";
+	print "MEMORY tables are not converted to InnoDB in this process.\n\n";
+	print "Required (one or more):\n";
+	print "-i | --innodb  - Convert any MyISAM tables to InnoDB\n";
+	print "-u | --utf8    - Convert any non-UTF8 tables to utf8mb4_unicode_ci\n\n";
+	print "Optional:\n";
+	print "-t | --table=S - The name of a single table to change\n";
+	print "-n | --skip-innodb=\"table1 table2 ...\" - Skip converting tables to InnoDB\n";
+	print "-s | --size=N  - The largest table size in records to convert.  Default is 1,000,000 rows.\n";
+	print "-r | --rebuild - Will compress/optimize existing InnoDB tables if found\n";
+	print "     --dynamic - Convert a table to Dynamic row format if available\n";
+	print "     --local   - Perform the action on the Remote Data Collector if run from there\n";
+	print "-f | --force   - Proceed with conversion regardless of table size\n\n";
+	print "-d | --debug   - Display verbose output during execution\n\n";
+=======
+	print PHP_EOL;
+	print 'usage: convert_tables.php [--debug] [--innodb] [--utf8] [--latin1] [--table=N] [--size=N] [--rebuild] [--dynamic]' . PHP_EOL . PHP_EOL;
+
+	print 'A utility to convert a Cacti Database from MyISAM to the InnoDB table format.' . PHP_EOL;
+	print 'MEMORY tables are not converted to InnoDB in this process.' . PHP_EOL . PHP_EOL;
+
+	print 'Required (one or more):' . PHP_EOL;
+	print '-i | --innodb  - Convert any MyISAM tables to InnoDB' . PHP_EOL . PHP_EOL;
+	print '-u | --utf8    - Convert any non-UTF8 tables to utf8mb4_unicode_ci' . PHP_EOL;
+	print '-l | --latin1  - Convert any non-latin1 tables to latin1' . PHP_EOL . PHP_EOL;
+
+	print 'Optional:' . PHP_EOL;
+	print '-t | --table=S - The name of a single table to change' . PHP_EOL;
+	print '-n | --skip-innodb="table1 table2 ..." - Skip converting tables to InnoDB' . PHP_EOL;
+	print '-s | --size=N  - The largest table size in records to convert.  Default is 1,000,000 rows.' . PHP_EOL;
+	print '-r | --rebuild - Will compress/optimize existing InnoDB tables if found' . PHP_EOL;
+	print '     --dynamic - Convert a table to Dynamic row format if available' . PHP_EOL;
+	print '     --local   - Perform the action on the Remote Data Collector if run from there' . PHP_EOL;
+	print '-f | --force   - Proceed with conversion regardless of table size' . PHP_EOL;
+	print '-d | --debug   - Display verbose output during execution' . PHP_EOL;
+>>>>>>> origin/fix/jquery-deprecations
 }

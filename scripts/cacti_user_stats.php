@@ -25,8 +25,10 @@
 
 error_reporting(0);
 
-/* get access to the database and open a session */
-include(dirname(__FILE__) . '/../include/cli_check.php');
+// get access to the database and open a session
+include(__DIR__ . '/../include/cli_check.php');
+
+global $cacti_db_session;
 
 $user_logins_valid        = 'U';
 $user_logins_invalid      = 'U';
@@ -38,7 +40,7 @@ $session_counter_garbage  = 'U';
 
 $active_interval = 600; // Ten minutes
 
-/* determine the number of invalid/valid user logins during the last poller interval */
+// determine the number of invalid/valid user logins during the last poller interval
 $user_logins_valid = db_fetch_cell("SELECT COUNT(*) AS user_logins
 	FROM user_log
 	WHERE UNIX_TIMESTAMP(`time`) BETWEEN UNIX_TIMESTAMP() - $active_interval AND UNIX_TIMESTAMP()
@@ -54,17 +56,17 @@ $user_logins_invalid = db_fetch_cell("SELECT COUNT(*) AS user_logins
 $active_interval_end      = time();
 $active_interval_begin    = $active_interval_end - $active_interval;
 
-/* determine the number of active/valid sessions during the last poller interval */
+// determine the number of active/valid sessions during the last poller interval
 if ($cacti_db_session == true) {
 	$session_counter_active = db_fetch_cell_prepared('SELECT count(*)
 		FROM sessions
 		WHERE access >= ?',
-		array($active_interval_begin));
+		[$active_interval_begin]);
 
 	$session_counter_sleeping = db_fetch_cell_prepared('SELECT count(*)
 		FROM sessions
 		WHERE access < ?',
-		array($active_interval_begin));
+		[$active_interval_begin]);
 
 	// These stats have little use when using the database session
 	$user_counter_active     = $session_counter_active;
@@ -77,27 +79,72 @@ if ($cacti_db_session == true) {
 
 	if (file_exists($session_save_path)) {
 		$session_dir_handle  = opendir($session_save_path);
+<<<<<<< HEAD
 		$session_maxlifetime = ini_get("session.gc_maxlifetime");
+||||||| 7dd05ee12
+	if ($session_dir_handle) {
+		$user_ids_active          = array();
+		$user_ids_sleeping        = array();
+		$session_counter_active   = 0;
+		$session_counter_sleeping = 0;
+		$session_counter_garbage  = 0;
+=======
+		$session_maxlifetime = ini_get('session.gc_maxlifetime');
+>>>>>>> origin/fix/jquery-deprecations
 
 		if ($session_dir_handle) {
+<<<<<<< HEAD
 			$user_ids_active          = array();
 			$user_ids_sleeping        = array();
+||||||| 7dd05ee12
+		while (false !== ($filename = readdir($session_dir_handle))) {
+			/* a real user session should be greater than 400 Bytes */
+			if (strpos($filename, 'sess_') !== false && filesize($session_save_path . '/' . $filename)> 400) {
+				$session = @file_get_contents($session_save_path . '/' . $filename);
+=======
+			$user_ids_active          = [];
+			$user_ids_sleeping        = [];
+>>>>>>> origin/fix/jquery-deprecations
 			$session_counter_active   = 0;
 			$session_counter_sleeping = 0;
 			$session_counter_garbage  = 0;
 
 			while (false !== ($filename = readdir($session_dir_handle))) {
+<<<<<<< HEAD
 				/* a real user session should be greater than 400 Bytes */
 				if (strpos($filename, 'sess_') !== false && filesize($session_save_path . '/' . $filename)> 400) {
+||||||| 7dd05ee12
+				/* first off check if we are allowed to read the session
+				 * file. Then we are only interested in sessions of
+				 * authenticated Cacti users
+				 */
+				if ($session !== false && strpos($session, 'cacti_cwd') !== false && preg_match('/sess_user_id\|s:[0-9]*:\"[0-9]*\"/', $session, $match)) {
+					$session_user_id = substr($match[0], strpos($match[0], ':"')+2, -1);
+					/* due to the fact that ATIME could be unsupported/disabled we have to use MTIME instead */
+					$mtime = filemtime($session_save_path . '/' . $filename);
+=======
+				// a real user session should be greater than 400 Bytes
+				if (str_contains($filename, 'sess_') && filesize($session_save_path . '/' . $filename) > 400) {
+>>>>>>> origin/fix/jquery-deprecations
 					$session = file_get_contents($session_save_path . '/' . $filename);
 
 					/* first off check if we are allowed to read the session
 					 * file. Then we are only interested in sessions of
 					 * authenticated Cacti users
 					 */
+<<<<<<< HEAD
 					if ($session !== false && strpos($session, 'cacti_cwd') !== false && preg_match('/sess_user_id\|s:[0-9]*:\"[0-9]*\"/', $session, $match)) {
 						$session_user_id = substr($match[0], strpos($match[0], ':"')+2, -1);
 						/* due to the fact that ATIME could be unsupported/disabled we have to use MTIME instead */
+||||||| 7dd05ee12
+					if ($mtime >= $active_interval_begin) {
+						/* increase active session counter */
+						$session_counter_active++;
+=======
+					if ($session !== false && str_contains($session, 'cacti_cwd') && preg_match('/sess_user_id\|s:[0-9]*:\"[0-9]*\"/', $session, $match)) {
+						$session_user_id = substr($match[0], strpos($match[0], ':"') + 2, -1);
+						// due to the fact that ATIME could be unsupported/disabled we have to use MTIME instead
+>>>>>>> origin/fix/jquery-deprecations
 						$mtime = filemtime($session_save_path . '/' . $filename);
 
 						/* determine active user sessions
@@ -106,6 +153,7 @@ if ($cacti_db_session == true) {
 						 * won't see real active users.
 						 */
 						if ($mtime >= $active_interval_begin) {
+<<<<<<< HEAD
 							/* increase active session counter */
 							$session_counter_active++;
 
@@ -116,12 +164,29 @@ if ($cacti_db_session == true) {
 
 							/* if the same user has more than one session and this one is active then the user is not sleeping */
 							if (false !== ($key = array_search($session_user_id, $user_ids_sleeping))) {
+||||||| 7dd05ee12
+						/* count all active users */
+						if (false === ($key = array_search($session_user_id, $user_ids_active))) {
+							$user_ids_active[] = $session_user_id;
+=======
+							// increase active session counter
+							$session_counter_active++;
+
+							// count all active users
+							if (false === ($key = array_search($session_user_id, $user_ids_active, true))) {
+								$user_ids_active[] = $session_user_id;
+							}
+
+							// if the same user has more than one session and this one is active then the user is not sleeping
+							if (false !== ($key = array_search($session_user_id, $user_ids_sleeping, true))) {
+>>>>>>> origin/fix/jquery-deprecations
 								unset($user_ids_sleeping[$key]);
 							}
 
 							continue;
 						}
 
+<<<<<<< HEAD
 						/* determine user sessions which are sleeping */
 						if ($mtime >= ($active_interval_begin - $session_maxlifetime) && $mtime < $active_interval_begin) {
 							/* increase sleeping session counter */
@@ -129,13 +194,42 @@ if ($cacti_db_session == true) {
 
 							/* count all sleeping users if they have no active sessions */
 							if (!in_array($session_user_id, $user_ids_active) && !in_array($session_user_id, $user_ids_sleeping)) {
+||||||| 7dd05ee12
+						/* if the same user has more than one session and this one is active then the user is not sleeping */
+						if (false !== ($key = array_search($session_user_id, $user_ids_sleeping))) {
+							unset($user_ids_sleeping[$key]);
+=======
+						// determine user sessions which are sleeping
+						if ($mtime >= ($active_interval_begin - $session_maxlifetime) && $mtime < $active_interval_begin) {
+							// increase sleeping session counter
+							$session_counter_sleeping++;
+
+							// count all sleeping users if they have no active sessions
+							if (!in_array($session_user_id, $user_ids_active, true) && !in_array($session_user_id, $user_ids_sleeping, true)) {
+>>>>>>> origin/fix/jquery-deprecations
 								$user_ids_sleeping[] = $session_user_id;
 							}
 
 							continue;
 						}
 
+<<<<<<< HEAD
 						/* count all user session declared as garbage */
+||||||| 7dd05ee12
+						continue;
+					}
+
+					/* determine user sessions which are sleeping */
+					if ($mtime >= ($active_interval_begin - $session_maxlifetime) && $mtime < $active_interval_begin) {
+						/* increase sleeping session counter */
+						$session_counter_sleeping++;
+
+						/* count all sleeping users if they have no active sessions */
+						if (!in_array($session_user_id, $user_ids_active) && !in_array($session_user_id, $user_ids_sleeping)) {
+							$user_ids_sleeping[] = $session_user_id;
+=======
+						// count all user session declared as garbage
+>>>>>>> origin/fix/jquery-deprecations
 						if ($mtime < ($active_interval_begin - $session_maxlifetime)) {
 							$session_counter_garbage++;
 						}
@@ -146,7 +240,14 @@ if ($cacti_db_session == true) {
 			$user_counter_active   = cacti_count($user_ids_active);
 			$user_counter_sleeping = cacti_count($user_ids_sleeping);
 
+<<<<<<< HEAD
 			/* close directory handle and destroy this session */
+||||||| 7dd05ee12
+		$user_counter_active   = cacti_count($user_ids_active);
+		$user_counter_sleeping = cacti_count($user_ids_sleeping);
+=======
+			// close directory handle and destroy this session
+>>>>>>> origin/fix/jquery-deprecations
 			closedir($session_dir_handle);
 		}
 	}
@@ -156,35 +257,38 @@ if ($cacti_db_session == true) {
 	}
 }
 
-print
-	'valid:'      . $user_logins_valid .
-	' invalid:'   . $user_logins_invalid .
-	' active:'    . $session_counter_active .
-	' sleeping:'  . $session_counter_sleeping .
-	' garbage:'   . $session_counter_garbage .
-	' uactive:'   . $user_counter_active .
+print 'valid:' . $user_logins_valid .
+	' invalid:' . $user_logins_invalid .
+	' active:' . $session_counter_active .
+	' sleeping:' . $session_counter_sleeping .
+	' garbage:' . $session_counter_garbage .
+	' uactive:' . $user_counter_active .
 	' usleeping:' . $user_counter_sleeping;
 
-function get_session_save_path() {
+function get_session_save_path() : mixed {
 	if (session_save_path() !== '') {
-		/* if default temp path is not in use */
+		// if default temp path is not in use
 		return realpath(session_save_path());
-	} elseif (function_exists('sys_get_temp_dir')) {
-		/* this requires PHP > 5.2.1 */
+	}
+
+	if (function_exists('sys_get_temp_dir')) {
+		// this requires PHP > 5.2.1
 		return realpath(sys_get_temp_dir());
-	} elseif ($temp=getenv('TMP') | $temp=getenv('TEMP') | $temp=getenv('TMPDIR')) {
-		/* try to use environment variables */
+	}
+
+	if ($temp = getenv('TMP') | $temp = getenv('TEMP') | $temp = getenv('TMPDIR')) {
+		// try to use environment variables
 		return $temp;
 	} else {
-		/* try to create a temp file */
-		$temp=tempnam(__FILE__,'');
+		// try to create a temp file
+		$temp = tempnam(__FILE__,'');
 
 		if (file_exists($temp)) {
 			unlink($temp);
+
 			return dirname($temp);
 		}
 
 		return false;
 	}
 }
-

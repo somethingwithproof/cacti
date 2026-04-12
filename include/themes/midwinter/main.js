@@ -20,705 +20,987 @@
   | http://www.cacti.net/                                                   |
   +-------------------------------------------------------------------------+
 */
+<<<<<<< HEAD
 
 // Host Autocomplete Magic
 themeLoader('on');
 let themeInitialized = false;
 let themeUserMenu
+||||||| 7dd05ee12
+// Host Autocomplete Magic
+themeLoader('on');
+let themeInitialized = false;
+let themeUserMenu
+=======
+>>>>>>> origin/fix/jquery-deprecations
 
-function themeReady() {
-	/* load default values */
-	initStorageItem('midWinter_GUI_Mode', 'compact');
-	initStorageItem('midWinter_Color_Mode', 'dark');
-	initStorageItem('midWinter_Color_Mode_Auto', 'on');
-	initStorageItem('midWinter_Font_Size', 'regular', 'zoom-level');
-
-	themeInitialized = midwinterInitialized();
-	setThemeColor();
-	setupTheme();
-	setupTree();
-	setupDefaultElements();
-	setMenuVisibility();
-	setHotKeys();
-	ajaxAnchors();
-	extendAnchorActions();
-	searchToHighlight();
-	updateNavigation();
-	themeLoader('off');
-	document.addEventListener("dblclick", () => {
-		toggleFullscreen();
-	})
+/* global setup */
+select2Setup = {
+	displayDefaultLabel : true
 }
 
-function checkConsoleMenu() {
-	if ( $('#cactiContent').length !== 0 && $('#menu').length === 0  ) {
-		$.ajax({
-			url: urlPath + 'about.php',
-			global : false
-		}).done(function(html) {
-			let menu = $(html).find('#menu');
-			redesignConsoleMenu(menu);
-			ajaxAnchors();
-			extendAnchorActions();
-			searchToHighlight();
-		}).fail(function(html) {
-			getPresentHTTPError(html);
-		});
+/* midwinter session object */
+let mdw = {
+    session: {
+        theme: {
+            boxes:      { animated: 'on' },
+            color:      { mode: 'dark', auto: 'off' },
+            controls:   { subTitle: 'off', tooltip: 'on' },
+            font:       { zoom: 75 },
+            mobile:     { autoTableLayout: 'off' },
+        },
+        dock: {
+            left:   { height: 'auto', width: 'auto', split: 50 },
+            right:  { height: 'auto', width: 'auto', split: 50 },
+            bottom: { height: 'auto', width: 'auto', split: 50 },
+        },
+        controls: {
+            leftTop: ['dashboards', 'settings', 'tree'],
+            leftBottom: [],
+            rightTop: ['filter', 'layout'],
+            rightBottom: [],
+            bottomLeft: ['help', 'user', 'logout'],
+            bottomRight: ['info'],
+        },
+        table: [],
+    },
+    obj: { box: {}, ctrl: {} },
+    cache: {
+        classes:    [],
+        path:       'include/js/',
+        storage:    Storages.localStorage,
+        tap:        { count: 0, clientX: 0, clientY: 0 }
     }
 }
 
-function midwinterInitialized() {
-	return ($('#compact_tab_menu').length !== 0);
+/* cache local and vendor libs */
+loadScript('navigationBox',   mdw.cache.path + 'navigationBox.js');
+loadScript('navigationTree',  mdw.cache.path + 'navigationTree.jstree.js');
+loadScript('hotkeys',         mdw.cache.path + 'vendor/hotkeys/hotkeys.min.js');
+loadScript('mark',            mdw.cache.path + 'vendor/mark/jquery.mark.js');
+loadScript('moment',          mdw.cache.path + 'vendor/moment/moment.min.js');
+loadScript('daterangepicker', mdw.cache.path + 'vendor/daterangepicker/daterangepicker.js');
+
+restoreLocalStorage();
+
+
+function themeReady() {
+	setupTheme();
+	setupDefaultElements();
+
+	updateNavigation();
+	updateAjaxAnchors();
+	setThemeColor();
+
+	hideConsoleNavigation();
+	setupTree();
+	setupThemeActions();
+	themeLoader('off');
+
+    setHotKeys();
 }
 
-function extendAnchorActions() {
-	$('a[role="menuitem"]').on('click', function() {
-		/* update MidWinter's BreadCrumb Navigation */
-		midWinterNavigation( $(this) );
-		/* close the Navigation Menu Box afterwards */
-		$(this).closest('div [class^=cactiConsoleNavigation]').addClass('hide');
+function hideConsoleNavigation() {
+	$('[class^="mdw-ConsoleNavigationBox"]').removeClass('visible');
+	$('[class^="mdw-ConsoleNavigationBox"][data-helper!="tree"]').removeClass('visible');
+	$('.compact_nav_icon[data-helper!="tree"]').removeClass('selected');
+}
+
+function updateAjaxAnchors() {
+	$('a.pic, a.linkOverDark, a.linkEditMain, a.console, a.hyperLink, a.tab').not('[href^="http"], [href^="https"], [href^="#"], [href^="mailto"], [target="_blank"]').off('click').on('click', function(event) {
+		event.preventDefault();
+		event.stopPropagation();
+
+		/* determine the page name */
+		var href = $(this).attr('href');
+
+		if (href === '#') {
+			return false;
+		}
+
+		/* update menu selection */
+		if ($(this).hasClass('pic')) {
+			$('a[class="pic selected"]').removeClass('selected');
+			$(this).addClass('selected');
+		}
+
+		if (href != null) {
+			pageName = basename(href);
+		}
+
+		/* close the console navigation afterward */
+		$('[class^="mdw-ConsoleNavigationBox"]').removeClass('visible');
+
+		loadUrl({url:href});
+		return false;
 	});
 }
 
 function midWinterNavigation(element) {
-	let action   =  element.parent().html();
-	let category =  element.closest('.menuitem').children('.menu_parent').first().html();
-	let helper   =  element.closest('div[class^="cactiConsoleNavigation"]').data('helper');
-	let rubric   =  $('.compact_nav_icon[data-helper="'+helper+'"]').html();
 
-	$('#navTitle .rubric').html( rubric );
-	$('#navTitle .category').html( category );
-	$('#navTitle .action').html( action );
+	let action   		= element.parent().html();
+	let category 		= element.closest('.menuitem').children('.menu_parent').first().children('span').text();
+	let helper   		= element.closest('div[class^="mdw-ConsoleNavigationBox"]').data('helper');
+	let rubric		 	= element.closest('div[class^="mdw-ConsoleNavigationBox"]').data('title');
+
+	$('#navBreadCrumb .rubric').html( '<span>'+rubric+'</span>').attr('data-helper', helper).off().on(
+		"click", {param: 'force_open', filter: 'reset'}, toggleCactiNavigationBox
+	);
+	$('#navBreadCrumb .category').html( '<span>'+category+'</span>' ).attr('data-helper', helper).off().on(
+		"click", {param: 'force_open', filter: category}, toggleCactiNavigationBox
+	);
+	$('#navBreadCrumb .action').html( action );
+
+	if (helper !== undefined) {
+		$('.compact_nav_icon[data-helper="'+helper+'"]').addClass('mdw-active');
+		$('.compact_nav_icon[data-helper!="'+helper+'"]').removeClass('mdw-active');
+	}
+
 }
 
 function updateNavigation() {
-	if (themeInitialized === false) {
-		// Search using different patterns until we have a valid location to populate the navigation
-		// Use the easy matches first.
-		var menu_element = $('.cactiConsoleNavigationArea a[href$="'+window.location.pathname+window.location.search+'"').first();
-		if (menu_element.length !== 0) return midWinterNavigation(menu_element);
-		var menu_element = $('.cactiConsoleNavigationArea a[href$="'+window.location.pathname+'"').first();
-		if (menu_element.length !== 0) return midWinterNavigation(menu_element);
-		var menu_element = $('.cactiConsoleNavigationArea a[href$="'+window.location.pathname+'index.php"').first();
-		if (menu_element.length !== 0) return midWinterNavigation(menu_element);
+	// use different search patterns until we have a valid location to populate the new breadcrumb navigation
+	let menu_element;
+	menu_element = $('[class^="mdw-ConsoleNavigationBox"] a[href$="'+window.location.pathname+window.location.search+'"').first();
+	if (menu_element.length !== 0) return midWinterNavigation(menu_element);
+	menu_element = $('[class^="mdw-ConsoleNavigationBox"] a[href$="'+window.location.pathname+'"').first();
+	if (menu_element.length !== 0) return midWinterNavigation(menu_element);
+	menu_element = $('[class^="mdw-ConsoleNavigationBox"] a[href$="'+window.location.pathname+'index.php"').first();
+	if (menu_element.length !== 0) return midWinterNavigation(menu_element);
 
-		// Append an action if the user did not provide one based upon the cactiAction variable
-		var menu_element = $('.cactiConsoleNavigationArea a[href^="'+window.location.pathname+'?action='+cactiAction+'"').first();
-		if (menu_element.length !== 0) return midWinterNavigation(menu_element);
+	// Append an action if the user did not provide one based upon the cactiAction variable
+	menu_element = $('[class^="mdw-ConsoleNavigationBox"] a[href^="'+window.location.pathname+'?action='+cactiAction+'"').first();
+	if (menu_element.length !== 0) return midWinterNavigation(menu_element);
 
-		// Choose what fits best in situations where users have cleared their settings
-		var menu_element = $('.cactiConsoleNavigationArea a[href^="'+window.location.pathname+'"').first();
-		if (menu_element.length !== 0) return midWinterNavigation(menu_element);
-	}
-}
-
-function setupTree() {
-	let storage = Storages.localStorage;
-	let midWinter_GUI_Mode = storage.get('midWinter_GUI_Mode');
-	let urlParams = new URLSearchParams(window.location.search);
-	let action = urlParams.get('action');
-
-	if (midWinter_GUI_Mode === 'compact' && pageName === 'graph_view.php' && action === 'tree') {
-		$('#mdw_tree').removeClass('hide');
-	} else {
-		$('#mdw_tree').addClass('hide');
-	}
+	// Choose what fits best in situations where users have cleared their settings
+	menu_element = $('[class^="mdw-ConsoleNavigationBox"] a[href^="'+window.location.pathname+'"').first();
+	if (menu_element.length !== 0) return midWinterNavigation(menu_element);
 }
 
 function setupTheme() {
-	let storage = Storages.localStorage;
-	let midWinter_Color_Mode = storage.get('midWinter_Color_Mode');
-	let midWinter_Color_Mode_Auto = storage.get('midWinter_Color_Mode_Auto');
-	let midWinter_Font_Size = storage.get('midWinter_Font_Size');
 
 	// -- login, logout -- rewrite
+	if ($('.cactiAuthBody').length !== 0 && $('.cactiAuthArea legend').text() !== 'WELCOME TO CACTI') {
+		/* modify login area and element */
+		$('.cactiAuthArea legend').text('WELCOME TO CACTI');
+
+		/* get rid of outdated HTML table layout - that makes CSS layout difficult */
+		let cactiAuthTable = $('.cactiAuthTable').detach();
+
+		/* suppress issues with autofocus while page is loading */
+		$('<input id="suppress_autofocus" type="text" style="display:none;" tab-index="-1" autofocus>').prependTo('.cactiAuth');
+
+		$(cactiAuthTable).find("input, button, label").each(
+			function() {
+				if( $(this).attr('type') === 'password' || $(this).attr('type') === 'text' ) {
+					if ($(this).attr('name') !== undefined) {
+						$(this).appendTo('.cactiAuth');
+						if($(this).attr('type') === 'password') {
+							switch ($(this).attr('id')) {
+								case 'current':
+									$(this).attr('placeholder', 'Current Password');
+									break;
+								case 'password':
+									$(this).attr('placeholder', 'New Password');
+									break;
+								case 'password_confirm':
+									$(this).attr('placeholder', 'Confirm Password');
+									break;
+								default:
+							}
+							$('<i class="ti ti-lock" data-helper="' + $(this).attr('id') + '" data-func="togglePwdInputField"></i>').insertAfter($(this));
+						}
+					}
+				}else {
+					$(this).appendTo('.cactiAuth');
+				}
+			}
+		)
+		let welcome = $(cactiAuthTable).find('td').eq(0).html();
+		$('<span>'+welcome+'</span>').prependTo('.cactiAuth');
+		cactiAuthTable = undefined;
+
+		$('.versionInfo').detach().appendTo('.cactiAuthBody');
+
+		$('<i class="ti ti-user"></i>').insertAfter('#login_username');
+	}
+
+
 	if ($('.loginArea legend').length !== 0) {
 		$('.loginArea legend').text('Cacti Monitoring');
 		$('.loginTitle p').html('v'+cactiVersion);
 		$('#login_username, #login_password').attr('placeholder', '');
 	}
 
-	// -- standard mode -- add user tabs to CactiPageHeader
-	if ($('.usertabs').length === 0) {
-		$('.infoBar, .menuHr, #userDocumentation, #userCommunity').remove();
-		$('.loggedInAs').show();
+	// duplicate cactiConsolePageHeadBackdrop for compact mode
 
-		let user_tab_content =
-			'<ul>'
-			+ '<li><a id="menu-user-help" class="usertabs-submenu" href="#"><i class="far fa-comment-alt"></i></a></li>'
-			+ '<li class="action-icon-user"><a class="pic" href="#"><i class="far fa-user"></i></a></li>'
-			+ '</ul>';
+	if ($('#cactiContent').length) {
+		$('<div id="mdw-GridContainer" class="mdw-GridContainer">' +
+			'<div id="mdw-GridContainer-Overlay" class="mdw-GridContainer-Overlay mdw-PopOver hidden"></div>' +
+			'<div id="mdw-GridContainer-PopOver" class="mdw-GridContainer-PopOver mdw-PopOver hidden">' +
+				'<div id="mdw-PopOverTitle" class="mdw-PopOverElements mdw-PopOverTitle"></div>' +
+				'<div id="mdw-PopOverContent" class="mdw-PopOverElements mdw-PopOverContent"></div>' +
+				'<div id="mdw-PopOverFooter" class="mdw-PopOverElements mdw-PopOverFooter"></div>' +
+			'</div>' +
+			'<div id="mdw-ConsoleNavigation" class="mdw-ConsoleNavigation"></div>' +
+			'<div id="mdw-ConsolePageHead" class="mdw-ConsolePageHead">' +
+				'<div id="navBreadCrumb" class="navBreadCrumb">' +
+					'<div class="home"><a href="' + urlPath + 'index.php" class="pic">Home</a></div>' +
+					'<div class="rubric"></div>' +
+					'<div class="category"></div>' +
+					'<div class="action"></div>' +
+				'</div>' +
+				'<div id="navSearch" class="navSearch"></div>' +
+				'<div id="navFilter" class="navFilter"></div>' +
+				'<div id="navControl" class="navControl" ></div>' +
+			'</div>' +
+			'<div id="mdw-Main" class="mdw-Main">' +
+				'<div id="mdw-DockTop" class="mdw-DockTop" >' +
+                    '<div class="mdw-DockInnerLeft"></div>' +
+                    '<div class="mdw-DockInnerRight"></div>' +
+                '</div>' +
+				'<div id="mdw-DockLeft" class="mdw-DockLeft" data-helper="displayDockTop">' +
+                    '<div class="mdw-DockInnerTop"></div>' +
+                    '<div class="mdw-DockInnerBottom"></div>' +
+                '</div>' +
+				'<div id="mdw-DockRight" class="mdw-DockRight">' +
+                    '<div class="mdw-DockInnerTop"></div>' +
+                    '<div class="mdw-DockInnerBottom"></div>' +
+                '</div>' +
+				'<div id="mdw-DockBottom" class="mdw-DockBottom">' +
+                    '<div class="mdw-DockInnerLeft"></div>' +
+                    '<div class="mdw-DockInnerRight"></div>' +
+                '</div>' +
+			'</div>' +
+			'<div id="mdw-ActionBar" class="mdw-ActionBar">' +
+				'<div id="mdw-ActionBarTop" class="mdw-ActionBarTop"></div>' +
+				'<div id="mdw-ActionBarMiddle" class="mdw-ActionBarMiddle"></div>' +
+				'<div id="mdw-ActionBarBottom" class="mdw-ActionBarBottom"></div>' +
+			'</div>' +
+		'</div>'
+	).
+		insertBefore("#breadCrumbBar");
 
-		$('<div class="maintabs usertabs">' + user_tab_content + '</div>').insertAfter('.maintabs');
-
-		let submenu_user_help_content =
-			'<li><a href="https://www.cacti.net" target="_blank" rel="noopener">'+cactiHome+'</></a></li>'
-			+'<li><a href="https://github.com/cacti" target="_blank" rel="noopener">'+cactiProjectPage+'</a></li>'
-			+'<li><hr class="menu"></li>'
-			+'<li><a href="https://forums.cacti.net/" target="_blank" rel="noopener">'+cactiCommunityForum+'</a></li>'
-			+'<li><a href="https://github.com/Cacti/documentation/blob/develop/README.md" target="_blank" rel="noopener">'+cactiDocumentation+'</a></li>'
-			+'<li><hr class="menu"></li>'
-			+'<li><a href="https://github.com/Cacti/cacti/issues/new" target="_blank" rel="noopener">'+reportABug+'</a></li>'
-			+'<li><a href="'+urlPath+'about.php">'+aboutCacti+'</a></li>';
-
-		$('<div class="dropdownMenu">'
-			+   '<ul id="submenu-user-help" class="submenuoptions right" style="display:none;">'
-			+       submenu_user_help_content
-			+   '</ul>'
-			+'</div>'
-		).appendTo('body');
-
-		let theme_switches =
-			'<li><hr class="menu"></li>'
-			+'<li><a href="#" class="toggleGuiMode">'+compactGraphicalUserInterface+'</a></li>'
-			+'<li><a href="#" class="toggleColorMode">'+(midWinter_Color_Mode === 'light' ? darkColorMode : lightColorMode)+'</a></li>'
-			+'<li><a href="#" class="toggleColorModeAuto">'+(midWinter_Color_Mode_Auto === 'on' ? ignorePreferredColorTheme : usePreferredColorTheme)+'</a></li>'
-			+'<li><a href="#" class="toggleGuiFontSize">Font Size: '+ midWinter_Font_Size +'</a></li>'
-			+'<li><hr class="menu"></li>';
-
-		$('.menuoptions').find('li').eq(2).after(theme_switches);
+		let element_main = $('#navigation_right').detach();
+		$(element_main).insertAfter($('#mdw-DockLeft'));
+		$('#cactiContent').remove();
 	}
 
-	// -- standard & compact mode -- redesign navigation tabs
-	let compact_tab_menu_content =
-		'<div class="cactiConsoleNavigationBox hide" data-helper="dashboards">'
-		+ '<div class="header compact">'
-		+	'<div></div><div><span>'+cactiDashboards+'</span></div>'
-		+'</div>'
-		+ '<ul class="nav">';
+	// -- redesign console navigation area
+	if ($('.mdw-ConsoleNavigation').length !== 0) {
 
-	if (cactiConsoleAllowed) {
-		compact_tab_menu_content +=
-			'<li class="menuitem" id="menu_home">'
-			+    '<a class="menu_parent active" href="#">'
-			+        '<i class="menu_glyph ignore fas fa-home"></i>'
-			+        '<span>'+cactiHome+'</span>'
-			+    '</a>'
-			+    '<ul>'
-			+        '<li><a href="'+urlPath+'index.php" class="pic" role="menuitem">'+cactiConsole+'</a></li>'
-			+    '</ul>'
-			+'</li>';
-	}
-
-	if (cactiGraphsAllowed) {
-		compact_tab_menu_content +=
-			'<li class="menuitem" id="menu_tab_dashboard">'
-			+    '<a class="menu_parent active" href="#">'
-			+        '<i class="menu_glyph ignore fas fa-chart-area"></i>'
-			+        '<span>'+cactiCharts+'</span>'
-			+    '</a>'
-			+    '<ul>'
-			+       '<li><a class="pic" role="menuitem" id="tab-graphs-tree-view" href="' + urlPath + 'graph_view.php?action=tree">' + treeView + '</a></li>'
-			+       '<li><a class="pic" role="menuitem" id="tab-graphs-list-view" href="' + urlPath + 'graph_view.php?action=list">' + listView + '</a></li>'
-			+       '<li><a class="pic" role="menuitem" id="tab-graphs-pre-view" href="' + urlPath + 'graph_view.php?action=preview">' + previewView + '</a></li>'
-			+    '</ul>'
-			+'</li>';
-	}
-
-	let showMisc = false;
-
-	$('.maintabs nav ul li a.lefttab').each(function() {
-		if ($(this).attr('id') !== 'tab-console' && $(this).attr('id') !== 'tab-graphs') {
-			showMisc = true;
-			return true;
+		if ($('#navBackdrop').length === 0 ) {
+			$('.mdw-ConsoleNavigation').empty().prepend('<div class="compact_nav_icon_menu">' +
+				'<div class="compact_nav_icon" data-subtitle="Console" id="navBackdrop" data-tooltip="Console" role="button" tabindex="0" aria-pressed="false">' +
+					'<div class="navBackdrop"></div>'+
+				'</div></div>');
+			if (cactiConsoleAllowed) {
+				$("#navBackdrop").click( function() {
+					/* hide open menu boxes first and remove menu selection */
+					$('[class^="cactiConsoleNavigation"]').removeClass('visible');
+					loadUrl({url:urlPath+'index.php'});
+				});
+			} else {
+				$("#navBackdrop").click( function() {
+					window.open('https://cacti.net', '_blank');
+				});
+			}
 		}
-	});
-
-	if (showMisc) {
-		compact_tab_menu_content +=
-			'<li class="menuitem" id="menu_tab_miscellaneous">'
-			+   '<a class="menu_parent active" href="#">'
-			+       '<i class="menu_glyph ignore fas fa-puzzle-piece"></i>'
-			+       '<span>'+cactiMisc+'</span>'
-			+   '</a>'
-			+'<ul>';
-	}
-
-	$('.maintabs nav ul li a.lefttab').each( function() {
-		let id = $(this).attr('id');
-
-		if (id === 'tab-graphs' && $(this).parent().hasClass('maintabs-has-submenu') === false) {
-			$(this).parent().addClass('maintabs-has-submenu');
-
-			let submenu_tab_graphs_content =
-				'<ul id="submenu-tab-graphs" class="submenuoptions" style="display:none;">'
-				+ '<li><a id="tab-graphs-tree-view" href="' + urlPath + 'graph_view.php?action=tree"><span>' + treeView + '</span></a></li>'
-				+ '<li><a id="tab-graphs-list-view" href="' + urlPath + 'graph_view.php?action=list"><span>' + listView + '</span></a></li>'
-				+ '<li><a id="tab-graphs-pre-view" href="' + urlPath + 'graph_view.php?action=preview"><span>' + previewView + '</span></a></li>'
-				+ '</ul>';
-
-			$('<div class="dropdownMenu">' + submenu_tab_graphs_content + '</div>').appendTo('body');
-		} else if ($(this).attr('href') !== urlPath + 'index.php') {
-			compact_tab_menu_content += '<li><a class="pic" role="menuitem" href="' + $(this).attr('href') + '">' + $('.text_' + id).text() + '</a></li>';
-		}
-	});
-	compact_tab_menu_content += '</ul></li></ul></div>';
-
-	if ($('.cactiConsoleNavigationArea').length === 0 && $('.cactiContent').length !== 0)  {
-		$('<div id="navigation" class="cactiConsoleNavigationArea compact"></div>').prependTo('#cactiContent');
-	}
-
-	// -- compact mode -- redesign console navigation area
-	if ($('.cactiConsoleNavigationArea').length !== 0) {
-		checkConsoleMenu();
 
 		if ($('#compact_tab_menu').length === 0 && $('#compact_user_menu').length === 0) {
-			// -- split the navigation area into 3 parts to separate tabs (dashboards), settings and user menus
-			let menu = $('#menu').detach();
 
-			$('.cactiConsoleNavigationArea').empty().prepend(
-				'<div class="compact" id="compact_tab_menu"></div>'
-				+'<div class="compact" id="compact_user_menu"></div>'
+			let element_menu = $('#menu').html();
+			if(element_menu === undefined) {
+				element_menu = loadElement('menu', 'about.php', true);
+			}
+
+			$('.mdw-ConsoleNavigation').append(
+				'<div class="compact_nav_icon_menu" id="compact_tab_menu"></div>'
+				+'<div class="compact_nav_icon_menu" id="compact_user_menu"></div>'
 			);
 
-			redesignConsoleMenu(menu);
+			/* dashboards */
+			new navigationButton('dashboards', 'Panels', 'Panels', 'ti ti-map', '#compact_tab_menu').show();
+			new navigationBox(cactiDashboards, 'dashboards', 'full','auto', {
+				close: true,
+				search: 'searchToHighlight',
+				resize: true
+			}).build();
 
-			// -- duplicate the console tab items and add them to the console navigation area for compact mode
-			if ($.trim($('compact_tab_menu').html()) === '') {
-				$('<div class="compact_nav_icon" data-helper="dashboards">'+
-						'<i class="fas fa-th-large"></i>'+
-						'<span>'+cactiDashboards+'</span>'+
-					'</div>').appendTo('#compact_tab_menu');
-			}
-
+			/* settings */
 			if (cactiConsoleAllowed) {
-				if ($.trim($('compact_tab_menu').html()) === '') {
-					$('<div class="compact_nav_icon" data-helper="settings">'+
-							'<i class="fas fa-cogs"></i>'+
-							'<span>'+zoom_i18n_settings+'</span>'+
-						'</div>'
-					).appendTo('#compact_tab_menu');
-				}
+				new navigationButton('settings', 'Setup', 'Settings', 'ti ti-settings-cog', '#compact_tab_menu');
+				new navigationBox(zoom_i18n_settings, 'settings', 'full', 'auto', {
+					close: true,
+					search: 'searchToHighlight',
+					resize: true,
+				}, 'left', zoom_i18n_settings, element_menu).build();
 			}
 
-			$(compact_tab_menu_content).appendTo('#compact_tab_menu');
+			/* tree */
+			if (cactiGraphsAllowed) {
+				new navigationButton('tree', 'Tree', 'Tree View','ti ti-seedling', '#compact_tab_menu').show();
+				new navigationBox( 'Tree', 'tree', 'full', 'auto', {
+					close: true,
+					search: 'searchCactiTree',
+					resize: true,
+				},'left', 'Tree').build();
+			}
 
-			// -- compact mode --
-			$('<div class="compact_nav_icon" data-helper="help">'+
-					'<i class="far fa-comment-alt"></i>'+
-					'<span>'+help+'</span>'+
-				'</div>'+
-				'<div class="compact_nav_icon" data-helper="user">'+
-					'<i class="far fa-user"></i>'+
-					'<span>'+cactiUser+'</span>'+
-				'</div>'+
-				'<div class="compact_nav_icon mdw_logout"><i class="fas fa-sign-out-alt"></i></div>'
-			).appendTo('#compact_user_menu');
 
-			let compact_user_menu_content =
-				'<div class="cactiConsoleNavigationUserBox hide" data-helper="help">'
-				+   '<div class="header compact"><div></div><div><span>'+justCacti+' &reg; v'+cactiVersion+'</span></div></div>'
-				+   '<ul class="nav">'
-				+   '<li class="menuitem" id="menu_user_help">'
-				+       '<a class="menu_parent active" href="#">'
-				+           '<i class="menu_glyph fas fa-medkit"></i>'
-				+           '<span>'+cactiGeneral+'</span>'
-				+       '</a>'
-				+       '<ul>'
-				+           '<li><a class="pic" role="menuitem" href="'+urlPath+'about.php">'+aboutCacti+'</a></li>'
-				+           '<li><a href="https://github.com/Cacti/documentation/blob/develop/README.md" target="_blank" rel="noopener">'+cactiDocumentation+'</a></li>'
-				+           '<li><a href="https://github.com/cacti" target="_blank" rel="noopener">'+cactiProjectPage+'</a></li>'
-				+           '<li><a href="https://www.cacti.net" target="_blank" rel="noopener">'+cactiHome+'</></a></li>'
-				+       '</ul>'
-				+   '</li>'
-				+   '<li class="menuitem" id="menu_user_issues">'
-				+       '<a class="menu_parent active" href="#">'
-				+           '<i class="menu_glyph fas fa-bug"></i>'
-				+           '<span>'+reportABug+'</span>'
-				+       '</a>'
-				+       '<ul>'
-				+           '<li><a href="https://github.com/Cacti/cacti/issues/new/choose" target="_blank" rel="noopener">'+justCacti+'</></a></li>'
-				+           '<li><a href="https://github.com/Cacti/documentation/issues/new/choose" target="_blank" rel="noopener">'+cactiDocumentation+'</></a></li>'
-				+           '<li><a href="https://github.com/Cacti/spine/issues/new/choose" target="_blank" rel="noopener">'+cactiSpine+'</a></li>'
-				+           '<li><a href="https://github.com/Cacti/rrdproxy/issues/new/choose" target="_blank" rel="noopener">'+cactiRRDProxy+'</a></li>'
-				+       '</ul>'
-				+   '</li>'
-				+   '<li class="menuitem" id="menu_user_shortcuts">'
-				+       '<a class="menu_parent active" href="#">'
-				+           '<i class="menu_glyph far fa-keyboard"></i>'
-				+           '<span>'+cactiKeyboard+'</span>'
-				+       '</a>'
-				+       '<ul>'
-				+           '<li><a href="#" class="dialog_client">'+cactiShortcuts+'</a></li>'
-				+       '</ul>'
-				+   '</li>'
-				+   '<li class="menuitem" id="menu_user_help">'
-				+       '<a class="menu_parent active" href="#">'
-				+           '<i class="menu_glyph fas fa-hands-helping"></i>'
-				+           '<span>'+cactiContributeTo+'</span>'
-				+       '</a>'
-				+       '<ul>'
-				+           '<li><a href="https://forums.cacti.net/" target="_blank" rel="noopener">'+cactiCommunityForum+'</a></li>'
-				+           '<li><a href="https://github.com/cacti" target="_blank" rel="noopener">'+cactiDevHelp+'</a></li>'
-				+           '<li><a href="https://www.cacti.net/development/contribute" target="_blank" rel="noopener">'+cactiDonate+'</a></li>'
-				+           '<li><a href="https://translate.cacti.net" target="_blank" rel="noopener">'+cactiTranslate+'</a></li>'
-                +       '</ul>'
-				+   '</li>'
-				+   '</ul>'
-				+   '</div>'
-				+   '<div class="cactiConsoleNavigationUserBox hide" data-helper="user">'
-				+   '<div class="header compact"><div></div><div><span>'+ $('.loggedInAs').text() +'</span></div></div>'
-				+   '<ul class="nav">'
-				+   '<li class="menuitem" id="menu_user_action">'
-				+       '<a class="menu_parent active" href="#">'
-				+           '<i class="menu_glyph fas fa-user-edit"></i>'
-				+           '<span>'+cactiProfile+'</span>'
-				+       '</a>'
-				+       '<ul>'
-				+           '<li><a class="pic" role="menuitem" href="'+urlPath+'auth_profile.php?action=edit">'+editProfile+'</a></li>'
-				+           '<li><a href="'+urlPath+'auth_changepassword.php" style="">'+changePassword+'</a></li>'
-				+       '</ul>'
-				+   '</li>'
-				+   '<li class="menuitem" id="menu_user_action">'
-				+       '<a class="menu_parent active" href="#">'
-				+           '<i class="menu_glyph fas fa-palette"></i>'
-				+           '<span>'+cactiTheme+'</span>'
-				+       '</a>'
-				+       '<ul>'
-				+           '<li><a href="#" class="toggleGuiMode">'+standardGraphicalUserInterface+'</a></li>'
-				+           '<li><a href="#" class="toggleColorMode">'+(midWinter_Color_Mode === 'light' ? darkColorMode : lightColorMode)+'</a></li>'
-				+           '<li><a href="#" class="toggleColorModeAuto">'+(midWinter_Color_Mode_Auto === 'on' ? ignorePreferredColorTheme : usePreferredColorTheme)+'</a></li>'
-				+           '<li><a href="#" class="toggleGuiFontSize">Font Size: '+ midWinter_Font_Size +'</a></li>'
-				+       '</ul>'
-				+   '</li>'
-				+   '<li class="menuitem" id="menu_user_client">'
-				+       '<a class="menu_parent active" href="#">'
-				+           '<i class="menu_glyph fas fa-desktop"></i>'
-				+           '<span>'+cactiClient+'</span>'
-				+       '</a>'
-				+       '<ul>'
-				+           '<li><a href="#" class="dialog_client">Overview</a></li>'
-				+       '</ul>'
-				+   '</li>'
-				+'</ul>'
-				+'</div>';
+			/* user help */
+			new navigationButton('help', 'Help', 'Help', 'ti ti-messages', '#compact_user_menu').show();
+			new navigationBox(help, 'help', 'half', '2', {
+				close: false,
+				search: false,
+				resize: false
+			}, 'left', justCacti+' &reg; v'+cactiVersion).build();
 
-			$(compact_user_menu_content).appendTo('#compact_user_menu');
-		}
+			/* user settings */
+			new navigationButton('user', 'User', 'User Settings', 'ti ti-user', '#compact_user_menu').show();
+			new navigationBox( cactiUser, 'user', 'half', '2', {
+				close: false,
+				search: false,
+				resize: false
+			}, 'left', $('.loggedInAs').text() ).build();
 
-		if ($('.cactiTreeNavigationArea').length === 0) {
-			$('<div id="mdw_tree" class="cactiTreeNavigationArea compact hide"></div>').insertAfter("#navigation");
+			/* log out */
+			new navigationButton('logout', 'Exit', 'Sign Out','ti ti-logout', '#compact_user_menu', 'redirect', urlPath+'logout.php').show();
+
+			/* table filters */
+	  		new navigationBox( 'Table Layout', 'displayOptions', 'full', '1', {
+				close: true,
+				search: false,
+				resize: false,
+				dock: true,
+			}, 'right','Table Layout', 'auto').build();
+			new navigationButton('toggleColorMode', 'Color', 'Toggle light/dark Mode', 'ti ti-contrast-filled', '#navControl', 'toggleColorMode', 'on').show();
+			new navigationButton('kioskMode', 'Kiosk', 'Enable Kiosk Mode', 'ti ti-device-desktop', '#navControl', 'kioskMode', 'on').show();
+
+			if ( document.fullscreenEnabled ) {
+				let icon = (!document.fullscreenElement) ? 'ti ti-maximize' : 'ti ti-minimize';
+				new navigationButton('fullScreen', 'Fullscreen', 'Switch to Fullscreen', icon, '#navControl', 'fullScreen').show();
+			}
+
+            /* theme setup */
+            /* MidWinter Info Icon */
+            new navigationBox( 'Theme', 'theme', 'full', '1', {
+                close: true,
+                search: false,
+                resize: false,
+                dock: true,
+            }, 'right','Theme', 'auto').build();
+            new navigationButton('theme', 'Theme Settings', 'Theme Settings', 'ti ti-color-swatch', '#mdw-ActionBarBottom').show();
+
+            /* display Filter */
+            mdw.obj.box.displayFilterOptions = new navigationBox('Filter', 'displayFilterOptions', 'auto', '1', {
+                close: true,
+                search: false,
+                resize: false,
+                dock: true,
+            }, 'right', 'Display Filter', '');
+            mdw.obj.box.displayFilterOptions.build();
+            mdw.obj.ctrl.displayFilterOptions = new navigationButton('displayFilterOptions', 'Filter', 'Show Display Filter', 'ti ti-filter', '#mdw-ActionBarTop');
+
 		}
 	}
 
-	/* User Menu */
-	$('.menuoptions').parent().appendTo('body');
+	/* CLEAN UP */
+	$('#menu_main_console').remove();
+	$('a.menu_parent').removeClass('mdw-active').prop('inert', true); // suppress focus
 
-	$('.action-icon-user').off().on('click', function(event) {
-		event.preventDefault();
-		if ($('.menuoptions').is(':visible') === false) {
-			$('.submenuoptions').stop().slideUp(120);
-			$('.menuoptions').stop().slideDown(120);
-		} else {
-			$('.menuoptions').stop().slideUp(120);
-		}
+	/* hide settings icon if the user got access to console only for e.g. Intropage, but nothing else */
+	if($('[class^="mdw-ConsoleNavigationBox"][data-helper="settings"]').has('li').length === 0) {
+		$('[class^="compact_nav_icon"][data-helper="settings"]').addClass('hide');
+	}else {
+		$('[class^="compact_nav_icon"][data-helper="settings"]').removeClass('hide');
+	}
 
-		return false;
-	});
-
-	$('.submenuoptions, .menuoptions').on('click', function() {
-		if ($(window).width() < 640) {
-			$(this).stop().delay(100).slideUp(0);
-		} else {
-			$(this).stop().slideUp(120);
-		}
+	$('#main').off('resize').on('resize', function() {
+		let width = $('#main');
+		$('#main .saveRowParent').width(width);
 	})
-
-	$('.compact_nav_icon:not(.mdw_logout)').off().on( "click", toggleCactiNavigationBox );
-	$('.compact_nav_icon.mdw_logout').off().on('click', {url: urlPath+'logout.php'}, redirect);
-
-	$('.dialog_client').off().on('click', {id: 'dialog_client'}, dialog_client);
-
-	$('.toggleGuiMode').off().on('click',toggleGuiMode);
-	$('.toggleColorMode').off().on('click',toggleColorMode);
-	$('.toggleColorModeAuto').off().on('click', toggleColorModeAuto);
-	$('.toggleGuiFontSize').off().on('click',toggleGuiFontSize);
-
-	$('.cactiConsoleContentArea, .cactiGraphContentArea').on('mouseenter', toggleCactiNavigationBox);
 }
 
-function redesignConsoleMenu(menu) {
-	if (menu !== undefined ) {
-		$(menu).insertAfter('#compact_tab_menu');
+function setupThemeActions() {
+	$('[data-scope="theme"][id^="mdw_"]:not([type="range"]), ' +
+		'a[data-scope="theme"], ' +
+		'i[data-func!=""][data-func]'
+	).off().on('click', function(e) {
+		let fname = $(this).attr('data-func');
+		if(is_function(fname)) window[fname](e);
+	});
 
-		$('#menu').addClass('cactiConsoleNavigationBox hide').attr('data-helper', 'settings');
-		$('<div class="header compact">'
-		+	'<div><input type="text" name="keyword" class="form-control input-sm" placeholder=""></div>'
-		+	'<div><span>'+zoom_i18n_settings+'</span></div></div>'
-		).prependTo('#menu');
+	$('input[type="range"][data-scope="theme"][id^="mdw_"]').off().on('change', function(e) {
+		let fname = $(this).attr('data-func');
+		if(is_function(fname)) window[fname](e);
+	});
 
-		// Clean up: kick out Main Console
-		$('#menu_main_console').remove();
+	//$('.cactiConsoleContentArea, .cactiGraphContentArea').off().on('click', toggleCactiNavigationBox);
 
-		/* replace default icons */
-		$('i.menu_glyph:not(.ignore).fa-home').removeClass('fa fa-home').addClass('fa fa-tools');
-		$('i.menu_glyph.fa-folder').removeClass('fa').addClass('far');
-		$('i.menu_glyph.fa-clone').removeClass('fa').addClass('far');
-		$('i.menu_glyph.fa-database').removeClass('fa fa-database').addClass('far fa-hdd');
-		$('i.menu_glyph:not(.ignore).fa-chart-area').removeClass('fa fa-chart-area').addClass('fa fa-plus');
-		$('i.menu_glyph.fa-cogs').removeClass('fa fa-cogs').addClass('fa fa-toolbox');
-		$('i.menu_glyph.fa-superpowers').removeClass('fab fa-superpowers').addClass('fas fa-network-wired');
-	}
+	$('#main, #navigation_right').off().on('click', {param: 'off'}, toggleCactiNavigationBox);
+	$('.mdw-ConsoleNavigationBox').off().on('click', hideDropDownMenu);
+	//$('.dropdown').off().on('click', toggleDropDownMenu);
+	document.addEventListener("fullscreenchange", fullScreenChangeHandler);
+
+	// make popover draggable
+	$('#mdw-GridContainer-PopOver').draggable({
+		containment: '#mdw-GridContainer',
+		scroll: false,
+		start: function() {
+			$(this).css('transform', 'translateX(0)');
+		}
+	});
 }
 
 function redirect(event) {
 	event.preventDefault();
-	let url = event.data.url;
-	window.location = url;
+	window.location = event.data.param;
+}
+
+function setNavigationBoxColumns(event) {
+	event.preventDefault();
+	let storage = Storages.localStorage;
+	let helper = event.target.getAttribute('data-helper');
+	let value = event.target.getAttribute('data-value');
+	$('[class^="mdw-ConsoleNavigationBox"][data-helper="' + helper + '"]').attr('data-width', value);
+	storage.set('midWinter_widthNavigationBox_'+helper, value);
 }
 
 function toggleCactiNavigationBox(event) {
-	event.preventDefault();
-	let helper = $(this).data('helper');
+	let caller = $(event.currentTarget);
+	let helper = caller.attr('data-helper');
+	let param = event.data.param;
 
-	$('[class^="cactiConsoleNavigation"][class$="Box"]:not([data-helper="'+helper+'"])').addClass('hide');
-	$('[class^="cactiConsoleNavigation"][data-helper="'+helper+'"]').toggleClass('hide');
+	/* hide open dropdown menu */
+	hideDropDownMenu();
+
+	$('#mdw-ConsoleNavigation .compact_nav_icon:not([data-helper="' + helper + '"])').removeClass('selected');
+	$('#mdw-SideBarContainer [class^="mdw-ConsoleNavigationBox"]:not([data-helper="' + helper + '"]) > div').scrollTop(0);
+	$('#mdw-SideBarContainer [class^="mdw-ConsoleNavigationBox"]:not([data-helper="' + helper + '"])').removeClass('visible');
+
+	let navigationBox = $('[class^="mdw-ConsoleNavigationBox"][data-helper="' + helper + '"]');
+	let compact_nav_icon = $('[class^="compact_nav_icon"][data-helper="' + helper + '"]');
+
+	if(param === 'on') {
+		caller.toggleClass('selected');
+		navigationBox.toggleClass('visible');
+	}else if(param === 'force_open') {
+		caller.addClass('selected');
+		navigationBox.addClass('visible');
+		compact_nav_icon.addClass('selected');
+
+		if(event.data && event.data.filter) {
+			let navBox_input_field = $("input[name=navBox-header-search]", navigationBox);
+			$('.navBox-header-search', navigationBox).removeClass('hide');
+			if(event.data.filter !== 'reset') {
+				navBox_input_field.trigger('focus').val(event.data.filter).trigger('input');
+			}else {
+				navBox_input_field.val('').trigger('input').blur();
+			}
+		}
+	}else if(param === 'force_close') {
+		caller.removeClass('selected').trigger('blur');
+		navigationBox.removeClass('visible');
+	}
+}
+
+function toggleCactiNavigationBoxPin(event) {
+	let caller = $(event.currentTarget);
+	let helper = caller.attr('data-helper');
+	let navigationBox = $('[class^="mdw-ConsoleNavigationBox"][data-helper="' + helper + '"]');
+	let compact_nav_icon = $('[class^="compact_nav_icon"][data-helper="' + helper + '"]');
+
+	if(event.data && event.data.dock) {
+		event.data.dock = event.data.dock.replace(/^./, str => str.toUpperCase());
+	}
+
+	if(/^(?:Left|Right|Top|Bottom)$/.test(event.data.dock)) {
+        let destination = $("#mdw-Dock" + event.data.dock + " > .mdw-DockInnerTop");
+        let make_resizeable = true;
+        if ( destination.is(':not(:empty)') ) {
+            destination = $("#mdw-Dock" + event.data.dock + " > .mdw-DockInnerBottom");
+            make_resizeable = false;
+        }
+
+        navigationBox.detach().appendTo(destination);
+
+		$("#mdw-Dock" + event.data.dock).removeClass('invisible');
+        if(make_resizeable) {
+            $("#mdw-Dock" + event.data.dock).resizable({
+                handles: 'w'
+            });
+
+            destination.resizable({
+                handles: 's',
+                resize: function (event, ui) {
+                    let parentHeight = $(this).parent().innerHeight();
+                    let newHeight = $(this).outerHeight() * 100 / parentHeight;
+                    $(this).css("height", newHeight + '%');
+                    /* update sibling */
+                    $(this).siblings('.mdw-DockInnerBottom').css('height', 100 - newHeight + '%');
+                }
+            });
+        }
+
+
+       // resize: function() {
+          //  $('.test:first-of-type').css('width', $('.test:first-of-type').outerWidth() * 100 / $(window).innerWidth() + '%');
+    //$('.test:nth-of-type(2)').css('width', 100 - ($('.test:first-of-type').outerWidth() * 100 / $(window).innerWidth()) + '%');
+
+    }
+
+}
+
+function toggleCactiDockNavigationBox(event) {
+	let caller = $(event.currentTarget);
+	let helper = caller.attr('data-helper');
+
+	if(event.data && event.data.param) {
+		event.data.param = 'on';
+	}
+
+	if(event.data.param === 'on') {
+		$(this).toggleClass('selected');
+	}
+
+	$('[class^="mdw-Dock"][data-helper="' + helper + '"]').toggleClass('invisible');
+}
+
+function toggleDropDownMenu(event) {
+	let caller = $(event.currentTarget);
+	let helper = caller.attr('data-helper');
+
+	$('[class^="navBox-header-button"][data-action="dropdown"][data-helper="' + helper + '"]').toggleClass('show');
+	return false;
+}
+
+function hideDropDownMenu() {
+	$('[class^="navBox-header-button"][data-action="dropdown"]').removeClass('show');
+}
+
+function toggleTableColumn(event) {
+	let storage = Storages.localStorage;
+	let tableHash = event.target.dataset.table;
+	let cIndex = parseInt(event.target.dataset.column);
+	let cClass = 'no-col'+cIndex;
+	let storage_table_headers = storage.get('midWinter_' + tableHash);
+
+	storage_table_headers[1][cIndex-1][4] = Number(event.target.checked);
+	if(event.target.checked === false) {
+		storage_table_headers[0].push(cClass);
+		$('table[data-table="'+tableHash+'"]').addClass(cClass);
+	}else {
+		let index = storage_table_headers[0].indexOf(cClass);
+		if(index !== -1) {
+			storage_table_headers[0].splice(index, 1);
+		}
+		$('table[data-table="'+tableHash+'"]').removeClass(cClass);
+	}
+	storage.set('midWinter_' + tableHash, JSON.stringify(storage_table_headers));
+
+	$('#mdw-columns-reset').toggleClass('inactive', (storage_table_headers[0].length === 0));
+}
+
+function resetTableColumns(event) {
+	event.preventDefault();
+	let cIndex;
+	let storage = Storages.localStorage;
+	let tableHash = event.target.getAttribute('data-helper');
+	let storage_table_headers = storage.get('midWinter_' + tableHash);
+
+	/* remove "hide-column-classes" from table */
+	$('[data-table="'+tableHash+'"]').removeClass(storage_table_headers[0]);
+
+	/* update local storage */
+	storage_table_headers[0] = [];
+	for(cIndex in storage_table_headers[1]) {
+		storage_table_headers[1][cIndex][4] = 1;
+	}
+	storage.set('midWinter_' + tableHash, JSON.stringify(storage_table_headers));
+
+	/* reset all column input fields */
+	$('#mdw-columns-reset').parent().find('input[type=checkbox]').prop('checked', true).attr('aria-checked', 'true').attr('data-prev-check', 'true');
+
+	/* set reset button/link in inactive mode */
+	$('#mdw-columns-reset').addClass('inactive');
+}
+
+function togglePwdInputField(event) {
+	let helper = event.target.getAttribute('data-helper');
+
+	let destination = $('input[id="' + helper + '"]');
+	if ( destination.length) {
+		if(destination.attr('type') === 'password') {
+			destination.attr('type', 'text');
+		}else {
+			destination.attr('type', 'password');
+		}
+		event.target.classList.toggle('ti-lock')
+		event.target.classList.toggle('ti-lock-off');
+	}
 }
 
 function setupDefaultElements() {
-	var pageName = basename($(location).attr('pathname'));
-	var hostTimer = false;
-	var clickTimeout = false;
-	var hostOpen = false;
 
-	// duplicate cactiConsolePageHeadBackdrop for compact mode
-	if ($('#cactiConsoleBackdrop').length === 0 ) {
-		$('<div id="cactiConsoleBackdrop"></div>'+
-			'<div id="navTitle">'+
-				'<div class="rubric"></div><div class="separator">/</div>'+
-				'<div class="category"></div><div class="separator">/</div>'+
-				'<div class="action"></div>'+
-			'</div>').prependTo("#breadCrumbBar");
+	let popover = $('#mdw-GridContainer-PopOver');
+	if ( popover.hasClass('hidden') ) {
 
-		if (cactiConsoleAllowed) {
-			$("#cactiConsoleBackdrop").click( function() {
-				/* hide open menu boxes first */
-				$('[class^="cactiConsoleNavigation"]').addClass('hide');
-				loadPage(urlPath+'index.php');
-			});
-		} else {
-			$("#cactiConsoleBackdrop").click( function() {
-				window.open('https://cacti.net', '_blank');
-			});
+		let storage = Storages.localStorage;
+		var pageName = basename($(location).attr('pathname'));
+		var hostTimer = false;
+		var clickTimeout = false;
+		var hostOpen = false;
+
+		$(function () {
+
+			var start = moment();
+			var end = moment();
+
+			function cb(start, end) {
+				$('#reportrange span').html(start.format() + ' - ' + end.format());
+			}
+
+			$('.compact_nav_icon[data-helper="daterangepicker"]').daterangepicker({
+				startDate: start,
+				endDate: end,
+				"timePicker": true,
+				"timePicker24Hour": true,
+				"timePickerSeconds": true,
+				ranges: {
+					'Last Half Hour': [moment().subtract(30, 'minutes'), moment()],
+					'Last Hour': [moment().subtract(60, 'minutes'), moment()],
+					'Last 2 Hours': [moment().subtract(90, 'minutes'), moment()],
+					'Today': [moment(), moment()],
+					'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+					'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+					'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+					'This Month': [moment().startOf('month'), moment().endOf('month')],
+					'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+				},
+				"opens": "left",
+			}, cb);
+
+			cb(start, end);
+
+		});
+
+		/* cleanup - remove unused elements */
+		//$('#breadCrumbBar, .cactiPageHead, .cactiShadow, .cactiConsoleNavigationArea, .cactiTreeNavigationArea').detach();
+		$('#breadCrumbBar, .cactiPageHead, .cactiShadow, .cactiConsoleNavigationArea').detach();
+
+		// ensure that filter table and 1st navBar will stay on top
+		if ($('.stickyContainer').length) {
+			$('.stickyContainer').remove();
 		}
-	}
 
-	// migrate breadcrumbs to Ajax
-	$('a[id^="nav_"]').each(function(data) {
-		$(this).addClass('hyperLink');
-	});
+		let btn_calendar = new navigationButton('daterangepicker', 'Calendar', 'Select Timeframe', 'ti ti-calendar-alt', '#mdw-ActionBarTop', '', '');
 
-	// ensure that filter table and 1st navBar will stay on top
-	if ($('#filterTableOnTop').length !== 0 ) $('#filterTableOnTop').remove();
+        transform_filter_table();
 
-	if ($(".filterTable").length !== 0) {
-		$('<div id="filterTableOnTop">').prependTo('#navigation_right');
-		$(".filterTable:first").closest('div').detach().prependTo('#filterTableOnTop');
-		$(".break:first").detach().appendTo('#filterTableOnTop');
-		$(".navBarNavigation:first").detach().appendTo('#filterTableOnTop');
-		$( "#filterTableOnTop").addClass('sticky');
-		$('<div class="cactiTableFilter"><span><i class="far fa fa-sliders-h"></i></span></div>').prependTo('#filterTableOnTop .cactiTableTitle');
-	}
-
-	// Add nice search filter to filters
-	if ($('input[id="filter"]').length > 0 && $('input[id="filter"] > i[class="fa fa-search filter"]').length < 1) {
-		$('input[id="filter"]').after("<i class='fa fa-search filter'/>").attr('autocomplete', 'off').attr('placeholder', searchFilter).parent('td').css('white-space', 'nowrap');
-	}
-
-	if ($('input[id="filterd"]').length > 0 && $('input[id="filterd"] > i[class="fa fa-search filter"]').length < 1) {
-		$('input[id="filterd"]').after("<i class='fa fa-search filter'/>").attr('autocomplete', 'off').attr('placeholder', searchFilter).parent('td').css('white-space', 'nowrap');
-	}
-
-	if ($('input[id="rfilter"]').length > 0 && $('input[id="rfilter"] > i[class="fa fa-search filter"]').length < 1) {
-		$('input[id="rfilter"]').after("<i class='fa fa-search filter'/>").attr('autocomplete', 'off').attr('placeholder', searchRFilter).parent('td').css('white-space', 'nowrap');
-	}
-
-	$('input#filter, input#rfilter').addClass('ui-state-default ui-corner-all');
-	$('input[type="text"], input[type="password"], input[type="checkbox"], textarea').not('image').addClass('ui-state-default ui-corner-all');
-
-	/* Highlight sortable table columns */
-	$('.tableHeader th').has('i.fa-sort').removeClass('tableHeaderColumnHover tableHeaderColumnSelected');
-	$('.tableHeader th').has('i.fa-sort-up').addClass('tableHeaderColumnSelected');
-	$('.tableHeader th').has('i.fa-sort-down').addClass('tableHeaderColumnSelected');
-	$('.tableHeader th').has('i.fa-sort').hover(
-		function() {
-			$(this).addClass("tableHeaderColumnHover");
-		}, function() {
-			$(this).removeClass("tableHeaderColumnHover");
+		// *********************************** Elements on Top (of Navigation right) ************************************
+		// ensure that elementsOnTop container is always available
+		if (!$("#elementsOnTop").length) {
+			$('<div id="elementsOnTop" class="elementsOnTop">' +
+				'<div id="tableTitleOnTop" class="elementOnTop tableTitleOnTop"></div>' +
+				'<div id="tableNavBarOnTop" class="elementOnTop tableNavBarOnTop"></div>' +
+				'<div id="tableActionOnTop" class="elementOnTop tableActionOnTop"></div>' +
+				'<div id="tableTabsOnTop" class="elementOnTop tableTabsOnTop"></div>' +
+				'</div>').prependTo('#navigation_right');
 		}
-	);
 
-	//$('td:nth-child(2), th:nth-child(2)').hide;
+		// empty all top elements first
+		$(".elementOnTop").empty();
+		// empty actionBar middle
+		$("#mdw-ActionBarMiddle").empty();
 
-	$('input#filter, input#rfilter').addClass('ui-state-default ui-corner-all');
-
-	$('input[type="text"], input[type="password"], input[type="checkbox"], textarea').not('image').addClass('ui-state-default ui-corner-all');
-
-	// really shitty workaround to make custom row checkboxes clickable again. :(
-	$('tr[id*="line"]:not(.disabled_row)').each(function(data) {
-		$(this).find('.formCheckboxLabel').attr('for', '');
-	});
-
-	// Turn file buttons into jQueryUI buttons
-	$('.import_label').button();
-	$('.import_button').change(function() {
-		text=this.value;
-		setImportFile(text);
-	});
-
-	setImportFile(noFileSelected);
-
-	function setImportFile(fileText) {
-		$('.import_text').text(fileText);
-	}
-
-	$('select.colordropdown').dropcolor();
-
-	$('select').not('.colordropdown').each(function() {
-		if ($(this).prop('multiple') != true) {
-			$(this).each(function() {
-				id = $(this).attr('id');
-
-				$(this).selectmenu({
-					open: function(event, ui) {
-						var instance = $(this).selectmenu('instance');
-						instance.menuInstance.focus(null, instance._getSelectedItem());
-					},
-					change: function(event, ui) {
-						$(this).val(ui.item.value).change();
-					},
-					position: {
-						my: "left top",
-						at: "left bottom",
-						collision: "flip"
-					},
-					width: false
-				});
-
-				$('#'+id+'-menu').css('max-height', '250px');
-			});
-		} else {
-			$(this).addClass('ui-state-default ui-corner-all');
+		// move table tabs to top
+		if ($("#main>div.tabs:first").length) {
+			$("#main>div.tabs:first").closest('div').detach().appendTo('#tableTabsOnTop');
 		}
-	});
 
-	$('#host').off().autocomplete({
-		source: pageName+'?action=ajax_hosts',
-		autoFocus: true,
-		minLength: 0,
-		select: function(event,ui) {
-			$('#host_id').val(ui.item.id);
-			callBack = $('#call_back').val();
-			if (callBack != 'undefined') {
-				if (callBack.indexOf('applyFilter') >= 0) {
-					applyFilter();
-				} else if (callBack.indexOf('applyGraphFilter') >= 0) {
-					applyGraphFilter();
+		// move table title to top
+		if ($("#main div.cactiTableTitleRow").length) {
+
+			$("#main div.cactiTableTitleRow:first > .cactiTableTitle").detach().appendTo('#tableTitleOnTop');
+			$("#main div.cactiTableTitleRow:first > .cactiTableAction:not(:empty)").detach().appendTo('#tableActionOnTop');
+			$("#main div.cactiTableTitleRow:first > .cactiTableButton:not(:empty)").detach().appendTo('#mdw-ActionBarMiddle');
+			$("#main div.cactiTableTitleRow:first").remove();
+
+			if ($("#main div.saveRow").length) {
+				$("#main div.saveRow").detach().appendTo('#tableActionOnTop');
+			} else if ($("#main div.actionsDropdown").length) {
+				$("#main div.actionsDropdown > div > span").detach().appendTo('#tableActionOnTop');
+			}
+
+			if ($("#main div.navBarNavigation").length) {
+				$("#main div.navBarNavigation:first").clone().appendTo('#tableNavBarOnTop');
+			}
+		}
+		// **************************************************************************************************************
+
+		/* display option: table layout */
+		let btn_table_layout = new navigationButton('displayOptions', 'Table', 'Setup Table Layout', 'ti ti-table-options', '#mdw-ActionBarTop');
+
+		if ($('thead>tr.tableHeader:has(th:nth-of-type(2))').length !== 0) {
+			let cArray = [];
+			let tClasses = [];
+			let cIndex = 1;
+			let cName;
+			let cTitle;
+			let cHideable = 0;
+			let cVisible = 1;
+			let tableID = $('tr.tableHeader').closest('.cactiTable').attr('id');
+			let cHeaderStr = '';
+			$('th', $('tr.tableHeader')).each(function () {
+				cName = 'n/a';
+				if ($(this).hasClass('sortable')) {
+					cName = $('div.sortinfo', $(this)).attr('sort-column');
 				}
-			} else if (typeof applyGraphFilter === 'function') {
-				applyGraphFilter();
+				cHeaderStr += cName;
+			})
+			let tableHash = cyrb53(window.location.pathname + tableID + cHeaderStr);
+			let table_settings;
+			let storage_table_headers = storage.get('midWinter_' + tableHash);
+
+
+			/* internal structure of storage_table_headers as follows
+            *	[0] - contains a cached string of classes hiding all unselected columns (by user) to save processing cycles
+                [1] - contains all table columns identified described as follows
+                      [ index, internal name |n/a|, title |n/a|, hide-able |0|, visible |1| ]
+                [2] - contains i18n session locale
+            */
+
+
+			/* make this table addressable */
+			$('#' + tableID).attr('data-table', tableHash);
+
+			if (storage_table_headers !== null) {
+				if (sessionLocale === storage_table_headers[2]) {
+					$('#' + tableID).addClass(storage_table_headers[0]);
+				} else {
+					/* user language change detected */
+					$('th', $('tr.tableHeader')).each(function () {
+						cTitle = 'n/a';
+						if ($(this).hasClass('sortable')) {
+							cTitle = $('i:first', $(this)).parent().text();
+						} else {
+							cTitle = $(this).text();
+						}
+						storage_table_headers[1][cIndex - 1][2] = cTitle;
+						cIndex++;
+					});
+					storage_table_headers[2] = sessionLocale;
+					storage.set('midWinter_' + tableHash, JSON.stringify(storage_table_headers));
+				}
 			} else {
-				applyFilter();
+				$('th', $('tr.tableHeader')).each(function () {
+					cName = 'n/a';
+					cTitle = 'n/a';
+					cHideable = 0;
+					if ($(this).hasClass('sortable')) {
+						cName = $('div.sortinfo', $(this)).attr('sort-column');
+						cTitle = $('i:first', $(this)).parent().text();
+						cHideable = 1;
+					} else {
+						if (!$(this).hasClass('tableSubHeaderCheckbox')) {
+							cName = 'n/a';
+							cTitle = $(this).text();
+							cHideable = 1;
+						}
+					}
+					cArray.push([cIndex, cName, cTitle, cHideable, cVisible]);
+					cIndex++;
+				})
+
+				if (cArray.length) {
+					table_settings = [tClasses, cArray, sessionLocale];
+					storage.set('midWinter_' + tableHash, JSON.stringify(table_settings));
+					storage_table_headers = storage.get('midWinter_' + tableHash);
+				}
 			}
-		}
-	}).addClass('ui-state-default ui-selectmenu-text').css('border', 'none').css('background-color', 'transparent');
 
-	$('#host_click').css('z-index', '4');
-	$('#host_wrapper').off().dblclick(function() {
-		hostOpen = false;
-		clearTimeout(hostTimer);
-		clearTimeout(clickTimeout);
-		$('#host').autocomplete('close').select();
-	}).click(function() {
-		if (hostOpen) {
-			$('#host').autocomplete('close');
-			clearTimeout(hostTimer);
-			hostOpen = false;
+			if (storage_table_headers !== null) {
+				let columns_filter = '';
+				let columns = storage_table_headers[1];
+				columns.forEach((columns) => {
+					cIndex = columns[0];
+					cName = columns[1];
+					cTitle = columns[2];
+					cHideable = columns[3];
+					cVisible = columns[4];
+
+					if (cHideable) {
+						columns_filter += '<div>' + cTitle + '</div>'
+							+ '<div>'
+							//+ '<label class="checkboxSwitch">'
+							+ '<input data-scope="theme" id="mdw_' + 'col_' + cIndex + '" data-func="toggleTableColumn" data-table="' + tableHash + '" data-column="' + cIndex + '" class="formCheckbox" type="checkbox" name="mdw_' + 'col_' + cIndex + '"' + (cVisible ? ' checked' : '') + ((cIndex === 1) ? ' disabled' : '') + '>'
+							//+ '<span class="checkboxSlider checkboxRound"></span>'
+							//+ '</label>'
+							//+ '<label class="checkboxLabel checkboxLabelWanted" for="mdw_' + 'col_' + cIndex + '"></label>'
+							+ '<label for="mdw_' + 'col_' + cIndex + '"></label>'
+							+ '</div>'
+					}
+				})
+//[["no-col4","no-col5"],[[1,"name_cache","Data Source Name",1,1],[2,"local_data_id","ID",1,1],[3,"n/a","Graphs",1,1],[4,"n/a","Poller Interval",1,0],[5,"n/a","Deletable",1,0],[6,"active","Active",1,1],[7,"data_template_name","Template Name",1,1],[8,"n/a","n/a",0,1]],"en-US"]
+				columns_filter += '<div id="mdw-columns-reset" class="mdw-columns-reset'
+					+ ((storage_table_headers[0].length === 0) ? ' inactive' : '')
+					+ '" data-helper="' + tableHash + '">Reset</div>';
+
+				$('[class^="mdw-ConsoleNavigationBox"][data-helper="displayOptions"] .tab-columns').html(columns_filter);
+				$('#mdw-columns-reset').off().on('click', resetTableColumns);
+				btn_table_layout.show();
+			}
 		} else {
-			clickTimeout = setTimeout(function() {
-				$('#host').autocomplete('search', '');
-				clearTimeout(hostTimer);
-				hostOpen = true;
-			}, 200);
+			$('[class^="mdw-ConsoleNavigationBox"][data-helper="displayOptions"] .tab-columns').html('');
+			btn_table_layout.hide();
 		}
-		$('#host').select();
-	}).on('mouseenter', function() {
-		$(this).addClass('ui-state-hover');
-		$('input#host').addClass('ui-state-hover');
-	}).on('mouseleave', function() {
-		$(this).removeClass('ui-state-hover');
-		$('#host').removeClass('ui-state-hover');
-		hostTimer = setTimeout(function() { $('#host').autocomplete('close'); }, 800);
-		hostOpen = false;
-	});
 
-	var hostPrefix = '';
-	$('#host').autocomplete('widget').each(function() {
-		hostPrefix=$(this).attr('id');
+		// Add nice search filter to filters
+		if ($('input[id="filter"]').length > 0 && $('input[id="filter"] > i[class="ti ti-search filter"]').length < 1) {
+			$('input[id="filter"]').after("<i class='ti ti-search filter'/>").attr('autocomplete', 'off').attr('placeholder', searchFilter).parent('td').css('white-space', 'nowrap');
+		}
 
-		if (hostPrefix != '') {
-			$('ul[id="'+hostPrefix+'"]').on('mouseenter', function() {
-				clearTimeout(hostTimer);
-			}).on('mouseleave', function() {
-				hostTimer = setTimeout(function() { $('#host').autocomplete('close'); }, 800);
-				$(this).removeClass('ui-state-hover');
-				$('input#host').removeClass('ui-state-hover');
+		if ($('input[id="filterd"]').length > 0 && $('input[id="filterd"] > i[class="ti ti-search filter"]').length < 1) {
+			$('input[id="filterd"]').after("<i class='ti ti-search filter'/>").attr('autocomplete', 'off').attr('placeholder', searchFilter).parent('td').css('white-space', 'nowrap');
+		}
+
+		if ($('input[id="rfilter"]').length > 0 && $('input[id="rfilter"] > i[class="ti ti-search filter"]').length < 1) {
+			$('input[id="rfilter"]').after("<i class='ti ti-search filter'/>").attr('autocomplete', 'off').attr('placeholder', searchRFilter).parent('td').css('white-space', 'nowrap');
+		}
+
+		$('input#filter, input#rfilter').addClass('ui-state-default ui-corner-all');
+		$('input[type="text"], input[type="password"], input[type="checkbox"], textarea').not('image').addClass('ui-state-default ui-corner-all');
+
+		/* Highlight sortable table columns */
+		$('.tableHeader th').has('i.fa-sort').removeClass('tableHeaderColumnHover tableHeaderColumnSelected');
+		$('.tableHeader th').has('i.fa-sort-up').addClass('tableHeaderColumnSelected');
+		$('.tableHeader th').has('i.fa-sort-down').addClass('tableHeaderColumnSelected');
+		$('.tableHeader th').has('i.fa-sort').hover(
+			function () {
+				$(this).addClass("tableHeaderColumnHover");
+			}, function () {
+				$(this).removeClass("tableHeaderColumnHover");
+			}
+		);
+
+
+		//$('td:nth-child(2), th:nth-child(2)').addClass('hide');
+
+
+		$('input#filter, input#rfilter').addClass('ui-state-default ui-corner-all');
+
+		$('input[type="text"], input[type="password"], input[type="checkbox"], textarea').not('image').addClass('ui-state-default ui-corner-all');
+
+		// really shitty workaround to make custom row checkboxes clickable again. :(
+		$('tr[id*="line"]:not(.disabled_row)').each(function (data) {
+			$(this).find('.formCheckboxLabel').removeAttr('for');
+		});
+
+		// Turn file buttons into jQueryUI buttons
+		$('.import_label').button();
+		$('.import_button').change(function () {
+			text = this.value;
+			setImportFile(text);
+		});
+
+		setImportFile(noFileSelected);
+
+		function setImportFile(fileText) {
+			$('.import_text').text(fileText);
+		}
+
+		// Hide the graph icons until you hover
+		$('.graphDrillDown').hover(
+			function () {
+				element = $(this);
+
+				// hide the previously shown element
+				if (element.attr('id').replace('dd', '') != graphMenuElement && graphMenuElement > 0) {
+					$('#dd' + graphMenuElement).find('.iconWrapper:first').hide(300);
+				}
+
+				clearTimeout(graphMenuTimer);
+				graphMenuTimer = setTimeout(function () {
+					showGraphMenu(element);
+				}, 400);
+			},
+			function () {
+				element = $(this);
+				clearTimeout(graphMenuTimer);
+				graphMenuTimer = setTimeout(function () {
+					hideGraphMenu(element);
+				}, 400);
+
+				if (typeof spikeKillClose == 'function') {
+					spikeKillClose();
+				}
+			}
+		);
+
+		function showGraphMenu(element) {
+			element.find('.spikekillMenu').menu('disable');
+			element.find('.iconWrapper').show(300, function () {
+				graphMenuElement = element.attr('id').replace('dd', '');
+				$(this).find('.spikekillMenu').menu('enable');
+				$(this).css('display', 'block');
 			});
 		}
-	});
 
-	// Hide the graph icons until you hover
-	$('.graphDrillDown').hover(
-		function() {
-			element = $(this);
-
-			// hide the previously shown element
-			if (element.attr('id').replace('dd', '') != graphMenuElement && graphMenuElement > 0) {
-				$('#dd'+graphMenuElement).find('.iconWrapper:first').hide(300);
-			}
-
-			clearTimeout(graphMenuTimer);
-			graphMenuTimer = setTimeout(function() { showGraphMenu(element); }, 400);
-		},
-		function() {
-			element = $(this);
-			clearTimeout(graphMenuTimer);
-			graphMenuTimer = setTimeout(function() { hideGraphMenu(element); }, 400);
+		function hideGraphMenu(element) {
+			element.find('.spikekillMenu').menu('disable');
+			element.find('.iconWrapper').hide(300, function () {
+				$(this).find('.spikekillMenu').menu('enable');
+			});
 		}
-	);
 
-	function showGraphMenu(element) {
-		element.find('.spikekillMenu').menu('disable');
-		element.find('.iconWrapper').show(300, function() {
-			graphMenuElement = element.attr('id').replace('dd', '');
-			$(this).find('.spikekillMenu').menu('enable');
-		});
+		setNavigationScroll();
 	}
-
-	function hideGraphMenu(element) {
-		element.find('.spikekillMenu').menu('disable');
-		element.find('.iconWrapper').hide(300, function() {
-			$(this).find('.spikekillMenu').menu('enable');
-		});
-	}
-
-	setNavigationScroll();
 }
 
-function initStorageItem(name, default_value, data_attribute= '') {
-	let storage = Storages.localStorage;
-	if (storage.isSet(name) === false) {
-		storage.set(name, default_value);
-	}
-	if (data_attribute !=='') {
-		setDocumentAttribute(data_attribute, storage.get(name));
-	}
-	return storage.get(name);
+function transform_filter_table() {
+    if ($("#main .filterTable").length) {
+        let filter;
+        filter = $("#main .filterTable:first").closest('div.cactiTable').detach();
+        $('[class^="mdw-ConsoleNavigationBox"][data-helper="displayFilterOptions"] .navBox-content').html(filter);
+
+        /* custom content */
+        if ($("#main >div:first .filterTable:first").closest('div').length === 1) {
+            //	$("#main >div:first .filterTable:first").closest('div').detach().prependTo('#filterTableOnTop');
+            $(".break:first").detach().appendTo('#filterTableOnTop');
+
+            /* hide filter table title */
+            $('#filterTableOnTop .cactiTableTitle').detach();
+            $("#filterTableOnTop").removeClass('hide');
+        }
+        mdw.obj.ctrl.displayFilterOptions.show();
+    } else {
+        mdw.obj.ctrl.displayFilterOptions.hide();
+      //  $('[class^="mdw-ConsoleNavigationBox"][data-helper="displayFilterOptions"]').hide();
+    }
+}
+
+function restoreLocalStorage() {
+    if (mdw.cache.storage.isSet('midWinter') === false) {
+        refreshLocalStorage();
+    } else {
+        mdw.session = JSON.parse(lzjs.decompress(mdw.cache.storage.get('midWinter')));
+    }
+    setDocumentAttribute('theme-color',         mdw.session.theme.color.mode );
+    setDocumentAttribute('theme-color-auto',    mdw.session.theme.color.auto );
+    setDocumentAttribute('zoom-level',          mdw.session.theme.font.zoom );
+    setDocumentAttribute('animations',          mdw.session.theme.boxes.animated );
+    setDocumentAttribute('auto-table-layout',   mdw.session.theme.mobile.autoTableLayout );
+    setDocumentAttribute('controls-subtitle',   mdw.session.theme.controls.subTitle );
+}
+
+function refreshLocalStorage() {
+    mdw.cache.storage.set('midWinter', lzjs.compress(JSON.stringify(mdw.session)));
 }
 
 function themeLoader(state='off', force = false) {
 	if (state === 'on') {
-		if (getDocumentAttribute('data-theme-state') !== 'ready' | force === true) {
+		if (getDocumentAttribute('data-theme-state') !== 'ready' || force === true) {
 			setDocumentAttribute('theme-state', 'loading');
 		}
 	} else {
@@ -735,99 +1017,84 @@ function getDocumentAttribute(name) {
 }
 
 function setCookieValue(name, value) {
-	$.cookie(name, value.toString(), { expires: 365, path: urlPath + ';SameSite=Lax', secure: true });
+	$.cookie(name, value.toString(), { expires: 365, path: urlPath + ';SameSite=Lax', secure: ( window.location.protocol === "https:") });
 }
 
 function getCookieValue(name) {
 	return $.cookie(name);
 }
 
-function toggleGuiMode() {
-	let storage = Storages.localStorage;
-	let midWinter_GUI_Mode = storage.get('midWinter_GUI_Mode');
-
-	midWinter_GUI_Mode = (midWinter_GUI_Mode === 'standard') ? 'compact' : 'standard';
-	storage.set('midWinter_GUI_Mode', midWinter_GUI_Mode);
-
-	setDocumentAttribute('theme-mode', midWinter_GUI_Mode);
-}
-
 function toggleColorMode() {
-	let storage = Storages.localStorage;
-	let midWinter_Color_Mode = storage.get('midWinter_Color_Mode');
-	let midWinter_Color_Mode_Auto = storage.get('midWinter_Color_Mode_Auto');
-
-	if (midWinter_Color_Mode_Auto !== 'on') {
-		midWinter_Color_Mode = (midWinter_Color_Mode === 'dark') ? 'light' : 'dark';
-		storage.set('midWinter_Color_Mode', midWinter_Color_Mode);
-		$('.toggleColorMode').text(midWinter_Color_Mode === 'dark' ? lightColorMode : darkColorMode);
-		setDocumentAttribute('theme-color', midWinter_Color_Mode);
-		setCookieValue('CactiColorMode', midWinter_Color_Mode);
+	if (mdw.session.theme.color.auto !== 'on') {
+        mdw.session.theme.color.mode = (mdw.session.theme.color.mode === 'dark') ? 'light' : 'dark';
+		refreshLocalStorage();
+		setDocumentAttribute('theme-color', mdw.session.theme.color.mode);
+		setCookieValue('CactiColorMode', mdw.session.theme.color.mode);
 		initializeGraphs(true);
 	}
 }
 
 function toggleColorModeAuto() {
-	let storage = Storages.localStorage;
-	let midWinter_Color_Mode = storage.get('midWinter_Color_Mode');
-	let midWinter_Color_Mode_Auto = storage.get('midWinter_Color_Mode_Auto');
-
-	midWinter_Color_Mode_Auto = (midWinter_Color_Mode_Auto === 'on') ? 'off' : 'on';
-	storage.set('midWinter_Color_Mode_Auto', midWinter_Color_Mode_Auto);
-	$('.toggleColorModeAuto').text( midWinter_Color_Mode_Auto === 'on' ? ignorePreferredColorTheme : usePreferredColorTheme );
-
+    mdw.session.theme.color.auto = (mdw.session.theme.color.auto === 'on') ? 'off' : 'on';
+    refreshLocalStorage();
+	setDocumentAttribute('theme-color-auto', mdw.session.theme.color.auto);
 	setThemeColor();
+	/* update output field beside input selector */
+	$('#mdw_themeColorModeAutoValue').val(mdw.session.theme.color.auto);
 }
 
-function toggleGuiFontSize() {
-	let storage = Storages.localStorage;
-	let midWinter_Font_Size = storage.get('midWinter_Font_Size');
-
-	if (midWinter_Font_Size === 'regular') {
-		midWinter_Font_Size = 'large';
-	} else if (midWinter_Font_Size === 'large') {
-		midWinter_Font_Size = 'small';
-	} else {
-		midWinter_Font_Size = 'regular';
+function changeGuiFontSize(change=true) {
+    mdw.session.theme.font.zoom = $('#mdw_themeFontSize').val();
+	if(change) {
+		refreshLocalStorage();
+        setDocumentAttribute('zoom-level', mdw.session.theme.font.zoom);
 	}
-	storage.set('midWinter_Font_Size', midWinter_Font_Size);
-	$('.toggleGuiFontSize').text('Font Size: '+ midWinter_Font_Size);
+	/* update output field beside input selector */
+	$('#mdw_themeFontSizeValue').val((parseFloat(mdw.session.theme.font.zoom) + 25).toFixed(1) + ' %');
+}
 
-	setDocumentAttribute('zoom-level', midWinter_Font_Size);
+function toggleGuiAnimations() {
+    mdw.session.theme.boxes.animated = (mdw.session.theme.boxes.animated === 'on') ? 'off' : 'on';
+    refreshLocalStorage();
+	setDocumentAttribute('animations', mdw.session.theme.boxes.animated);
+	/* update output field beside input selector */
+	$('#mdw_themeAnimationsValue').val(mdw.session.theme.boxes.animated);
+}
+
+function toggleControlsSubtitle() {
+    mdw.session.theme.controls.subTitle = (mdw.session.theme.controls.subTitle === 'on') ? 'off' : 'on';
+    refreshLocalStorage();
+	setDocumentAttribute('controls-subtitle', mdw.session.theme.controls.subTitle);
+	/* update output field beside input selector */
+	$('#mdw_themeControlsSubTitleValue').val(mdw.session.theme.controls.subTitle);
+}
+
+function toggleAutoTableLayout() {
+    mdw.session.theme.mobile.autoTableLayout = (mdw.session.theme.mobile.autoTableLayout === 'on') ? 'off' : 'on';
+    refreshLocalStorage();
+	setDocumentAttribute('auto-table-layout', mdw.session.theme.mobile.autoTableLayout);
+	/* update output field beside input selector */
+	$('#mdw_themeAutoTableLayoutValue').val(mdw.session.theme.mobile.autoTableLayout);
 }
 
 function setThemeColor() {
-	let storage = Storages.localStorage;
-
-	if (storage.get('midWinter_Color_Mode_Auto') === 'on') {
-		$('.toggleColorMode').hide(0);
-		detectSystemColorSetup();
-	} else {
-		$('.toggleColorMode').show(0);
-		checkThemeColorSetup(storage.get('midWinter_Color_Mode'));
-		//setDocumentAttribute('theme-color', storage.get('midWinter_Color_Mode'));
-		//setCookieValue('CactiColorMode', storage.get('midWinter_Color_Mode'));
-	}
-	setDocumentAttribute('theme-mode', storage.get('midWinter_GUI_Mode'));
+	$('#mdw_themeColorMode').attr('disabled', (mdw.session.theme.color.auto === 'on'));
+	detectSystemColorSetup(mdw.session.theme.color.auto);
 }
 
-function detectSystemColorSetup() {
+function detectSystemColorSetup(state) {
+	let storage = Storages.localStorage;
 	const systemColorMode = window.matchMedia("(prefers-color-scheme: dark)");
 
-	try {
-		systemColorMode.addEventListener('change', (e) => {
-			checkThemeColorSetup((e.matches) ? 'dark' : 'light')
-		});
-    } catch (e1) {
-		try {
-			systemColorMode.addListener((e) => {
-				checkThemeColorSetup((e.matches) ? 'dark' : 'light')
-			});
-		} catch (e2) {
-			console.error(e2);
-		}
+	let _listener = (e) => { checkThemeColorSetup((e.matches) ? 'dark' : 'light'); };
+
+	if(state === 'on') {
+		systemColorMode.addEventListener('change', _listener);
+		checkThemeColorSetup(systemColorMode.matches === true ? 'dark' : 'light');
+	}else {
+		systemColorMode.removeEventListener('change', _listener);
+		checkThemeColorSetup(mdw.session.theme.color.mode);
 	}
-	checkThemeColorSetup(systemColorMode.matches === true ? 'dark' : 'light');
 }
 
 function checkThemeColorSetup(color_mode) {
@@ -835,348 +1102,329 @@ function checkThemeColorSetup(color_mode) {
 	let cookie_color_mode = getCookieValue('CactiColorMode');
 
 	if (document_color_mode !== color_mode || cookie_color_mode !== color_mode) {
+        refreshLocalStorage();
 		setDocumentAttribute('theme-color', color_mode)
 		setCookieValue('CactiColorMode', color_mode);
 		initializeGraphs(true);
 	}
 }
 
-function setMenuVisibility() {
-	storage=Storages.localStorage;
+function preparePopOver(html) {
+	const container = 'mdw-GridContainer-PopOver';
+	const overlay = 'mdw-GridContainer-Overlay';
 
-	// Initialize the navigation settings
-	// This will setup the initial visibility of the menu
-	$('li.menuitem').each(function() {
-		var id = $(this).attr('id');
+	const popover = $('#'+container);
+	const screenOverlay = $('#'+overlay);
 
-		if (storage.isSet(id)) {
-			var active = storage.get(id);
-		} else {
-			var active = null;
+	if ( popover !== 'undefined' && screenOverlay !== 'undefined' ) {
+
+		let title = popover.find('.mdw-PopOverTitle:first');
+		let content = popover.find('.mdw-PopOverContent:first');
+		let footer = popover.find('.mdw-PopOverFooter:first');
+
+		content.html(html);
+		title.html( content.find('.cactiTableTitleRow:first').detach() );
+		footer.html( content.find('.saveRow:first').detach() );
+
+		popover.find('button[value="cancel"]')
+				.attr('onclick', '')
+				.on('click', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+					togglePopOver(false);
+					return false;
+				});
+
+		popover.find('#action_confirm')
+				.on('submit', function(e) {
+					togglePopOver(false);
+						//popover.find('.mdw-PopOverElements').empty();
+				});
+
+		togglePopOver( true);
+	}
+}
+
+function togglePopOver(force) {
+	let popover = $('.mdw-PopOver');
+	if (popover !== 'undefined') {
+		if (typeof force == 'boolean') {
+			popover.toggleClass('hidden', (force !== true))
+		}else {
+			popover.toggleClass('hidden');
 		}
+	}
+}
 
-		if (active != null && active === 'active') {
-			$(this).find('ul').attr('aria-hidden', 'false').attr('aria-expanded', 'true').show();
-			$(this).next('a').show();
-		} else {
-			$(this).find('ul').attr('aria-hidden', 'true').attr('aria-expanded', 'false').hide();
-			$(this).next('a').hide();
+function fullScreen(event) {
+	if (!document.fullscreenElement) {
+		document.documentElement.requestFullscreen().then( r => fullScreenChangeHandler() );
+	}else if (document.exitFullscreen) {
+		document.exitFullscreen().then( r => fullScreenChangeHandler() );
+	}
+}
+
+function fullScreenChangeHandler() {
+	if (document.fullscreenElement) {
+		$('.compact_nav_icon[data-helper="fullScreen"]>i').removeClass('ti-maximize').addClass('ti-minimize');
+	}else {
+		$('.compact_nav_icon[data-helper="fullScreen"]>i').addClass('ti-maximize').removeClass('ti-minimize');
+	}
+}
+
+
+function kioskMode(event = false) {
+	if (event === false) {
+		setDocumentAttribute('kiosk-mode', 'off');
+		if(isMobile.any() != null) {
+			$('#mdw-Main').off('click');
 		}
+	}else {
+		toggleCactiNavigationBox(event);
+		setDocumentAttribute('kiosk-mode', 'on');
+		if(isMobile.any() != null) {
+			$('#mdw-Main').off('click').on('click', function(e) {
+				let tap;
+				mdw.cache.tab.count++;
 
-		if ($(this).find('a.selected').length === 0) {
-			//console.log('hiding1:'+$(this).closest('.menuitem').attr('id'));
-			$(this).find('ul').attr('aria-hidden', 'true').attr('aria-expanded', 'false').hide();
-			$(this).next('a').hide();
-			storage.set($(this).closest('.menuitem').attr('id'), 'collapsed');
-		} else {
-			$(this).find('ul').attr('aria-hidden', 'false').attr('aria-expanded', 'true').show();
-			$(this).next('a').show();
-			storage.set($(this).closest('.menuitem').attr('id'), 'active');
+				if(mdw.cache.tab.count === 1) {
+					mdw.cache.tab.clientX = e.clientX;
+					mdw.cache.tab.clientY = e.clientY;
+
+					tap = setTimeout(function(){
+						mdw.cache.tab.count = 0;
+						mdw.cache.tab.clientX = 0;
+						mdw.cache.tab.clientY = 0;
+					},300);
+				}else if (mdw.cache.tab.count === 2) {
+					if(Math.abs(e.clientX-mdw.cache.tab.clientX) < 10 && Math.abs(e.clientY-mdw.cache.tab.clientY) < 10) {
+						e.preventDefault();
+						clearTimeout(tap);
+						mdw.cache.tab.count = 0;
+						mdw.cache.tab.clientX = 0;
+						mdw.cache.tab.clientY = 0;
+						kioskMode(false);
+					}
+				}else {
+					mdw.cache.tab.count = 0;
+					mdw.cache.tab.clientX = 0;
+					mdw.cache.tab.clientY = 0;
+					kioskMode(false);
+				}
+			});
 		}
-	});
+	}
+}
 
-	// Function to give life to the Navigation pane
-	$('#nav li:has(ul) a.active').off().on('click', function(event) {
-		event.preventDefault();
+function setHotKeys() {
+	if(mdw.cache.classes.includes('hotkeys')) {
+		hotkeys('c+d,c+l,c+p,c+F1,F5,SHIFT+m+d, SHIFT+m+g, SHIFT+p, SHIFT+c+s, ESC', function (event, handler) {
+			event.preventDefault();
+			switch (handler.key) {
+				case 'c+d':
+					loadUrl({url:urlPath+'index.php'});
+					break;
+				case 'c+l':
+					loadUrl({url:urlPath+'graph_view.php?action=list'});
+					break;
+				case 'c+p':
+					loadUrl({url:urlPath+'graph_view.php?action=preview'});
+					break;
+				case 'F5':
+					togglePopOver( false);
+					loadUrl({url:window.location.href});
+					break;
+				case 'SHIFT+m+d':
+					loadUrl({url:urlPath+'host.php'});
+					break;
+				case 'SHIFT+m+g':
+					loadUrl({url:urlPath+'graphs.php'});
+					break;
+				case 'SHIFT+p':
+					loadUrl({url:urlPath+'auth_profile.php?action=edit'});
+					break;
+				case 'SHIFT+c+s':
+					loadUrl({url:urlPath+'settings.php'});
+					break;
+				case 'ESC':
+					kioskMode(false);
+					togglePopOver( false);
+					break;
+				default:
+					alert(event);
 
-		let id = $(this).closest('.menuitem').attr('id');
-
-		if ($(this).next().is(':visible')) {
-			$(this).next('ul').attr('aria-hidden', 'true').attr('aria-expanded', 'false');
-			$(this).next().slideUp( { duration: 200, easing: 'swing' } );
-			storage.set(id, 'collapsed');
-		} else {
-			$(this).next('ul').attr('aria-hidden', 'false').attr('aria-expanded', 'true');
-			$(this).next().slideToggle( { duration: 200, easing: 'swing' } );
-			if ($(this).next().is(':visible')) {
-				storage.set($(this).closest('.menuitem').attr('id'), 'active');
-			} else {
-				storage.set(id, 'collapsed');
 			}
-		}
-
-		$('li.menuitem').not('#'+id).each(function() {
-			let text = $(this).attr('id');
-			let id   = $(this).attr('id');
-
-			$(this).find('ul').attr('aria-hidden', 'true').attr('aria-expanded', 'false');
-			$(this).find('ul').slideUp( { duration: 200, easing: 'swing' } );
-			storage.set($(this).attr('id'), 'collapsed');
+			return false;
 		});
-	});
+	}
 }
 
-function searchToHighlight() {
-	$.cachedScript(urlPath + 'include/themes/midwinter/vendor/mark/jquery.mark.js').done(function (script, textStatus) {
-		if (textStatus === 'success') {
-			$("input[name='keyword']").on("input", highlight);
+function loadScript(className, url='') {
+	if(!urlPath) {
+		let location = window.location.pathname;
+		let dirname = location.substring(0, location.lastIndexOf("/") + 1);
+		urlPath = (dirname.search('/install/') !== -1) ? dirname + '../' : dirname;
+	}
+
+	if(mdw.cache.classes.includes(className) === false) {
+		$.ajax({
+			dataType: 'script',
+			cache: false,
+			async: false,
+			url: urlPath + url,
+			success: mdw.cache.classes.push(className)
+		}).fail(function(html) {
+			getPresentHTTPError(html);
+		});
+	}
+}
+
+function loadElement(elementName, url='', content_only=false) {
+	let element;
+	$.ajax({
+		dataType: 'html',
+		cache: false,
+		async: false,
+		url: urlPath + url,
+		success: function(html) {
+			element = (content_only) ? $(html).find('#'+elementName).html() : $(html).find('#'+elementName);
 		}
+	}).fail(function(html) {
+		getPresentHTTPError(html);
 	});
+	return element;
 }
 
-function highlight() {
-	// Read the keyword
-	let keyword = $("input[name='keyword']").val();
-	pattern = '.*' + keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '.*';
+/*
+    cyrb53 (c) 2018 bryc (github.com/bryc)
+    License: Public domain. Attribution appreciated.
+    A fast and simple 53-bit string hash function with decent collision resistance.
+    Largely inspired by MurmurHash2/3, but with a focus on speed/simplicity.
+*/
+const cyrb53 = function(str, seed = 0) {
+	let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+	for(let i = 0, ch; i < str.length; i++) {
+		ch = str.charCodeAt(i);
+		h1 = Math.imul(h1 ^ ch, 2654435761);
+		h2 = Math.imul(h2 ^ ch, 1597334677);
+	}
+	h1  = Math.imul(h1 ^ (h1 >>> 16), 2246822507);
+	h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+	h2  = Math.imul(h2 ^ (h2 >>> 16), 2246822507);
+	h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+	return 4294967296 * (2097151 & h2) + (h1 >>> 0);
+};
+
+function searchToHighlight(event) {
+	let caller = $(event.currentTarget);
+	let helper = caller.attr('data-helper');
+	let container = $('[class^="mdw-ConsoleNavigationBox"][data-helper="' + helper + '"]').find('.navBox-content');
+
+	let keyword = $(this).val();
+	let pattern = '.*' + keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '.*';
 	let re = new RegExp(pattern,'gmiu');
 
-	$("ul[role='menu'] a[role='menuitem']").unmark({
+	$("li.menuitem", container).removeClass('hide');
+	$("a[role='menuitem'], li.menuitem", container).unmark({
 		done: function() {
 			if(keyword) {
-				$("ul[role='menu'] a[role='menuitem']").markRegExp(re, {
+				$("a[role='menuitem'], li.menuitem", container).markRegExp(re, {
 					"accuracy": "complementary",
 					"separateWordSearch": false,
 				});
+				$("li.menuitem", container).not(":has(mark)").addClass('hide');
 			}
 		}
 	});
 }
 
+function get_theme_content() {
 
-function setHotKeys() {
-	$.cachedScript(urlPath + 'include/themes/midwinter/vendor/hotkeys/hotkeys.js').done(function (script, textStatus) {
-		if (textStatus === 'success') {
-			hotkeys('SHIFT+c,c+t,c+l,c+p,c+F1,F5,SHIFT+m+d, SHIFT+g, SHIFT+p, ESC, SHIFT+k', function (event, handler) {
-				event.preventDefault();
-				switch (handler.key) {
-					case 'SHIFT+c':
-						loadPage(urlPath+'index.php');
-						break;
-					case 'c+t':
-						loadPage(urlPath+'graph_view.php?action=tree');
-						break;
-					case 'c+l':
-						loadPage(urlPath+'graph_view.php?action=list');
-						break;
-					case 'c+p':
-						loadPage(urlPath+'graph_view.php?action=preview');
-						break;
-					case 'F5':
-						loadPage(window.location.href);
-						break;
-					case 'SHIFT+m+d':
-						loadPage(urlPath+'host.php');
-						break;
-					case 'SHIFT+g':
-						loadPage(urlPath+'graphs.php');
-						break;
-					case 'SHIFT+p':
-						loadPage(urlPath+'auth_profile.php?action=edit');
-						break;
-					case 'SHIFT+k':
-						//kiosk_mode('');
-						toggleFullscreen('navigation_right');
-						break;
-					case 'ESC':
-						toggleFullscreen('');
-						break;
-					default: alert(event);
-                }
+    let midWinter_Color_Mode = mdw.session.theme.color.mode;
+    let midWinter_Color_Mode_Auto = mdw.session.theme.color.auto;
+    let midWinter_Font_Size = mdw.session.theme.font.zoom;
+  //  let midWinter_widthNavigationBox_dashboards = storage.get('midWinter_widthNavigationBox_dashboards');
+    let midWinter_Animations = mdw.session.theme.boxes.animated
+    let midWinter_ShownFontSizeValue = parseFloat(midWinter_Font_Size) + 25;
+    let midWinter_Auto_Table_Layout = mdw.session.theme.mobile.autoTableLayout;
+    let midWinter_Controls_SubTitle = mdw.session.theme.controls.subTitle;
 
-				return false;
-			});
-		}
-	});
-}
+    return '<ul class="nav">'
+        +   '<li class="menuitem" id="menu_user_action">'
+        +       '<a class="menu_parent" href="#" inert>'
+        +           '<i class="menu_glyph ti ti-photo"></i>'
+        +           '<span>General</span>'
+        +       '</a>'
+        +       '<ul>'
+        +           '<li>'
+        +				'<div>' + 'Animations' + '</div>'
+        +				'<div>'
+        +					'<label class="checkboxSwitch">'
+        +						'<input data-scope="theme" id="mdw_themeAnimations" data-func="toggleGuiAnimations" class="formCheckbox" type="checkbox" name="mdw_themeAnimations" '+(midWinter_Animations === 'on' ? 'checked' : '')+'>'
+        +						'<span class="checkboxSlider checkboxRound"></span>'
+        +					'</label>'
+        +					'<label class="checkboxLabel checkboxLabelWanted" for="mdw_themeAnimations"></label>'
+        +                   '<output id="mdw_themeAnimationsValue">'+ midWinter_Animations +'</output>'
+        +				'</div>'
+        +           '</li>'
+        +           '<li>'
+        +				'<div>' + 'Show Control Names' + '</div>'
+        +				'<div>'
+        +					'<label class="checkboxSwitch">'
+        +						'<input data-scope="theme" id="mdw_themeControlsSubTitle" data-func="toggleControlsSubtitle" class="formCheckbox" type="checkbox" name="mdw_themeControlsSubtitle" '+(midWinter_Controls_SubTitle === 'on' ? 'checked' : '')+'>'
+        +						'<span class="checkboxSlider checkboxRound"></span>'
+        +					'</label>'
+        +					'<label class="checkboxLabel checkboxLabelWanted" for="mdw_themeControlsSubTitle"></label>'
+        +                   '<output id="mdw_themeControlsSubTitleValue">'+ midWinter_Controls_SubTitle +'</output>'
+        +				'</div>'
+        +           '</li>'
+        +           '<li>'
+        +				'<div>' + 'Zoom Level' + '</div>'
+        +				'<div>'
+        +						'<input data-scope="theme" class="mdw_themeFontSize" id="mdw_themeFontSize" onchange="changeGuiFontSize()" oninput="changeGuiFontSize(false)" type="range" min="50" max="100" step="2.5" value="'+ midWinter_Font_Size +'" defaultValue="75">'
+        +                       '<output id="mdw_themeFontSizeValue">'+midWinter_ShownFontSizeValue+'%</output>'
+        +				'</div>'
+        +           '</li>'
+        +       '</ul>'
+        +   '</li>'
+        +   '<li class="menuitem" id="menu_user_action">'
+        +       '<a class="menu_parent" href="#" inert>'
+        +           '<i class="menu_glyph ti ti-color-swatch"></i>'
+        +           '<span>Colors</span>'
+        +       '</a>'
+        +       '<ul>'
+        +           '<li>'
+        +				'<div>' + usePreferredColorTheme + '</div>'
+        +				'<div>'
+        +					'<label class="checkboxSwitch">'
+        +						'<input data-scope="theme" id="mdw_themeColorModeAuto" data-func="toggleColorModeAuto" class="formCheckbox" type="checkbox" name="mdw_themeColorModeAuto" '+(midWinter_Color_Mode_Auto === 'on' ? 'checked' : '')+'>'
+        +						'<span class="checkboxSlider checkboxRound"></span>'
+        +					'</label>'
+        +					'<label class="checkboxLabel checkboxLabelWanted" for="mdw_themeColorModeAuto"></label>'
+        +                   '<output id="mdw_themeColorModeAutoValue">'+ midWinter_Color_Mode_Auto +'</output>'
+        +				'</div>'
+        +           '</li>'
 
-jQuery.cachedScript = function(url, options) {
-	options = $.extend(options||{}, {
-		dataType: "script",
-		cache: true,
-		url: url
-	})
-
-	return jQuery.ajax(options);
-}
-
-function kiosk_mode(state='toggle') {
-	if (state === 'toggle') {
-		//hide all navigation elements
-		$('.cactiConsoleNavigationArea, .breadCrumbBar').addClass('hide');
-		$('.cactiContent').addClass('fullscreen');
-	} else {
-		$('.cactiConsoleNavigationArea, .breadCrumbBar').removeClass('hide');
-		$('.cactiContent').removeClass('fullscreen');
-	}
-}
-
-function getFullscreenElement() {
-	return document.fullscreenElement
-			|| document.webkitFullscreenElement
-			|| document.mozFullscreenElement
-			|| document.msmFullscreenElement
-}
-
-function toggleFullscreen(element = false){
-	if(getFullscreenElement()){
-		if(element === false) {
-			document.exitFullscreen();
-		}else {
-			document.documentElement.requestFullscreen().catch(console.log);
-		}
-	}else {
-		if(element === false) {
-			document.documentElement.requestFullscreen().catch(console.log);
-		}else {
-			document.getElementById(element).requestFullscreen().catch(console.log);
-		}
-	}
-}
-
-function dialog_client(event) {
-	event.preventDefault();
-
-	$.cachedScript(urlPath + 'include/themes/midwinter/vendor/ua-parser/ua-parser.js').done(function (script, textStatus) {
-		if (textStatus === 'success') {
-			let title='Your Client';
-
-			let uaObj = new UAParser();
-			let env = uaObj.getResult();
-
-			switch(env.browser.name) {
-				case 'Chrome Headless':
-				case 'Chrome WebView':
-				case 'Chrome':
-				case 'Chromium':
-					env.browser.icon = 'fab fa-chrome';
-					break;
-				case 'IE':
-				case 'IEMobile':
-					env.browser.icon = 'fab fa-internet-explorer';
-					break;
-				case 'Edge':
-					env.browser.icon = 'fab fa-edge';
-					break;
-				case 'Firefox':
-					env.browser.icon = 'fab fa-firefox-browser';
-					break;
-				case 'Opera':
-				case 'Opera Mini':
-				case 'Opera Mobi':
-				case 'Opera Tablet':
-					env.browser.icon = 'fab fa-opera';
-					break;
-				case 'Safari':
-				case 'Mobile Safari':
-					env.browser.icon = 'fab fa-safari';
-					break;
-				default:
-					env.browser.icon = 'far fa-square';
-			}
-
-			switch(env.os.name) {
-				case 'Windows':
-				case 'Windows Phone':
-				case 'Windows Mobile':
-					env.os.icon = 'fab fa-windows';
-					break;
-				case 'Chromium OS':
-					env.os.icon = 'fab fa-chrome';
-					break;
-				case 'Mac OS':
-				case 'iOS':
-					env.os.icon = 'fab fa-apple';
-					break;
-				case 'Android':
-				case 'CentOS':
-				case 'Fedora':
-				case 'FreeBSD':
-				case 'RedHat':
-				case 'SUSE':
-				case 'Ubuntu':
-					env.os.icon = 'fab fa-' + env.os.name.toLowerCase();
-					break;
-				case 'Raspbian':
-					env.os.icon = 'fab fa-raspberry-pi';
-					break;
-				case 'BlackBerry':
-					env.os.icon = 'fab fa-blackberry';
-					break;
-				case 'Arch':
-				case 'Debian':
-				case 'Gentoo':
-				case 'GNU':
-				case 'Joli':
-				case 'Linpus':
-				case 'Mageia':
-				case 'Mandriva':
-				case 'MeeGo':
-				case 'Mint':
-				case 'NetBSD':
-				case 'OpenBSD':
-				case 'PCLinuxOS':
-				case 'Slackware':
-				case 'UNIX':
-				case 'VectorLinux':
-				case 'Linux':
-					env.os.icon = 'fab fa-linux';
-					break;
-				default:
-					env.os.icon = 'far fa-square';
-			}
-
-			switch (env.device.type) {
-				case 'console':
-					env.device.icon = 'fas fa-gamepad';
-					break;
-				case 'mobile':
-					env.device.icon = 'fas fa-mobile-alt';
-					break;
-				case 'tablet':
-					env.device.icon = 'fas fa-tablet-alt';
-					break;
-				case 'smarttv':
-					env.device.icon = 'fas fa-tv';
-					break;
-				case 'embedded':
-					env.device.icon = 'fas fa-cubes';
-					break;
-				default:
-					env.device.icon = 'fas fa-desktop';
-			}
-
-			let content = '<div class="cactiFlexBoxContainer">';
-
-			content += '<div class="cactiFlexBoxContentBox">'
-				+             '<div class="header"><span>Browser</span></div>'
-				+             '<div class="content"><i class="'+env.browser.icon+'"></i></div>'
-				+             '<div class="footer"><span>'+ env.browser.name +'</span><span>'+ env.browser.version +'</span></div>'
-				+ '</div>';
-
-			content += '<div class="cactiFlexBoxContentBox">'
-				+             '<div class="header"><span>OS</span></div>'
-				+             '<div class="content"><i class="'+env.os.icon+'"></i></div>'
-				+             '<div class="footer"><span>'+ env.os.name +'</span><span>'+ env.os.version +'</span></div>'
-				+ '</div>';
-
-			content += '<div class="cactiFlexBoxContentBox">'
-				+             '<div class="header"><span>Type</span></div>'
-				+             '<div class="content"><i class="'+env.device.icon+'"></i></div>'
-				+             '<div class="footer"><span>'+ ((env.device.type == undefined) ? '-' : env.device.type) +'</span></div>'
-				+ '</div>';
-
-			content += '<div class="cactiFlexBoxContentBox">'
-				+             '<div class="header"><span>Network</span></div>'
-				+             '<div class="content"><i class="fas fa-network-wired"></i></div>'
-				+             '<div class="footer"><span>'+ ((env.device.type == undefined) ? '-' : env.device.type) +'</span></div>'
-				+ '</div>';
-
-			content += '</div>';
-
-
-			$('#dialog_container').remove();
-			$('body').append('<div id="dialog_container" style="display:none">'+content+'</div>');
-			$('#dialog_container').dialog({
-				draggable: true,
-				resizable: true,
-				height: 'auto',
-				minWidth: 400,
-				maxWidth: 1200,
-				maxHeight: 1200,
-				title: title
-			});
-
-			console.log('loaded');
-		}
-	});
+        +       '</ul>'
+        +   '</li>'
+        +   '<li class="menuitem" id="menu_user_action">'
+        +       '<a class="menu_parent" href="#" inert>'
+        +           '<i class="menu_glyph ti ti-device-mobile"></i>'
+        +           '<span>Mobile Devices</span>'
+        +       '</a>'
+        +       '<ul>'
+        +           '<li>'
+        +				'<div>' + 'Auto Table Layout' + '</div>'
+        +				'<div>'
+        +					'<label class="checkboxSwitch">'
+        +						'<input data-scope="theme" id="mdw_themeAutoTableLayout" data-func="toggleAutoTableLayout" class="formCheckbox" type="checkbox" name="mdw_themeAutoTableLayout" '+(midWinter_Auto_Table_Layout === 'on' ? 'checked' : '')+'>'
+        +						'<span class="checkboxSlider checkboxRound"></span>'
+        +					'</label>'
+        +					'<label class="checkboxLabel checkboxLabelWanted" for="mdw_themeAutoTableLayout"></label>'
+        +                   '<output id="mdw_themeAutoTableLayoutValue">'+ midWinter_Auto_Table_Layout +'</output>'
+        +				'</div>'
+        +           '</li>'
+        +       '</ul>'
+        +   '</li>'
+        +'</ul>';
 }

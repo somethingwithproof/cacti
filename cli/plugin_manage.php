@@ -31,12 +31,12 @@ $enable    = false;
 $disable   = false;
 $uninstall = false;
 $allperms  = false;
-$plugins   = array();
+$plugins   = [];
 
 if (cacti_sizeof($parms)) {
 	$shortopts = 'VvHh';
 
-	$longopts = array(
+	$longopts = [
 		'plugin::',
 		'install',
 		'enable',
@@ -45,11 +45,11 @@ if (cacti_sizeof($parms)) {
 		'allperms',
 		'version',
 		'help'
-	);
+	];
 
 	$options = getopt($shortopts, $longopts);
 
-	foreach($options as $arg => $value) {
+	foreach ($options as $arg => $value) {
 		switch($arg) {
 			case 'plugin':
 				if (is_array($value)) {
@@ -83,6 +83,7 @@ if (cacti_sizeof($parms)) {
 			case 'V':
 			case 'v':
 				display_version();
+<<<<<<< HEAD
 				exit(0);
 			case 'help':
 			case 'H':
@@ -92,6 +93,37 @@ if (cacti_sizeof($parms)) {
 			default:
 				print "ERROR: Invalid Argument: ($arg)" . PHP_EOL . PHP_EOL;
 				display_help();
+||||||| 7dd05ee12
+			break;
+		case 'version':
+		case 'V':
+		case 'v':
+			display_version();
+			exit(0);
+		case 'help':
+		case 'H':
+		case 'h':
+			display_help();
+			exit(0);
+		default:
+			print "ERROR: Invalid Argument: ($arg)" . PHP_EOL . PHP_EOL;
+			display_help();
+			exit(1);
+=======
+
+				exit(0);
+			case 'help':
+			case 'H':
+			case 'h':
+				display_help();
+
+				exit(0);
+
+			default:
+				print "ERROR: Invalid Argument: ($arg)" . PHP_EOL . PHP_EOL;
+				display_help();
+
+>>>>>>> origin/fix/jquery-deprecations
 				exit(1);
 		}
 	}
@@ -99,32 +131,43 @@ if (cacti_sizeof($parms)) {
 	// Sanity checks
 	if ($enable && $disable) {
 		print 'FATAL: Options --enable and --disable are mutually exclusive' . PHP_EOL;
+
 		exit(1);
-	} elseif ($install && $uninstall) {
+	}
+
+	if ($install && $uninstall) {
 		print 'FATAL: Options --install and --uninstall are mutually exclusive' . PHP_EOL;
+
 		exit(1);
-	} elseif ($install && $disable) {
+	}
+
+	if ($install && $disable) {
 		print 'FATAL: Options --install and --disable are mutually exclusive' . PHP_EOL;
+
 		exit(1);
-	} elseif ($uninstall && $enable) {
+	}
+
+	if ($uninstall && $enable) {
 		print 'FATAL: Options --uninstall and --enable are mutually exclusive' . PHP_EOL;
+
 		exit(1);
 	}
 } else {
 	display_help();
+
 	exit(1);
 }
 
 print 'NOTE: ' . cacti_sizeof($plugins) . ' Plugins to be acted on.' . PHP_EOL;
 
 if (cacti_sizeof($plugins)) {
-	foreach($plugins as $plugin) {
+	foreach ($plugins as $plugin) {
 		print "NOTE: Plugin '$plugin' processing started" . PHP_EOL;
 
 		if ($install) {
 			$installed = false;
 
-			if (is_dir($config['base_path'] . '/plugins/' . $plugin)) {
+			if (is_dir(CACTI_PATH_PLUGINS . '/' . $plugin)) {
 				print "NOTE: Plugin directory for Plugin $plugin exists" . PHP_EOL;
 
 				if (!api_plugin_installed($plugin)) {
@@ -143,7 +186,6 @@ if (cacti_sizeof($plugins)) {
 
 								print "NOTE: Plugin $plugin enabled." . PHP_EOL;
 							}
-
 						}
 					} else {
 						print "WARNING: Plugin '$plugin' can not install.  Message is: $message" . PHP_EOL;
@@ -179,6 +221,7 @@ if (cacti_sizeof($plugins)) {
 	}
 }
 
+<<<<<<< HEAD
 function plugin_manage_install_allrealms($plugin) {
 	print "NOTE: Enabling Plugin '$plugin' permissions for administrative accounts" . PHP_EOL;
 
@@ -188,25 +231,41 @@ function plugin_manage_install_allrealms($plugin) {
 		array($plugin));
 
 	foreach($realms as $realm) {
+||||||| 7dd05ee12
+=======
+function plugin_manage_install_allrealms(string $plugin) : void {
+	print "NOTE: Enabling Plugin '$plugin' permissions for administrative accounts" . PHP_EOL;
+
+	$realms = db_fetch_assoc_prepared('SELECT *
+		FROM plugin_realms
+		WHERE plugin = ?',
+		[$plugin]);
+
+	foreach ($realms as $realm) {
+>>>>>>> origin/fix/jquery-deprecations
 		api_plugin_register_realm($plugin, $realm['file'], $realm['display'], 1);
 	}
 }
 
 /**
  * display_version - displays version information
+ *
+ * @return void
  */
-function display_version() {
+function display_version() : void {
 	$version = get_cacti_cli_version();
 	print "Cacti Install Utility, Version $version, " . COPYRIGHT_YEARS . PHP_EOL;
 }
 
 /**
- *display_help - displays the usage of the function
+ * display_help - displays the usage of the function
+ *
+ * @return void
  */
-function display_help () {
+function display_help() : void {
 	print 'usage: plugin_manage.php [--plugin=S] [--install --enable --allperms] [--uninstall ] [--disable]' . PHP_EOL . PHP_EOL;
 
-	print  'A utility to install/uninstall a Cacti plugin or plugins' . PHP_EOL . PHP_EOL;
+	print 'A utility to install/uninstall a Cacti plugin or plugins' . PHP_EOL . PHP_EOL;
 
 	print 'Required:' . PHP_EOL;
 	print '  --plugin=S   - The plugin to install.  Use the option multiple time for more plugins' . PHP_EOL . PHP_EOL;

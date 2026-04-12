@@ -19,4 +19,9 @@ if (PHP_VERSION_ID < 50600) {
 
 require_once __DIR__ . '/composer/autoload_real.php';
 
+<<<<<<< HEAD
 return ComposerAutoloaderInitdc6b32dad13fa4041cc9058b131d1519::getLoader();
+||||||| 7dd05ee12
+=======
+return ComposerAutoloaderInit4457df976b6743d4cf060b8bfc645118::getLoader();
+>>>>>>> origin/fix/jquery-deprecations

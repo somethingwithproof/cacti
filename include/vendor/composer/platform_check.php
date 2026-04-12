@@ -4,8 +4,14 @@
 
 $issues = array();
 
+<<<<<<< HEAD
 if (!(PHP_VERSION_ID >= 70000)) {
     $issues[] = 'Your Composer dependencies require a PHP version ">= 7.0.0". You are running ' . PHP_VERSION . '.';
+||||||| 7dd05ee12
+=======
+if (!(PHP_VERSION_ID >= 80100)) {
+    $issues[] = 'Your Composer dependencies require a PHP version ">= 8.1.0". You are running ' . PHP_VERSION . '.';
+>>>>>>> origin/fix/jquery-deprecations
 }
 
 if ($issues) {

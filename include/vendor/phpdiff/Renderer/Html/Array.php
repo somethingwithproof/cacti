@@ -195,7 +195,16 @@ class Diff_Renderer_Html_Array extends Diff_Renderer_Abstract
 
 			if ($spaces != '') {
 				$count = strlen($spaces);
+<<<<<<< HEAD
 				if($count == 0) {
+||||||| 7dd05ee12
+		$spaces = $matches[1];
+		$count = strlen($spaces);
+		if($count == 0) {
+=======
+
+				if ($count == 0) {
+>>>>>>> origin/fix/jquery-deprecations
 					return '';
 				}
 			} else {

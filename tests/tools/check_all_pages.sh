@@ -29,7 +29,13 @@
 # ------------------------------------------------------------------------------
 # Debugging
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 #set -xv
+||||||| 7dd05ee12
+mode=$1
+=======
+# set -xv
+>>>>>>> origin/fix/jquery-deprecations
 
 # ------------------------------------------------------------------------------
 # Restart service and stop the firewall if it's running
@@ -39,22 +45,244 @@ sudo systemctl status apache2 2>/dev/null
 sudo systemctl stop firewalld 2>/dev/null
 
 echo "---------------------------------------------------------------------"
-echo "NOTE: Check all Pages Script Starting"
+echo "Check all Pages Script Starting"
 echo "---------------------------------------------------------------------"
 
 # ------------------------------------------------------------------------------
 # Check for MariaDB or MySQL
+<<<<<<< HEAD
+||||||| 7dd05ee12
+# Get inputs from user (Interactive mode)
+=======
 # ------------------------------------------------------------------------------
-if [ $(which mariadb | wc -l) -gt 0 ]; then
+if [ "$(which mariadb | wc -l)" -gt 0 ]; then
   dbshell="mariadb"
+  # shellcheck disable=SC2034 # dbdump/dbadmin reserved for callers sourcing this script
   dbdump="mariadb-dump"
   dbadmin="mariadb-admin"
 else
   dbshell="mysql"
+  # shellcheck disable=SC2034
   dbdump="mysqldump"
+  # shellcheck disable=SC2034
   dbadmin="mysqladmin"
 fi
 
+# ------------------------------------------------------------------------------
+# Website defaults
+# ------------------------------------------------------------------------------
+WEBHOST="http://127.0.0.1/cacti";
+WAUSER="admin";
+WAPASS="admin";
+
+# ------------------------------------------------------------------------------
+# Database defaults
+# ------------------------------------------------------------------------------
+DBFILE="./.my.cnf";
+DBHOST="localhost";
+DBNAME="cacti";
+DBPASS="cactiuser";
+DBUSER="cactiuser";
+DBSLEEP=2
+# shellcheck disable=SC2034 # DBCLIENT printed in the values summary block via indirect expansion
+DBCLIENT=$($dbshell --version | awk '{print $3}')
+
+# ------------------------------------------------------------------------------
+# Shell defaults
+# ------------------------------------------------------------------------------
+WSOWNER="apache"
+WSERROR="/var/log/httpd/error_log"
+WSACCESS="/var/log/httpd/access_log"
+
+if id www-data > /dev/null 2>&1; then
+  WSOWNER="www-data"
+  WSERROR="/var/log/apache2/error.log"
+  WSACCESS="/var/log/apache2/access.log"
+fi
+
+# shellcheck disable=SC2034 # WGET_OUTPUT captured to suppress output; result checked via $?
+WGET_OUTPUT=$(wget 2>&1);
+WGET_RESULT=$?
+if [ $WGET_RESULT -eq 127 ]; then
+  echo "wget was not found, please install";
+  #echo
+  #echo "${WGET_OUTPUT}"
+  exit 1
+fi
+
+DEBUG=0
+VMSTAT=0
+PS=0
+SHUTDOWN=0
+
+# ------------------------------------------------------------------------------
+# Get inputs from user (Interactive mode)
+>>>>>>> origin/fix/jquery-deprecations
+# ------------------------------------------------------------------------------
+<<<<<<< HEAD
+if [ $(which mariadb | wc -l) -gt 0 ]; then
+  dbshell="mariadb"
+  dbdump="mariadb-dump"
+  dbadmin="mariadb-admin"
+||||||| 7dd05ee12
+if [ "$mode" = "--interactive" ]; then
+	echo "Enter Database username"
+	read -r database_user
+	echo "Enter Database Password"
+	read -r database_pw
+	echo "Enter Cacti Admin password"
+	read -r login_pw
+
+	export MYSQL_AUTH_USR="-ucactiuser -pcactiuser"
+elif [ "$mode" = "--help" ]; then
+	echo "NOTE: Checks all Cacti pages using wget options"
+	echo "NOTE: Original script by team Debian."
+	echo ""
+	echo "usage: check_all_pages.sh [--interactive]"
+	echo ""
+elif [ -f ./.my.cnf ]; then
+    echo "NOTE: GitHub integration using ./.my.cnf.cnf"
+
+	export MYSQL_AUTH_USR="--defaults-file=./.my.cnf"
+	login_pw="admin"
+=======
+while [ -n "$1" ]; do
+  case $1 in
+    "--interactive")
+      echo "Enter Database username"
+      read -r DBUSER
+      echo "Enter Database Password"
+      read -r DBPASS
+      echo "Enter Cacti Admin password"
+      read -r WAPASS
+      ;;
+    "--help")
+      echo "Checks all Cacti pages using wget options"
+      echo "Original script by team Debian."
+      echo ""
+      echo "usage: check_all_pages.sh [--interactive] [options]"
+      echo ""
+      echo "Options:"
+      echo "  --interactive        Prompt for database user/password and Cacti admin password"
+      echo "  -wh <url>           Set Cacti web host URL (default: ${WEBHOST})"
+      echo "  -wU <user>          Set Cacti web UI username (default: ${WAUSER})"
+      echo "  -wp <pass>          Set Cacti web UI password (default: ${WAPASS})"
+      echo "  -wo <user>          Set web server user/owner (default: ${WSOWNER})"
+      echo "  -we <path>          Set web server error log path (default: ${WSERROR})"
+      echo "  -wa <path>          Set web server access log path (default: ${WSACCESS})"
+      echo "  -vmstat <seconds>   Provide periodic vmstat output at end of the page run"
+      echo "  -ps <seconds>       Provide top memory process output periodically at end of the page run"
+      echo "  -debug              Enable debug output"
+      echo "  -df <file>          Use database options file and disable DB sleep (default: ${DBFILE})"
+      echo "  -dh <host>          Set database host and disable DB sleep (default: ${DBHOST})"
+      echo "  -dn <name>          Set database name (default: ${DBNAME})"
+      echo "  -du <user>          Set database username and disable DB sleep (default: ${DBUSER})"
+      echo "  -dp <pass>          Set database password and disable DB sleep"
+      echo ""
+      ;;
+    "-wh")
+      WEBHOST="$2"
+      shift
+      ;;
+    "-wU")
+      WAUSER="$2"
+      shift
+      ;;
+    "-wp")
+      WAPASS="$2"
+      shift
+      ;;
+    "-wo")
+      WSOWNER="$2"
+      shift
+      ;;
+    "-we")
+      WSERROR="$2"
+      shift
+      ;;
+    "-wa")
+      WSACCESS="$2"
+      shift
+      ;;
+    "-debug")
+      DEBUG=1
+      ;;
+    "-vmstat")
+      if ! [[ "$2" =~ ^[0-9]+$ ]] || [ "$2" -le 0 ]; then
+        echo "ERROR: -vmstat value must be a positive integer."
+        exit 1
+      fi
+      VMSTAT="$2"
+      shift
+      ;;
+    "-ps")
+      if ! [[ "$2" =~ ^[0-9]+$ ]] || [ "$2" -le 0 ]; then
+        echo "ERROR: -ps value must be a positive integer."
+        exit 1
+      fi
+      PS="$2"
+      shift
+      ;;
+    "-df")
+      DBFILE="$2"
+      DBSLEEP=0
+      shift
+      ;;
+    "-dh")
+      DBHOST="$2"
+      DBSLEEP=0
+      shift
+      ;;
+    "-dn")
+      DBNAME="$2"
+      shift
+      ;;
+    "-du")
+      DBUSER="$2"
+      DBSLEEP=0
+      shift
+      ;;
+    "-dp")
+      DBPASS="$2"
+      DBSLEEP=0
+      shift
+      ;;
+    *)
+      ;;
+  esac
+  shift;
+done
+
+# --- Website defaults
+export MYSQL_AUTH_USR="-u${DBUSER} -p${DBPASS}"
+if [ -f "$DBFILE" ]; then
+  echo "NOTE: GitHub integration using ${DBFILE}"
+
+  export MYSQL_AUTH_USR="--defaults-file=${DBFILE}"
+>>>>>>> origin/fix/jquery-deprecations
+else
+<<<<<<< HEAD
+  dbshell="mysql"
+  dbdump="mysqldump"
+  dbadmin="mysqladmin"
+||||||| 7dd05ee12
+	echo "NOTE: Script is running in non-interactive mode ensure you fill out the DB credentials!!!"
+	sleep 2 #Give user a chance to see the prompt
+
+	export MYSQL_AUTH_USR="-ucactiuser -pcactiuser -hlocalhost"
+	login_pw="admin"
+=======
+  echo "NOTE: Script is running in batch mode using default credentials!!!"
+
+  if [[ -n "${DBSLEEP}" ]]; then
+    sleep "${DBSLEEP}" #Give user a chance to see the prompt
+  fi
+
+  export MYSQL_AUTH_USR="-u${DBUSER} -p${DBPASS} -h${DBHOST}"
+>>>>>>> origin/fix/jquery-deprecations
+fi
+
+<<<<<<< HEAD
 # ------------------------------------------------------------------------------
 # Website defaults
 # ------------------------------------------------------------------------------
@@ -219,6 +447,20 @@ DBSERVER=$($dbshell $MYSQL_AUTH_USR -e "SHOW GLOBAL VARIABLES LIKE 'version'" | 
 
 echo "---------------------------------------------------------------------"
 echo "Using the following values:";
+||||||| 7dd05ee12
+# ------------------------------------------------------------------------------
+# Debugging
+# ------------------------------------------------------------------------------
+#set -xv
+=======
+# --- Get the server version and dump the key variables
+# shellcheck disable=SC2086,SC2034 # $MYSQL_AUTH_USR word-split intentional; DBSERVER printed via indirect expansion
+DBSERVER=$($dbshell $MYSQL_AUTH_USR -e "SHOW GLOBAL VARIABLES LIKE 'version'" | grep -v Value | awk '{print $2}')
+
+echo "---------------------------------------------------------------------"
+echo "NOTE: Using the following values:";
+
+>>>>>>> origin/fix/jquery-deprecations
 for v in WEBHOST WAUSER WAPASS DBCLIENT DBSERVER DBFILE DBHOST DBNAME DBPASS DBUSER DBSLEEP WSOWNER WSERROR WSACCESS; do
   name="$v"
   if [[ $name == "WAPASS" || $name == "DBPASS" ]]; then
@@ -245,6 +487,25 @@ echo "NOTE: Base Path is ${BASE_PATH}"
 
 CACTI_LOG="${BASE_PATH}/log/cacti.log"
 CACTI_ERRLOG="${BASE_PATH}/log/cacti.stderr.log"
+<<<<<<< HEAD
+||||||| 7dd05ee12
+DEBUG=0
+CACTI_LOG="$BASE_PATH/log/cacti.log"
+CACTI_ERRLOG="$BASE_PATH/log/cacti.stderr.log"
+POLLER="$BASE_PATH/poller.php"
+
+if id www-data > /dev/null 2>&1;then
+  WEBUSER="www-data"
+  APACHE_ERROR="/var/log/apache2/error.log"
+  APACHE_ACCESS="/var/log/apache2/access.log"
+else
+  WEBUSER="apache"
+  APACHE_ERROR="/var/log/httpd/error_log"
+  APACHE_ACCESS="/var/log/httpd/access_log"
+fi
+=======
+# shellcheck disable=SC2034 # POLLER reserved for callers sourcing this script
+>>>>>>> origin/fix/jquery-deprecations
 POLLER="${BASE_PATH}/poller.php"
 
 # ------------------------------------------------------------------------------
@@ -252,17 +513,43 @@ POLLER="${BASE_PATH}/poller.php"
 # ------------------------------------------------------------------------------
 if [ ! -d /tmp/check-all-pages ]; then
   mkdir /tmp/check-all-pages
+<<<<<<< HEAD
+||||||| 7dd05ee12
+	mkdir /tmp/check-all-pages
+=======
+fi
+
+if [ ! -d /tmp/check-all-output ]; then
+  mkdir /tmp/check-all-output
+>>>>>>> origin/fix/jquery-deprecations
 fi
 
 # ------------------------------------------------------------------------------
 # Backup the error logs to capture what went wrong
 # ------------------------------------------------------------------------------
+# shellcheck disable=SC2329 # invoked indirectly via shutdown()
 save_log_files() {
   echo "---------------------------------------------------------------------"
+<<<<<<< HEAD
   echo "Saving All Log Files"
+||||||| 7dd05ee12
+	echo "---------------------------------------------------------------------"
+	echo "Saving All Log Files"
+	echo "---------------------------------------------------------------------"
+=======
+  echo "NOTE: Saving All Log Files"
+>>>>>>> origin/fix/jquery-deprecations
   echo "---------------------------------------------------------------------"
 
+<<<<<<< HEAD
   if [ $started == 1 ];then
+||||||| 7dd05ee12
+	if [ $started == 1 ];then
+		logBase=/tmp/check-all-pages/test.$(date +%s)
+		mkdir -p $logBase
+=======
+  if [ "$started" == 1 ];then
+>>>>>>> origin/fix/jquery-deprecations
     logBase="/tmp/check-all-pages/test.$(date +%s)"
     mkdir -p "$logBase"
 
@@ -287,7 +574,23 @@ save_log_files() {
 
     chmod a+r -R "${logBase}/"
 
+<<<<<<< HEAD
     if [ $DEBUG -eq 1 ];then
+||||||| 7dd05ee12
+		if [ $DEBUG -eq 1 ];then
+			echo "DEBUG: Dumping $CACTI_LOG"
+			cat $CACTI_LOG ${logBase}/cacti.log
+			echo "DEBUG: Dumping $CACTI_ERRLOG"
+			cat $CACTI_ERRLOG 
+			echo "DEBUG: Dumping $APACHE_ACCESS"
+			cat $APACHE_ACCESS 
+			echo "DEBUG: Dumping $APACHE_ERROR"
+			cat $APACHE_ERROR 
+		fi
+	fi
+=======
+    if [ "$DEBUG" -eq 1 ];then
+>>>>>>> origin/fix/jquery-deprecations
       echo "DEBUG: Dumping ${CACTI_LOG}"
       cat "$CACTI_LOG" "${logBase}/cacti.log"
       echo "DEBUG: Dumping ${CACTI_ERRLOG}"
@@ -306,38 +609,81 @@ save_log_files() {
 set_cacti_admin_password() {
   echo "NOTE: Setting Cacti admin password and unsetting forced password change"
 
+<<<<<<< HEAD
   $dbshell $MYSQL_AUTH_USR -e "UPDATE user_auth SET password=MD5('$WAPASS') WHERE id = 1 ;" "$DBNAME"
   $dbshell $MYSQL_AUTH_USR -e "UPDATE user_auth SET password_change='', must_change_password='' WHERE id = 1 ;" "$DBNAME"
+||||||| 7dd05ee12
+	mysql $MYSQL_AUTH_USR -e "UPDATE user_auth SET password=MD5('$login_pw') WHERE id = 1 ;" cacti 
+	mysql $MYSQL_AUTH_USR -e "UPDATE user_auth SET password_change='', must_change_password='' WHERE id = 1 ;" cacti 
+	mysql $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('secpass_forceold', '') ;" cacti 
+=======
+  # shellcheck disable=SC2086 # $MYSQL_AUTH_USR is intentionally word-split (multi-word option string)
+  $dbshell $MYSQL_AUTH_USR -e "UPDATE user_auth SET password=SHA2('$WAPASS', 256) WHERE id = 1 ;" "$DBNAME"
+  # shellcheck disable=SC2086
+  $dbshell $MYSQL_AUTH_USR -e "UPDATE user_auth SET password_change='', must_change_password='' WHERE id = 1 ;" "$DBNAME"
+  # shellcheck disable=SC2086
+>>>>>>> origin/fix/jquery-deprecations
   $dbshell $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('secpass_forceold', '') ;" "$DBNAME"
 }
 
 enable_log_validation() {
   echo "NOTE: Setting Cacti log validation to on to validate improperly validated variables"
 
+<<<<<<< HEAD
+||||||| 7dd05ee12
+	mysql $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_validation','on') ;" cacti
+=======
+  # shellcheck disable=SC2086 # $MYSQL_AUTH_USR is intentionally word-split (multi-word option string)
+>>>>>>> origin/fix/jquery-deprecations
   $dbshell $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_validation','on') ;" "$DBNAME"
 }
 
+# shellcheck disable=SC2329 # available for callers; not invoked in this script path
 set_log_level_none() {
   echo "NOTE: Setting Cacti log verbosity to none"
 
+<<<<<<< HEAD
+||||||| 7dd05ee12
+	mysql $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_verbosity', '1') ;" cacti
+=======
+  # shellcheck disable=SC2086
+>>>>>>> origin/fix/jquery-deprecations
   $dbshell $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_verbosity', '1') ;" "$DBNAME"
 }
 
 set_log_level_normal() {
   echo "NOTE: Setting Cacti log verbosity to low"
 
+<<<<<<< HEAD
+||||||| 7dd05ee12
+	mysql $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_verbosity', '2') ;" cacti
+=======
+  # shellcheck disable=SC2086
+>>>>>>> origin/fix/jquery-deprecations
   $dbshell $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_verbosity', '2') ;" "$DBNAME"
 }
 
 set_log_level_debug() {
   echo "NOTE: Setting Cacti log verbosity to DEBUG"
 
+<<<<<<< HEAD
+||||||| 7dd05ee12
+	mysql $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_verbosity', '6') ;" cacti
+=======
+  # shellcheck disable=SC2086
+>>>>>>> origin/fix/jquery-deprecations
   $dbshell $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('log_verbosity', '6') ;" "$DBNAME"
 }
 
 set_stderr_logging() {
   echo "NOTE: Setting Cacti standard error log location"
 
+<<<<<<< HEAD
+||||||| 7dd05ee12
+	mysql $MYSQL_AUTH_USR -e "REPLACE INTO cacti.settings (name, value) VALUES ('path_stderrlog', '$CACTI_ERRLOG');" cacti
+=======
+  # shellcheck disable=SC2086
+>>>>>>> origin/fix/jquery-deprecations
   $dbshell $MYSQL_AUTH_USR -e "REPLACE INTO settings (name, value) VALUES ('path_stderrlog', '${CACTI_ERRLOG}');" "$DBNAME"
 }
 
@@ -347,29 +693,87 @@ allow_index_following() {
   sed -i "s/<meta name='robots' content='noindex,nofollow'>//g" "$BASE_PATH/lib/html.php"
 }
 
+<<<<<<< HEAD
 shutdown_handler() {
   echo ""
   echo "WARNING: Process Interrupted.  Cleaning up and Exiting"
+||||||| 7dd05ee12
+catch_error() {
+	echo ""
+	echo "WARNING: Process Interrupted.  Exiting"
+=======
+# shellcheck disable=SC2329 # invoked via shutdown_handler/normal_shutdown trap handlers
+shutdown() {
+  if [ "$SHUTDOWN" -eq 0 ]; then
+    echo ""
+    echo "NOTE: Process Ending.  Cleaning up and Exiting."
+>>>>>>> origin/fix/jquery-deprecations
 
+<<<<<<< HEAD
   # Get rid of any jobs
   kill -SIGINT $(jobs -p) 2> /dev/null
+||||||| 7dd05ee12
+	# Get rid of any jobs
+	kill -SIGINT $(jobs -p) 2> /dev/null
+=======
+    save_log_files
+>>>>>>> origin/fix/jquery-deprecations
 
+<<<<<<< HEAD
   if [ -f "$tmpFile1" ]; then
     rm -f "$tmpFile1"
   fi
+||||||| 7dd05ee12
+	if [ -f $tmpFile1 ]; then
+		rm -f $tmpFile1
+	fi
+=======
+    # Get rid of any jobs
+    # shellcheck disable=SC2046 # jobs -p produces one PID per word intentionally
+    kill $(jobs -p) 2> /dev/null
+>>>>>>> origin/fix/jquery-deprecations
 
+<<<<<<< HEAD
   if [ -f "$tmpFile2" ]; then
     rm -f "$tmpFile2"
   fi
+||||||| 7dd05ee12
+	if [ -f $tmpFile2 ]; then
+		rm -f $tmpFile2
+	fi
+=======
+    if [ -f "$tmpFile1" ]; then
+      /bin/rm -f "$tmpFile1"
+    fi
+>>>>>>> origin/fix/jquery-deprecations
 
+<<<<<<< HEAD
   if [ -f "$cookieFile" ]; then
     rm -f "$cookieFile"
   fi
+||||||| 7dd05ee12
+	if [ -f $cookieFile ]; then
+		rm -f $cookieFile
+	fi
+=======
+    if [ -f "$tmpFile2" ]; then
+      /bin/rm -f "$tmpFile2"
+    fi
+>>>>>>> origin/fix/jquery-deprecations
 
+<<<<<<< HEAD
   if [ -f "/tmp/vmstat.out" ]; then
     rm -f /tmp/vmstat.out
   fi
+||||||| 7dd05ee12
+	save_log_files
+=======
+    if [ -f "$cookieFile" ]; then
+      /bin/rm -f "$cookieFile"
+    fi
+>>>>>>> origin/fix/jquery-deprecations
 
+<<<<<<< HEAD
   save_log_files
 
   exit 0
@@ -386,23 +790,96 @@ normal_exit() {
   fi
 
   exit 0
+||||||| 7dd05ee12
+	exit 0
+=======
+    if [ -f "/tmp/check-all-output/vmstat.out" ]; then
+      /bin/rm -f /tmp/check-all-output/vmstat.out
+    fi
+
+    if [ -f "/tmp/check-all-output/topproc.out" ]; then
+      /bin/rm -f /tmp/check-all-output/topproc.out
+    fi
+
+    if [ -d "/tmp/check-all-output" ]; then
+      /bin/rm -rf /tmp/check-all-output
+    fi
+
+    SHUTDOWN=1
+  fi
+}
+
+# shellcheck disable=SC2329 # invoked via trap on signals 1 2 3 6 14 15
+shutdown_handler() {
+  shutdown
+
+  exit 1;
+}
+
+# shellcheck disable=SC2329 # invoked via trap on EXIT (signal 0)
+normal_shutdown() {
+  return=$?
+
+  shutdown
+
+  exit "$return";
+}
+
+# ------------------------------------------------------------------------------
+# As part of instrumentation, track the top processes on the system
+# ------------------------------------------------------------------------------
+capture_processes() {
+  sleep_time=$1
+
+  while true; do
+    # shellcheck disable=SC2129 # individual redirects preserve readability here
+    echo "-------------------------------------------------" >> /tmp/check-all-output/topproc.out
+    date >> /tmp/check-all-output/topproc.out
+    echo "-------------------------------------------------" >> /tmp/check-all-output/topproc.out
+    # shellcheck disable=SC2009 # pgrep lacks --sort/-rss; full ps pipeline required
+    ps aux --sort -rss | grep -v gdm 2>/dev/null | head -5 >> /tmp/check-all-output/topproc.out
+    sleep "$sleep_time"
+  done
+>>>>>>> origin/fix/jquery-deprecations
 }
 
 # ------------------------------------------------------------------------------
 # To make sure that the autopkgtest/CI sites store the information
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 trap 'shutdown_handler' 1 2 3 6 9 14 15
 trap 'normal_exit' 0
+||||||| 7dd05ee12
+trap 'catch_error' 1 2 3 6 9 14 15
+=======
+trap 'shutdown_handler' 1 2 3 6 14 15
+trap 'normal_shutdown' 0
+>>>>>>> origin/fix/jquery-deprecations
 
 echo "NOTE: Current Directory is $(pwd)"
 
 # ------------------------------------------------------------------------------
 # Zero out the log files
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 > "$CACTI_LOG"
 > "$CACTI_ERRLOG"
 > "$WSERROR"
 > "$WSACCESS"
+||||||| 7dd05ee12
+> $CACTI_LOG
+> $CACTI_ERRLOG
+> $APACHE_ERROR
+> $APACHE_ACCESS
+/bin/chown $WEBUSER:$WEBUSER $CACTI_LOG
+/bin/chown $WEBUSER:$WEBUSER $CACTI_ERRLOG
+
+=======
+true > "$CACTI_LOG"
+true > "$CACTI_ERRLOG"
+true > "$WSERROR"
+true > "$WSACCESS"
+>>>>>>> origin/fix/jquery-deprecations
 /bin/chown "$WSOWNER":"$WSOWNER" "$CACTI_LOG"
 /bin/chown "$WSOWNER":"$WSOWNER" "$CACTI_ERRLOG"
 
@@ -417,6 +894,7 @@ allow_index_following
 # ------------------------------------------------------------------------------
 # Check the Apache Syntax and add the default site
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 if [ $DEBUG -eq 1 ]; then
   echo "---------------------------------------------------------------------"
   echo "Checking the Apache Config"
@@ -464,6 +942,57 @@ if [ $DEBUG -eq 1 ]; then
   echo "---------------------------------------------------------------------"
   echo "Apache Process List"
   echo "---------------------------------------------------------------------"
+||||||| 7dd05ee12
+=======
+if [ "$DEBUG" -eq 1 ]; then
+  echo "---------------------------------------------------------------------"
+  echo "NOTE: Checking the Apache Config"
+  echo "---------------------------------------------------------------------"
+  apache2ctl -t
+fi
+
+if [ -f "/usr/sbin/a2ensite" ] && [ -f "/etc/apache2/sites-available/000-default.conf" ]; then
+  echo "---------------------------------------------------------------------"
+  echo "NOTE: Enabling the Apache Site for Debian/Ubuntu"
+  echo "---------------------------------------------------------------------"
+  /usr/sbin/a2ensite 000-default.conf 
+fi
+
+if [ "$DEBUG" -eq 1 ]; then
+  # ------------------------------------------------------------------------------
+  # Check to see if apache2 is up and listening
+  # ------------------------------------------------------------------------------
+  echo "---------------------------------------------------------------------"
+  echo "NOTE: Network Status showing open Apache ports"
+  echo "---------------------------------------------------------------------"
+  netstat -anp | grep apache
+
+  # ------------------------------------------------------------------------------
+  # Dump the Apache Configuration
+  # ------------------------------------------------------------------------------
+  if [ -f "/etc/apache2/sites-available/000-default.conf" ]; then
+    echo "---------------------------------------------------------------------"
+    echo "NOTE: Apache Configuration for Cacti"
+    echo "---------------------------------------------------------------------"
+    cat /etc/apache2/sites-available/000-default.conf
+  fi
+
+  # ------------------------------------------------------------------------------
+  # List to contents of the web root
+  # ------------------------------------------------------------------------------
+  echo "---------------------------------------------------------------------"
+  echo "Top Level Cacti Web Root Files"
+  echo "---------------------------------------------------------------------"
+  ls -altr /var/www/html/cacti/*.php
+
+  # ------------------------------------------------------------------------------
+  # Print out the processlist
+  # ------------------------------------------------------------------------------
+  echo "---------------------------------------------------------------------"
+  echo "NOTE: Apache Process List"
+  echo "---------------------------------------------------------------------"
+  # shellcheck disable=SC2009 # grep -v grep pattern intentional; pgrep lacks -f equivalent here
+>>>>>>> origin/fix/jquery-deprecations
   ps -ef | grep apache2 | grep -v grep
 fi
 
@@ -477,18 +1006,31 @@ started=1
 # ------------------------------------------------------------------------------
 # Make sure we get the magic, this is stored in the cookies for future use.
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 if [ $DEBUG -eq 1 ]; then
+||||||| 7dd05ee12
+if [ $DEBUG -eq 1 ]; then
+	set_log_level_debug
+=======
+if [ "$DEBUG" -eq 1 ]; then
+>>>>>>> origin/fix/jquery-deprecations
   set_log_level_debug
 else
   set_log_level_normal
 fi
 
 echo "---------------------------------------------------------------------"
-echo "Starting Web Based Page Validation"
+echo "NOTE: Output of Disk Topology"
+echo "---------------------------------------------------------------------"
+df -h
+
+echo "---------------------------------------------------------------------"
+echo "NOTE: Starting Web Based Page Validation"
 echo "---------------------------------------------------------------------"
 echo "NOTE: Saving Cookie Data"
 wget -q --keep-session-cookies --save-cookies "$cookieFile" --output-document="$tmpFile1" "$WEBHOST"/index.php >/dev/null 2>&1
 
+<<<<<<< HEAD
 if [ -f $tmpFile1 ]; then
   magic=$(grep "name='__csrf_magic' value=" $tmpFile1 | sed "s/.*__csrf_magic' value=\"//" | sed "s/\" \/>//")
 
@@ -497,6 +1039,19 @@ if [ -f $tmpFile1 ]; then
     echo "The CSRF Magic Token is"
     echo "---------------------------------------------------------------------"
     echo ${magic}
+||||||| 7dd05ee12
+magic=$(grep "name='__csrf_magic' value=" "$tmpFile1" | sed "s/.*__csrf_magic' value=\"//" | sed "s/\" \/>//")
+postData="action=login&login_username=admin&login_password=${login_pw}&__csrf_magic=${magic}"
+=======
+if [ -f "$tmpFile1" ]; then
+  magic=$(grep "name='__csrf_magic' value=" "$tmpFile1" | sed "s/.*__csrf_magic' value=\"//" | sed "s/\" \/>//")
+
+  if [ "$DEBUG" -eq 1 ]; then
+    echo "---------------------------------------------------------------------"
+    echo "NOTE: The CSRF Magic Token is"
+    echo "---------------------------------------------------------------------"
+    echo "${magic}"
+>>>>>>> origin/fix/jquery-deprecations
   fi
 else
   echo "---------------------------------------------------------------------"
@@ -508,6 +1063,7 @@ fi
 postData="action=login&login_username=${WAUSER}&login_password=${WAPASS}&__csrf_magic=${magic}"
 
 echo "NOTE: Logging into the Cacti User Interface"
+<<<<<<< HEAD
 wget $loadSaveCookie --post-data="${postData}" --output-document="${tmpFile2}" "${WEBHOST}"/index.php >/dev/null 2>&1
 
 if [ $DEBUG -eq 1 ]; then
@@ -527,6 +1083,38 @@ fi
 # ------------------------------------------------------------------------------
 if [ $VMSTAT -gt 0 ]; then
   vmstat --wide $VMSTAT > /tmp/vmstat.out &
+||||||| 7dd05ee12
+wget -q $loadSaveCookie --post-data="$postData" --output-document="$tmpFile2" http://localhost/cacti/index.php
+=======
+# shellcheck disable=SC2086 # $loadSaveCookie is intentionally word-split (multi-word option string)
+wget $loadSaveCookie --post-data="${postData}" --output-document="${tmpFile2}" "${WEBHOST}"/index.php >/dev/null 2>&1
+
+if [ "$DEBUG" -eq 1 ]; then
+  echo "---------------------------------------------------------------------"
+  echo "DEBUG: Output of index.php"
+  echo "---------------------------------------------------------------------"
+  cat "${tmpFile2}"
+
+  progress=" --show-progress"
+else
+  progress=""
+fi
+
+# ------------------------------------------------------------------------------
+# Run vmstat in background at a user-configurable interval (VMSTAT)
+# ------------------------------------------------------------------------------
+if [ "$VMSTAT" -gt 0 ]; then
+  vmstat --wide "$VMSTAT" > /tmp/check-all-output/vmstat.out &
+  # shellcheck disable=SC2034 # PIDS reserved for future job tracking
+  PIDS="PIDS $!"
+fi
+
+# ------------------------------------------------------------------------------
+# Show memory stats top memory consumers
+# ------------------------------------------------------------------------------
+if [ "$PS" -gt 0 ]; then
+  capture_processes "$PS" &
+>>>>>>> origin/fix/jquery-deprecations
 fi
 
 # ------------------------------------------------------------------------------
@@ -536,13 +1124,30 @@ fi
 start_time=$(date +%s)
 
 echo "NOTE: Recursively Checking all Base Pages - Note this will take several minutes!!!"
+<<<<<<< HEAD
 wget $loadSaveCookie --output-file="${logFile1}" --reject-regex="(logout\.php|remove|delete|uninstall|install|disable|enable)" $progress --recursive --level=0 --execute=robots=off "${WEBHOST}"/index.php >/dev/null 2>&1
+||||||| 7dd05ee12
+wget $loadSaveCookie --output-file="$logFile1" --reject-regex="(logout\.php|remove|delete|uninstall|install|disable|enable)" --recursive --level=0 --execute=robots=off http://localhost/cacti/index.php
+=======
+# shellcheck disable=SC2086 # $loadSaveCookie and $progress are intentionally word-split (multi-word option strings)
+wget $loadSaveCookie --directory-prefix=/tmp/check-all-output --output-file="${logFile1}" --reject-regex="(logout\.php|remove|delete|uninstall|install|disable|enable)" $progress --recursive --level=0 --execute=robots=off "${WEBHOST}"/index.php >/dev/null 2>&1
+>>>>>>> origin/fix/jquery-deprecations
 error=$?
 
 end_time=$(date +%s)
+<<<<<<< HEAD
 total=$(($end_time-$start_time))
 
 if [ $error -eq 8 ]; then
+||||||| 7dd05ee12
+if [ $error -eq 8 ]; then
+	errors=`grep "awaiting response... 404" $logFile1 | wc -l`
+	echo "WARNING: $errors pages not found.  This is not necessarily a bug"
+=======
+total=$((end_time-start_time))
+
+if [ "$error" -eq 8 ]; then
+>>>>>>> origin/fix/jquery-deprecations
   errors=$(grep -c "awaiting response... 404" "${logFile1}")
   echo "WARNING: $errors pages not found.  This is not necessarily a bug"
 fi
@@ -550,6 +1155,7 @@ fi
 # ------------------------------------------------------------------------------
 # Debug Errors if required
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 if [ $DEBUG -eq 1 ]; then
   echo "---------------------------------------------------------------------"
   echo "Output of Wget Log file"
@@ -565,14 +1171,59 @@ if [ $DEBUG -eq 1 ]; then
   cat "${WSERROR}"
   echo "---------------------------------------------------------------------"
   echo "Output of Apache Access Log"
+||||||| 7dd05ee12
+if [ $DEBUG -eq 1 ]; then
+	echo "---------------------------------------------------------------------"
+	echo "Output of Wget Log file"
+	echo "---------------------------------------------------------------------"
+	cat $logFile1
+	echo "---------------------------------------------------------------------"
+	echo "Output of Cacti Log file"
+	echo "---------------------------------------------------------------------"
+	cat $CACTI_LOG
+	echo "---------------------------------------------------------------------"
+	echo "Output of Apache Error Log
+	echo "---------------------------------------------------------------------"
+	cat $APACHE_ERROR
+	echo "---------------------------------------------------------------------"
+	echo "Output of Apache Access Log
+	echo "---------------------------------------------------------------------"
+	cat $APACHE_ACCESS
+=======
+if [ "$DEBUG" -eq 1 ]; then
+  echo "---------------------------------------------------------------------"
+  echo "DEBUG: Output of Wget Log file"
+  echo "---------------------------------------------------------------------"
+  cat "${logFile1}"
+  echo "---------------------------------------------------------------------"
+  echo "DEBUG: Output of Cacti Log file"
+  echo "---------------------------------------------------------------------"
+  cat "${CACTI_LOG}"
+  echo "---------------------------------------------------------------------"
+  echo "DEBUG: Output of Apache Error Log"
+  echo "---------------------------------------------------------------------"
+  cat "${WSERROR}"
+  echo "---------------------------------------------------------------------"
+  echo "DEBUG: Output of Apache Access Log"
+>>>>>>> origin/fix/jquery-deprecations
   echo "---------------------------------------------------------------------"
   cat "${WSACCESS}"
 fi
 
 checks=$(grep -c "HTTP" "$logFile1")
 
+<<<<<<< HEAD
 if [ $total -gt 0 ]; then
   check_rate=$(($checks/$total))
+||||||| 7dd05ee12
+if [ $DEBUG -eq 1 ];then
+	echo "---------------------------------------------------------------------"
+	cat $logFile1
+	echo "---------------------------------------------------------------------"
+=======
+if [ "$total" -gt 0 ]; then
+  check_rate=$(echo "scale=2; $checks / $total" | bc)
+>>>>>>> origin/fix/jquery-deprecations
 else
   check_rate="N/A"
 fi
@@ -601,17 +1252,36 @@ echo "---------------------------------------------------------------------"
 # ------------------------------------------------------------------------------
 # Output vmstat statistics if requested
 # ------------------------------------------------------------------------------
+<<<<<<< HEAD
 if [ $VMSTAT -gt 0 ]; then
   echo "NOTE: Output of vmstat"
   echo "---------------------------------------------------------------------"
   cat /tmp/vmstat.out
+||||||| 7dd05ee12
+=======
+if [ "$VMSTAT" -gt 0 ]; then
+  echo "NOTE: Output of vmstat"
+  echo "---------------------------------------------------------------------"
+  cat /tmp/check-all-output/vmstat.out
+  echo "---------------------------------------------------------------------"
+fi
+
+# ------------------------------------------------------------------------------
+# Output top processes data if it exists
+# ------------------------------------------------------------------------------
+if [ -f "/tmp/check-all-output/topproc.out" ]; then
+  echo "NOTE: Output of top memory processes"
+  echo "---------------------------------------------------------------------"
+  echo "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND"
+  cat /tmp/check-all-output/topproc.out
+>>>>>>> origin/fix/jquery-deprecations
   echo "---------------------------------------------------------------------"
 fi
 
 # ------------------------------------------------------------------------------
 # Finally check the cacti log for unexpected items
 # ------------------------------------------------------------------------------
-echo "NOTE: Checking Cacti Log for Errors"
+echo "Checking Cacti Log for Errors"
 FILTERED_LOG="$(grep -v \
   -e "AUTH LOGIN: User 'admin' authenticated" \
   -e "WEBUI NOTE: Poller Resource Cache scheduled for rebuild by user admin" \
@@ -632,8 +1302,25 @@ FILTERED_LOG="$(grep -v \
   -e "DSDEBUG Bad Data" \
   -e "PUSHOUT Child Started" \
   "$CACTI_LOG")" || true
+<<<<<<< HEAD
 
 save_log_files
+||||||| 7dd05ee12
+	-e "AUTH LOGIN: User 'admin' authenticated" \
+	-e "WEBUI NOTE: Poller Resource Cache scheduled for rebuild by user admin" \
+	-e "WEBUI NOTE: Poller Cache repopulated by user admin" \
+	-e "WEBUI NOTE: Cacti DS Stats purged by user admin" \
+	-e "IMPORT NOTE: File is Signed Correctly" \
+	-e "MAILER INFO:" \
+	-e "STATS:" \
+	-e "IMPORT Importing XML Data for " \
+	-e "CMDPHP SQL Backtrace: " \
+	-e "CMDPHP Not Already Set" \
+	$CACTI_LOG)" || true
+
+save_log_files
+=======
+>>>>>>> origin/fix/jquery-deprecations
 
 # ------------------------------------------------------------------------------
 # Look for errors in the Log

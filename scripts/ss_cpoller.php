@@ -26,14 +26,14 @@
 error_reporting(0);
 
 if (!isset($called_by_script_server)) {
-	include_once(dirname(__FILE__) . '/../include/cli_check.php');
+	include_once(__DIR__ . '/../include/cli_check.php');
 
 	array_shift($_SERVER['argv']);
 
 	print call_user_func_array('ss_cpoller', $_SERVER['argv']);
 }
 
-function ss_cpoller($cmd = 'index', $arg1 = '', $arg2 = '') {
+function ss_cpoller(string $cmd = 'index', string $arg1 = '', string $arg2 = '') : mixed {
 	if ($cmd == 'index') {
 		$collectors = db_fetch_assoc('SELECT id FROM poller ORDER BY id');
 
@@ -65,29 +65,45 @@ function ss_cpoller($cmd = 'index', $arg1 = '', $arg2 = '') {
 	} elseif ($cmd == 'get') {
 		$arg   = $arg1;
 		$index = $arg2;
-		$value = '0';
+		$value = 'U';
 
 		switch($arg) {
 			case 'recacheTime':
+<<<<<<< HEAD
 				$value = '0';
 				$stats = explode(' ', db_fetch_cell_prepared('SELECT value FROM settings WHERE name = ?', array('stats_recache_' . $index)));
+||||||| 7dd05ee12
+				$value = '0';
+				$stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_recache_' . $index . '"'));
+=======
+				$value = 'U';
+				$stats = explode(' ', db_fetch_cell_prepared('SELECT value FROM settings WHERE name = ?', ['stats_recache_' . $index]));
+>>>>>>> origin/fix/jquery-deprecations
 
-				foreach($stats as $_stat) {
+				foreach ($stats as $_stat) {
 					if (preg_match('/^RecacheTime:/', $_stat)) {
 						$parts = explode(':', $_stat);
-						$value = $parts[1];;
+						$value = $parts[1];
 					}
 				}
 
 				break;
 			case 'recacheDevices':
+<<<<<<< HEAD
 				$value = '0';
 				$stats = explode(' ', db_fetch_cell_prepared('SELECT value FROM settings WHERE name = ?', array('stats_recache_' . $index)));
+||||||| 7dd05ee12
+				$value = '0';
+				$stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_recache_' . $index . '"'));
+=======
+				$value = 'U';
+				$stats = explode(' ', db_fetch_cell_prepared('SELECT value FROM settings WHERE name = ?', ['stats_recache_' . $index]));
+>>>>>>> origin/fix/jquery-deprecations
 
-				foreach($stats as $_stat) {
+				foreach ($stats as $_stat) {
 					if (preg_match('/^DevicesRecached:/', $_stat)) {
 						$parts = explode(':', $_stat);
-						$value = $parts[1];;
+						$value = $parts[1];
 					}
 				}
 
@@ -96,67 +112,79 @@ function ss_cpoller($cmd = 'index', $arg1 = '', $arg2 = '') {
 				$value = db_fetch_cell_prepared('SELECT avg_time
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'minTime':
 				$value = db_fetch_cell_prepared('SELECT min_time
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'maxTime':
 				$value = db_fetch_cell_prepared('SELECT max_time
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'processCount':
 				$value = db_fetch_cell_prepared('SELECT processes
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'threadCount':
 				$value = db_fetch_cell_prepared('SELECT threads
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'pollerTime':
 				$value = db_fetch_cell_prepared('SELECT total_time
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'getSNMP':
 				$value = db_fetch_cell_prepared('SELECT snmp
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'getScript':
 				$value = db_fetch_cell_prepared('SELECT script
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
 
 				break;
 			case 'getScriptServer':
 				$value = db_fetch_cell_prepared('SELECT server
 					FROM poller
 					WHERE id = ?',
-					array($index));
+					[$index]);
+
+				break;
+			case 'getErrorHosts':
+				$value = db_fetch_cell_prepared('SELECT COUNT(DISTINCT host_id)
+					FROM host_errors WHERE poller_id = ?', [$index]);
+
+				break;
+			case 'getTotalErrors':
+				$value = db_fetch_cell_prepared('SELECT SUM(errors)
+					FROM host_errors WHERE poller_id = ?', [$index]);
 
 				break;
 		}
 
-		return ($value == '' ? '0' : $value);
+		return ($value == '' ? 'U' : $value);
 	}
+
+	return 'U';
 }

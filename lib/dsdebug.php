@@ -22,10 +22,15 @@
  +-------------------------------------------------------------------------+
 */
 
-/* dsstats_debug - this simple routine print's a standard message to the console
-     when running in debug mode.
-   @returns - NULL */
-function dsdebug_debug($message) {
+/**
+ * dsstats_debug - This simple routine print's a standard message to the console
+ * when running in debug mode.
+ *
+ * @param string $message
+ *
+ * @return void
+ */
+function dsdebug_debug(string $message) : void {
 	global $debug;
 
 	if ($debug) {
@@ -33,37 +38,47 @@ function dsdebug_debug($message) {
 	}
 }
 
-/* log_dsstats_statistics - provides generic timing message to both the Cacti log and the settings
-     table so that the statistics can be graphed as well.
-   @arg $type - (string) the type of statistics to log, either 'HOURLY', 'DAILY' or 'MAJOR'.
-   @returns - null */
-function log_dsdebug_statistics($type, $checks, $issues) {
+/**
+ * log_dsstats_statistics - provides generic timing message to both the Cacti log and the settings
+ * table so that the statistics can be graphed as well.
+ *
+ * @param string $type   The type of statistics to log, either 'HOURLY', 'DAILY' or 'MAJOR'.
+ * @param int    $checks The number of checks performed
+ * @param int    $issues The number of issues found
+ *
+ * @return void
+ */
+function log_dsdebug_statistics(string $type, int $checks, int $issues) : void {
 	global $start;
 
-	/* take time and log performance data */
+	// take time and log performance data
 	$end = microtime(true);
 
-	$cacti_stats = sprintf('ChecksPerformed:%d, TotalIssues:%d, Time:%01.4f ', $checks, $issues, round($end-$start,4));
+	$cacti_stats = sprintf('ChecksPerformed:%d, TotalIssues:%d, Time:%01.4f ', $checks, $issues, round($end - $start,4));
 
-	/* log to the database */
+	// log to the database
 	set_config_option('stats_dsdebug_' . $type, $cacti_stats);
 
-	/* log to the logfile */
+	// log to the logfile
 	cacti_log('DSDEBUG STATS: Type:' . $type . ', ' . $cacti_stats , true, 'SYSTEM');
 }
 
-/* dsstats_error_handler - this routine logs all PHP error transactions
-     to make sure they are properly logged.
-   @arg $errno - (int) The errornum reported by the system
-   @arg $errmsg - (string) The error message provides by the error
-   @arg $filename - (string) The filename that encountered the error
-   @arg $linenum - (int) The line number where the error occurred
-   @arg $vars - (mixed) The current state of PHP variables.
-   @returns - (bool) always returns true for some reason */
-function dsdebug_error_handler($errno, $errmsg, $filename, $linenum, $vars = []) {
+/**
+ * dsstats_error_handler - This routine logs all PHP error transactions
+ * to make sure they are properly logged.
+ *
+ * @param int    $errno    The errornum reported by the system
+ * @param string $errmsg   The error message provides by the error
+ * @param string $filename The filename that encountered the error
+ * @param int    $linenum  The line number where the error occurred
+ * @param array  $vars     The current state of PHP variables.
+ *
+ * @return bool Always returns true for some reason
+ */
+function dsdebug_error_handler(int $errno, string $errmsg, string $filename, int $linenum, array $vars = []) : bool {
 	if (read_config_option('log_verbosity') >= POLLER_VERBOSITY_DEBUG) {
-		/* define all error types */
-		$errortype = array(
+		// define all error types
+		$errortype = [
 			E_ERROR             => 'Error',
 			E_WARNING           => 'Warning',
 			E_PARSE             => 'Parsing Error',
@@ -76,53 +91,77 @@ function dsdebug_error_handler($errno, $errmsg, $filename, $linenum, $vars = [])
 			E_USER_WARNING      => 'User Warning',
 			E_USER_NOTICE       => 'User Notice',
 			E_STRICT            => 'Runtime Notice'
-		);
+		];
 
 		if (defined('E_RECOVERABLE_ERROR')) {
 			$errortype[E_RECOVERABLE_ERROR] = 'Catchable Fatal Error';
 		}
 
-		/* create an error string for the log */
-		$err = "ERRNO:'"  . $errno   . "' TYPE:'"    . $errortype[$errno] .
-			"' MESSAGE:'" . $errmsg  . "' IN FILE:'" . $filename .
+		// create an error string for the log
+		$err = "ERRNO:'" . $errno . "' TYPE:'" . $errortype[$errno] .
+			"' MESSAGE:'" . $errmsg . "' IN FILE:'" . $filename .
 			"' LINE NO:'" . $linenum . "'";
 
-		/* let's ignore some lesser issues */
-		if (substr_count($errmsg, 'date_default_timezone')) return;
-		if (substr_count($errmsg, 'Only variables')) return;
+		// let's ignore some lesser issues
+		if (substr_count($errmsg, 'date_default_timezone')) {
+			return false;
+		}
 
-		/* log the error to the Cacti log */
+		if (substr_count($errmsg, 'Only variables')) {
+			return false;
+		}
+
+		// log the error to the Cacti log
 		cacti_log('PROGERR: ' . $err, false, 'DSDEBUG');
+
+		return false;
 	}
 
-	return;
+	return true;
 }
 
+<<<<<<< HEAD
 function dsdebug_poller_output(&$rrd_update_array) {
 	global $config;
 
 	/* suppress warnings */
+||||||| 7dd05ee12
+function dsdebug_poller_output(&$rrd_update_array) {
+	global $config, $ds_types, $ds_last, $ds_steps, $ds_multi;
+
+	/* suppress warnings */
+=======
+function dsdebug_poller_output(array &$rrd_update_array) : void {
+	// suppress warnings
+>>>>>>> origin/fix/jquery-deprecations
 	if (defined('E_DEPRECATED')) {
 		error_reporting(E_ALL ^ E_DEPRECATED);
 	} else {
 		error_reporting(E_ALL);
 	}
 
-	/* install the dsstats error handler */
+	// install the dsstats error handler
 	set_error_handler('dsdebug_error_handler');
 
-	/* do not make any calculations unless enabled */
+	// do not make any calculations unless enabled
 	$checks = db_fetch_assoc('SELECT * FROM data_debug WHERE `done` = 0');
+
 	if (cacti_sizeof($checks)) {
 		if (cacti_sizeof($rrd_update_array)) {
 			foreach ($checks as $c) {
-				foreach($rrd_update_array as $item) {
+				foreach ($rrd_update_array as $item) {
 					if ($c['datasource'] == $item['local_data_id']) {
 						if (isset($item['times'][key($item['times'])])) {
 							$c['info'] = cacti_unserialize($c['info']);
+<<<<<<< HEAD
+||||||| 7dd05ee12
+							$c['info'] = unserialize($c['info']);
+=======
+
+>>>>>>> origin/fix/jquery-deprecations
 							$c['info']['last_result'] = $item['times'][key($item['times'])];
-							$c['info'] = serialize($c['info']);
-							db_execute_prepared('UPDATE data_debug SET `info` = ? WHERE `id` = ?', array($c['info'], $c['id']));
+							$c['info']                = serialize($c['info']);
+							db_execute_prepared('UPDATE data_debug SET `info` = ? WHERE `id` = ?', [$c['info'], $c['id']]);
 						}
 					}
 				}
@@ -130,17 +169,17 @@ function dsdebug_poller_output(&$rrd_update_array) {
 		}
 	}
 
-	/* restore original error handler */
+	// restore original error handler
 	restore_error_handler();
 }
 
-function dsdebug_poller_bottom() {
-	global $config, $start;
+function dsdebug_poller_bottom() : bool {
+	global $start;
 
-	/* install the dsstats error handler */
+	// install the dsstats error handler
 	set_error_handler('dsdebug_error_handler');
 
-	/* take time and log performance data */
+	// take time and log performance data
 	$start = microtime(true);
 
 	if (!db_table_exists('data_debug')) {
@@ -156,17 +195,25 @@ function dsdebug_poller_bottom() {
 		$total_issues = 0;
 
 		foreach ($checks as $c) {
+<<<<<<< HEAD
 			$c['issue'] = array();
 			$info = cacti_unserialize($c['info']);
+||||||| 7dd05ee12
+			$c['issue'] = array();
+			$info = unserialize($c['info']);
+=======
+			$c['issue'] = [];
+			$info       = cacti_unserialize($c['info']);
+>>>>>>> origin/fix/jquery-deprecations
 
 			$dtd = db_fetch_row_prepared('SELECT *
 				FROM data_template_data
 				WHERE local_data_id = ?',
-				array($c['datasource']));
+				[$c['datasource']]);
 
 			if (!isset($dtd['local_data_id'])) {
 				$c['issue'][] = __('Data Source ID %s does not exist', $c['datasource']);
-				$c['done'] = 1;
+				$c['done']    = 1;
 
 				$total_issues++;
 			} else {
@@ -174,7 +221,7 @@ function dsdebug_poller_bottom() {
 					boost_process_poller_output($c['datasource']);
 				}
 
-				$real_path = str_replace('<path_rra>', $config['rra_path'], $dtd['data_source_path']);
+				$real_path = str_replace('<path_rra>', CACTI_PATH_RRA, $dtd['data_source_path']);
 
 				// rrd_folder_writable
 				$info['rrd_folder_writable'] = (is_resource_writable(dirname($real_path) . '/') ? 1 : 0);
@@ -187,14 +234,15 @@ function dsdebug_poller_bottom() {
 
 				// active
 				$info['active'] = $dtd['active'];
+
 				// owner
-				if ($config['cacti_server_os'] == 'win32') {
+				if (CACTI_SERVER_OS == 'win32') {
 					$info['owner'] = '<unable to determine on windows>';
 				} else {
-					$o = posix_getpwuid(fileowner($real_path));
-					$o = $o['name'];
-					$g = posix_getgrgid(filegroup($real_path));
-					$g = $g['name'];
+					$o             = posix_getpwuid(fileowner($real_path));
+					$o             = $o['name'];
+					$g             = posix_getgrgid(filegroup($real_path));
+					$g             = $g['name'];
 					$info['owner'] =  $o . ':' . $g;
 				}
 
@@ -202,13 +250,13 @@ function dsdebug_poller_bottom() {
 				$info['runas_poller'] = get_running_user();
 
 				// convert_name
-				$info['convert_name'] = (strpos('|', get_data_source_title($c['datasource'])) === false ? 1 : 0);
+				$info['convert_name'] = (!str_contains('|', get_data_source_title($c['datasource'])) ? 1 : 0);
 
 				// last_result  (processed by hook)
 				if (is_array($info['last_result']) && !empty($info['last_result']) && $info['valid_data'] == '') {
 					$info['valid_data'] = 1;
 
-					foreach ($info['last_result'] as $k => $l) {
+					foreach ($info['last_result'] as $l) {
 						if ($l == 'U') {
 							cacti_log('Bad Data Found for Data Source ID ' . $c['datasource'], false, 'DSDEBUG');
 							$info['valid_data'] = 0;
@@ -218,12 +266,31 @@ function dsdebug_poller_bottom() {
 					}
 				}
 
+<<<<<<< HEAD
 				// rrd_match
+||||||| 7dd05ee12
+				// rrd_match
+				$rrdinfo                 = rrdtool_function_info($c['datasource']);
+				$comp                    = rrdtool_cacti_compare($c['datasource'], $rrdinfo);
+				$info['rrd_match']       = (is_array($comp) && empty($comp) ? 1 : 0);
+				$info['rrd_match_array'] = $comp;
+				$info['rrd_info']        = $rrdinfo;
+=======
+>>>>>>> origin/fix/jquery-deprecations
 				$rrdinfo = rrdtool_function_info($c['datasource']);
 
 				if (cacti_sizeof($rrdinfo)) {
 					$comp                    = rrdtool_cacti_compare($c['datasource'], $rrdinfo);
+<<<<<<< HEAD
 					$info['rrd_match']       = (is_array($comp) && empty($comp) ? 1 : 0);
+||||||| 7dd05ee12
+				// rra_timestamp
+				if ($info['rra_timestamp'] != ''
+					&& isset($rrdinfo['last_update'])
+					&& $info['rra_timestamp'] != $rrdinfo['last_update']) {
+=======
+					$info['rrd_match']       = (!cacti_sizeof($comp) ? 1 : 0);
+>>>>>>> origin/fix/jquery-deprecations
 					$info['rrd_match_array'] = $comp;
 					$info['rrd_info']        = $rrdinfo;
 
@@ -231,7 +298,63 @@ function dsdebug_poller_bottom() {
 					if ($info['rra_timestamp'] != ''
 						&& isset($rrdinfo['last_update'])
 						&& $info['rra_timestamp'] != $rrdinfo['last_update']) {
+<<<<<<< HEAD
 
+||||||| 7dd05ee12
+					$info['rra_timestamp2'] = $rrdinfo['last_update'];
+				}
+
+				if (isset($rrdinfo['last_update']) && $info['rra_timestamp'] == '') {
+					$info['rra_timestamp'] = $rrdinfo['last_update'];
+				}
+
+				$c['done'] = 1;
+				$f = array();
+				foreach ($info as $k => $v) {
+					if ($v === '') {
+						$c['done'] = 0;
+						$f[] = $k;
+					}
+				}
+
+				if ($c['started'] < time() - ($dtd['rrd_step'] * 5)) {
+					$c['done'] = 1;
+					$c['issue'][] = __('Debug not completed after 5 pollings');
+					$c['issue'][] = __('Failed fields: ') . implode(', ', $f);
+
+					$total_issues++;
+				}
+
+				// Try to determine issue
+				// Not set as Active
+				// Log permanent fails first
+				if ($info['active'] != 'on') {
+					$c['issue'][] = __('Data Source is not set as Active');
+					$c['done'] = 1;
+
+					$total_issues++;
+				}
+
+				// File Permissions
+				if ((!$info['rrd_exists'] || !$info['rrd_writable']) && !$info['rrd_folder_writable']) {
+					$c['issue'][] = __('RRDfile Folder (rra) is not writable by Poller.  Folder owner: %s.  Poller runs as: %s', $o, $info['runas_poller']);
+					$c['done'] = 1;
+
+					$total_issues++;
+				} elseif (!$info['rrd_writable']) {
+					$c['issue'][] = __('RRDfile is not writable by Poller.  RRDfile owner: %s.  Poller runs as %s', $o, $info['runas_poller']);
+					$c['done'] = 1;
+
+					$total_issues++;
+				}
+
+				// For errors that only appear after so many errors next
+				if ($c['done'] == 1) {
+					if ($info['rrd_match'] == 0) {
+						$c['issue'][] = __('RRDfile does not match Data Source');
+						$total_issues++;
+=======
+>>>>>>> origin/fix/jquery-deprecations
 						$info['rra_timestamp2'] = $rrdinfo['last_update'];
 					}
 
@@ -240,16 +363,39 @@ function dsdebug_poller_bottom() {
 					}
 
 					$c['done'] = 1;
+<<<<<<< HEAD
 					$f = array();
 					foreach ($info as $k => $v) {
 						if ($v === '') {
 							$c['done'] = 0;
 							$f[] = $k;
+||||||| 7dd05ee12
+					if (is_array($info['last_result']) && !empty($info['last_result'])) {
+						foreach ($info['last_result'] as $k => $l) {
+							if ($l == 'U') {
+								$c['issue'][] = __('Data Source returned Bad Results for ' . $k);
+								$total_issues++;
+							}
+=======
+					$f         = [];
+
+					foreach ($info as $k => $v) {
+						if ($v === '') {
+							$c['done'] = 0;
+							$f[]       = $k;
+>>>>>>> origin/fix/jquery-deprecations
 						}
 					}
 
 					if ($c['started'] < time() - ($dtd['rrd_step'] * 5)) {
+<<<<<<< HEAD
 						$c['done'] = 1;
+||||||| 7dd05ee12
+					} elseif ($info['last_result'] == '') {
+						$c['issue'][] = __('Data Source was not polled');
+=======
+						$c['done']    = 1;
+>>>>>>> origin/fix/jquery-deprecations
 						$c['issue'][] = __('Debug not completed after 5 pollings');
 						$c['issue'][] = __('Failed fields: ') . implode(', ', $f);
 
@@ -261,13 +407,21 @@ function dsdebug_poller_bottom() {
 					// Log permanent fails first
 					if ($info['active'] != 'on') {
 						$c['issue'][] = __('Data Source is not set as Active');
+<<<<<<< HEAD
 						$c['done'] = 1;
+||||||| 7dd05ee12
+					if ($c['issue'] == '') {
+						$c['issue'][] = __('No issues found');
+=======
+						$c['done']    = 1;
+>>>>>>> origin/fix/jquery-deprecations
 
 						$total_issues++;
 					}
 
 					// File Permissions
 					if ((!$info['rrd_exists'] || !$info['rrd_writable']) && !$info['rrd_folder_writable']) {
+<<<<<<< HEAD
 						$c['issue'][] = __('RRDfile Folder (rra) is not writable by Poller.  Folder owner: %s.  Poller runs as: %s', $o, $info['runas_poller']);
 						$c['done'] = 1;
 
@@ -275,6 +429,16 @@ function dsdebug_poller_bottom() {
 					} elseif (!$info['rrd_writable']) {
 						$c['issue'][] = __('RRDfile is not writable by Poller.  RRDfile owner: %s.  Poller runs as %s', $o, $info['runas_poller']);
 						$c['done'] = 1;
+||||||| 7dd05ee12
+=======
+						$c['issue'][] = __('RRDfile Folder (rra) is not writable by Poller.  Folder owner: %s.  Poller runs as: %s', $info['owner'], $info['runas_poller']);
+						$c['done']    = 1;
+
+						$total_issues++;
+					} elseif (!$info['rrd_writable']) {
+						$c['issue'][] = __('RRDfile is not writable by Poller.  RRDfile owner: %s.  Poller runs as %s', $info['owner'], $info['runas_poller']);
+						$c['done']    = 1;
+>>>>>>> origin/fix/jquery-deprecations
 
 						$total_issues++;
 					}
@@ -317,7 +481,12 @@ function dsdebug_poller_bottom() {
 				db_execute_prepared('UPDATE data_debug
 					SET `done` = ?, `info` = ?, `issue` = ?
 					WHERE id = ?',
+<<<<<<< HEAD
 					array($c['done'], $info, trim(implode("\n", $c['issue'])), $c['id']));
+||||||| 7dd05ee12
+=======
+					[$c['done'], $info, trim(implode("\n", $c['issue'])), $c['id']]);
+>>>>>>> origin/fix/jquery-deprecations
 			}
 		}
 
@@ -325,13 +494,15 @@ function dsdebug_poller_bottom() {
 	}
 
 	restore_error_handler();
+
+	return true;
 }
 
-function dsdebug_run_repair($id) {
+function dsdebug_run_repair(int $id) : bool {
 	$check = db_fetch_row_prepared('SELECT *
 		FROM data_debug
 		WHERE datasource = ?',
-		array($id));
+		[$id]);
 
 	if (cacti_sizeof($check)) {
 		$check['info'] = cacti_unserialize($check['info']);
@@ -339,12 +510,12 @@ function dsdebug_run_repair($id) {
 		if (isset($check['info']['rrd_match_array']['tune'])) {
 			$path = get_data_source_path($id, true);
 
-			if (is_writeable($path)) {
+			if (is_writable($path)) {
 				$rrdtool_path = read_config_option('path_rrdtool');
-				$failures = 0;
+				$failures     = 0;
 				$failure_data = '';
 
-				foreach($check['info']['rrd_match_array']['tune'] AS $options) {
+				foreach ($check['info']['rrd_match_array']['tune'] as $options) {
 					$command    = $rrdtool_path . ' tune ' . $options;
 
 					$output = rrdtool_execute('tune ' . $options, false, RRDTOOL_OUTPUT_RETURN_STDERR);
@@ -372,4 +543,3 @@ function dsdebug_run_repair($id) {
 
 	return false;
 }
-

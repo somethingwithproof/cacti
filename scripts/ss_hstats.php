@@ -33,6 +33,7 @@ if (!isset($called_by_script_server)) {
 	print call_user_func_array('ss_hstats', $_SERVER['argv']);
 }
 
+<<<<<<< HEAD
 function ss_hstats($host_id = 0, $stat = '') {
 	$allowed_columns = array(
 		'polling_time'  => 'polling_time',
@@ -47,18 +48,87 @@ function ss_hstats($host_id = 0, $stat = '') {
 
 	if (!isset($allowed_columns[$stat])) {
 		return '0';
+||||||| 7dd05ee12
+function ss_hstats($host_id = 0, $stat = '') {
+	switch ($stat) {
+		case 'polling_time':
+			$column = $stat;
+			break;
+		case 'min_time':
+			$column = $stat;
+			break;
+		case 'max_time':
+			$column = $stat;
+			break;
+		case 'cur_time':
+			$column = $stat;
+			break;
+		case 'avg_time':
+			$column = $stat;
+			break;
+		case 'uptime':
+			$column = 'snmp_sysUpTimeInstance';
+			break;
+		case 'failed_polls':
+			$column = $stat;
+			break;
+		case 'availability':
+			$column = $stat;
+			break;
+		default:
+			return '0';
+=======
+/**
+ * Map stat type to database column name.
+ *
+ * @param string $stat Stat type to map
+ *
+ * @return string|null Column name or null if invalid stat
+ */
+function ss_hstats_map_stat_to_column(string $stat) : ?string {
+	switch ($stat) {
+		case 'polling_time':
+		case 'min_time':
+		case 'max_time':
+		case 'cur_time':
+		case 'avg_time':
+		case 'failed_polls':
+		case 'availability':
+		case 'current_errors':
+			return $stat;
+		case 'uptime':
+			return 'snmp_sysUpTimeInstance';
+		default:
+			return null;
+	}
+}
+
+function ss_hstats(int $host_id = 0, string $stat = '') : string {
+	$column = ss_hstats_map_stat_to_column($stat);
+
+	if ($column === null) {
+		return 'U';
+	}
+
+	$allowed = ['polling_time', 'min_time', 'max_time', 'cur_time', 'avg_time', 'snmp_sysUpTimeInstance', 'failed_polls', 'availability', 'current_errors'];
+
+	if (!in_array($column, $allowed, true)) {
+		return 'U';
+>>>>>>> origin/fix/jquery-deprecations
 	}
 
 	$column = $allowed_columns[$stat];
 
 	if ($host_id > 0) {
-		$value = db_fetch_cell_prepared("SELECT $column
+		$value = db_fetch_cell_prepared(
+			"SELECT $column
 			FROM host
 			WHERE id = ?",
-			array($host_id));
+			[$host_id]
+		);
 
 		return ($value == '' ? 'U' : $value);
 	}
 
-	return '0';
+	return 'U';
 }

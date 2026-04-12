@@ -7,4 +7,9 @@ $baseDir = dirname(dirname($vendorDir));
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+<<<<<<< HEAD
+||||||| 7dd05ee12
+=======
+    'Stringable' => $vendorDir . '/myclabs/php-enum/stubs/Stringable.php',
+>>>>>>> origin/fix/jquery-deprecations
 );

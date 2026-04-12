@@ -528,7 +528,14 @@ class Rijndael extends BlockCipher
                 0x97000000, 0x35000000, 0x6A000000, 0xD4000000, 0xB3000000,
                 0x7D000000, 0xFA000000, 0xEF000000, 0xC5000000, 0x91000000
             ];
+<<<<<<< HEAD
             $rcon = array_map([self::class, 'safe_intval'], $rcon);
+||||||| 7dd05ee12
+            );
+            $rcon = array_map('intval', $rcon);
+=======
+            $rcon = array_map('intval', $rcon);
+>>>>>>> origin/fix/jquery-deprecations
         }
 
         if (isset($this->kl['key']) && $this->key === $this->kl['key'] && $this->key_length === $this->kl['key_length'] && $this->block_size === $this->kl['block_size']) {
@@ -568,9 +575,16 @@ class Rijndael extends BlockCipher
                 // on a 32-bit machine, it's 32-bits, and on a 64-bit machine, it's 64-bits. on a 32-bit machine,
                 // 0xFFFFFFFF << 8 == 0xFFFFFF00, but on a 64-bit machine, it equals 0xFFFFFFFF00. as such, doing 'and'
                 // with 0xFFFFFFFF (or 0xFFFFFF00) on a 32-bit machine is unnecessary, but on a 64-bit machine, it is.
+<<<<<<< HEAD
                 $temp = PHP_INT_SIZE == 8 ? // rotWord
                     (($temp << 8) & 0xFFFFFF00) | (($temp >> 24) & 0x000000FF) :
                     ($temp << 8) | (($temp >> 24) & 0x000000FF);
+||||||| 7dd05ee12
+                $temp = (($temp << 8) & intval(0xFFFFFF00)) | (($temp >> 24) & 0x000000FF); // rotWord
+                $temp = $this->_subWord($temp) ^ $rcon[$i / $this->Nk];
+=======
+                $temp = (($temp << 8) & intval(0xFFFFFF00)) | (($temp >> 24) & 0x000000FF); // rotWord
+>>>>>>> origin/fix/jquery-deprecations
                 $temp = $this->subWord($temp) ^ $rcon[$i / $this->Nk];
             } elseif ($this->Nk > 6 && $i % $this->Nk == 4) {
                 $temp = $this->subWord($temp);
@@ -661,7 +675,13 @@ class Rijndael extends BlockCipher
             // according to <http://csrc.nist.gov/archive/aes/rijndael/Rijndael-ammended.pdf#page=19> (section 5.2.1),
             // precomputed tables can be used in the mixColumns phase. in that example, they're assigned t0...t3, so
             // those are the names we'll use.
+<<<<<<< HEAD
             $t3 = array_map([self::class, 'safe_intval'], [
+||||||| 7dd05ee12
+            $t3 = array_map('intval', array(
+=======
+            $t3 = array_map('intval', [
+>>>>>>> origin/fix/jquery-deprecations
                 // with array_map('intval', ...) we ensure we have only int's and not
                 // some slower floats converted by php automatically on high values
                 0x6363A5C6, 0x7C7C84F8, 0x777799EE, 0x7B7B8DF6, 0xF2F20DFF, 0x6B6BBDD6, 0x6F6FB1DE, 0xC5C55491,
@@ -746,7 +766,13 @@ class Rijndael extends BlockCipher
     {
         static $tables;
         if (empty($tables)) {
+<<<<<<< HEAD
             $dt3 = array_map([self::class, 'safe_intval'], [
+||||||| 7dd05ee12
+            $dt3 = array_map('intval', array(
+=======
+            $dt3 = array_map('intval', [
+>>>>>>> origin/fix/jquery-deprecations
                 0xF4A75051, 0x4165537E, 0x17A4C31A, 0x275E963A, 0xAB6BCB3B, 0x9D45F11F, 0xFA58ABAC, 0xE303934B,
                 0x30FA5520, 0x766DF6AD, 0xCC769188, 0x024C25F5, 0xE5D7FC4F, 0x2ACBD7C5, 0x35448026, 0x62A38FB5,
                 0xB15A49DE, 0xBA1B6725, 0xEA0E9845, 0xFEC0E15D, 0x2F7502C3, 0x4CF01281, 0x4697A38D, 0xD3F9C66B,
@@ -875,8 +901,322 @@ class Rijndael extends BlockCipher
                     $t3[ $' . $s . (($i + $c[3]) % $Nb) . '        & 0xff] ^
                     ' . $w[++$wc] . ";\n";
             }
+<<<<<<< HEAD
+||||||| 7dd05ee12
+        if (!isset($lambda_functions[$code_hash])) {
+            switch (true) {
+                case $gen_hi_opt_code:
+                    // The hi-optimized $lambda_functions will use the key-words hardcoded for better performance.
+                    $w  = $this->w;
+                    $dw = $this->dw;
+                    $init_encrypt = '';
+                    $init_decrypt = '';
+                    break;
+                default:
+                    for ($i = 0, $cw = count($this->w); $i < $cw; ++$i) {
+                        $w[]  = '$w['  . $i . ']';
+                        $dw[] = '$dw[' . $i . ']';
+                    }
+                    $init_encrypt = '$w  = $self->w;';
+                    $init_decrypt = '$dw = $self->dw;';
+            }
+
+            $Nr = $this->Nr;
+            $Nb = $this->Nb;
+            $c  = $this->c;
+
+            // Generating encrypt code:
+            $init_encrypt.= '
+                static $tables;
+                if (empty($tables)) {
+                    $tables = &$self->_getTables();
+                }
+                $t0   = $tables[0];
+                $t1   = $tables[1];
+                $t2   = $tables[2];
+                $t3   = $tables[3];
+                $sbox = $tables[4];
+            ';
+
+            $s  = 'e';
+            $e  = 's';
+            $wc = $Nb - 1;
+
+            // Preround: addRoundKey
+            $encrypt_block = '$in = unpack("N*", $in);'."\n";
+            for ($i = 0; $i < $Nb; ++$i) {
+                $encrypt_block .= '$s'.$i.' = $in['.($i + 1).'] ^ '.$w[++$wc].";\n";
+            }
+
+            // Mainrounds: shiftRows + subWord + mixColumns + addRoundKey
+            for ($round = 1; $round < $Nr; ++$round) {
+                list($s, $e) = array($e, $s);
+                for ($i = 0; $i < $Nb; ++$i) {
+                    $encrypt_block.=
+                        '$'.$e.$i.' =
+                        $t0[($'.$s.$i                  .' >> 24) & 0xff] ^
+                        $t1[($'.$s.(($i + $c[1]) % $Nb).' >> 16) & 0xff] ^
+                        $t2[($'.$s.(($i + $c[2]) % $Nb).' >>  8) & 0xff] ^
+                        $t3[ $'.$s.(($i + $c[3]) % $Nb).'        & 0xff] ^
+                        '.$w[++$wc].";\n";
+                }
+            }
+
+            // Finalround: subWord + shiftRows + addRoundKey
+            for ($i = 0; $i < $Nb; ++$i) {
+                $encrypt_block.=
+                    '$'.$e.$i.' =
+                     $sbox[ $'.$e.$i.'        & 0xff]        |
+                    ($sbox[($'.$e.$i.' >>  8) & 0xff] <<  8) |
+                    ($sbox[($'.$e.$i.' >> 16) & 0xff] << 16) |
+                    ($sbox[($'.$e.$i.' >> 24) & 0xff] << 24);'."\n";
+            }
+            $encrypt_block .= '$in = pack("N*"'."\n";
+            for ($i = 0; $i < $Nb; ++$i) {
+                $encrypt_block.= ',
+                    ($'.$e.$i                  .' & '.((int)0xFF000000).') ^
+                    ($'.$e.(($i + $c[1]) % $Nb).' &         0x00FF0000   ) ^
+                    ($'.$e.(($i + $c[2]) % $Nb).' &         0x0000FF00   ) ^
+                    ($'.$e.(($i + $c[3]) % $Nb).' &         0x000000FF   ) ^
+                    '.$w[$i]."\n";
+            }
+            $encrypt_block .= ');';
+
+            // Generating decrypt code:
+            $init_decrypt.= '
+                static $invtables;
+                if (empty($invtables)) {
+                    $invtables = &$self->_getInvTables();
+                }
+                $dt0   = $invtables[0];
+                $dt1   = $invtables[1];
+                $dt2   = $invtables[2];
+                $dt3   = $invtables[3];
+                $isbox = $invtables[4];
+            ';
+
+            $s  = 'e';
+            $e  = 's';
+            $wc = $Nb - 1;
+
+            // Preround: addRoundKey
+            $decrypt_block = '$in = unpack("N*", $in);'."\n";
+            for ($i = 0; $i < $Nb; ++$i) {
+                $decrypt_block .= '$s'.$i.' = $in['.($i + 1).'] ^ '.$dw[++$wc].';'."\n";
+            }
+
+            // Mainrounds: shiftRows + subWord + mixColumns + addRoundKey
+            for ($round = 1; $round < $Nr; ++$round) {
+                list($s, $e) = array($e, $s);
+                for ($i = 0; $i < $Nb; ++$i) {
+                    $decrypt_block.=
+                        '$'.$e.$i.' =
+                        $dt0[($'.$s.$i                        .' >> 24) & 0xff] ^
+                        $dt1[($'.$s.(($Nb + $i - $c[1]) % $Nb).' >> 16) & 0xff] ^
+                        $dt2[($'.$s.(($Nb + $i - $c[2]) % $Nb).' >>  8) & 0xff] ^
+                        $dt3[ $'.$s.(($Nb + $i - $c[3]) % $Nb).'        & 0xff] ^
+                        '.$dw[++$wc].";\n";
+                }
+            }
+
+            // Finalround: subWord + shiftRows + addRoundKey
+            for ($i = 0; $i < $Nb; ++$i) {
+                $decrypt_block.=
+                    '$'.$e.$i.' =
+                     $isbox[ $'.$e.$i.'        & 0xff]        |
+                    ($isbox[($'.$e.$i.' >>  8) & 0xff] <<  8) |
+                    ($isbox[($'.$e.$i.' >> 16) & 0xff] << 16) |
+                    ($isbox[($'.$e.$i.' >> 24) & 0xff] << 24);'."\n";
+            }
+            $decrypt_block .= '$in = pack("N*"'."\n";
+            for ($i = 0; $i < $Nb; ++$i) {
+                $decrypt_block.= ',
+                    ($'.$e.$i.                        ' & '.((int)0xFF000000).') ^
+                    ($'.$e.(($Nb + $i - $c[1]) % $Nb).' &         0x00FF0000   ) ^
+                    ($'.$e.(($Nb + $i - $c[2]) % $Nb).' &         0x0000FF00   ) ^
+                    ($'.$e.(($Nb + $i - $c[3]) % $Nb).' &         0x000000FF   ) ^
+                    '.$dw[$i]."\n";
+            }
+            $decrypt_block .= ');';
+
+            $lambda_functions[$code_hash] = $this->_createInlineCryptFunction(
+                array(
+                   'init_crypt'    => '',
+                   'init_encrypt'  => $init_encrypt,
+                   'init_decrypt'  => $init_decrypt,
+                   'encrypt_block' => $encrypt_block,
+                   'decrypt_block' => $decrypt_block
+                )
+            );
+=======
         }
 
+        // Finalround: subWord + shiftRows + addRoundKey
+        for ($i = 0; $i < $Nb; ++$i) {
+            $encrypt_block .=
+                '$' . $e . $i . ' =
+                 $sbox[ $' . $e . $i . '        & 0xff]        |
+                ($sbox[($' . $e . $i . ' >>  8) & 0xff] <<  8) |
+                ($sbox[($' . $e . $i . ' >> 16) & 0xff] << 16) |
+                ($sbox[($' . $e . $i . ' >> 24) & 0xff] << 24);' . "\n";
+        }
+        $encrypt_block .= '$in = pack("N*"' . "\n";
+        for ($i = 0; $i < $Nb; ++$i) {
+            $encrypt_block .= ',
+                ($' . $e . $i                  . ' & ' . ((int)0xFF000000) . ') ^
+                ($' . $e . (($i + $c[1]) % $Nb) . ' &         0x00FF0000   ) ^
+                ($' . $e . (($i + $c[2]) % $Nb) . ' &         0x0000FF00   ) ^
+                ($' . $e . (($i + $c[3]) % $Nb) . ' &         0x000000FF   ) ^
+                ' . $w[$i] . "\n";
+        }
+        $encrypt_block .= ');';
+
+        // Generating decrypt code:
+        $init_decrypt .= '
+            if (empty($invtables)) {
+                $invtables = &$this->getInvTables();
+            }
+            $dt0   = $invtables[0];
+            $dt1   = $invtables[1];
+            $dt2   = $invtables[2];
+            $dt3   = $invtables[3];
+            $isbox = $invtables[4];
+        ';
+
+        $s  = 'e';
+        $e  = 's';
+        $wc = $Nb - 1;
+
+        // Preround: addRoundKey
+        $decrypt_block = '$in = unpack("N*", $in);' . "\n";
+        for ($i = 0; $i < $Nb; ++$i) {
+            $decrypt_block .= '$s' . $i . ' = $in[' . ($i + 1) . '] ^ ' . $dw[++$wc] . ';' . "\n";
+        }
+
+        // Mainrounds: shiftRows + subWord + mixColumns + addRoundKey
+        for ($round = 1; $round < $Nr; ++$round) {
+            list($s, $e) = [$e, $s];
+            for ($i = 0; $i < $Nb; ++$i) {
+                $decrypt_block .=
+                    '$' . $e . $i . ' =
+                    $dt0[($' . $s . $i                        . ' >> 24) & 0xff] ^
+                    $dt1[($' . $s . (($Nb + $i - $c[1]) % $Nb) . ' >> 16) & 0xff] ^
+                    $dt2[($' . $s . (($Nb + $i - $c[2]) % $Nb) . ' >>  8) & 0xff] ^
+                    $dt3[ $' . $s . (($Nb + $i - $c[3]) % $Nb) . '        & 0xff] ^
+                    ' . $dw[++$wc] . ";\n";
+            }
+        }
+
+        // Finalround: subWord + shiftRows + addRoundKey
+        for ($i = 0; $i < $Nb; ++$i) {
+            $decrypt_block .=
+                '$' . $e . $i . ' =
+                 $isbox[ $' . $e . $i . '        & 0xff]        |
+                ($isbox[($' . $e . $i . ' >>  8) & 0xff] <<  8) |
+                ($isbox[($' . $e . $i . ' >> 16) & 0xff] << 16) |
+                ($isbox[($' . $e . $i . ' >> 24) & 0xff] << 24);' . "\n";
+        }
+        $decrypt_block .= '$in = pack("N*"' . "\n";
+        for ($i = 0; $i < $Nb; ++$i) {
+            $decrypt_block .= ',
+                ($' . $e . $i .                        ' & ' . ((int)0xFF000000) . ') ^
+                ($' . $e . (($Nb + $i - $c[1]) % $Nb) . ' &         0x00FF0000   ) ^
+                ($' . $e . (($Nb + $i - $c[2]) % $Nb) . ' &         0x0000FF00   ) ^
+                ($' . $e . (($Nb + $i - $c[3]) % $Nb) . ' &         0x000000FF   ) ^
+                ' . $dw[$i] . "\n";
+        }
+        $decrypt_block .= ');';
+
+        $this->inline_crypt = $this->createInlineCryptFunction(
+            [
+               'init_crypt'    => 'static $tables; static $invtables;',
+               'init_encrypt'  => $init_encrypt,
+               'init_decrypt'  => $init_decrypt,
+               'encrypt_block' => $encrypt_block,
+               'decrypt_block' => $decrypt_block
+            ]
+        );
+    }
+
+    /**
+     * Encrypts a message.
+     *
+     * @see self::decrypt()
+     * @see parent::encrypt()
+     * @param string $plaintext
+     * @return string
+     */
+    public function encrypt($plaintext)
+    {
+        $this->setup();
+
+        switch ($this->engine) {
+            case self::ENGINE_LIBSODIUM:
+                $this->newtag = sodium_crypto_aead_aes256gcm_encrypt($plaintext, $this->aad, $this->nonce, $this->key);
+                return Strings::shift($this->newtag, strlen($plaintext));
+            case self::ENGINE_OPENSSL_GCM:
+                return openssl_encrypt(
+                    $plaintext,
+                    'aes-' . $this->getKeyLength() . '-gcm',
+                    $this->key,
+                    OPENSSL_RAW_DATA,
+                    $this->nonce,
+                    $this->newtag,
+                    $this->aad
+                );
+        }
+
+        return parent::encrypt($plaintext);
+    }
+
+    /**
+     * Decrypts a message.
+     *
+     * @see self::encrypt()
+     * @see parent::decrypt()
+     * @param string $ciphertext
+     * @return string
+     */
+    public function decrypt($ciphertext)
+    {
+        $this->setup();
+
+        switch ($this->engine) {
+            case self::ENGINE_LIBSODIUM:
+                if ($this->oldtag === false) {
+                    throw new InsufficientSetupException('Authentication Tag has not been set');
+                }
+                if (strlen($this->oldtag) != 16) {
+                    break;
+                }
+                $plaintext = sodium_crypto_aead_aes256gcm_decrypt($ciphertext . $this->oldtag, $this->aad, $this->nonce, $this->key);
+                if ($plaintext === false) {
+                    $this->oldtag = false;
+                    throw new BadDecryptionException('Error decrypting ciphertext with libsodium');
+                }
+                return $plaintext;
+            case self::ENGINE_OPENSSL_GCM:
+                if ($this->oldtag === false) {
+                    throw new InsufficientSetupException('Authentication Tag has not been set');
+                }
+                $plaintext = openssl_decrypt(
+                    $ciphertext,
+                    'aes-' . $this->getKeyLength() . '-gcm',
+                    $this->key,
+                    OPENSSL_RAW_DATA,
+                    $this->nonce,
+                    $this->oldtag,
+                    $this->aad
+                );
+                if ($plaintext === false) {
+                    $this->oldtag = false;
+                    throw new BadDecryptionException('Error decrypting ciphertext with OpenSSL');
+                }
+                return $plaintext;
+>>>>>>> origin/fix/jquery-deprecations
+        }
+
+<<<<<<< HEAD
         // Finalround: subWord + shiftRows + addRoundKey
         for ($i = 0; $i < $Nb; ++$i) {
             $encrypt_block .=
@@ -962,6 +1302,11 @@ class Rijndael extends BlockCipher
                'decrypt_block' => $decrypt_block
             ]
         );
+||||||| 7dd05ee12
+        $this->inline_crypt = $lambda_functions[$code_hash];
+=======
+        return parent::decrypt($ciphertext);
+>>>>>>> origin/fix/jquery-deprecations
     }
 
     /**

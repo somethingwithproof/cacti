@@ -26,12 +26,12 @@
 error_reporting(0);
 
 if (!isset($called_by_script_server)) {
-	include_once(dirname(__FILE__) . '/../include/cli_check.php');
+	include_once(__DIR__ . '/../include/cli_check.php');
 
 	print call_user_func('ss_sql');
 }
 
-function ss_sql() {
+function ss_sql() : string {
 	global $database_username;
 	global $database_password;
 	global $database_hostname;
@@ -42,8 +42,16 @@ function ss_sql() {
 		$cmd .= ' --password=' . cacti_escapeshellarg($database_password);
 	}
 
+<<<<<<< HEAD
 	$result = shell_exec($cmd);
 	
+||||||| 7dd05ee12
+=======
+	$cmd .= ' status';
+
+	$result = shell_exec($cmd) ?? '';
+
+>>>>>>> origin/fix/jquery-deprecations
 	$result = preg_replace('/: /', ':', $result);
 	$result = preg_replace('/  /', ' ', $result);
 	$result = preg_replace('/Slow queries/', 'SlowQueries', $result);
@@ -53,4 +61,3 @@ function ss_sql() {
 
 	return trim($result) ?: 'U';
 }
-

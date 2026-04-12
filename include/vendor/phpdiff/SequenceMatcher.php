@@ -65,7 +65,12 @@ class Diff_SequenceMatcher
 	/**
 	 * @var array The opCode array.
 	 */
+<<<<<<< HEAD
 	private $opCodes = null;
+||||||| 7dd05ee12
+=======
+	private $opCode = null;
+>>>>>>> origin/fix/jquery-deprecations
 
 	/**
 	 * @var array The matchingBlocks array.
@@ -99,10 +104,11 @@ class Diff_SequenceMatcher
 	 * @param string|array $b A string or array containing the lines to compare.
 	 * @param string|array $junkCallback Either an array or string that references a callback function (if there is one) to determine 'junk' characters.
 	 */
-	public function __construct($a, $b, $junkCallback=null, $options = null)
+	public function __construct($a, $b, $junkCallback = null, $options = null)
 	{
 		$this->a = null;
 		$this->b = null;
+
 		$this->junkCallback = $junkCallback;
 		$this->setOptions($options);
 		$this->setSequences($a, $b);
@@ -364,8 +370,8 @@ class Diff_SequenceMatcher
 			return $this->matchingBlocks;
 		}
 
-		$aLength = count($this->a);
-		$bLength = count($this->b);
+		$aLength = count($this->a ?? []);
+		$bLength = count($this->b ?? []);
 
 		$queue = array(
 			array(

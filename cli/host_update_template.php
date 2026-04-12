@@ -24,93 +24,129 @@
 */
 
 require(__DIR__ . '/../include/cli_check.php');
-require_once($config['base_path'] . '/lib/api_automation_tools.php');
-require_once($config['base_path'] . '/lib/api_automation.php');
-require_once($config['base_path'] . '/lib/api_data_source.php');
-require_once($config['base_path'] . '/lib/api_graph.php');
-require_once($config['base_path'] . '/lib/api_device.php');
-require_once($config['base_path'] . '/lib/data_query.php');
-require_once($config['base_path'] . '/lib/poller.php');
-require_once($config['base_path'] . '/lib/snmp.php');
-require_once($config['base_path'] . '/lib/sort.php');
-require_once($config['base_path'] . '/lib/template.php');
-require_once($config['base_path'] . '/lib/utility.php');
+require_once(CACTI_PATH_LIBRARY . '/api_automation_tools.php');
+require_once(CACTI_PATH_LIBRARY . '/api_automation.php');
+require_once(CACTI_PATH_LIBRARY . '/api_data_source.php');
+require_once(CACTI_PATH_LIBRARY . '/api_graph.php');
+require_once(CACTI_PATH_LIBRARY . '/api_device.php');
+require_once(CACTI_PATH_LIBRARY . '/data_query.php');
+require_once(CACTI_PATH_LIBRARY . '/poller.php');
+require_once(CACTI_PATH_LIBRARY . '/snmp.php');
+require_once(CACTI_PATH_LIBRARY . '/sort.php');
+require_once(CACTI_PATH_LIBRARY . '/template.php');
+require_once(CACTI_PATH_LIBRARY . '/utility.php');
 
 ini_set('max_execution_time', '0');
 
-/* switch to main database for cli's */
-if ($config['poller_id'] > 1) {
+// switch to main database for cli's
+if (POLLER_ID > 1) {
 	db_switch_remote_to_main();
 }
 
-/* process calling arguments */
+// process calling arguments
 $parms = $_SERVER['argv'];
 array_shift($parms);
 
-/* utility requires input parameters */
+// utility requires input parameters
 if (cacti_sizeof($parms) == 0) {
-	print "ERROR: You must supply input parameters\n\n";
+	print 'ERROR: You must supply input parameters' . PHP_EOL . PHP_EOL;
 	display_help();
+
 	exit(1);
 }
 
-$debug    = false;
-$template = '';
-$hostid   = '';
+$debug             = false;
+$host_template_id  = '';
+$host_id           = '';
+$params            = [];
 
 if (cacti_sizeof($parms)) {
+<<<<<<< HEAD
 	foreach($parms as $parameter) {
 		if (strpos($parameter, '=')) {
 			list($arg, $value) = explode('=', $parameter, 2);
+||||||| 7dd05ee12
+	foreach($parms as $parameter) {
+		if (strpos($parameter, '=')) {
+			list($arg, $value) = explode('=', $parameter);
+=======
+	foreach ($parms as $parameter) {
+		if (str_contains($parameter, '=')) {
+			[$arg, $value] = explode('=', $parameter, 2);
+>>>>>>> origin/fix/jquery-deprecations
 		} else {
-			$arg = $parameter;
+			$arg   = $parameter;
 			$value = '';
 		}
 
 		switch ($arg) {
 			case '--host-template':
 			case '--host-template-id':
-				$template = $value;
+				$host_template_id = $value;
+
 				break;
 			case '--host-id':
 				$host_id = $value;
+
 				break;
 			case '--list-host-templates':
 				displayHostTemplates(getHostTemplates());
+
 				exit(0);
 			case '-d':
 			case '--debug':
 				$debug = true;
+
 				break;
 			case '--version':
 			case '-V':
 			case '-v':
 				display_version();
+
 				exit(0);
 			case '--help':
 			case '-H':
 			case '-h':
 				display_help();
+
 				exit(0);
+
 			default:
-				print 'ERROR: Invalid Parameter ' . $parameter . "\n\n";
+				print 'ERROR: Invalid Parameter ' . $parameter . PHP_EOL . PHP_EOL;
 				display_help();
+
 				exit(1);
 		}
 	}
 }
 
-/* determine the hosts to reindex */
-if (strtolower($host_id) == 'all') {
+// determine the hosts to reindex
+if (cacti_strtolower($host_id) == 'all') {
 	$sql_where = '';
+<<<<<<< HEAD
 } elseif (is_numeric($host_id)) {
 	$sql_where = ' WHERE id=' . $host_id;
+||||||| 7dd05ee12
+}else if (is_numeric($host_id)) {
+	$sql_where = ' WHERE id=' . $host_id;
+=======
+} elseif ($host_id > 0) {
+	$sql_where = ' WHERE id = ?';
+	$params[]  = $host_id;
+>>>>>>> origin/fix/jquery-deprecations
 } else {
-	print "ERROR: You must specify either a host_id or 'all' to proceed.\n\n";
+	print "ERROR: You must specify either a host_id or 'all' to proceed." . PHP_EOL . PHP_EOL;
 	display_help();
+<<<<<<< HEAD
 	exit(1);
 }
+||||||| 7dd05ee12
+	exit;
+}
+=======
+>>>>>>> origin/fix/jquery-deprecations
 
+<<<<<<< HEAD
 /* determine data queries to rerun */
 if (is_numeric($template) && $template > 0) {
 	$sql_where .= ($sql_where != '' ? ' AND':'WHERE') . " host_template_id=$template";
@@ -178,35 +214,194 @@ if ($exists > 0) {
 } else {
 	print "ERROR: The selected Host Template does not exist, try --list-host-templates\n\n";
 
+||||||| 7dd05ee12
+/* determine data queries to rerun */
+if (is_numeric($template)) {
+	$sql_where .= ($sql_where != '' ? " AND host_template_id=$template": "WHERE host_template_id=$template");
+} else {
+	print "ERROR: You must specify a Host Template to proceed.\n\n";
+	display_help();
+	exit;
+}
+
+/* verify that the host template is accurate */
+if (db_fetch_cell("SELECT id FROM host_template WHERE id=$template") > 0) {
+	$hosts = db_fetch_assoc("SELECT * FROM host $sql_where");
+
+	if (cacti_sizeof($hosts)) {
+	foreach($hosts as $host) {
+		print "NOTE: Updating Host '" . $host['description'] . "'\n";
+		$snmp_queries = db_fetch_assoc('SELECT snmp_query_id
+			FROM host_template_snmp_query
+			WHERE host_template_id=' . $host['host_template_id']);
+
+		if (cacti_sizeof($snmp_queries) > 0) {
+			print "NOTE: Updating Data Queries. There were '" . cacti_sizeof($snmp_queries) . "' Found\n";
+			foreach ($snmp_queries as $snmp_query) {
+				print "NOTE: Updating Data Query ID '" . $snmp_query['snmp_query_id'] . "'\n";
+				db_execute('REPLACE INTO host_snmp_query (host_id,snmp_query_id,reindex_method)
+					VALUES (' . $host['id'] . ', ' . $snmp_query['snmp_query_id'] . ',' . DATA_QUERY_AUTOINDEX_BACKWARDS_UPTIME . ')');
+
+				/* recache snmp data */
+				run_data_query($host['id'], $snmp_query['snmp_query_id']);
+			}
+		}
+
+		$graph_templates = db_fetch_assoc('SELECT graph_template_id FROM host_template_graph WHERE host_template_id=' . $host['host_template_id']);
+
+		if (cacti_sizeof($graph_templates) > 0) {
+			print "NOTE: Updating Graph Templates. There were '" . cacti_sizeof($graph_templates) . "' Found\n";
+
+			foreach ($graph_templates as $graph_template) {
+				db_execute('REPLACE INTO host_graph (host_id, graph_template_id) VALUES (' . $host['id'] . ', ' . $graph_template['graph_template_id'] . ')');
+
+				automation_hook_graph_template($host['id'], $graph_template['graph_template_id']);
+
+				api_plugin_hook_function('add_graph_template_to_host', array('host_id' => $host['id'], 'graph_template_id' => $graph_template['graph_template_id']));
+			}
+		}
+	}
+	}
+} else {
+	print "ERROR: The selected Host Template does not exist, try --list-host-templates\n\n";
+=======
+>>>>>>> origin/fix/jquery-deprecations
 	exit(1);
 }
 
+<<<<<<< HEAD
 /*  display_version - displays version information */
 function display_version() {
 	$version = get_cacti_cli_version();
 
 	print "Cacti Retemplate Host Utility, Version $version, " . COPYRIGHT_YEARS . "\n";
+||||||| 7dd05ee12
+/*  display_version - displays version information */
+function display_version() {
+	$version = get_cacti_cli_version();
+	print "Cacti Retemplate Host Utility, Version $version, " . COPYRIGHT_YEARS . "\n";
+=======
+// determine data queries to rerun
+if ($host_template_id > 0) {
+	$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' host_template_id = ?';
+	$params[] = $host_template_id;
+} else {
+	print 'ERROR: You must specify a Host Template to proceed.' . PHP_EOL . PHP_EOL;
+	display_help();
+
+	exit(1);
+>>>>>>> origin/fix/jquery-deprecations
 }
 
-/*	display_help - displays the usage of the function */
-function display_help () {
-	display_version();
+// verify that the host template is accurate
+$exists = db_fetch_cell_prepared('SELECT id
+	FROM host_template
+	WHERE id = ?',
+	[$host_template_id]);
 
-	print "\nusage: host_update_template.php --host-id=[host-id|all] [--host-template=[ID]] [--debug]\n\n";
-	print "A utility to update Cacti devices with the latest Device Template\n\n";
-	print "Required:\n";
-	print "    --host-id=host_id|all - The host_id to have templates reapplied 'all' to do all hosts\n";
-	print "    --host-template=ID    - Which Host Template to Refresh\n\n";
-	print "Optional:\n";
-	print "    --debug               - Display verbose output during execution\n\n";
-	print "List Options:\n";
-	print "    --list-host-templates - Lists all available Host Templates\n\n";
+if ($exists > 0) {
+	$hosts = db_fetch_assoc_prepared("SELECT * FROM host $sql_where", $params);
+
+	if (cacti_sizeof($hosts)) {
+		foreach ($hosts as $host) {
+			print "NOTE: Updating Host '" . $host['description'] . "'" . PHP_EOL;
+
+			$snmp_queries = db_fetch_assoc_prepared('SELECT snmp_query_id
+				FROM host_template_snmp_query
+				WHERE host_template_id = ?',
+				[$host['host_template_id']]);
+
+			if (cacti_sizeof($snmp_queries) > 0) {
+				print "NOTE: Updating Data Queries. There were '" . cacti_sizeof($snmp_queries) . "' Found" . PHP_EOL;
+
+				foreach ($snmp_queries as $snmp_query) {
+					print "NOTE: Updating Data Query ID '" . $snmp_query['snmp_query_id'] . "'" . PHP_EOL;
+
+					db_execute_prepared('INSERT IGNORE INTO host_snmp_query
+						(host_id, snmp_query_id, reindex_method)
+						VALUES (?, ?, ?)',
+						[$host['id'], $snmp_query['snmp_query_id'], DATA_QUERY_AUTOINDEX_BACKWARDS_UPTIME]);
+
+					// recache snmp data
+					run_data_query($host['id'], $snmp_query['snmp_query_id']);
+				}
+			}
+
+			if ($host['id'] > 0) {
+				object_cache_get_totals('device_state', $host['id']);
+			}
+
+			$graph_templates = db_fetch_assoc_prepared('SELECT graph_template_id
+				FROM host_template_graph
+				WHERE host_template_id = ?',
+				[$host['host_template_id']]);
+
+			if (cacti_sizeof($graph_templates) > 0) {
+				print "NOTE: Updating Graph Templates. There were '" . cacti_sizeof($graph_templates) . "' Found" . PHP_EOL;
+
+				foreach ($graph_templates as $graph_template) {
+					db_execute_prepared('INSERT IGNORE INTO host_graph
+						(host_id, graph_template_id)
+						VALUES (?, ?)',
+						[$host['id'], $graph_template['graph_template_id']]);
+
+					automation_hook_graph_template($host['id'], $graph_template['graph_template_id']);
+
+					api_plugin_hook_function('add_graph_template_to_host', ['host_id' => $host['id'], 'graph_template_id' => $graph_template['graph_template_id']]);
+				}
+			}
+
+			if ($host['id'] > 0) {
+				object_cache_get_totals('device_state', $host['id'], true);
+				object_cache_update_totals('diff');
+			}
+		}
+	}
+} else {
+	print 'ERROR: The selected Host Template does not exist, try --list-host-templates' . PHP_EOL . PHP_EOL;
+
+	exit(1);
 }
 
-function debug($message) {
+function debug(string $message) : void {
 	global $debug;
 
 	if ($debug) {
-		print("DEBUG: " . $message . "\n");
+		print('DEBUG: ' . trim($message) . PHP_EOL);
 	}
+}
+
+/**
+ * display_version - displays version information
+ *
+ * @return void
+ */
+function display_version() : void {
+	$version = get_cacti_cli_version();
+
+	print "Cacti Retemplate Host Utility, Version $version, " . COPYRIGHT_YEARS . PHP_EOL;
+}
+
+/**
+ * display_help - displays the usage of the function
+ *
+ * @return void
+ */
+function display_help() : void {
+	display_version();
+
+	print PHP_EOL;
+	print 'usage: host_update_template.php --host-id=[host-id|all] [--host-template=[ID]] [--debug]' . PHP_EOL . PHP_EOL;
+
+	print 'A utility to update Cacti devices with the latest Device Template' . PHP_EOL . PHP_EOL;
+
+	print 'Required:' . PHP_EOL;
+	print "    --host-id=host_id|all - The host_id to have templates reapplied 'all' to do all hosts" . PHP_EOL;
+	print '    --host-template=ID    - Which Host Template to Refresh' . PHP_EOL . PHP_EOL;
+
+	print 'Optional:' . PHP_EOL;
+	print '    --debug               - Display verbose output during execution' . PHP_EOL;
+
+	print 'List Options:' . PHP_EOL;
+	print '    --list-host-templates - Lists all available Host Templates' . PHP_EOL;
 }

@@ -411,6 +411,7 @@ class Salsa20 extends StreamCipher
             $r1 &= 0xFFFFFFFF;
             $r2 = ($x & 0xFFFFFFFF) >> (32 - $n);
         } else {
+<<<<<<< HEAD
             $x = self::safe_intval($x);
             $r1 = $x << $n;
             $r2 = $x >> (32 - $n);
@@ -483,6 +484,81 @@ class Salsa20 extends StreamCipher
 
         for ($i = 1; $i <= 16; $i++) {
             $x[$i] = self::safe_intval($x[$i] + $z[$i]);
+||||||| 7dd05ee12
+=======
+            $x = (int) $x;
+            $r1 = $x << $n;
+            $r2 = $x >> (32 - $n);
+            $r2 &= (1 << $n) - 1;
+        }
+        return $r1 | $r2;
+    }
+
+    /**
+     * The quarterround function
+     *
+     * @param int $a
+     * @param int $b
+     * @param int $c
+     * @param int $d
+     */
+    protected static function quarterRound(&$a, &$b, &$c, &$d)
+    {
+        $b ^= self::leftRotate($a + $d, 7);
+        $c ^= self::leftRotate($b + $a, 9);
+        $d ^= self::leftRotate($c + $b, 13);
+        $a ^= self::leftRotate($d + $c, 18);
+    }
+
+    /**
+     * The doubleround function
+     *
+     * @param int $x0 (by reference)
+     * @param int $x1 (by reference)
+     * @param int $x2 (by reference)
+     * @param int $x3 (by reference)
+     * @param int $x4 (by reference)
+     * @param int $x5 (by reference)
+     * @param int $x6 (by reference)
+     * @param int $x7 (by reference)
+     * @param int $x8 (by reference)
+     * @param int $x9 (by reference)
+     * @param int $x10 (by reference)
+     * @param int $x11 (by reference)
+     * @param int $x12 (by reference)
+     * @param int $x13 (by reference)
+     * @param int $x14 (by reference)
+     * @param int $x15 (by reference)
+     */
+    protected static function doubleRound(&$x0, &$x1, &$x2, &$x3, &$x4, &$x5, &$x6, &$x7, &$x8, &$x9, &$x10, &$x11, &$x12, &$x13, &$x14, &$x15)
+    {
+        // columnRound
+        static::quarterRound($x0, $x4, $x8, $x12);
+        static::quarterRound($x5, $x9, $x13, $x1);
+        static::quarterRound($x10, $x14, $x2, $x6);
+        static::quarterRound($x15, $x3, $x7, $x11);
+        // rowRound
+        static::quarterRound($x0, $x1, $x2, $x3);
+        static::quarterRound($x5, $x6, $x7, $x4);
+        static::quarterRound($x10, $x11, $x8, $x9);
+        static::quarterRound($x15, $x12, $x13, $x14);
+    }
+
+    /**
+     * The Salsa20 hash function function
+     *
+     * @param string $x
+     */
+    protected static function salsa20($x)
+    {
+        $z = $x = unpack('V*', $x);
+        for ($i = 0; $i < 10; $i++) {
+            static::doubleRound($z[1], $z[2], $z[3], $z[4], $z[5], $z[6], $z[7], $z[8], $z[9], $z[10], $z[11], $z[12], $z[13], $z[14], $z[15], $z[16]);
+        }
+
+        for ($i = 1; $i <= 16; $i++) {
+            $x[$i] += $z[$i];
+>>>>>>> origin/fix/jquery-deprecations
         }
 
         return pack('V*', ...$x);

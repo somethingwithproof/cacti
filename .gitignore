@@ -66,12 +66,19 @@ resource/**
 scripts/**
 
 # Ignore Custom Cacti theme folders
+<<<<<<< HEAD
 include/themes/*
+||||||| 7dd05ee12
+include/themes/*
+=======
+include/themes/*/*
+>>>>>>> origin/fix/jquery-deprecations
 
 # Ignore custom stylesheet (applied on all themes)
 include/themes/custom.css
 
 # Do not ignore standard Cacti theme folders
+<<<<<<< HEAD
 !include/themes/cacti
 !include/themes/carrot
 !include/themes/classic
@@ -83,6 +90,27 @@ include/themes/custom.css
 !include/themes/raspberry
 !include/themes/sunrise
 !include/themes/midwinter
+||||||| 7dd05ee12
+!include/themes/classic
+!include/themes/dark
+!include/themes/modern
+!include/themes/paper-plane
+!include/themes/paw
+!include/themes/sunrise
+!include/themes/midwinter
+=======
+!include/themes/cacti/*
+!include/themes/carrot/*
+!include/themes/classic/*
+!include/themes/dark/*
+!include/themes/hollyberry/*
+!include/themes/modern/*
+!include/themes/paper-plane/*
+!include/themes/paw/*
+!include/themes/raspberry/*
+!include/themes/sunrise/*
+!include/themes/midwinter/*
+>>>>>>> origin/fix/jquery-deprecations
 
 # Ignore any mac DS_Store files
 .DS_Store
@@ -100,5 +128,17 @@ include/vendor/csrf/csrf-secret.php
 .vscode/**
 
 # Ignore vendor folders
+<<<<<<< HEAD
 include/vendor/*
 vendor/*
+||||||| 7dd05ee12
+=======
+include/vendor/**
+vendor/**
+
+# Docker local config
+.env
+.env.local
+.env.*.local
+docker-compose.override.yml
+>>>>>>> origin/fix/jquery-deprecations

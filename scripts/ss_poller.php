@@ -26,9 +26,9 @@
 error_reporting(0);
 
 if (!isset($called_by_script_server)) {
-	include_once(dirname(__FILE__) . '/../include/cli_check.php');
+	include_once(__DIR__ . '/../include/cli_check.php');
 
-	$checks = array(
+	$checks = [
 		'ss_poller',
 		'ss_poller_items',
 		'ss_recache',
@@ -51,7 +51,7 @@ if (!isset($called_by_script_server)) {
 		'ss_spike_stats',
 		'ss_webseer_counts',
 		'ss_webseer_stats',
-	);
+	];
 
 	foreach ($checks as $check) {
 		if (function_exists($check)) {
@@ -60,32 +60,39 @@ if (!isset($called_by_script_server)) {
 	}
 }
 
-function ss_thold_time() {
+function ss_thold_time() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_thold"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
-		if (preg_match('/^Time/', $_stat)) $stats .= str_replace('Time:', '', $_stat);
+		if (preg_match('/^Time/', $_stat)) {
+			$stats .= str_replace('Time:', '', $_stat);
+		}
 	}
 
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_thold_checks() {
+function ss_thold_checks() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_thold"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
-		if (preg_match('/^Tholds/', $_stat)) $stats .= str_replace('Tholds:', '', $_stat);
+		if (preg_match('/^Tholds/', $_stat)) {
+			$stats .= str_replace('Tholds:', '', $_stat);
+		}
 	}
 
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_thold_hstats() {
+function ss_thold_hstats() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_thold"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
 		if (preg_match('/^TotalDevices/', $_stat)) {
 			$stats .= $_stat . ' ';
@@ -97,21 +104,25 @@ function ss_thold_hstats() {
 	return empty($stats) ? 'TotalDevices:0 DownDevices:0' : trim($stats);
 }
 
-function ss_monitor_time() {
+function ss_monitor_time() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_monitor"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
-		if (preg_match('/^Time/', $_stat)) $stats .= str_replace('Time:', '', $_stat);
+		if (preg_match('/^Time/', $_stat)) {
+			$stats .= str_replace('Time:', '', $_stat);
+		}
 	}
 
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_monitor_stats() {
+function ss_monitor_stats() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_monitor"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
 		if (preg_match('/^Reboots/', $_stat)) {
 			$stats .= $_stat . ' ';
@@ -127,21 +138,25 @@ function ss_monitor_stats() {
 	return empty($stats) ? 'Reboots:0 DownDevices:0 Notifications:0 Purges:0' : trim($stats);
 }
 
-function ss_syslog_time() {
+function ss_syslog_time() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="syslog_stats"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
-		if (preg_match('/^time/', $_stat)) $stats .= str_replace('time:', '', $_stat);
+		if (preg_match('/^time/', $_stat)) {
+			$stats .= str_replace('time:', '', $_stat);
+		}
 	}
 
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_syslog_stats() {
+function ss_syslog_stats() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="syslog_stats"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
 		if (preg_match('/^deletes/', $_stat)) {
 			$stats .= $_stat . ' ';
@@ -163,16 +178,17 @@ function ss_syslog_stats() {
 	return empty($stats) ? 'deletes:0 incoming:0 removes:0 xfers:0 alerts:0 alarms:0 reports:0' : trim($stats);
 }
 
-function ss_poller() {
+function ss_poller() : mixed {
 	$stats = db_fetch_cell('SELECT value
 		FROM settings
 		WHERE name="stats_poller"');
 
-	return empty($stats) ? 'Time:0 Method:0 Processes:0 Threads:0 Hosts:0 HostsPerProcess:0 DataSources:0 RRDsProcessed:0' : trim($stats);
+	return empty($stats) ? 'Time:0 Method:0 Processes:0 Threads:0 Hosts:0 HostsPerProcess:0 DataSources:0 RRDsProcessed:0 ErrorHosts:0 TotalErrors:0' : trim($stats);
 }
 
-function ss_webseer_counts() {
-	$stats = array();
+function ss_webseer_counts() : mixed {
+	$stats = [];
+
 	if (db_table_exists('plugin_webseer_urls')) {
 		$stats = db_fetch_row('SELECT SUM(triggered) AS triggered,
 			SUM(CASE WHEN triggered=0 THEN 1 ELSE 0 END) AS successful,
@@ -180,14 +196,14 @@ function ss_webseer_counts() {
 			FROM plugin_webseer_urls');
 	}
 
-
 	return !cacti_sizeof($stats) ? 'triggered:0 successful:0 disabled:0' : 'triggered:' . $stats['triggered'] . ' successful:' . $stats['successful'] . ' disabled:' . $stats['disabled'];
 }
 
-function ss_webseer_stats() {
+function ss_webseer_stats() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_webseer"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
 		if (preg_match('/^Time/', $_stat)) {
 			$stats .= $_stat . ' ';
@@ -201,12 +217,12 @@ function ss_webseer_stats() {
 	return empty($stats) ? 'Time:0 Checks:0 Servers:0' : trim($stats);
 }
 
-function ss_poller_items() {
+function ss_poller_items() : mixed {
 	$poller_cache = db_fetch_assoc('SELECT action, COUNT(*) AS count
 		FROM poller_item
 		GROUP BY action');
 
-	$entries = array(0, 0, 0);
+	$entries = [0, 0, 0];
 
 	if (cacti_sizeof($poller_cache)) {
 		foreach ($poller_cache as $item) {
@@ -215,13 +231,13 @@ function ss_poller_items() {
 	}
 
 	return trim(
-		'snmp:'          . $entries[0] . ' ' .
-		'script:'        . $entries[1] . ' ' .
+		'snmp:' . $entries[0] . ' ' .
+		'script:' . $entries[1] . ' ' .
 		'script_server:' . $entries[2]
 	);
 }
 
-function ss_recache() {
+function ss_recache() : mixed {
 	$stats = db_fetch_cell('SELECT value
 		FROM settings
 		WHERE name LIKE "stats_recache%"
@@ -230,7 +246,7 @@ function ss_recache() {
 	return empty($stats) ? 'RecacheTime:0 DevicesRecached:0' : trim($stats);
 }
 
-function ss_boost() {
+function ss_boost() : mixed {
 	$stats = db_fetch_cell('SELECT value
 		FROM settings
 		WHERE name = "stats_boost"');
@@ -238,7 +254,14 @@ function ss_boost() {
 	return empty($stats) ? 'Time:0 RRDUpdates:0' : trim($stats);
 }
 
+<<<<<<< HEAD
 function ss_boost_mem() {
+||||||| 7dd05ee12
+function ss_boost_mem() {
+	$stats = db_fetch_cell('SELECT value
+=======
+function ss_boost_mem() : mixed {
+>>>>>>> origin/fix/jquery-deprecations
 	$stats = db_fetch_cell('SELECT SUM(value)
 		FROM settings
 		WHERE name LIKE "boost_peak_memory%"');
@@ -246,7 +269,7 @@ function ss_boost_mem() {
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_boost_table() {
+function ss_boost_table() : mixed {
 	$stats = db_fetch_cell('SELECT DATA_LENGTH+INDEX_LENGTH AS tbl_len
 		FROM INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_NAME = "poller_output_boost"
@@ -255,7 +278,7 @@ function ss_boost_table() {
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_boost_records() {
+function ss_boost_records() : mixed {
 	$stats = db_fetch_cell('SELECT TABLE_ROWS
 		FROM INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_NAME = "poller_output_boost"
@@ -264,7 +287,7 @@ function ss_boost_records() {
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_boost_avg_size() {
+function ss_boost_avg_size() : mixed {
 	$stats = db_fetch_cell('SELECT AVG_ROW_LENGTH
 		FROM INFORMATION_SCHEMA.TABLES
 		WHERE TABLE_NAME = "poller_output_boost"
@@ -273,10 +296,11 @@ function ss_boost_avg_size() {
 	return empty($stats) ? '0' : trim($stats);
 }
 
-function ss_boost_timing() {
+function ss_boost_timing() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_detail_boost"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
 		if (preg_match('/^get_records:/', $_stat)) {
 			$stats .= str_replace('get_records', 'rrd_get_records', $_stat) . ' ';
@@ -296,10 +320,11 @@ function ss_boost_timing() {
 	return empty($stats) ? 'get_records:0 results_cycle:0 rrd_filename_and_template:0 rrd_lastupdate:0 rrdupdate:0 delete:0' : trim($stats);
 }
 
-function ss_export() {
+function ss_export() : mixed {
 	$_stats = explode(' ', db_fetch_cell('SELECT value FROM settings WHERE name="stats_export"'));
 
 	$stats = '';
+
 	foreach ($_stats as $_stat) {
 		if (preg_match('/^ExportDuration/', $_stat)) {
 			$stats .= $_stat . ' ';
@@ -310,4 +335,3 @@ function ss_export() {
 
 	return empty($stats) ? 'ExportDuration:0 TotalGraphsExported:0' : trim($stats);
 }
-

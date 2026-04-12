@@ -78,6 +78,7 @@ const FIELDS_BINARY_LOCATIONS = {
 }
 
 const FIELDS_PROFILE = {
+	admin_email_address:   { type: 'textbox',  name: 'AdminEmailAddress'  },
 	default_profile:       { type: 'dropdown', name: 'Profile'            },
 	cron_interval:         { type: 'textbox',  name: 'CronInterval'       },
 	automation_mode:       { type: 'checkbox', name: 'AutomationMode'     },
@@ -301,18 +302,18 @@ function collapseHeadings(headingStates) {
 		var enabled = headingStates[key];
 		var element = $('#' + key);
 		if (element != null && element.length > 0) {
-			fa_icon = 'fa fa-exclamation-triangle';
+			fa_icon = 'ti ti-alert-triangle-filled';
 			if (enabled == DB_STATUS_ERROR) {
-				fa_icon = 'fa fa-thumbs-down cactiInstallSqlFailure';
+				fa_icon = 'ti ti-thumb-down cactiInstallSqlFailure';
 			} else if (enabled == DB_STATUS_WARNING) {
-				fa_icon = 'fa fa-exclamation-triangle cactiInstallSqlWarning';
+				fa_icon = 'ti ti-alert-triangle-filled cactiInstallSqlWarning';
 			} else if (enabled == DB_STATUS_RESTART) {
-				fa_icon = 'fa fa-exclamation-triangle cactiInstallSqlWarning';
+				fa_icon = 'ti ti-alert-triangle-filled cactiInstallSqlWarning';
 			} else if (enabled == DB_STATUS_SUCCESS) {
-				fa_icon = 'fa fa-thumbs-up cactiInstallSqlSuccess';
+				fa_icon = 'ti ti-thumb-up cactiInstallSqlSuccess';
 				toggleHeader(element, false);
 			} else if (enabled) {
-				fa_icon = 'fa fa-check-circle cactiInstallSqlSkipped';
+				fa_icon = 'ti ti-check-circle cactiInstallSqlSkipped';
 				toggleHeader(element, false);
 			}
 
@@ -357,6 +358,7 @@ function processStepWelcome(StepData) {
 //		$('#accept').prop('checked',true);
 //	}
 
+<<<<<<< HEAD
 	if (StepData.Theme != 'classic') {
 		$('select#theme').selectmenu({
 			change: function() {
@@ -387,12 +389,66 @@ function processStepWelcome(StepData) {
 		}).iconselectmenu( "menuWidget" ).addClass( "ui-menu-icons customicons" );
 	} else {
 		$('#theme').change(function() {
-			performStep(STEP_WELCOME, undefined, true);
+||||||| 7dd05ee12
+	if (StepData.Theme != 'classic') {
+		$('select#theme').selectmenu({
+			change: function() {
+				performStep(STEP_WELCOME, undefined, true);
+			}
 		});
-		$('#language').change(function() {
-			performStep(STEP_WELCOME, undefined, true);
+
+		$.widget( "custom.iconselectmenu", $.ui.selectmenu, {
+			_renderItem: function( ul, item ) {
+				var li = $( "<li>" ), wrapper = $( "<div>", { text: item.label } );
+				if ( item.disabled ) {
+					li.addClass( "ui-state-disabled" );
+				}
+
+				$( "<span>", {
+					style: item.element.attr( "data-style" ),
+					"class": "flag-icon flag-icon-squared " + item.element.attr( "data-class" )
+				}).appendTo( wrapper );
+
+				return li.append( wrapper ).appendTo( ul );
+			}
 		});
-	}
+
+		$("select#language").selectmenu('destroy').iconselectmenu({
+			change: function() {
+				performStep(STEP_WELCOME, undefined, true);
+			}
+		}).iconselectmenu( "menuWidget" ).addClass( "ui-menu-icons customicons" );
+	} else {
+		$('#theme').change(function() {
+=======
+	$('select#theme').selectmenu({
+		change: function() {
+>>>>>>> origin/fix/jquery-deprecations
+			performStep(STEP_WELCOME, undefined, true);
+		}
+	});
+
+	$.widget( "custom.iconselectmenu", $.ui.selectmenu, {
+		_renderItem: function( ul, item ) {
+			var li = $( "<li>" ), wrapper = $( "<div>", { text: item.label } );
+			if ( item.disabled ) {
+				li.addClass( "ui-state-disabled" );
+			}
+
+			$( "<span>", {
+				style: item.element.attr( "data-style" ),
+				"class": "fi fis " + item.element.attr( "data-class" )
+			}).appendTo( wrapper );
+
+			return li.append( wrapper ).appendTo( ul );
+		}
+	});
+
+	$("select#language").selectmenu('destroy').iconselectmenu({
+		change: function() {
+			performStep(STEP_WELCOME, undefined, true);
+		}
+	}).iconselectmenu( "menuWidget" ).addClass( "ui-menu-icons customicons" );
 
 	if ($('#accept').length) {
 		$('#accept').click(function() {
@@ -428,17 +484,11 @@ function processStepInstallType(StepData) {
 			}
 		}
 
-		if (StepData.Theme != 'classic') {
-			$('select#install_type').selectmenu({
-				change: function() {
-					performStep(STEP_INSTALL_TYPE);
-				}
-			});
-		} else {
-			$('#install_type').change(function() {
+		$('select#install_type').selectmenu({
+			change: function() {
 				performStep(STEP_INSTALL_TYPE);
-			});
-		}
+			}
+		});
 	}
 }
 
@@ -494,7 +544,7 @@ function processStepCheckTables(StepData) {
 
 }
 
-function processStepInputValidation(StepData) {
+function processStepNoticesRecommendations(StepData) {
 	if ($('#confirm').length) {
 		$('#confirm').click(function() {
 			if ($(this).is(':checked')) {
@@ -692,9 +742,7 @@ function performStep(installStep, suppressRefresh, forceReload) {
 			setButtonData('Test',data.Test);
 
 			$('input[type=\"text\"], input[type=\"password\"], input[type=\"checkbox\"], textarea').not('image').addClass('ui-state-default ui-corner-all');
-			if (data.Theme != 'classic') {
-				$('select').selectmenu();
-			}
+			$('select').selectmenu();
 
 			if (data.Step == STEP_WELCOME) {
 				processStepWelcome(data.StepData);
@@ -707,7 +755,7 @@ function performStep(installStep, suppressRefresh, forceReload) {
 			} else if (data.Step == STEP_BINARY_LOCATIONS) {
 				processStepBinaryLocations(data.StepData);
 			} else if (data.Step == STEP_INPUT_VALIDATION) {
-				processStepInputValidation(data.StepData);
+				processStepNoticesRecommendations(data.StepData);
 			} else if (data.Step == STEP_PROFILE_AND_AUTOMATION) {
 				processStepProfileAndAutomation(data.StepData);
 			} else if (data.Step == STEP_TEMPLATE_INSTALL) {
@@ -801,10 +849,13 @@ function performTestConnection() {
 				if (data.status == 'true') {
 					isSuccessful = true;
 					statusText = testSuccessful;
+				} else {
+					isSuccessful = false;
+					statusText = data.message;
 				}
 			}
 			$('#labelTest').text(statusText);
-			$('#labelTest').show().fadeOut(2000);
+			$('#labelTest').show().delay(2000).fadeOut(2000);
 			if (isSuccessful) {
 				enableButton('Next');
 			} else {

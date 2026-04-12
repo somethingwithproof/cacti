@@ -26,18 +26,20 @@
  * Make sure these values reflect your actual database/host/user/password
  */
 
-$database_type     = 'mysql';
-$database_default  = 'cacti';
-$database_hostname = 'localhost';
-$database_username = 'cactiuser';
-$database_password = 'cactiuser';
-$database_port     = '3306';
-$database_retries  = 5;
-$database_ssl      = false;
-$database_ssl_key  = '';
-$database_ssl_cert = '';
-$database_ssl_ca   = '';
-$database_persist  = false;
+$database_type        = 'mysql';
+$database_default     = 'cacti';
+$database_hostname    = 'localhost';
+$database_username    = 'cactiuser';
+$database_password    = 'cactiuser';
+$database_port        = 3306;
+$database_retries     = 5;
+$database_ssl         = false;
+$database_ssl_key     = '';
+$database_ssl_cert    = '';
+$database_ssl_ca      = '';
+$database_ssl_capath  = '';
+$database_ssl_verify_server_cert = true;
+$database_persist     = false;
 
 /**
  * When the cacti server is a remote poller, then these entries point to
@@ -45,6 +47,7 @@ $database_persist  = false;
  * must remain commented out.
  */
 
+<<<<<<< HEAD
 #$rdatabase_type     = 'mysql';
 #$rdatabase_default  = 'cacti';
 #$rdatabase_hostname = 'localhost';
@@ -58,6 +61,36 @@ $database_persist  = false;
 #$rdatabase_ssl_ca   = '';
 
 /**
+||||||| 7dd05ee12
+#$rdatabase_type     = 'mysql';
+#$rdatabase_default  = 'cacti';
+#$rdatabase_hostname = 'localhost';
+#$rdatabase_username = 'cactiuser';
+#$rdatabase_password = 'cactiuser';
+#$rdatabase_port     = '3306';
+#$rdatabase_retries  = 5;
+#$rdatabase_ssl      = false;
+#$rdatabase_ssl_key  = '';
+#$rdatabase_ssl_cert = '';
+#$rdatabase_ssl_ca   = '';
+
+/*
+=======
+#$rdatabase_type       = 'mysql';
+#$rdatabase_default    = 'cacti';
+#$rdatabase_hostname   = 'localhost';
+#$rdatabase_username   = 'cactiuser';
+#$rdatabase_password   = 'cactiuser';
+#$rdatabase_port       = 3306;
+#$rdatabase_retries    = 5;
+#$rdatabase_ssl        = false;
+#$rdatabase_ssl_key    = '';
+#$rdatabase_ssl_cert   = '';
+#$rdatabase_ssl_ca     = '';
+#$rdatabase_ssl_capath = '';
+#$rdatabase_ssl_verify_server_cert = true;
+/*
+>>>>>>> origin/fix/jquery-deprecations
  * The poller_id of this system.  set to `1` for the main cacti web server.
  * Otherwise, you this value should be the poller_id for the remote poller.
  */
@@ -75,8 +108,10 @@ $url_path = '/cacti/';
 /**
  * Default session name - session name must contain alpha characters
  */
-
 $cacti_session_name = 'Cacti';
+if (isset($_COOKIE['CactiTab'])) {
+	$cacti_session_name = 'CactiTabId:' . $_COOKIE['CactiTab'];
+}
 
 /**
  * Default Cookie domain - The cookie domain to be used for Cacti
@@ -96,14 +131,23 @@ $cacti_db_session = false;
 
 $disable_log_rotation = false;
 
+<<<<<<< HEAD
 /**
  * Optional parameters to define scripts and resource paths. These
+||||||| 7dd05ee12
+/*
+ * Optional parameters to define scripts and resource paths. These
+=======
+/*
+ * Optional parameters to define scripts, resource, and rra paths. These
+>>>>>>> origin/fix/jquery-deprecations
  * variables become important when using remote poller installs when the
  * scripts and resource files are not in the main Cacti web server path.
  */
-
-//$scripts_path = '/var/www/html/cacti/scripts';
-//$resource_path = '/var/www/html/cacti/resource/';
+//$scripts_path      = '/var/www/html/cacti/scripts';
+//$resource_path     = '/var/www/html/cacti/resource/';
+//$rra_path          = '/var/www/html/cacti/rra/';
+//$package_keys_path = '/etc/cacti/pki';
 
 /**
  * Optional parameter to define a data input whitelist command string. This
@@ -238,3 +282,20 @@ $i18n_log = null;
  * locations under /tmp/systemd<uniqueid>/tmp
  */
 $i18n_text_log = null;
+<<<<<<< HEAD
+||||||| 7dd05ee12
+# define('DEBUG_SQL_FLOW', true);
+=======
+
+/**
+ * Define the array of IP addresses whitelisted for
+ * remote agent communication.
+ *
+ * Example:
+ *
+ * $remote_agent_whitelist = ['1.2.3.4'];
+ *
+ */
+
+$remote_agent_whitelist = array();
+>>>>>>> origin/fix/jquery-deprecations

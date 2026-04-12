@@ -2596,7 +2596,14 @@ abstract class SymmetricKey
 
         $length = ord($text[strlen($text) - 1]);
 
+<<<<<<< HEAD
         if (!$length | ($length > $this->block_size)) {
+||||||| 7dd05ee12
+        if (!$length || $length > $this->block_size) {
+            return false;
+=======
+        if (!$length || $length > $this->block_size) {
+>>>>>>> origin/fix/jquery-deprecations
             throw new BadDecryptionException("The ciphertext has an invalid padding length ($length) compared to the block size ({$this->block_size})");
         }
 

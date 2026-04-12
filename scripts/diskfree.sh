@@ -20,4 +20,10 @@
 #   | http://www.cacti.net/                                                   |
 #   +-------------------------------------------------------------------------+
 
+<<<<<<< HEAD
 df -k $1 | grep -v Filesystem| awk '{printf "megabytes:" $4 " percent:" int($5)}'
+||||||| 7dd05ee12
+df -k $1 | grep -v Filesystem| awk '{printf "megabytes:" $4 " percent:" int($5)}'
+=======
+df -k "$1" | grep -v Filesystem| awk '{printf "megabytes:" $4 " percent:" int($5)}'
+>>>>>>> origin/fix/jquery-deprecations

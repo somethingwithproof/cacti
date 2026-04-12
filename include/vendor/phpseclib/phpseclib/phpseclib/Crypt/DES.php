@@ -673,6 +673,7 @@ class DES extends BlockCipher
     {
         static $sbox1, $sbox2, $sbox3, $sbox4, $sbox5, $sbox6, $sbox7, $sbox8, $shuffleip, $shuffleinvip;
         if (!$sbox1) {
+<<<<<<< HEAD
             $sbox1 = array_map([self::class, 'safe_intval'], self::$sbox1);
             $sbox2 = array_map([self::class, 'safe_intval'], self::$sbox2);
             $sbox3 = array_map([self::class, 'safe_intval'], self::$sbox3);
@@ -681,6 +682,25 @@ class DES extends BlockCipher
             $sbox6 = array_map([self::class, 'safe_intval'], self::$sbox6);
             $sbox7 = array_map([self::class, 'safe_intval'], self::$sbox7);
             $sbox8 = array_map([self::class, 'safe_intval'], self::$sbox8);
+||||||| 7dd05ee12
+            $sbox1 = array_map("intval", $this->sbox1);
+            $sbox2 = array_map("intval", $this->sbox2);
+            $sbox3 = array_map("intval", $this->sbox3);
+            $sbox4 = array_map("intval", $this->sbox4);
+            $sbox5 = array_map("intval", $this->sbox5);
+            $sbox6 = array_map("intval", $this->sbox6);
+            $sbox7 = array_map("intval", $this->sbox7);
+            $sbox8 = array_map("intval", $this->sbox8);
+=======
+            $sbox1 = array_map('intval', self::$sbox1);
+            $sbox2 = array_map('intval', self::$sbox2);
+            $sbox3 = array_map('intval', self::$sbox3);
+            $sbox4 = array_map('intval', self::$sbox4);
+            $sbox5 = array_map('intval', self::$sbox5);
+            $sbox6 = array_map('intval', self::$sbox6);
+            $sbox7 = array_map('intval', self::$sbox7);
+            $sbox8 = array_map('intval', self::$sbox8);
+>>>>>>> origin/fix/jquery-deprecations
             /* Merge $shuffle with $[inv]ipmap */
             for ($i = 0; $i < 256; ++$i) {
                 $shuffleip[]    =  self::$shuffle[self::$ipmap[$i]];
@@ -1292,6 +1312,7 @@ class DES extends BlockCipher
 
         $init_crypt = 'static $sbox1, $sbox2, $sbox3, $sbox4, $sbox5, $sbox6, $sbox7, $sbox8, $shuffleip, $shuffleinvip;
             if (!$sbox1) {
+<<<<<<< HEAD
                 $sbox1 = array_map("self::safe_intval", self::$sbox1);
                 $sbox2 = array_map("self::safe_intval", self::$sbox2);
                 $sbox3 = array_map("self::safe_intval", self::$sbox3);
@@ -1300,6 +1321,52 @@ class DES extends BlockCipher
                 $sbox6 = array_map("self::safe_intval", self::$sbox6);
                 $sbox7 = array_map("self::safe_intval", self::$sbox7);
                 $sbox8 = array_map("self::safe_intval", self::$sbox8);'
+||||||| 7dd05ee12
+        // We create max. 10 hi-optimized code for memory reason. Means: For each $key one ultra fast inline-crypt function.
+        // (Currently, for DES, one generated $lambda_function cost on php5.5@32bit ~135kb unfreeable mem and ~230kb on php5.5@64bit)
+        // (Currently, for TripleDES, one generated $lambda_function cost on php5.5@32bit ~240kb unfreeable mem and ~340kb on php5.5@64bit)
+        // After that, we'll still create very fast optimized code but not the hi-ultimative code, for each $mode one
+        $gen_hi_opt_code = (bool)( count($lambda_functions) < 10 );
+
+        // Generation of a unique hash for our generated code
+        $code_hash = "Crypt_DES, $des_rounds, {$this->mode}";
+        if ($gen_hi_opt_code) {
+            // For hi-optimized code, we create for each combination of
+            // $mode, $des_rounds and $this->key its own encrypt/decrypt function.
+            // After max 10 hi-optimized functions, we create generic
+            // (still very fast.. but not ultra) functions for each $mode/$des_rounds
+            // Currently 2 * 5 generic functions will be then max. possible.
+            $code_hash = str_pad($code_hash, 32) . $this->_hashInlineCryptFunction($this->key);
+        }
+
+        // Is there a re-usable $lambda_functions in there? If not, we have to create it.
+        if (!isset($lambda_functions[$code_hash])) {
+            // Init code for both, encrypt and decrypt.
+            $init_crypt = 'static $sbox1, $sbox2, $sbox3, $sbox4, $sbox5, $sbox6, $sbox7, $sbox8, $shuffleip, $shuffleinvip;
+                if (!$sbox1) {
+                    $sbox1 = array_map("intval", $self->sbox1);
+                    $sbox2 = array_map("intval", $self->sbox2);
+                    $sbox3 = array_map("intval", $self->sbox3);
+                    $sbox4 = array_map("intval", $self->sbox4);
+                    $sbox5 = array_map("intval", $self->sbox5);
+                    $sbox6 = array_map("intval", $self->sbox6);
+                    $sbox7 = array_map("intval", $self->sbox7);
+                    $sbox8 = array_map("intval", $self->sbox8);'
+                    /* Merge $shuffle with $[inv]ipmap */ . '
+                    for ($i = 0; $i < 256; ++$i) {
+                        $shuffleip[]    =  $self->shuffle[$self->ipmap[$i]];
+                        $shuffleinvip[] =  $self->shuffle[$self->invipmap[$i]];
+                    }
+=======
+                $sbox1 = array_map("intval", self::$sbox1);
+                $sbox2 = array_map("intval", self::$sbox2);
+                $sbox3 = array_map("intval", self::$sbox3);
+                $sbox4 = array_map("intval", self::$sbox4);
+                $sbox5 = array_map("intval", self::$sbox5);
+                $sbox6 = array_map("intval", self::$sbox6);
+                $sbox7 = array_map("intval", self::$sbox7);
+                $sbox8 = array_map("intval", self::$sbox8);'
+>>>>>>> origin/fix/jquery-deprecations
                 /* Merge $shuffle with $[inv]ipmap */ . '
                 for ($i = 0; $i < 256; ++$i) {
                     $shuffleip[]    =  self::$shuffle[self::$ipmap[$i]];

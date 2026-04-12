@@ -23,13 +23,14 @@
 */
 
 $guest_account = true;
-include('./include/auth.php');
-include_once('./lib/clog_webapi.php');
-include_once('./lib/poller.php');
-include_once('./lib/utility.php');
+require('./include/auth.php');
+require_once(CACTI_PATH_LIBRARY . '/clog_webapi.php');
+require_once(CACTI_PATH_LIBRARY . '/poller.php');
+require_once(CACTI_PATH_LIBRARY . '/utility.php');
 
-/* check edit/alter permissions */
+// check edit/alter permissions
 if (!clog_authorized()) {
+<<<<<<< HEAD
 	if (isset_request_var('header')) {
 		if ($config['poller_id'] > 1) {
 			print '<div style="display:none">cactiRemoteState</div>';
@@ -37,6 +38,11 @@ if (!clog_authorized()) {
 			print '<div style="display:none">cactiPermissionDenied</div>';
 		}
 	} elseif ($config['poller_id'] > 1) {
+||||||| 7dd05ee12
+	echo __('FATAL: YOU DO NOT HAVE ACCESS TO THIS AREA OF CACTI');
+=======
+	if (POLLER_ID > 1) {
+>>>>>>> origin/fix/jquery-deprecations
 		header('Location: logout.php?action=remote');
 	} else {
 		header('Location: permission_denied.php');

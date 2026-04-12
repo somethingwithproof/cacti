@@ -694,14 +694,32 @@ button.ui-button::-moz-focus-inner {
 }
 .ui-selectmenu-text {
 	display: block;
-	margin-right: 20px;
+	margin-right: 5px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+
+button.ui-multiselect,
 .ui-selectmenu-button.ui-button {
-	text-align: left;
 	white-space: nowrap;
-	width: 14em;
+	width: 100% !important;
+	max-width: 25rem !important;
+	border-radius: 4px;
+	display: inline-flex;
+	flex-direction: row-reverse;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0.4rem 0.5em !important;
+	
+	&:active,
+	&:focus-within,
+	&:focus-visible {
+		outline: none !important;
+		box-shadow: none !important;
+		background: var(--background-content);
+		border: 1px solid var(--border-color-highlight);
+		-webkit-tap-highlight-color: 1px solid var(--border-color-highlight);
+	}
 }
 .ui-selectmenu-icon.ui-icon {
 	float: right;
@@ -956,11 +974,25 @@ a.ui-button:focus {
 .ui-widget-header .ui-state-active,
 a.ui-button:active,
 .ui-button:active,
+<<<<<<< HEAD
 .ui-button.ui-state-active:hover {
 	border: 1px solid #aaaaaa;
 	background: #ffffff url("images/ui-bg_glass_65_ffffff_1x400.png") 50% 50% repeat-x;
+||||||| 7dd05ee12
+.ui-button.ui-state-active:hover {
+=======
+.ui-button.ui-state-active:hover,
+.ui-button.ui-state-active:focus-within {
+>>>>>>> origin/fix/jquery-deprecations
 	font-weight: normal;
+<<<<<<< HEAD
 	color: #212121;
+||||||| 7dd05ee12
+	color: #93CEFF;
+=======
+	color: white;
+	background: var(--background-progress);
+>>>>>>> origin/fix/jquery-deprecations
 }
 .ui-icon-background,
 .ui-state-active .ui-icon-background {

@@ -21,5 +21,12 @@
  | http://www.cacti.net/                                                   |
  +-------------------------------------------------------------------------+
 */
+<<<<<<< HEAD
 
 header("Location:../index.php");
+||||||| 7dd05ee12
+
+header("Location:../index.php");
+=======
+header('Location:../index.php');
+>>>>>>> origin/fix/jquery-deprecations
