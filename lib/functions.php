@@ -5193,6 +5193,11 @@ function validate_path_within(string $filename, string $base_dir) : string|false
 		return false;
 	}
 
+	// Reject platform path separators explicitly for cross-platform safety.
+	if (str_contains($filename, '/') || str_contains($filename, '\\')) {
+		return false;
+	}
+
 	$base_real = realpath($base_dir);
 
 	if ($base_real === false) {
@@ -5202,11 +5207,17 @@ function validate_path_within(string $filename, string $base_dir) : string|false
 	$combined = $base_real . '/' . $filename;
 	$resolved = realpath($combined);
 
-	if ($resolved === false || !str_starts_with($resolved, $base_real . '/')) {
-		return false;
+	// Existing file case: ensure realpath resolves within base (symlink-safe).
+	if ($resolved !== false) {
+		if (!str_starts_with($resolved, $base_real . '/') && $resolved !== $base_real) {
+			return false;
+		}
+
+		return $resolved;
 	}
 
-	return $resolved;
+	// New file case: allow a safe path under base for write/create operations.
+	return $combined;
 }
 
 function validate_relative_path_within(string $path, string $base_dir) : string|false {

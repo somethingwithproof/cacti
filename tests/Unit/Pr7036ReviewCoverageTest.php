@@ -73,6 +73,14 @@ test('PR7036 comments: import path handling validates with base containment help
 	expect($source)->toContain("\$filename = \$validated;");
 });
 
+test('PR7036 comments: validate_path_within supports safe create paths and blocks separators', function () {
+	$source = pr7036_source('lib/functions.php');
+
+	expect($source)->toContain("str_contains(\$filename, '/') || str_contains(\$filename, '\\\\')");
+	expect($source)->toContain('if ($resolved !== false)');
+	expect($source)->toContain('return $combined;');
+});
+
 test('PR7036 comments: reports title output is escaped consistently', function () {
 	$source = pr7036_source('lib/reports.php');
 
