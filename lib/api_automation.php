@@ -753,7 +753,7 @@ function automation_get_new_graphs_sql(array $rule) : mixed {
 			'filter'  => FILTER_CALLBACK,
 			'default' => 'description',
 			'options' => ['options' => function ($v) {
-				return preg_match('/^[a-zA-Z_][a-zA-Z0-9_.]*$/', $v) ? $v : 'description';
+				return preg_match('/^[a-zA-Z_`][a-zA-Z0-9_`().,]*$/', $v) ? $v : 'description';
 			}]
 		],
 		'sort_direction' => [

@@ -102,7 +102,7 @@ function form_save() : void {
 		if (!is_error_message()) {
 			$input_string_bare = preg_replace('/<[a-zA-Z_]+>/', '', $save['input_string']);
 
-			if (preg_match('/[;&|`$\\\\\n\r]/', $input_string_bare)) {
+			if (preg_match('/[;&`$\\\\\n\r]/', $input_string_bare)) {
 				raise_message('validation_error', __('Input string contains dangerous shell characters'), MESSAGE_LEVEL_ERROR);
 				header('Location: data_input.php?action=edit&id=' . (empty($save['id']) ? '' : $save['id']));
 				exit;
