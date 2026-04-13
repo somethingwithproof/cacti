@@ -158,20 +158,9 @@ function remote_client_authorized() : bool {
 	}
 
 	if ($client_name != $client_addr) {
-		$forward_records = @dns_get_record($client_name, DNS_A | DNS_AAAA);
-		$forward_match   = false;
-
-		if (is_array($forward_records)) {
-			foreach ($forward_records as $record) {
-				$ip = isset($record['ip']) ? $record['ip'] : (isset($record['ipv6']) ? $record['ipv6'] : '');
-
-				if ($ip === $client_addr) {
-					$forward_match = true;
-
-					break;
-				}
-			}
-		}
+		$forward_match = cacti_remote_agent_forward_matches($client_addr, $client_name, function (string $host) {
+			return @dns_get_record($host, DNS_A | DNS_AAAA);
+		});
 
 		if (!$forward_match) {
 			$safe_name = preg_replace('/[^a-zA-Z0-9.\-:]/', '', $client_name);
@@ -184,18 +173,8 @@ function remote_client_authorized() : bool {
 	$pollers = db_fetch_assoc('SELECT * FROM poller WHERE disabled = ""', true, $poller_db_cnn_id);
 
 	if (cacti_sizeof($pollers) > 1) {
-		foreach ($pollers as $poller) {
-			if ($poller['hostname'] == $client_name) {
-				return true;
-			}
-
-			if ($poller['hostname'] == $client_addr) {
-				return true;
-			}
-
-			if (in_array($client_addr,$remote_agent_whitelist, true)) {
-				return true;
-			}
+		if (cacti_remote_agent_is_authorized_host($client_name, $client_addr, $pollers, $remote_agent_whitelist)) {
+			return true;
 		}
 	}
 

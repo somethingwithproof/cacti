@@ -1,6 +1,6 @@
 <phpunit bootstrap="include/vendor/autoload.php" beStrictAboutOutputDuringTests="false">
     <php>
-        <ini name="error_reporting" value="-1"/>
+        <ini name="error_reporting" value="8191"/>
     </php>
     <testsuites>
         <testsuite name="Unit">

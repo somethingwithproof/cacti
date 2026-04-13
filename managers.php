@@ -756,7 +756,7 @@ function form_actions() : void {
 			$selected_items = sanitize_unserialize_selected_items(gnrv('selected_graphs_array'));
 
 			if ($selected_items != false) {
-				$ids = array_filter(array_map('intval', $selected_items), function ($v) { return $v > 0; });
+				$ids = cacti_extract_positive_int_ids($selected_items);
 
 				if (empty($ids)) {
 					header('Location: managers.php');

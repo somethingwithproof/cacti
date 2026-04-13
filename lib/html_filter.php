@@ -964,9 +964,7 @@ class CactiTableFilter {
 
 			$filters['sort_direction']['filter']  = FILTER_CALLBACK;
 			$filters['sort_direction']['options'] = ['options' => function ($v) {
-				$v = strtoupper(trim($v));
-
-				return in_array($v, ['ASC', 'DESC'], true) ? $v : 'ASC';
+				return cacti_validate_sort_direction($v, 'ASC');
 			}];
 			$filters['sort_direction']['default'] = $this->filter_array['sort']['sort_direction'];
 		}

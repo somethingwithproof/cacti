@@ -20,9 +20,11 @@ function pr7036_source(string $path): string {
 
 test('PR7036 comments: data_input keeps shell hardening but allows pipe workflows', function () {
 	$source = pr7036_source('data_input.php');
+	$helper = pr7036_source('lib/security_validation.php');
 
-	expect($source)->toContain("preg_replace('/<[a-zA-Z_]+>/', '', \$save['input_string'])");
-	expect($source)->toContain("preg_match('/[;&`$\\\\\\\\\\n\\r]/', \$input_string_bare)");
+	expect($source)->toContain("cacti_input_string_is_safe(\$save['input_string'])");
+	expect($helper)->toContain("preg_replace('/<[a-zA-Z_]+>/', '', \$input_string)");
+	expect($helper)->toContain("preg_match('/[;&`$\\\\\\\\\\n\\r]/', \$input_string_bare)");
 	expect($source)->not->toContain('[;&|`$');
 
 	$allowed = 'grep foo /tmp/x | wc -l';
@@ -34,15 +36,17 @@ test('PR7036 comments: data_input keeps shell hardening but allows pipe workflow
 
 test('PR7036 comments: api_automation sort regex supports backticks and parenthesis', function () {
 	$source = pr7036_source('lib/api_automation.php');
+	$helper = pr7036_source('lib/security_validation.php');
 
-	expect($source)->toContain("/^[a-zA-Z_`][a-zA-Z0-9_`().,]*$/");
+	expect($source)->toContain("cacti_validate_sort_column(\$v, 'description')");
+	expect($helper)->toContain("/^[a-zA-Z_`][a-zA-Z0-9_`().,]*$/");
 });
 
 test('PR7036 comments: html_filter sort_column uses sanitize_search_string to avoid UI breakage', function () {
 	$source = pr7036_source('lib/html_filter.php');
 
 	expect($source)->toContain("\$filters['sort_column']['options']    = ['options' => 'sanitize_search_string'];");
-	expect($source)->toContain("return in_array(\$v, ['ASC', 'DESC'], true) ? \$v : 'ASC';");
+	expect($source)->toContain("cacti_validate_sort_direction(\$v, 'ASC')");
 });
 
 test('PR7036 comments: auth_login rotates session id on successful login', function () {
@@ -114,4 +118,10 @@ test('PR7036 comments: remote agent logs FQDN mismatch migration hint', function
 
 	expect($source)->toContain('matches poller');
 	expect($source)->toContain('by short hostname but not FQDN');
+});
+
+test('PR7036 comments: centralized security validation helpers are loaded globally', function () {
+	$source = pr7036_source('include/global.php');
+
+	expect($source)->toContain("require_once(CACTI_PATH_LIBRARY . '/security_validation.php');");
 });
