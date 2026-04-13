@@ -3,6 +3,17 @@ name: Security Docker Tests
 on:
   pull_request:
     branches: [develop]
+    paths:
+      - '.github/workflows/security-docker-tests.yml'
+      - 'docker-compose.yml'
+      - 'docker/**'
+      - 'tests/Unit/**'
+      - 'tests/tools/**'
+      - 'lib/**'
+      - 'include/global.php'
+      - 'data_input.php'
+      - 'managers.php'
+      - 'remote_agent.php'
   workflow_dispatch:
 
 permissions:

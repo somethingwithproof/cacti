@@ -78,11 +78,10 @@ function cacti_remote_agent_forward_matches(string $client_addr, string $client_
  */
 function cacti_remote_agent_is_authorized_host(string $client_name, string $client_addr, array $pollers, array $whitelist): bool {
 	foreach ($pollers as $poller) {
-		if ($poller['hostname'] == $client_name || $poller['hostname'] == $client_addr) {
+		if (isset($poller['hostname']) && (strcasecmp($poller['hostname'], $client_name) === 0 || $poller['hostname'] === $client_addr)) {
 			return true;
 		}
 	}
 
 	return in_array($client_addr, $whitelist, true);
 }
-

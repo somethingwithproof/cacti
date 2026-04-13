@@ -25,8 +25,12 @@ test('security helpers: sort validation enforces constrained column and directio
 	expect(cacti_validate_sort_column('description', 'description'))->toBe('description');
 	expect(cacti_validate_sort_column('`description`', 'description'))->toBe('`description`');
 	expect(cacti_validate_sort_column('description;drop', 'description'))->toBe('description');
+	expect(cacti_validate_sort_column('', 'description'))->toBe('description');
+	expect(cacti_validate_sort_column('   ', 'description'))->toBe('description');
 	expect(cacti_validate_sort_direction('desc', 'ASC'))->toBe('DESC');
 	expect(cacti_validate_sort_direction('sideways', 'ASC'))->toBe('ASC');
+	expect(cacti_validate_sort_direction('', 'ASC'))->toBe('ASC');
+	expect(cacti_validate_sort_direction('   ', 'ASC'))->toBe('ASC');
 });
 
 test('security helpers: managers id extraction keeps only positive integers', function () {
@@ -65,4 +69,12 @@ test('security helpers: remote agent host authorization requires exact fqdn or i
 	expect(cacti_remote_agent_is_authorized_host('other.example.com', '10.0.0.10', $pollers, []))->toBeTrue();
 	expect(cacti_remote_agent_is_authorized_host('poller01', '10.0.0.9', $pollers, []))->toBeFalse();
 	expect(cacti_remote_agent_is_authorized_host('other.example.com', '10.0.0.99', $pollers, ['10.0.0.99']))->toBeTrue();
+});
+
+test('security helpers: remote agent hostname match is case-insensitive', function () {
+	$pollers = [
+		['hostname' => 'PoLlEr01.Example.COM'],
+	];
+
+	expect(cacti_remote_agent_is_authorized_host('poller01.example.com', '10.0.0.9', $pollers, []))->toBeTrue();
 });

@@ -72,6 +72,17 @@ test('validate_path_within rejects path separators and traversal-like names', fu
 	}
 });
 
+test('validate_path_within rejects windows drive and UNC-like path forms', function () {
+	$base = make_temp_dir('cacti-win-base');
+
+	try {
+		expect(validate_path_within('C:\\Windows\\Temp\\evil.txt', $base))->toBeFalse();
+		expect(validate_path_within('\\\\server\\share\\evil.txt', $base))->toBeFalse();
+	} finally {
+		remove_tree($base);
+	}
+});
+
 test('validate_relative_path_within rejects unix and windows traversal segments', function () {
 	$base = make_temp_dir('cacti-rel-base');
 
