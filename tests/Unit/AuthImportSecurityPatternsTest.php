@@ -298,8 +298,9 @@ test('import.php restricts file writes to scripts/ and resource/ paths', functio
 	expect($importSource)->toContain("str_contains(\$name, 'resource/')");
 });
 
-test('import.php constructs write paths relative to CACTI_PATH_BASE', function () use ($importSource) {
-	expect($importSource)->toContain('CACTI_PATH_BASE . "/$name"');
+test('import.php validates and constrains write paths under CACTI_PATH_BASE', function () use ($importSource) {
+	expect($importSource)->toContain('validate_relative_path_within($name, CACTI_PATH_BASE)');
+	expect($importSource)->toContain('$filename = $validated;');
 });
 
 test('import.php checks directory writability before file creation', function () use ($importSource) {

@@ -106,11 +106,12 @@ test('rrd graph theme rejects dot-only basename values', function () use ($rrdPa
 
 // --- PR #6974: remote_agent effective_user and OID validation ---
 
-test('remote_agent registers effective_user with gfrv for int validation', function () use ($remoteAgentPath) {
+test('remote_agent does not accept effective_user from request and uses session user', function () use ($remoteAgentPath) {
 	$contents = file_get_contents($remoteAgentPath);
 
-	// gfrv() defaults to FILTER_VALIDATE_INT, ensuring effective_user is validated
-	expect($contents)->toContain("gfrv('effective_user')");
+	expect($contents)->not->toContain("gfrv('effective_user')");
+	expect($contents)->not->toContain("grv('effective_user')");
+	expect($contents)->toContain('$_SESSION[SESS_USER_ID] ?? 0');
 });
 
 test('remote_agent OID validation regex in get_snmp_data', function () use ($remoteAgentPath) {
