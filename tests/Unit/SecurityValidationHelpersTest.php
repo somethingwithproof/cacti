@@ -34,9 +34,9 @@ test('security helpers: sort validation enforces constrained column and directio
 });
 
 test('security helpers: managers id extraction keeps only positive integers', function () {
-	$ids = cacti_extract_positive_int_ids(['1', '-5', '0', '4.2', 'abc', '7', '9 OR 1=1']);
+	$ids = cacti_extract_positive_int_ids(['1', '-5', '0', '4.2', 'abc', '7', '9 OR 1=1', ' +7', ' 08 ']);
 
-	expect($ids)->toBe([1, 4, 7, 9]);
+	expect($ids)->toBe([1, 4, 7, 9, 7, 8]);
 });
 
 test('security helpers: remote agent forward lookup requires exact ip match', function () {

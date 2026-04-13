@@ -27,6 +27,8 @@ jobs:
   security-docker:
     name: docker security test suite
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -39,6 +41,7 @@ jobs:
           extensions: intl, mysqli, pdo_mysql, mbstring, xml
 
       - name: Install PHP dependencies
+        timeout-minutes: 8
         run: composer install --no-interaction --prefer-dist
 
       - name: Create test environment
@@ -57,11 +60,13 @@ jobs:
           EOF
 
       - name: Build and start docker stack
+        timeout-minutes: 12
         run: |
-          docker compose --env-file .env.test build
+          docker compose --env-file .env.test build --pull
           docker compose --env-file .env.test up -d
 
       - name: Wait for healthy containers
+        timeout-minutes: 5
         run: |
           set -euo pipefail
           for i in $(seq 1 24); do
@@ -83,6 +88,7 @@ jobs:
           docker compose --env-file .env.test exec -T web php -r "new PDO('mysql:host=db;dbname=cacti', 'cacti', 'testpass');"
 
       - name: Run security-focused unit suite in container
+        timeout-minutes: 8
         run: |
           docker compose --env-file .env.test exec -T web include/vendor/bin/pest --colors=never \
             tests/Unit/Pr7036ReviewCoverageTest.php \

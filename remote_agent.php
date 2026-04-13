@@ -186,7 +186,8 @@ function remote_client_authorized() : bool {
 			$poller_short = str_contains($poller['hostname'], '.') ? explode('.', $poller['hostname'])[0] : $poller['hostname'];
 
 			if ($poller_short == $short_name) {
-				cacti_log("SECURITY: Remote agent '$client_name' ($client_addr) matches poller '{$poller['hostname']}' by short hostname but not FQDN. Update the poller hostname to the FQDN.", false, 'AUTH');
+				$poller_id = isset($poller['id']) ? (int) $poller['id'] : 0;
+				cacti_log("SECURITY: Remote agent '$client_name' ($client_addr) matches poller '{$poller['hostname']}' (id:$poller_id) by short hostname but not FQDN. Update the poller hostname to the FQDN.", false, 'AUTH');
 
 				break;
 			}

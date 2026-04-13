@@ -117,6 +117,7 @@ test('PR7036 comments: remote agent logs FQDN mismatch migration hint', function
 	$source = pr7036_source('remote_agent.php');
 
 	expect($source)->toContain('matches poller');
+	expect($source)->toContain('(id:$poller_id)');
 	expect($source)->toContain('by short hostname but not FQDN');
 });
 
