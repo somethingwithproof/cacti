@@ -67,17 +67,9 @@ function filter_value(mixed $value, string $filter, string $href = '', string $t
 		$charset = 'UTF-8';
 	}
 
-<<<<<<< HEAD
 	if (empty($value)) {
 		return $value;
 	}
-||||||| 7dd05ee12
-	if ($value == '') {
-		return $value;
-	}
-=======
-	$value =  htmle($value);
->>>>>>> origin/fix/jquery-deprecations
 
 	// Grave Accent character can lead to xss
 	$value = str_replace('`', '&#96;', $value);
@@ -230,7 +222,6 @@ function set_user_setting(string $config_name, mixed $value, mixed $user = null)
 			cacti_log("ERROR: User setting name '$config_name' is too long, will be truncated", false, 'SYSTEM');
 		}
 
-<<<<<<< HEAD
 		cacti_log('NOTE: Attempt to set user setting \'' . $config_name . '\', with no user id: ' . cacti_debug_backtrace('', false, false, 0, 1), false, $mode, POLLER_VERBOSITY_MEDIUM);
 	} elseif (db_table_exists('settings_user')) {
 		if (strlen($config_name) > 255) {
@@ -241,20 +232,6 @@ function set_user_setting(string $config_name, mixed $value, mixed $user = null)
 			(user_id, name, value) VALUES (?, ?, ?)
 			ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)',
 			array($user, $config_name, $value));
-||||||| 7dd05ee12
-		cacti_log('NOTE: Attempt to set user setting \'' . $config_name . '\', with no user id: ' . cacti_debug_backtrace('', false, false, 0, 1), false, $mode, POLLER_VERBOSITY_MEDIUM);
-	} elseif (db_table_exists('settings_user')) {
-		db_execute_prepared('REPLACE INTO settings_user
-			SET user_id = ?,
-			name = ?,
-			value = ?',
-			array($user, $config_name, $value));
-=======
-		db_execute_prepared('INSERT INTO settings_user
-			(user_id, name, value) VALUES (?, ?, ?)
-			ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)',
-			[$user, $config_name, $value]);
->>>>>>> origin/fix/jquery-deprecations
 
 		$_SESSION[OPTIONS_USER][$config_name] = $value;
 		$settings_user[$config_name]['value'] = $value;
@@ -456,15 +433,7 @@ function set_config_option(string $config_name, mixed $value, bool $remote = fal
 	db_execute_prepared('INSERT INTO settings
 		(name, value) VALUES (?, ?)
 		ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)',
-<<<<<<< HEAD
 		array($config_name, $value));
-||||||| 7dd05ee12
-	db_execute_prepared('REPLACE INTO settings
-		SET name = ?, value = ?',
-		array($config_name, $value));
-=======
-		[$config_name, $value]);
->>>>>>> origin/fix/jquery-deprecations
 
 	if ($remote && !is_remote_path_setting($config_name)) {
 		$gone_time = read_config_option('poller_interval') * 2;
@@ -711,27 +680,11 @@ function cache_common_config_settings() : array {
 /**
  * Finds the current value of a Cacti configuration setting
  *
-<<<<<<< HEAD
  * @param $config_name    The name of the configuration setting as specified
  *                        as a key in $settings array in
  *                        'include/global_settings.php'
-||||||| 7dd05ee12
- * @param $config_name - the name of the configuration setting as specified $settings array
- *   in 'include/global_settings.php'
-=======
- * @param string $config_name The name of the configuration setting as
- *                            specified $settings array in
- *                            'include/global_settings.php'
- * @param bool   $force       Pull the data from the database if true ignoring session
->>>>>>> origin/fix/jquery-deprecations
  *
-<<<<<<< HEAD
  * @return string|false   The current value of the configuration option
-||||||| 7dd05ee12
- * @return - the current value of the configuration option
-=======
- * @return mixed The current value of the configuration option
->>>>>>> origin/fix/jquery-deprecations
  */
 function read_config_option(string $config_name, bool $force = false) : mixed {
 	global $config, $database_hostname, $database_default, $database_port, $database_sessions;
@@ -781,13 +734,7 @@ function read_config_option(string $config_name, bool $force = false) : mixed {
 		if (isset($database_hostname) && isset($database_port) && isset($database_default) &&
 			isset($database_sessions["$database_hostname:$database_port:$database_default"])) {
 			// Get the database setting
-<<<<<<< HEAD
 			$db_result = db_fetch_row_prepared('SELECT value FROM settings WHERE name = ?', array($config_name), false);
-||||||| 7dd05ee12
-			$db_result = db_fetch_row_prepared('SELECT value FROM settings WHERE name = ?', array($config_name));
-=======
-			$db_result = db_fetch_row_prepared('SELECT value FROM settings WHERE name = ?', [$config_name], false);
->>>>>>> origin/fix/jquery-deprecations
 
 			if (cacti_sizeof($db_result)) {
 				$value = $db_result['value'];
@@ -838,54 +785,21 @@ function get_selected_theme() : string {
 
 		// user has a theme
 		if (!empty($user_theme)) {
-<<<<<<< HEAD
 			$theme = $user_theme;;
-||||||| 7dd05ee12
-		if (! empty($user_theme)) {
-			$theme = $user_theme;;
-=======
-			$theme = $user_theme;
->>>>>>> origin/fix/jquery-deprecations
 		}
 	}
 
-<<<<<<< HEAD
 	if (!file_exists($config['base_path'] . '/include/themes/' . $theme . '/main.css')) {
 		foreach($themes as $t => $name) {
 			if ($t != 'classic') {
 				if (file_exists($config['base_path'] . '/include/themes/' . $t . '/main.css')) {
 					$theme = $t;
-||||||| 7dd05ee12
-	if (!file_exists($config['base_path'] . '/include/themes/' . $theme . '/main.css')) {
-		foreach($themes as $t => $name) {
-			if (file_exists($config['base_path'] . '/include/themes/' . $t . '/main.css')) {
-				$theme = $t;
-=======
-	if (!file_exists(CACTI_PATH_INCLUDE . '/themes/' . $theme . '/main.css')) {
-		foreach ($themes as $t => $name) {
-			if (file_exists(CACTI_PATH_INCLUDE . '/themes/' . $t . '/main.css')) {
-				$theme = $t;
->>>>>>> origin/fix/jquery-deprecations
 
-<<<<<<< HEAD
 					db_execute_prepared('UPDATE settings_user
 						SET value = ?
 						WHERE user_id = ?
 						AND name = "selected_theme"',
 						array($theme, $_SESSION['sess_user_id']));
-||||||| 7dd05ee12
-				db_execute_prepared('UPDATE settings_user
-					SET value = ?
-					WHERE user_id = ?
-					AND name="selected_theme"',
-					array($theme, $_SESSION['sess_user_id']));
-=======
-				db_execute_prepared('UPDATE settings_user
-					SET value = ?
-					WHERE user_id = ?
-					AND name = "selected_theme"',
-					[$theme, $_SESSION[SESS_USER_ID]]);
->>>>>>> origin/fix/jquery-deprecations
 
 					break;
 				}
@@ -955,35 +869,14 @@ function is_valid_theme(mixed &$theme, int $set_user = 0) : bool {
  * form_input_validate - validates the value of a form field and Takes the appropriate action if the input
  * is not valid
  *
-<<<<<<< HEAD
  * @param string $field_value    value of the form field
  * @param string $field_name     name of the $_POST field as specified in the HTML
  * @param string $regexp_match   (optionally) enter a regular expression to match the value against
  * @param bool $allow_nulls      whether to allow an empty string as a value or not
  * @param int $custom_message    the ID of the message to raise upon an error which is defined in the
  *   $messages array in 'include/global_arrays.php'
-||||||| 7dd05ee12
- * @param $field_value - the value of the form field
- * @param $field_name - the name of the $_POST field as specified in the HTML
- * @param $regexp_match - (optionally) enter a regular expression to match the value against
- * @param $allow_nulls - (bool) whether to allow an empty string as a value or not
- * @param $custom_message - (int) the ID of the message to raise upon an error which is defined in the
- *   $messages array in 'include/global_arrays.php'
-=======
- * @param mixed  $field_value  Value of the form field
- * @param string $field_name   Name of the $_POST field as specified in the HTML
- * @param string $regexp_match Optionally enter a regular expression to match the value against
- * @param bool   $allow_nulls  Whether to allow an empty string as a value or not
- * @param mixed  $message_id   The error message to raise in the case of an error
->>>>>>> origin/fix/jquery-deprecations
  *
-<<<<<<< HEAD
  * @return string                the original $field_value
-||||||| 7dd05ee12
- * @return - the original $field_value
-=======
- * @return mixed - The original $field_value
->>>>>>> origin/fix/jquery-deprecations
  */
 function form_input_validate(mixed $field_value, string $field_name, string $regexp_match, bool $allow_nulls, mixed $message_id = 3) : mixed {
 	global $messages;
@@ -1000,28 +893,9 @@ function form_input_validate(mixed $field_value, string $field_name, string $reg
 	if ($allow_nulls == false && $field_value == '') {
 		$report_message = __("Form Validation Failed: Variable '%s' does not allow nulls and variable is null", $field_name);
 	} elseif ($regexp_match != '' && !preg_match('/' . $regexp_match . '/', $field_value)) {
-<<<<<<< HEAD
 		if (read_config_option('log_validation') == 'on') {
 			cacti_log("Form Validation Failed: Variable '$field_name' with Value '$field_value' Failed REGEX '$regexp_match'", false);
 			cacti_debug_backtrace('REGEX FAILURE');
-||||||| 7dd05ee12
-		if (read_config_option('log_validation') == 'on') {
-			cacti_log("Form Validation Failed: Variable '$field_name' with Value '$field_value' Failed REGEX '$regexp_match'", false);
-=======
-		$report_message = __("Form Validation Failed: Variable '%s' with Value '%s' Failed REGEX '%s'", $field_name, $field_value, $regexp_match);
-	}
-
-	if ($report_message !== null) {
-		$custom_message = null;
-
-		if (read_config_option('log_validation')) {
-			cacti_log($report_message, false, 'ERROR:');
-
-			if (read_config_option('log_validation') == INPUT_VALIDATION_FULL && $message_id == 3) {
-				$message_id     = $field_name;
-				$custom_message = $report_message;
-			}
->>>>>>> origin/fix/jquery-deprecations
 		}
 
 		$_SESSION[SESS_ERROR_FIELDS][$field_name] = $custom_message ?? $message_id;
@@ -1281,7 +1155,6 @@ function raise_message(mixed $message_id, string $message = '', int $message_lev
  * as the result of an server side error that can not be captured
  * normally.
  *
-<<<<<<< HEAD
  * @param  (string) The title for the dialog title bar
  * @param  (string) Header section for the message
  * @param  (string) The actual error message to display
@@ -1310,20 +1183,6 @@ function raise_message_javascript($title, $header, $message) {
 /**
  * display_output_messages - displays all of the cached messages from the raise_message() function and clears
  * the message cache
-||||||| 7dd05ee12
- * display_output_messages - displays all of the cached messages from the raise_message() function and clears
- * the message cache
-=======
- * Note, this function assumes strings are already escaped when being
- * called.
- *
- * @param string $title   The title for the dialog title bar
- * @param string $header  Header section for the message
- * @param string $message The actual error message to display
- * @param int    $level   The level to be displayed at
- *
- * @return void
->>>>>>> origin/fix/jquery-deprecations
  */
 function raise_message_javascript(string $title, string $header, string $message, int $level = MESSAGE_LEVEL_MIXED) : void {
 	?>
@@ -1457,7 +1316,6 @@ function clear_messages() : bool {
 function kill_session_var(string $var_name) : void {
 	// register_global = on: reset local settings cache so the user sees the new settings
 	unset($_SESSION[$var_name]);
-<<<<<<< HEAD
 
 	/* register_global = off: reset local settings cache so the user sees the new settings */
 	/* session_unregister is deprecated in PHP 5.3.0, unset is sufficient */
@@ -1467,18 +1325,6 @@ function kill_session_var(string $var_name) : void {
 	} else {
 		unset($var_name);
 	}
-||||||| 7dd05ee12
-
-	/* register_global = off: reset local settings cache so the user sees the new settings */
-	/* session_unregister is deprecated in PHP 5.3.0, unset is sufficient */
-	if (version_compare(PHP_VERSION, '5.3.0', '<')) {
-		session_unregister($var_name);
-	} else {
-		unset($var_name);
-	}
-=======
-	unset($var_name);
->>>>>>> origin/fix/jquery-deprecations
 }
 
 /**
@@ -1511,19 +1357,9 @@ function force_session_data() : bool {
  * '$arr[0] = array('id' => 23, 'name' => 'blah')' to the form
  * '$arr = array(23 => 'blah')'
  *
-<<<<<<< HEAD
  * @param array  $array		The original array to manipulate
  * @param string $key		The name of the key
  * @param string $key_value	The name of the key value
-||||||| 7dd05ee12
- * @param $array - (array) the original array to manipulate
- * @param $key - the name of the key
- * @param $key_value - the name of the key value
-=======
- * @param mixed  $array     The original array to manipulate
- * @param string $key       The name of the key
- * @param mixed  $key_value The name of the key value
->>>>>>> origin/fix/jquery-deprecations
  *
  * @return array the modified array
  */
@@ -1662,14 +1498,7 @@ function cacti_log(mixed $string, bool $output = false, string $environ = 'CMDPH
 		$database_log = false;
 	}
 
-<<<<<<< HEAD
 	if (trim($string) == '') {
-||||||| 7dd05ee12
-=======
-	if (is_array($string)) {
-		$string = json_encode($string);
-	} elseif ($string == '' || trim($string) == '') {
->>>>>>> origin/fix/jquery-deprecations
 		return false;
 	}
 
@@ -1850,7 +1679,6 @@ function cacti_log(mixed $string, bool $output = false, string $environ = 'CMDPH
  * It is used in 0.8.6 to speed the viewing of the Cacti log file, which
  * can be problematic in the 0.8.6 branch.
  *
-<<<<<<< HEAD
  * @param $file_name    - (char constant) the name of the file to tail
  * @param $line_cnt     - (int constant)  the number of lines to count
  * @param $message_type - (int constant) the type of message to return
@@ -1858,34 +1686,8 @@ function cacti_log(mixed $string, bool $output = false, string $environ = 'CMDPH
  * @param $page_nr      - (int) the page we want to show rows for
  * @param $total_rows   - (int) the total number of rows in the logfile
  * @param $matches      - (bool) match or does not match the filter
-||||||| 7dd05ee12
- * @param $file_name    - (char constant) the name of the file to tail
- * @param $line_cnt     - (int constant)  the number of lines to count
- * @param $message_type - (int constant) the type of message to return
- * @param $filter       - (char) the filtering expression to search for
- * @param $page_nr      - (int) the page we want to show rows for
- * @param $total_rows   - (int) the total number of rows in the logfile
-=======
- * @param string $file_name    The name of the file to tail
- * @param int    $line_cnt     The number of lines to count
- * @param mixed  $message_type The type of message to return
- * @param mixed  $filter       The filtering expression to search for
- * @param mixed  $page_nr      The page we want to show rows for
- * @param mixed  $total_rows   The total number of rows in the logfile
- * @param mixed  $matches      Match or does not match the filter
- * @param mixed  $expand_text  Expand text to perform replacements
- * @param int    $reverse      1 => Normal tail, 2 => Reverse tail
- *
- * @return array
->>>>>>> origin/fix/jquery-deprecations
  */
-<<<<<<< HEAD
 function tail_file($file_name, $number_of_lines, $message_type = -1, $filter = '', &$page_nr = 1, &$total_rows = 0, $matches = true) {
-||||||| 7dd05ee12
-function tail_file($file_name, $number_of_lines, $message_type = -1, $filter = '', &$page_nr = 1, &$total_rows = 0) {
-=======
-function tail_file(string $file_name, int $line_cnt, mixed $message_type = -1, mixed $filter = '', mixed &$page_nr = 1, mixed &$total_rows = 0, mixed $matches = true, mixed $expand_text = false, int $reverse = 1) : array {
->>>>>>> origin/fix/jquery-deprecations
 	if (!file_exists($file_name)) {
 		touch($file_name);
 
@@ -1920,31 +1722,8 @@ function tail_file(string $file_name, int $line_cnt, mixed $message_type = -1, m
 	 * instead of the line number from time to time for some reason.
 	 */
 	while (($line = fgets($fp)) !== false) {
-<<<<<<< HEAD
 		if (determine_display_log_entry($message_type, $line, $filter, $matches)) {
 			++$total_rows;
-||||||| 7dd05ee12
-		if (determine_display_log_entry($message_type, $line, $filter)) {
-			++$total_rows;
-=======
-		$display = (determine_display_log_entry($message_type, $line, $filter, $matches));
-
-		if ($should_expand && !$display) {
-			$expanded = text_substitute($line, isHtml: false);
-
-			if ($expanded != $line) {
-				// expand line different so lets see if we want it now after all
-				$display = (determine_display_log_entry($message_type, $expanded, $filter, $matches));
-			}
-		}
-
-		$display_line[$line_no] = $display;
-
-		$line_no++;
-
-		if ($display) {
-			$total_rows++;
->>>>>>> origin/fix/jquery-deprecations
 		}
 	}
 
@@ -1972,21 +1751,7 @@ function tail_file(string $file_name, int $line_cnt, mixed $message_type = -1, m
 	$line_no    = 0;
 
 	while (($line = fgets($fp)) !== false) {
-<<<<<<< HEAD
 		$display = determine_display_log_entry($message_type, $line, $filter, $matches);
-||||||| 7dd05ee12
-		$display = determine_display_log_entry($message_type, $line, $filter);
-=======
-		if (!isset($display_line[$line_no])) {
-			$line_no++;
-
-			continue;
-		}
-
-		$display = $display_line[$line_no];
-
-		$line_no++;
->>>>>>> origin/fix/jquery-deprecations
 
 		if ($display === false) {
 			continue;
@@ -2015,31 +1780,14 @@ function tail_file(string $file_name, int $line_cnt, mixed $message_type = -1, m
 /**
  * determine_display_log_entry - function to determine if we display the line
  *
-<<<<<<< HEAD
  * @param $message_type
  * @param $line
  * @param $filter
  * @param $matches
-||||||| 7dd05ee12
- * @param $message_type
- * @param $line
- * @param $filter
-=======
- * @param int    $message_type
- * @param string $line
- * @param string $filter
- * @param bool   $matches
->>>>>>> origin/fix/jquery-deprecations
  *
  * @return mixed Should the entry be displayed
  */
-<<<<<<< HEAD
 function determine_display_log_entry($message_type, $line, $filter, $matches = true) {
-||||||| 7dd05ee12
-function determine_display_log_entry($message_type, $line, $filter) {
-=======
-function determine_display_log_entry(int $message_type, string $line, string $filter, bool $matches = true) : mixed {
->>>>>>> origin/fix/jquery-deprecations
 	static $thold_enabled = null;
 
 	if ($thold_enabled == null) {
@@ -2153,7 +1901,6 @@ function determine_display_log_entry(int $message_type, string $line, string $fi
 		if ($matches) {
 			if (validate_is_regex($filter) && preg_match('/' . $filter . '/i', $line)) {
 				return $line;
-<<<<<<< HEAD
 			} elseif (stripos($line, $filter) !== false) {
 				return $line;
 			}
@@ -2165,22 +1912,6 @@ function determine_display_log_entry(int $message_type, string $line, string $fi
 			} elseif (!stripos($line, $filter) !== false) {
 				return $line;
 			}
-||||||| 7dd05ee12
-		if (stripos($line, $filter) !== false) {
-			return $line;
-		} elseif (validate_is_regex($filter) && preg_match('/' . $filter . '/i', $line)) {
-			return $line;
-=======
-			}
-
-			if (stripos($line, $filter) !== false) {
-				return $line;
-			}
-		} elseif (validate_is_regex($filter) && !preg_match('/' . $filter . '/i', $line)) {
-			return $line;
-		} elseif (!stripos($line, $filter) !== false) {
-			return $line;
->>>>>>> origin/fix/jquery-deprecations
 		}
 
 		return false;
@@ -2216,25 +1947,13 @@ function update_host_status(int $status, int $host_id, Net_Ping &$ping, int $pin
 	if ($host['status_fail_date'] == '') {
 		$host['status_fail_date'] = 0;
 	} else {
-<<<<<<< HEAD
 		$host['status_fail_date'] = strtotime($host['status_fail_date']);;
-||||||| 7dd05ee12
-		$host['status_fail_date'] = strtotime('0000-00-00 00:00:00');
-=======
-		$host['status_fail_date'] = strtotime($host['status_fail_date']);
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if ($host['status_rec_date'] == '') {
 		$host['status_rec_date'] = 0;
 	} else {
-<<<<<<< HEAD
 		$host['status_rec_date'] = strtotime($host['status_rec_date']);;
-||||||| 7dd05ee12
-		$host['status_rec_date'] = strtotime('0000-00-00 00:00:00');
-=======
-		$host['status_rec_date'] = strtotime($host['status_rec_date']);
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if ($status == HOST_DOWN) {
@@ -2284,45 +2003,18 @@ function update_host_status(int $status, int $host_id, Net_Ping &$ping, int $pin
 				$host['status_event_count'] = 0;
 			}
 		} elseif ($host['status'] == HOST_RECOVERING) {
-<<<<<<< HEAD
 			/* host is recovering, put back in failed state */
-||||||| 7dd05ee12
-=======
-			// host is recovering, put back in failed state
->>>>>>> origin/fix/jquery-deprecations
 			$host['status_event_count'] = 1;
-<<<<<<< HEAD
 			$host['status'] = HOST_DOWN;
-||||||| 7dd05ee12
-			$host['status'] = HOST_DOWN;
-
-			set_config_option('time_last_change_site_device', time());
-		/* host was unknown and now is down */
-=======
-			$host['status']             = HOST_DOWN;
->>>>>>> origin/fix/jquery-deprecations
 		} elseif ($host['status'] == HOST_UNKNOWN) {
-<<<<<<< HEAD
 			/* host was unknown and now is down */
 			$host['status'] = HOST_DOWN;
-||||||| 7dd05ee12
-			$host['status'] = HOST_DOWN;
-=======
-			// host was unknown and now is down
-			$host['status']             = HOST_DOWN;
->>>>>>> origin/fix/jquery-deprecations
 			$host['status_event_count'] = 0;
 		} else {
 			$host['status_event_count']++;
 		}
 	} else {
-<<<<<<< HEAD
 		/* host is up.  Update total polls and availability */
-||||||| 7dd05ee12
-		/* update total polls and availability */
-=======
-		// host is up.  Update total polls and availability
->>>>>>> origin/fix/jquery-deprecations
 		$host['total_polls']++;
 		$host['availability'] = 100 * ($host['total_polls'] - $host['failed_polls']) / $host['total_polls'];
 
@@ -2380,19 +2072,9 @@ function update_host_status(int $status, int $host_id, Net_Ping &$ping, int $pin
 				* $host['avg_time'] + $ping_time) / ($host['total_polls'] - $host['failed_polls']);
 		}
 
-<<<<<<< HEAD
 		/* the host was down, now it's recovering */
 		if ($host['status'] == HOST_DOWN || $host['status'] == HOST_RECOVERING) {
 			/* just up, change to recovering */
-||||||| 7dd05ee12
-		/* the host was down, now it's recovering */
-		if (($host['status'] == HOST_DOWN) || ($host['status'] == HOST_RECOVERING )) {
-			/* just up, change to recovering */
-=======
-		// the host was down, now it's recovering
-		if ($host['status'] == HOST_DOWN || $host['status'] == HOST_RECOVERING) {
-			// just up, change to recovering
->>>>>>> origin/fix/jquery-deprecations
 			if ($host['status'] == HOST_DOWN) {
 				$host['status']             = HOST_RECOVERING;
 				$host['status_event_count'] = 1;
@@ -2400,15 +2082,7 @@ function update_host_status(int $status, int $host_id, Net_Ping &$ping, int $pin
 				$host['status_event_count']++;
 			}
 
-<<<<<<< HEAD
 			/* if it's time to issue a recovery message, indicate so */
-||||||| 7dd05ee12
-			set_config_option('time_last_change_site_device', time());
-
-			/* if it's time to issue a recovery message, indicate so */
-=======
-			// if it's time to issue a recovery message, indicate so
->>>>>>> origin/fix/jquery-deprecations
 			if ($host['status_event_count'] >= $ping_recovery_count) {
 				// host is up, flag it that way
 				$host['status'] = HOST_UP;
@@ -2419,32 +2093,16 @@ function update_host_status(int $status, int $host_id, Net_Ping &$ping, int $pin
 				$host['status_event_count'] = 0;
 			}
 		} else {
-<<<<<<< HEAD
 			/* host was unknown and now is up */
-||||||| 7dd05ee12
-		/* host was unknown and now is up */
-=======
-			// host was unknown and now is up
->>>>>>> origin/fix/jquery-deprecations
 			$host['status'] = HOST_UP;
 
 			$host['status_event_count'] = 0;
 		}
 	}
 
-<<<<<<< HEAD
 	/* if the user wants a flood of information then flood them */
 	if ($host['status'] == HOST_UP || $host['status'] == HOST_RECOVERING) {
 		/* log ping result if we are to use a ping for reachability testing */
-||||||| 7dd05ee12
-	/* if the user wants a flood of information then flood them */
-	if (($host['status'] == HOST_UP) || ($host['status'] == HOST_RECOVERING)) {
-		/* log ping result if we are to use a ping for reachability testing */
-=======
-	// if the user wants a flood of information then flood them
-	if ($host['status'] == HOST_UP || $host['status'] == HOST_RECOVERING) {
-		// log ping result if we are to use a ping for reachability testing
->>>>>>> origin/fix/jquery-deprecations
 		if ($ping_availability == AVAIL_SNMP_AND_PING) {
 			cacti_log("Device[$host_id] PING: " . $ping->ping_response, $print_data_to_stdout, 'PING', POLLER_VERBOSITY_HIGH);
 			cacti_log("Device[$host_id] SNMP: " . $ping->snmp_response, $print_data_to_stdout, 'PING', POLLER_VERBOSITY_HIGH);
@@ -2641,38 +2299,14 @@ function prepare_validate_result(string &$result) : mixed {
 
 	// clean off ugly non-numeric data
 	if (is_numeric($result)) {
-<<<<<<< HEAD
 		dsv_log('prepare_validate_result','data is numeric', POLLER_VERBOSITY_MEDIUM);
-||||||| 7dd05ee12
-		dsv_log('prepare_validate_result','data is numeric');
-=======
-		dsv_log('prepare_validate_result', 'data is numeric', POLLER_VERBOSITY_MEDIUM);
->>>>>>> origin/fix/jquery-deprecations
 
 		return true;
-<<<<<<< HEAD
 	} elseif ($result == 'U') {
-||||||| 7dd05ee12
-	} elseif ($result == 'U') {
-		dsv_log('prepare_validate_result', 'data is U');
-=======
-	}
-
-	if ($result == 'U') {
->>>>>>> origin/fix/jquery-deprecations
 		dsv_log('prepare_validate_result', 'data is U', POLLER_VERBOSITY_MEDIUM);
 
 		return true;
-<<<<<<< HEAD
 	} elseif (is_hexadecimal($result)) {
-||||||| 7dd05ee12
-	} elseif (is_hexadecimal($result)) {
-		dsv_log('prepare_validate_result', 'data is hex');
-=======
-	}
-
-	if (is_hexadecimal($result)) {
->>>>>>> origin/fix/jquery-deprecations
 		dsv_log('prepare_validate_result', 'data is hex', POLLER_VERBOSITY_MEDIUM);
 
 		return hexdec($result);
@@ -2694,13 +2328,8 @@ function prepare_validate_result(string &$result) : mixed {
 			}
 
 			$space_cnt = substr_count(trim($result), ' ');
-<<<<<<< HEAD
 
 			dsv_log('prepare_validate_result', "data has $space_cnt spaces and $delim_cnt fields which is " . (($space_cnt + 1 == $delim_cnt) ? '' : 'NOT') . ' okay', POLLER_VERBOSITY_MEDIUM);
-||||||| 7dd05ee12
-			dsv_log('prepare_validate_result', "data has $space_cnt spaces and $delim_cnt fields which is " . (($space_cnt+1 == $delim_cnt) ? 'NOT ' : '') . ' okay');
-=======
->>>>>>> origin/fix/jquery-deprecations
 
 			dsv_log('prepare_validate_result', "data has $space_cnt spaces and $delim_cnt fields which is " . (($space_cnt + 1 == $delim_cnt) ? '' : 'NOT') . ' okay', POLLER_VERBOSITY_MEDIUM);
 
@@ -2757,34 +2386,13 @@ function is_valid_pathname($path) {
 /**
  * dsv_log - provides debug logging when tracing Graph/Data Source creation
  *
-<<<<<<< HEAD
  * @param $message - the message to output to the log
  * @param $data    - the data to be carried with the message
  * @param $level   - the level to log the dsv_log at or above
 */
 function dsv_log($message, $data = null, $level = POLLER_VERBOSITY_LOW) {
-||||||| 7dd05ee12
- * @param $message - the message to output to the log
- * @param $data  - the data to be carried with the message
-*/
-function dsv_log($message,$data) {
-=======
- * @param string $message The message to output to the log
- * @param mixed  $data    The data to be carried with the message
- * @param int    $level   The level of verbosity to use
- *
- * @return void
- */
-function dsv_log(string $message, mixed $data = null, int $level = POLLER_VERBOSITY_LOW) : void {
->>>>>>> origin/fix/jquery-deprecations
 	if (read_config_option('data_source_trace') == 'on') {
-<<<<<<< HEAD
 		cacti_log(($message . ' = ') . (is_array($data) ? json_encode($data) : ($data === null ? 'NULL' : $data)), false, 'DSTRACE', $level);
-||||||| 7dd05ee12
-		cacti_log(($message . ' = ') . (is_array($data) ? json_encode($data) : $data), false, 'DSTRACE');
-=======
-		cacti_log(($message . ' = ') . (is_array($data) ? json_encode($data) : ($data ?? 'NULL')), false, 'DSTRACE', $level);
->>>>>>> origin/fix/jquery-deprecations
 	}
 }
 
@@ -2823,16 +2431,8 @@ function test_data_sources(int $graph_template_id, int $host_id, int $snmp_query
 		[$graph_template_id]);
 
 	if (cacti_sizeof($data_template_ids) && $test_source == 'on') {
-<<<<<<< HEAD
 		foreach($data_template_ids as $dt) {
 			dsv_log("test_data_source", [ 'dt' => $dt, 'host_id' => $host_id, 'snmp_query_id' => $snmp_query_id, 'snmp_index' => $snmp_index, 'values' => $values]);
-||||||| 7dd05ee12
-		foreach($data_template_ids as $dt) {
-			dsv_log("test_data_source", [ 'dt' => $dt, 'host_id' => $host_id, 'snmp_query_id' => $snmp_query_id, 'snmp_index' => $snmp_index, 'values' => $values]);
-=======
-		foreach ($data_template_ids as $dt) {
-			dsv_log('test_data_source', [ 'dt' => $dt, 'host_id' => $host_id, 'snmp_query_id' => $snmp_query_id, 'snmp_index' => $snmp_index, 'values' => $values]);
->>>>>>> origin/fix/jquery-deprecations
 
 			if (!test_data_source($dt, $host_id, $snmp_query_id, $snmp_index, $values)) {
 				return false;
@@ -2863,15 +2463,7 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 
 	$called_by_script_server = true;
 
-<<<<<<< HEAD
 	dsv_log('test_data_source', [ 'data_template_id' => $data_template_id, 'host_id' => $host_id, 'snmp_query_id' => $snmp_query_id, 'snmp_index' => $snmp_index, 'suggested_vals' => $suggested_vals]);
-||||||| 7dd05ee12
-	dsv_log('test_data_source', [ 'data_template_id' => $data_template_id, 'host_id' => $host_id, 'snmp_query_id' => $snmp_query_id, 'snmp_index' => $snmp_index, 'suggested_vals' => $suggested_vals]);
-=======
-	$outputs = [];
-
-	dsv_log('test_data_source', ['data_template_id' => $data_template_id, 'host_id' => $host_id, 'snmp_query_id' => $snmp_query_id, 'snmp_index' => $snmp_index, 'suggested_vals' => $suggested_vals]);
->>>>>>> origin/fix/jquery-deprecations
 
 	$data_input = db_fetch_row_prepared('SELECT ' . SQL_NO_CACHE . '
 		di.id, di.type_id, dtd.id AS data_template_data_id,
@@ -2950,23 +2542,10 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 				WHERE data_input_id = ?
 				AND input_output = "out"
 				AND update_rra="on"';
-<<<<<<< HEAD
 
 			dsv_log('num_output_fields_sql',$num_output_fields_sql);
-||||||| 7dd05ee12
-			dsv_log('num_output_fields_sql',$num_output_fields_sql);
-=======
->>>>>>> origin/fix/jquery-deprecations
 
-<<<<<<< HEAD
 			$num_output_fields = cacti_sizeof(db_fetch_assoc_prepared($num_output_fields_sql, array($data_input['id'])));
-||||||| 7dd05ee12
-			$num_output_fields = cacti_sizeof(db_fetch_assoc_prepared($num_output_fields_sql, array($data_input['id'])));
-=======
-			dsv_log('num_output_fields_sql', $num_output_fields_sql);
-
-			$num_output_fields = cacti_sizeof(db_fetch_assoc_prepared($num_output_fields_sql, [$data_input['id']]));
->>>>>>> origin/fix/jquery-deprecations
 
 			dsv_log('num_output_fields', $num_output_fields);
 
@@ -3020,19 +2599,9 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 			if (!is_numeric($output)) {
 				if ($output === false || $output === null || $output == 'U') {
 					return false;
-<<<<<<< HEAD
 				} elseif (strpos($output, ':U') !== false) {
 					return false;
 				} elseif (prepare_validate_result($output) === false) {
-||||||| 7dd05ee12
-				} elseif (prepare_validate_result($output) === false) {
-=======
-				}
-
-				$output_str = (string) $output;
-
-				if (prepare_validate_result($output_str) === false) {
->>>>>>> origin/fix/jquery-deprecations
 					return false;
 				}
 			}
@@ -3095,15 +2664,7 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 
 			dsv_log('SNMP [updated] host_fields', $host_fields);
 
-<<<<<<< HEAD
 			$host = array_merge($host, $host_fields);
-||||||| 7dd05ee12
-			$host = array_merge($host, $host_fields);
-=======
-			if (is_array($host)) {
-				$host = array_merge($host, $host_fields);
-			}
->>>>>>> origin/fix/jquery-deprecations
 
 			dsv_log('SNMP [updated] host', $host);
 
@@ -3295,16 +2856,8 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 
 							$script_path = read_config_option('path_php_binary') . ' -q ' . get_script_query_path(trim($prepend . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' "' . $snmp_index . '"'), $script_queries['script_path'], $host_id);
 						} else {
-<<<<<<< HEAD
 							$action = POLLER_ACTION_SCRIPT;
 							$script_path = get_script_query_path(trim((isset($script_queries['arg_prepend']) ? $script_queries['arg_prepend'] : '') . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' "' . $snmp_index . '"'), $script_queries['script_path'], $host_id);
-||||||| 7dd05ee12
-							$action = POLLER_ACTION_SCRIPT;
-							$script_path = get_script_query_path(trim((isset($script_queries['arg_prepend']) ? $script_queries['arg_prepend'] : '') . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' ' . $snmp_index), $script_queries['script_path'], $host_id);
-=======
-							$action      = POLLER_ACTION_SCRIPT;
-							$script_path = get_script_query_path(trim(($script_queries['arg_prepend'] ?? '') . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' "' . $snmp_index . '"'), $script_queries['script_path'], $host_id);
->>>>>>> origin/fix/jquery-deprecations
 						}
 					}
 
@@ -3337,13 +2890,7 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
  * @param int $data_template_id The ID of the data template
  * @param int $host_id          The ID of the host device
  *
-<<<<<<< HEAD
  * @return string - the full script path or (bool) false for an error
-||||||| 7dd05ee12
- * @return - the full script path or (bool) false for an error
-=======
- * @return mixed The full script path or (bool) false for an error
->>>>>>> origin/fix/jquery-deprecations
  */
 function get_full_test_script_path(int $data_template_id, int $host_id) : mixed {
 	$data_source = db_fetch_row_prepared('SELECT ' . SQL_NO_CACHE . '
@@ -3579,15 +3126,8 @@ function stri_replace(string $find, string $replace, string $string) : string {
  *
  * @param mixed $string The string to modify/clean
  *
-<<<<<<< HEAD
  * @return string	The modified string
-||||||| 7dd05ee12
- * @return - the modified string
-=======
- * @return mixed The modified string
->>>>>>> origin/fix/jquery-deprecations
  */
-<<<<<<< HEAD
 function clean_up_lines($string) {
 	if ($string != '') {
 		return preg_replace('/\s*[\r\n]+\s*/',' ', $string);
@@ -3609,33 +3149,6 @@ function clean_up_name($string) {
 		$string = preg_replace('/[\s\.]+/', '_', $string);
 		$string = preg_replace('/[^a-zA-Z0-9_]+/', '', $string);
 		$string = preg_replace('/_{2,}/', '_', $string);
-||||||| 7dd05ee12
-function clean_up_lines($string) {
-	if ($string != '') {
-		return preg_replace('/\s*[\r\n]+\s*/',' ', $string);
-	} else {
-		return $string;
-	}
-}
-
-/**
- * clean_up_name - runs a string through a series of regular expressions designed to
- * eliminate "bad" characters
- *
- * @param $string - the string to modify/clean
- *
- * @return - the modified string
- */
-function clean_up_name($string) {
-	if ($string != '') {
-		$string = preg_replace('/[\s\.]+/', '_', $string);
-		$string = preg_replace('/[^a-zA-Z0-9_]+/', '', $string);
-		$string = preg_replace('/_{2,}/', '_', $string);
-=======
-function clean_up_lines(mixed $string) : mixed {
-	if ($string !== null && is_string($string)) {
-		$string = preg_replace('/\s*[\r\n]+\s*/',' ', $string);
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	return $string;
@@ -3647,13 +3160,7 @@ function clean_up_lines(mixed $string) : mixed {
  *
  * @param mixed $string The string to modify/clean
  *
-<<<<<<< HEAD
  * @return string	The modified string
-||||||| 7dd05ee12
- * @return - the modified string
-=======
- * @return mixed The modified string
->>>>>>> origin/fix/jquery-deprecations
  */
 function clean_up_name(mixed $string) : mixed {
 	if ($string !== null && is_string($string)) {
@@ -3813,13 +3320,7 @@ function get_graph_title_cache(int $local_graph_id) : mixed {
  *
  * @param int $local_graph_id The ID of the graph to get a title for
  *
-<<<<<<< HEAD
  * @return string	The graph title
-||||||| 7dd05ee12
- * @return - the graph title
-=======
- * @return string The graph title
->>>>>>> origin/fix/jquery-deprecations
  */
 function get_graph_title(int $local_graph_id) : string {
 	$graph = db_fetch_row_prepared('SELECT gl.host_id, gl.snmp_query_id,
@@ -4481,6 +3982,17 @@ function build_where_from_array($filters, &$params) {
 }
 
 /**
+ * validate_sql_identifier - ensures that a database table or column name is safe
+ *
+ * @param string $identifier The name of the table or column
+ *
+ * @return bool True if valid, false otherwise
+ */
+function validate_sql_identifier(string $identifier) : bool {
+	return (bool)preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $identifier);
+}
+
+/**
  * get_item - returns the ID of the next or previous item id
  *
  * @param string $tblname   The table name that contains the target id
@@ -4491,43 +4003,13 @@ function build_where_from_array($filters, &$params) {
  *
  * @return int The ID of the next or previous item id
  */
-<<<<<<< HEAD
 function get_item($tblname, $field, $startid, $lmt_query, $direction) {
-	$params = array();
-||||||| 7dd05ee12
-function get_item($tblname, $field, $startid, $lmt_query, $direction) {
-=======
-/**
- * build_where_from_array - builds a SQL WHERE clause fragment from an associative array
- *
- * @param array $filters An associative array of field => value
- * @param array $params  A reference to the params array for prepared statements
- *
- * @return string The SQL WHERE fragment
- */
-function build_where_from_array(array $filters, array &$params) : string {
-	$where = [];
-
-	foreach ($filters as $field => $value) {
-		if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $field)) {
-			cacti_log('ERROR: Invalid field name in build_where_from_array: ' . $field, false, 'SECURITY');
-
-			continue;
-		}
-
-		$where[]  = "`$field` = ?";
-		$params[] = $value;
+	if (!validate_sql_identifier($tblname) || !validate_sql_identifier($field)) {
+		cacti_log("ERROR: Invalid SQL identifier in get_item: Table: $tblname, Field: $field", false, 'SECURITY');
+		return 0;
 	}
 
-	return implode(' AND ', $where);
-}
-
-function get_item(string $tblname, string $field, int $startid, string|array $lmt_query, string $direction) : int {
-	$sql_operator = '';
-	$sql_order    = '';
-	$new_item_id  = 0;
-	$params       = [];
->>>>>>> origin/fix/jquery-deprecations
+	$params = array();
 
 	if ($direction == 'next') {
 		$sql_operator = '>';
@@ -4542,7 +4024,6 @@ function get_item(string $tblname, string $field, int $startid, string|array $lm
 		WHERE id = ?",
 		[$startid]);
 
-<<<<<<< HEAD
 	$where_clause = '';
 
 	if (is_array($lmt_query)) {
@@ -4558,28 +4039,6 @@ function get_item(string $tblname, string $field, int $startid, string|array $lm
 	array_unshift($params, $current_sequence);
 
 	$new_item_id = db_fetch_cell_prepared($sql_query, $params);
-||||||| 7dd05ee12
-	$new_item_id = db_fetch_cell("SELECT id
-		FROM $tblname
-		WHERE $field $sql_operator $current_sequence " . ($lmt_query != '' ? " AND $lmt_query":"") . "
-		ORDER BY $field $sql_order
-		LIMIT 1");
-=======
-	if ($sql_operator != '') {
-		$where_clause = '';
-
-		if (is_array($lmt_query)) {
-			$where_clause = build_where_from_array($lmt_query, $params);
-		} else {
-			$where_clause = $lmt_query;
-		}
-
-		$sql_query = "SELECT id FROM $tblname WHERE $field $sql_operator ? " . ($where_clause != '' ? " AND $where_clause" : '') . " ORDER BY $field $sql_order LIMIT 1";
-		array_unshift($params, $current_sequence);
-
-		$new_item_id = db_fetch_cell_prepared($sql_query, $params);
-	}
->>>>>>> origin/fix/jquery-deprecations
 
 	if (empty($new_item_id)) {
 		return $startid;
@@ -4599,8 +4058,12 @@ function get_item(string $tblname, string $field, int $startid, string|array $lm
  * @return int The next available sequence id
  */
 function get_sequence(mixed $id, string $field, string $table_name, string|array $group_query) : int {
+	if (!validate_sql_identifier($table_name) || !validate_sql_identifier($field)) {
+		cacti_log("ERROR: Invalid SQL identifier in get_sequence: Table: $table_name, Field: $field", false, 'SECURITY');
+		return 0;
+	}
+
 	if (empty($id)) {
-<<<<<<< HEAD
 		$params = array();
 
 		if (is_array($group_query)) {
@@ -4612,13 +4075,6 @@ function get_sequence(mixed $id, string $field, string $table_name, string|array
 		$data = db_fetch_row_prepared("SELECT max($field)+1 AS seq
 			FROM $table_name
 			WHERE $where_clause", $params);
-||||||| 7dd05ee12
-		$data = db_fetch_row("SELECT max($field)+1 AS seq
-			FROM $table_name
-			WHERE $group_query");
-=======
-		$params = [];
->>>>>>> origin/fix/jquery-deprecations
 
 		if (is_array($group_query)) {
 			$where_clause = build_where_from_array($group_query, $params);
@@ -4655,6 +4111,11 @@ function get_sequence(mixed $id, string $field, string $table_name, string|array
  * @return void
  */
 function move_item_down(string $table_name, int $current_id, string|array $group_query = '') : void {
+	if (!validate_sql_identifier($table_name)) {
+		cacti_log("ERROR: Invalid SQL identifier in move_item_down: Table: $table_name", false, 'SECURITY');
+		return;
+	}
+
 	$next_item = get_item($table_name, 'sequence', $current_id, $group_query, 'next');
 
 	$sequence = db_fetch_cell_prepared("SELECT sequence
@@ -4688,7 +4149,13 @@ function move_item_down(string $table_name, int $current_id, string|array $group
  * @return void
  */
 function move_item_up(string $table_name, int $current_id, string|array $group_query = '') : void {
-	$last_item = get_item($table_name, 'sequence', $current_id, $group_query, 'previous');
+	if (!validate_sql_identifier($table_name)) {
+		cacti_log("ERROR: Invalid SQL identifier in move_item_up: Table: $table_name", false, 'SECURITY');
+		return;
+	}
+
+	$prev_item = get_item($table_name, 'sequence', $current_id, $group_query, 'previous');
+
 
 	$sequence = db_fetch_cell_prepared("SELECT sequence
 		FROM $table_name
@@ -5154,15 +4621,7 @@ function get_browser_query_string() : string {
 /**
  * Returns the basename of the current page in a web server friendly way
  *
-<<<<<<< HEAD
  * @return string	The basename of the current script file
-||||||| 7dd05ee12
- * @return - the basename of the current script file
-=======
- * @param bool $basename Whether to return only the filename
- *
- * @return mixed The basename of the current script file
->>>>>>> origin/fix/jquery-deprecations
  */
 function get_current_page(bool $basename = true) : mixed {
 	if (isset($_SERVER['SCRIPT_NAME']) && $_SERVER['SCRIPT_NAME'] != '') {
@@ -5476,20 +4935,12 @@ function get_hash_version(string $type) : string {
  *
  * @return string A 128-bit, hexadecimal hash
  */
-<<<<<<< HEAD
 function generate_hash() {
 	try {
 		return bin2hex(random_bytes(16));
 	} catch (Exception $e) {
 		return md5(session_id() . microtime() . rand(0, 1000));
 	}
-||||||| 7dd05ee12
-function generate_hash() {
-	return md5(session_id() . microtime() . rand(0,1000));
-=======
-function generate_hash() : string {
-	return bin2hex(random_bytes(16));
->>>>>>> origin/fix/jquery-deprecations
 }
 
 /**
@@ -5523,14 +4974,7 @@ function debug_log_insert_section_start($type, $text, $allowcopy = false) : void
  *
  * @return void
  */
-<<<<<<< HEAD
 function debug_log_insert_section_end($type) {
-||||||| 7dd05ee12
-function debug_log_insert_section_end($type) {
-	debug_log_insert($type, "</div></td></tr></table></td></tr></td></table>");
-=======
-function debug_log_insert_section_end(string $type) : void {
->>>>>>> origin/fix/jquery-deprecations
 	debug_log_insert($type, '</div></td></tr></table></td></tr></td></table>');
 }
 
@@ -5595,14 +5039,7 @@ function debug_log_return(string $type) : string {
 		if (isset($_SESSION['debug_log'][$type])) {
 			$log_text .= "<table style='width:100%;'>";
 
-<<<<<<< HEAD
 			foreach($_SESSION['debug_log'][$type] as $key => $val) {
-||||||| 7dd05ee12
-			for ($i=0; $i<cacti_count($_SESSION['debug_log'][$type]); $i++) {
-				$log_text .= '<tr><td>' . $_SESSION['debug_log'][$type][$i] . '</td></tr>';
-=======
-			foreach ($_SESSION['debug_log'][$type] as $val) {
->>>>>>> origin/fix/jquery-deprecations
 				$log_text .= '<tr><td>' . $val . '</td></tr>';
 			}
 
@@ -5612,14 +5049,7 @@ function debug_log_return(string $type) : string {
 		if (isset($_SESSION['debug_log'][$type])) {
 			$log_text .= "<table style='width:100%;'>";
 
-<<<<<<< HEAD
 			foreach($_SESSION['debug_log'][$type] as $key => $val) {
-||||||| 7dd05ee12
-			foreach($_SESSION['debug_log'][$type] as $key => $val) {
-				$log_text .= "<tr><td>$val</td></tr>\n";
-=======
-			foreach ($_SESSION['debug_log'][$type] as $key => $val) {
->>>>>>> origin/fix/jquery-deprecations
 				$log_text .= '<tr><td>' . $val . '</td></tr>';
 
 				unset($_SESSION['debug_log'][$type][$key]);
@@ -5671,7 +5101,6 @@ function sanitize_search_string(string $string) : string {
  *
  * @return string The sanitized uri
  */
-<<<<<<< HEAD
 function sanitize_uri($uri) {
 	static $drop_char_match = array(
 		'^', '$',
@@ -5700,24 +5129,6 @@ function sanitize_uri($uri) {
 	if (is_urlencoded($uri)) {
 		$uri = urldecode($uri);
 	}
-||||||| 7dd05ee12
-function sanitize_uri($uri) {
-	static $drop_char_match =   array('^', '$', '<', '>', '`', "'", '"', '|', '+', '[', ']', '{', '}', ';', '!', '(', ')');
-	static $drop_char_replace = array( '', '',  '',  '',  '',  '',   '',  '',  '',  '',  '',  '',  '',  '',  '');
-=======
-function sanitize_uri(string $uri) : string {
-	static $drop_char_match = [
-		'^', '$',
-		'<', '>',
-		'`', "'",
-		'"', '|',
-		'+', '[',
-		']', '{',
-		'}', ';',
-		'!', '(',
-		')'
-	];
->>>>>>> origin/fix/jquery-deprecations
 
 	static $drop_char_replace = [
 		'', '',
@@ -5747,21 +5158,11 @@ function sanitize_uri(string $uri) : string {
 /**
  * Checks to see if a string is urlencoded
  *
-<<<<<<< HEAD
  * @param  string $string the string to be validated
  *
  * @return boolean - true is the string is urlencoded otherwise false
  */
 function is_urlencoded($string) {
-||||||| 7dd05ee12
-	return str_replace($drop_char_match, $drop_char_replace, strip_tags(urldecode($uri)));
-=======
- * @param string $string the string to be validated
- *
- * @return boolean - true is the string is urlencoded otherwise false
- */
-function is_urlencoded(string $string) : bool {
->>>>>>> origin/fix/jquery-deprecations
 	if ($string != urldecode($string)) {
 		return true;
 	} else {
@@ -5816,16 +5217,9 @@ function sanitize_cdef(string $cdef) : string {
  * validates that a user-supplied filename resolves to a path within a given
  * base directory to guard against directory traversal and injection
  *
-<<<<<<< HEAD
  * @param string $filename The user-supplied filename
  * @param string $base_dir The base directory the file must reside in
-||||||| 7dd05ee12
- * @param array $items   - an array of serialized items from a post
-=======
- * @param mixed $items An array of serialized items from a post
->>>>>>> origin/fix/jquery-deprecations
  *
-<<<<<<< HEAD
  * @return mixed The validated real path, or false if invalid
  */
 function validate_path_within($filename, $base_dir) {
@@ -5877,11 +5271,6 @@ function validate_relative_path_within($path, $base_dir) {
  * @param string $items   An array of serialized items from a post
  *
  * @return array          The sanitized selected items array
-||||||| 7dd05ee12
- * @return array      - the sanitized selected items array
-=======
- * @return mixed The sanitized selected items array
->>>>>>> origin/fix/jquery-deprecations
  */
 function sanitize_unserialize_selected_items(mixed $items) : mixed {
 	$return_items = false;
@@ -5891,13 +5280,7 @@ function sanitize_unserialize_selected_items(mixed $items) : mixed {
 
 		// validate that sanitized string is correctly formatted
 		if (preg_match('/^a:[0-9]+:{/', $unstripped) && !preg_match('/(^|;|{|})O:\+?[0-9]+:"/', $unstripped)) {
-<<<<<<< HEAD
 			$items = unserialize($unstripped, array('allowed_classes' => false));
-||||||| 7dd05ee12
-			$items = unserialize($unstripped);
-=======
-			$items = unserialize($unstripped, ['allowed_classes' => false]);
->>>>>>> origin/fix/jquery-deprecations
 
 			if (is_array($items)) {
 				$return_items = $items;
@@ -5922,7 +5305,6 @@ function sanitize_unserialize_selected_items(mixed $items) : mixed {
 	return $return_items;
 }
 
-<<<<<<< HEAD
 function cacti_escapeshellcmd($string) {
 	global $config;
 
@@ -5943,25 +5325,6 @@ function cacti_escapeshellcmd($string) {
 	}
 }
 
-||||||| 7dd05ee12
-function cacti_escapeshellcmd($string) {
-	global $config;
-
-	if ($config['cacti_server_os'] == 'unix') {
-		return escapeshellcmd($string);
-	} else {
-		$replacements = "#&;`|*?<>^()[]{}$\\";
-
-		for ($i=0; $i < strlen($replacements); $i++) {
-			$string = str_replace($replacements[$i], ' ', $string);
-		}
-		return $string;
-	}
-}
-
-
-=======
->>>>>>> origin/fix/jquery-deprecations
 /**
  * verifies all selected graphs only contain numeric and string values
  *
@@ -5993,7 +5356,6 @@ function cacti_escapeshellcmd(string $string) : string {
 		return $string;
 	}
 
-<<<<<<< HEAD
 	/* remove any carriage returns or line feeds from the argument */
 	$string = str_replace(array("\n", "\r"), array('', ''), $string);
 
@@ -6003,48 +5365,6 @@ function cacti_escapeshellcmd(string $string) : string {
 	 * you do this, but are perfectly happy with a quotation mark.
 	 */
 	if ($config['cacti_server_os'] == 'unix') {
-||||||| 7dd05ee12
-	/* we must use an apostrophe to escape community names under Unix in case the user uses
-	characters that the shell might interpret. the ucd-snmp binaries on Windows flip out when
-	you do this, but are perfectly happy with a quotation mark. */
-	if ($config['cacti_server_os'] == 'unix') {
-=======
-	if (CACTI_SERVER_OS == 'unix') {
-		return escapeshellcmd($string);
-	}
-
-	$replacements = '#&;`|*?<>^()[]{}$\\';
-
-	for ($i = 0; $i < strlen($replacements); $i++) {
-		$string = str_replace($replacements[$i], ' ', $string);
-	}
-
-	return $string;
-}
-
-/**
- * mimics escapeshellarg, even for windows
- *
- * @param $string The string to be escaped
- * @param $quote  true: do NOT remove quotes from result; false: do remove quotes
- *
- * @return string The escaped [quoted|unquoted] string
- */
-function cacti_escapeshellarg(string $string, bool $quote = true) : string {
-	if ($string == '') {
-		return $string;
-	}
-
-	// remove any carriage returns or line feeds from the argument
-	$string = str_replace(["\n", "\r"], ['', ''], $string);
-
-	/*
-	 * we must use an apostrophe to escape community names under Unix in case the user uses
-	 * characters that the shell might interpret. the ucd-snmp binaries on Windows flip out when
-	 * you do this, but are perfectly happy with a quotation mark.
-	 */
-	if (CACTI_SERVER_OS == 'unix') {
->>>>>>> origin/fix/jquery-deprecations
 		$string = escapeshellarg($string);
 
 		if ($quote) {
@@ -6193,20 +5513,7 @@ function admin_email(string $subject, string $message) : bool {
 	return $result;
 }
 
-<<<<<<< HEAD
 function send_mail($to, $from, $subject, $body, $attachments = '', $headers = '', $html = false) {
-||||||| 7dd05ee12
-function send_mail($to, $from, $subject, $body, $attachments = '', $headers = '', $html = false) {
-	$fromname = '';
-	if (is_array($from)) {
-		$fromname = $from[1];
-		$from     = $from[0];
-	}
-=======
-function send_mail(mixed $to, mixed $from = null, string $subject = '',
-	string $body = '', mixed $attachments = [], mixed $headers = [],
-	bool $html = false, bool $expandIds = false) : string {
->>>>>>> origin/fix/jquery-deprecations
 	if (!is_array($from)) {
 		$name = '';
 
@@ -6221,7 +5528,6 @@ function send_mail(mixed $to, mixed $from = null, string $subject = '',
 			}
 		}
 
-<<<<<<< HEAD
 		if ($from != '' && strpos($from, '<') === false) {
 			if ($name == '') {
 				$full_name = db_fetch_cell_prepared('SELECT full_name
@@ -6244,33 +5550,6 @@ function send_mail(mixed $to, mixed $from = null, string $subject = '',
 		}
 	} else {
 		return mailer($from, $to, '', '', '', $subject, $body, '', $attachments, $headers, $html);
-||||||| 7dd05ee12
-	$from = array(0 => $from, 1 => $fromname);
-	return mailer($from, $to, '', '', '', $subject, $body, '', $attachments, $headers, $html);
-=======
-		if ($from != '' && !str_contains($from, '<')) {
-			if ($name == '') {
-				$full_name = db_fetch_cell_prepared('SELECT full_name
-					FROM user_auth
-					WHERE email_address = ?',
-					[$from]);
-
-				if ($full_name != '') {
-					$name = $full_name;
-
-					$from = "$name <$from>";
-				}
-			}
-		}
-
-		if ($from != '') {
-			return mailer($from, $to, subject: $subject, body: $body, attachments: $attachments, headers: $headers, html: $html, expandIds: $expandIds);
-		} else {
-			return 'ERROR: From Email Address Not Set';
-		}
-	} else {
-		return mailer($from, $to, subject: $subject, body: $body, attachments: $attachments, headers: $headers, html: $html, expandIds: $expandIds);
->>>>>>> origin/fix/jquery-deprecations
 	}
 }
 
@@ -6287,7 +5566,6 @@ function send_mail(mixed $to, mixed $from = null, string $subject = '',
  *
  *     2. An array of Emails and Names:
  *
-<<<<<<< HEAD
  *     array(
  *       'email1@email.com' => 'My email',
  *       'email2@email.com' => 'Your email',
@@ -6310,34 +5588,6 @@ function send_mail(mixed $to, mixed $from = null, string $subject = '',
  *         'name'  => 'Whose email'
  *       )
  *     );
-||||||| 7dd05ee12
- * The $from field will only use the first contact specified.  If no contact is provided for $replyto
- * then $from is used for that too. If $from is empty, it will default to cacti@<server> or if no server name can
- * be found, it will use cacti@cacti.net
-=======
- *     [
- *       'email1@email.com' => 'My email',
- *       'email2@email.com' => 'Your email',
- *       'email3@email.com' => 'Whose email'
- *     ];
- *
- *     3. An array of arrays with keys of 'email' and 'name':
- *
- *     [
- *       [
- *         'email' => 'email1@email.com',
- *         'name'  => 'My email'
- *       ],
- *       [
- *         'email' => 'email2@email.com',
- *         'name'  => 'Your email'
- *       ],
- *       [
- *         'email' => 'email3@email.com',
- *         'name'  => 'Whose email'
- *       ]
- *     ];
->>>>>>> origin/fix/jquery-deprecations
  *
  * The $from field will only use the first contact specified.
  *
@@ -6420,14 +5670,7 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 	} elseif ($how == 2) {
 		$mail->isSMTP();
 		$mail->Host = read_config_option('settings_smtp_host');
-<<<<<<< HEAD
 		$mail->Port = read_config_option('settings_smtp_port');
-||||||| 7dd05ee12
-		$mail->Host     = read_config_option('settings_smtp_host');
-		$mail->Port     = read_config_option('settings_smtp_port');
-=======
-		$mail->Port = intval(read_config_option('settings_smtp_port'));
->>>>>>> origin/fix/jquery-deprecations
 
 		if (read_config_option('settings_smtp_username') != '') {
 			$mail->SMTPAuth = true;
@@ -6440,14 +5683,7 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 			$mail->SMTPAuth = false;
 		}
 
-<<<<<<< HEAD
 		$secure = read_config_option('settings_smtp_secure');
-||||||| 7dd05ee12
-		$secure  = read_config_option('settings_smtp_secure');
-=======
-		$secure  = read_config_option('settings_smtp_secure');
-
->>>>>>> origin/fix/jquery-deprecations
 		if (!empty($secure) && $secure != 'none') {
 			if ($secure == 'tls') {
 				$mail->SMTPSecure = $mail::ENCRYPTION_STARTTLS;
@@ -6577,21 +5813,9 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 		}
 	}
 
-<<<<<<< HEAD
 	$result = null;
 
 	$fromText  = add_email_details(array($from), $result, array($mail, 'setFrom'));
-||||||| 7dd05ee12
-	// Sanity test the from email
-	if (!filter_var($from['email'], FILTER_VALIDATE_EMAIL)) {
-		return 'Bad email address format. Invalid from email address ' . $from['email'];
-	}
-
-	$fromText  = add_email_details(array($from), $result, array($mail, 'setFrom'));
-=======
-	$result    = false;
-	$fromText  = add_email_details([$from], $result, [$mail, 'setFrom']);
->>>>>>> origin/fix/jquery-deprecations
 
 	if ($result == false) {
 		return record_mailer_error($fromText, $mail->ErrorInfo);
@@ -6852,13 +6076,7 @@ function parse_email_details(mixed $emails, int $max_records = 0, array $details
 		$emails = [$emails];
 	}
 
-<<<<<<< HEAD
 	$update = array();
-||||||| 7dd05ee12
-	$update = array();
-=======
-	$update = [];
->>>>>>> origin/fix/jquery-deprecations
 
 	foreach ($emails as $check_email) {
 		if (!empty($check_email)) {
@@ -6883,13 +6101,7 @@ function parse_email_details(mixed $emails, int $max_records = 0, array $details
 					$email = array_key_exists(0, $check_email) ? $check_email[0] : '';
 				}
 
-<<<<<<< HEAD
 				$details[mb_strtolower($email)] = array('name' => $name, 'email' => mb_strtolower($email));
-||||||| 7dd05ee12
-				$details[trim(strtolower($email))] = array('name' => trim($name), 'email' => trim(strtolower($email)));
-=======
-				$details[mb_strtolower($email)] = ['name' => $name, 'email' => mb_strtolower($email)];
->>>>>>> origin/fix/jquery-deprecations
 			}
 		}
 	}
@@ -6898,13 +6110,7 @@ function parse_email_details(mixed $emails, int $max_records = 0, array $details
 		$detail  = reset($details);
 		$results = is_array($detail) ? $detail : [];
 	} elseif ($max_records != 0 && $max_records < count($details)) {
-<<<<<<< HEAD
 		$results = array();
-||||||| 7dd05ee12
-		$results = array();
-=======
-		$results = [];
->>>>>>> origin/fix/jquery-deprecations
 
 		foreach ($details as $d) {
 			$results[] = $d;
@@ -6921,14 +6127,7 @@ function parse_email_details(mixed $emails, int $max_records = 0, array $details
 	return $results;
 }
 
-<<<<<<< HEAD
 function split_emaildetail($email) {
-||||||| 7dd05ee12
-function split_emaildetail($email) {
-	$rname  = '';
-=======
-function split_emaildetail(mixed $email) : array {
->>>>>>> origin/fix/jquery-deprecations
 	$rname = '';
 	$rmail = '';
 
@@ -6940,23 +6139,14 @@ function split_emaildetail(mixed $email) : array {
 	 * Handle the special case where sendmail is being used
 	 * without an email domain
 	 */
-<<<<<<< HEAD
 	if (!is_array($email) && strpos($email, '@') === false) {
 		return array('name' => '', 'email' => $email);
-||||||| 7dd05ee12
-		$sPattern = '/(?:"?([^"]*)"?\s)?(?:<?(.+@[^>]+)>?)/i';
-		preg_match($sPattern, $email, $aMatch);
-=======
-	if (!is_array($email) && !str_contains($email, '@')) {
-		return ['name' => '', 'email' => $email];
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	/**
 	 * Handle the case where the Email is a string, but may
 	 * include the name at the beginning of the Email.
 	 */
-<<<<<<< HEAD
 	if (!is_array($email) && strpos($email, '@') !== false) {
 		if (strpos($email, '<') !== false) {
 			$parts = explode('<', $email);
@@ -6964,18 +6154,6 @@ function split_emaildetail(mixed $email) : array {
 			$email = str_replace('>', '', $parts[1]);
 
 			return array('name' => $name, 'email' => $email);
-||||||| 7dd05ee12
-		if (isset($aMatch[1])) {
-			$rname = trim($aMatch[1]);
-=======
-	if (!is_array($email) && str_contains($email, '@')) {
-		if (str_contains($email, '<')) {
-			$parts = explode('<', $email);
-			$name  = str_replace(['"', "'"], ['', ''], $parts[0]);
-			$email = str_replace('>', '', $parts[1]);
-
-			return ['name' => $name, 'email' => $email];
->>>>>>> origin/fix/jquery-deprecations
 		}
 	}
 
@@ -7001,13 +6179,7 @@ function split_emaildetail(mixed $email) : array {
 		$rname = $email[1];
 	}
 
-<<<<<<< HEAD
 	return array('name' => $rname, 'email' => mb_strtolower($rmail));
-||||||| 7dd05ee12
-	return array('name' => $rname, 'email' => strtolower($rmail));
-=======
-	return ['name' => $rname, 'email' => mb_strtolower($rmail)];
->>>>>>> origin/fix/jquery-deprecations
 }
 
 function create_emailtext(array $e) : string {
@@ -7070,20 +6242,10 @@ function ping_mail_server(string $host, int $port, string $user, string $passwor
 	return $results;
 }
 
-<<<<<<< HEAD
 function email_test() {
 	global $config;
 
 	$message  =  __('This is a test message generated from Cacti.  This message was sent to test the configuration of your Mail Settings.') . '<br><br>';
-||||||| 7dd05ee12
-function email_test() {
-	global $config;
-
-	$message =  __('This is a test message generated from Cacti.  This message was sent to test the configuration of your Mail Settings.') . '<br><br>';
-=======
-function email_test() : void {
-	$message =  __('This is a test message generated from Cacti.  This message was sent to test the configuration of your Mail Settings.') . '<br><br>';
->>>>>>> origin/fix/jquery-deprecations
 	$message .= __('Your email settings are currently set as follows') . '<br><br>';
 	$message .= '<b>' . __('Method') . '</b>: ';
 
@@ -7100,32 +6262,16 @@ function email_test() : void {
 	if ($how == 0) {
 		$mail = __('PHP\'s Mailer Class');
 	} elseif ($how == 1) {
-<<<<<<< HEAD
 		$mail     = __('Sendmail') . '<br><b>' . __('Sendmail Path'). '</b>: ';
-||||||| 7dd05ee12
-		$mail = __('Sendmail') . '<br><b>' . __('Sendmail Path'). '</b>: ';
-=======
-		$mail     = __('Sendmail') . '<br><b>' . __('Sendmail Path') . '</b>: ';
->>>>>>> origin/fix/jquery-deprecations
 		$sendmail = read_config_option('settings_sendmail_path');
 		$mail    .= $sendmail;
 	} elseif ($how == 2) {
 		print __('Method: SMTP') . '<br>';
-<<<<<<< HEAD
 
 		$mail = __('SMTP') . '<br>';
 
 		$smtp_host     = read_config_option('settings_smtp_host');
 		$smtp_port     = read_config_option('settings_smtp_port');
-||||||| 7dd05ee12
-		$mail = __('SMTP') . '<br>';
-		$smtp_host = read_config_option('settings_smtp_host');
-		$smtp_port = read_config_option('settings_smtp_port');
-=======
-		$mail          = __('SMTP') . '<br>';
-		$smtp_host     = read_config_option('settings_smtp_host');
-		$smtp_port     = intval(read_config_option('settings_smtp_port'));
->>>>>>> origin/fix/jquery-deprecations
 		$smtp_username = read_config_option('settings_smtp_username');
 		$smtp_password = read_config_option('settings_smtp_password');
 		$smtp_secure   = read_config_option('settings_smtp_secure');
@@ -7747,21 +6893,9 @@ function get_classic_tabimage(string $text, bool $down = false) : mixed {
 
 		foreach ($lines as $line) {
 			if ($ttf_functions) {
-<<<<<<< HEAD
 				imagettftext($tab, $line[2], 0, intval($line[3]), intval($line[4]), $white, $line[1], $line[0]);
-||||||| 7dd05ee12
-				imagettftext($tab, $line[2], 0, $line[3], $line[4], $white, $line[1], $line[0]);
-=======
-				imagettftext($tab, $line[2], 0, intval($line[3]), intval($line[4]), $white, (string) $line[1], $line[0]);
->>>>>>> origin/fix/jquery-deprecations
 			} else {
-<<<<<<< HEAD
 				imagestring($tab, $line[1], intval($line[3]), intval($line[4]), $line[0], $white);
-||||||| 7dd05ee12
-				imagestring($tab, $line[1], $line[3], $line[4], $line[0], $white);
-=======
-				imagestring($tab, (int) $line[1], intval($line[3]), intval($line[4]), $line[0], $white);
->>>>>>> origin/fix/jquery-deprecations
 			}
 		}
 
@@ -7823,13 +6957,7 @@ function IgnoreErrorHandler(string $message, string $file = '', int $line = 0) :
 		'A temporary server error occurred', // dns_get_record
 		'Maximum execution time of',
 		'transport read',
-<<<<<<< HEAD
 	);
-||||||| 7dd05ee12
-	);
-=======
-	];
->>>>>>> origin/fix/jquery-deprecations
 
 	foreach ($general_ignore as $i) {
 		if (stripos($message, $i) !== false) {
@@ -7864,19 +6992,9 @@ function CactiErrorHandler(int $level, string $message, string $file, int $line,
 
 	preg_match("/.*\/plugins\/([\w-]*)\/.*/", $file, $output_array);
 
-<<<<<<< HEAD
 	$plugin = (is_array($output_array) && isset($output_array[1]) ? $output_array[1] : '');
 
 	if ($level !== null && isset($phperrors[$level])) {
-||||||| 7dd05ee12
-	$plugin = (is_array($output_array) && isset($output_array[1]) ? $output_array[1] : '');
-	$error  = 'PHP ' . $phperrors[$level] . ($plugin != '' ? " in  Plugin '$plugin'" : '') . ": $message in file: $file  on line: $line";
-=======
-	$plugin = $output_array[1] ?? '';
-	$error  = 'Unknown error occurred';
-
-	if ($level != null && isset($phperrors[$level])) {
->>>>>>> origin/fix/jquery-deprecations
 		$error  = 'PHP ' . $phperrors[$level] . ($plugin != '' ? " in  Plugin '$plugin'" : '') . ": $message in file: $file  on line: $line";
 	} else {
 		$error  = 'PHP Unknown Error' . ($plugin != '' ? " in  Plugin '$plugin'" : '') . ": $message in file: $file  on line: $line";
@@ -7970,7 +7088,6 @@ function CactiShutdownHandler() : bool {
 
 				$plugin = ($output_array[1] ?? '');
 
-<<<<<<< HEAD
 					if ($error['type'] !== null && isset($phperrors[$error['type']])) {
 						$message = 'PHP ' . $phperrors[$error['type']] .
 							($plugin != '' ? " in  Plugin '$plugin'" : '') . ': ' . $error['message'] .
@@ -7980,21 +7097,6 @@ function CactiShutdownHandler() : bool {
 							($plugin != '' ? " in  Plugin '$plugin'" : '') . ': ' . $error['message'] .
 							' in file: ' .  $error['file'] . ' on line: ' . $error['line'];
 					}
-||||||| 7dd05ee12
-					$message = 'PHP ' . $phperrors[$error['type']] .
-						($plugin != '' ? " in  Plugin '$plugin'" : '') . ': ' . $error['message'] .
-						' in file: ' .  $error['file'] . ' on line: ' . $error['line'];
-=======
-				if ($error['type'] != null && isset($phperrors[$error['type']])) {
-					$message = 'PHP ' . $phperrors[$error['type']] .
-						($plugin != '' ? " in  Plugin '$plugin'" : '') . ': ' . $error['message'] .
-						' in file: ' . $error['file'] . ' on line: ' . $error['line'];
-				} else {
-					$message = 'PHP Unknown Error' .
-						($plugin != '' ? " in  Plugin '$plugin'" : '') . ': ' . $error['message'] .
-						' in file: ' . $error['file'] . ' on line: ' . $error['line'];
-				}
->>>>>>> origin/fix/jquery-deprecations
 
 				cacti_log($message, false, 'ERROR');
 				cacti_debug_backtrace('PHP ERROR', false, true, 0, 1);
@@ -8416,7 +7518,6 @@ function repair_system_data_input_methods(string $step = 'import') : void {
 							cacti_log('No Bad Data Template RRD Records', false, 'WEBUI', POLLER_VERBOSITY_DEVDBG);
 						}
 
-<<<<<<< HEAD
 						db_execute_prepared('DELETE FROM data_input_fields WHERE hash = ?', array($bhash['hash']));
 					} elseif ($bhash['hash'] == '35637c344d84d8aa3a4dc50e4a120b3f')  {
 						$data_input_field_id = db_fetch_cell_prepared('SELECT *
@@ -8432,25 +7533,6 @@ function repair_system_data_input_methods(string $step = 'import') : void {
 							db_execute_prepared('DELETE FROM data_input_data
 								WHERE data_input_field_id = ?',
 								array($data_input_field_id));
-||||||| 7dd05ee12
-						db_execute_prepared('DELETE FROM data_input_fields WHERE hash = ?', array($bhash['hash']));
-=======
-						db_execute_prepared('DELETE FROM data_input_fields WHERE hash = ?', [$bhash['hash']]);
-					} elseif ($bhash['hash'] == '35637c344d84d8aa3a4dc50e4a120b3f') {
-						$data_input_field_id = db_fetch_cell_prepared('SELECT *
-							FROM data_input_fields
-							WHERE hash = ?',
-							['35637c344d84d8aa3a4dc50e4a120b3f']);
-
-						if ($data_input_field_id > 0) {
-							db_execute_prepared('DELETE FROM data_input_fields
-								WHERE id = ?',
-								[$data_input_field_id]);
-
-							db_execute_prepared('DELETE FROM data_input_data
-								WHERE data_input_field_id = ?',
-								[$data_input_field_id]);
->>>>>>> origin/fix/jquery-deprecations
 						}
 					} else {
 						cacti_log('WARNING: Could not find Cacti default matching hash for unknown system hash "' . $bhash['hash'] . '" for ' . $data_input_id . '.  No repair performed.');
@@ -8463,7 +7545,6 @@ function repair_system_data_input_methods(string $step = 'import') : void {
 	}
 }
 
-<<<<<<< HEAD
 if (isset($config['cacti_server_os']) && $config['cacti_server_os'] == 'win32' && !function_exists('posix_kill')) {
 	if (!defined('SIGTERM')) {
 		define('SIGTERM', 15);
@@ -8484,46 +7565,7 @@ if (isset($config['cacti_server_os']) && $config['cacti_server_os'] == 'win32' &
 	function posix_kill($pid, $signal = SIGTERM) {
 		$wmi   = new COM("winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2");
 		$procs = $wmi->ExecQuery("SELECT ProcessId FROM Win32_Process WHERE ProcessId='" . $pid . "'");
-||||||| 7dd05ee12
-if (isset($config['cacti_server_os']) && $config['cacti_server_os'] == 'win32' && !function_exists('posix_kill')) {
-	function posix_kill($pid, $signal = SIGTERM) {
-		$wmi   = new COM("winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2");
-		$procs = $wmi->ExecQuery("SELECT ProcessId FROM Win32_Process WHERE ProcessId='" . $pid . "'");
-=======
-if (cacti_strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && !function_exists('posix_kill')) {
-	if (!defined('SIGTERM')) {
-		define('SIGTERM', 15);
-	}
 
-	if (!defined('SIGKILL')) {
-		define('SIGKILL', 9);
-	}
-
-	if (!defined('SIGHUP')) {
-		define('SIGHUP', 1);
-	}
-
-	if (!defined('SIGINT')) {
-		define('SIGINT', 2);
-	}
-
-	function posix_kill(int $pid, int $signal = SIGTERM) : bool {
-		// Check if the process exists
-		$checkProcessCmd = "powershell.exe -Command \"Get-Process -Id $pid -ErrorAction SilentlyContinue\"";
-		$processExists   = trim((string) shell_exec($checkProcessCmd));
-
-		if (!empty($processExists)) {
-			if ($signal == 0) {
-				return true;  // The process is running
-			}
-
-			if ($signal == SIGTERM || $signal == SIGINT || $signal == SIGKILL) {
-				// Kill the process
-				$killCmd = "powershell.exe -Command \"Stop-Process -Id $pid -Force\"";
-				shell_exec($killCmd);
->>>>>>> origin/fix/jquery-deprecations
-
-<<<<<<< HEAD
 		if (cacti_sizeof($procs)) {
 			if ($signal == 0) {
 				return true;  // The process is running
@@ -8536,33 +7578,7 @@ if (cacti_strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && !function_exists('posix_
 			} else {
 				cacti_log("WARNING: Unknown Signal Number $signal in posix_kill", false, 'POLLER');
 				return false;
-||||||| 7dd05ee12
-		if (cacti_sizeof($procs)) {
-			if ($signal == SIGTERM) {
-				foreach($procs as $proc) {
-					$proc->Terminate();
-				}
-			} else {
-				return true;
-=======
-				return true;
->>>>>>> origin/fix/jquery-deprecations
 			}
-<<<<<<< HEAD
-||||||| 7dd05ee12
-		} else {
-=======
-
-			if ($signal == SIGHUP) {
-				cacti_log("WARNING: SIGHUP Signal for pid: $pid is not supported on Windows", false, 'POLLER');
-
-				return false;
-			} else {
-				cacti_log("WARNING: Unknown Signal Number $signal in posix_kill", false, 'POLLER');
-
-				return false;
-			}
->>>>>>> origin/fix/jquery-deprecations
 		} elseif ($signal == 0) {
 			return false;
 		} else {
@@ -8571,7 +7587,6 @@ if (cacti_strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && !function_exists('posix_
 	}
 }
 
-<<<<<<< HEAD
 function is_ipaddress($ip_address = '') {
 	/* Strip IPv6 Scope ID (Zone Index) for validation, as
 	   filter_var rejects valid link-local addresses like fe80::1%eth0 */
@@ -8582,13 +7597,6 @@ function is_ipaddress($ip_address = '') {
 	}
 
 	/* check for ipv4/v6 */
-||||||| 7dd05ee12
-function is_ipaddress($ip_address = '') {
-	/* check for ipv4/v6 */
-=======
-function is_ipaddress(string $ip_address = '') : bool {
-	// check for ipv4/v6
->>>>>>> origin/fix/jquery-deprecations
 	if (function_exists('filter_var')) {
 		if (filter_var($clean_ip, FILTER_VALIDATE_IP) !== false) {
 			return true;
@@ -8822,21 +7830,9 @@ function get_cacti_version_text(bool $include_version = true, string $version = 
 	$version_text = format_cacti_version_text($version);
 
 	if ($include_version) {
-<<<<<<< HEAD
 		return trim(__('Version %s %s', CACTI_VERSION, (defined('CACTI_VERSION_BETA') ? __('- Beta %s', constant('CACTI_VERSION_BETA')):'')));
-||||||| 7dd05ee12
-		return trim(__('Version %s %s', CACTI_VERSION, (defined('CACTI_VERSION_BETA') ? __('- Beta %s', CACTI_VERSION_BETA):'')));
-=======
-		return trim(__('Version %s %s', $version_text, ''));
->>>>>>> origin/fix/jquery-deprecations
 	} else {
-<<<<<<< HEAD
 		return trim(__('%s %s', CACTI_VERSION, (defined('CACTI_VERSION_BETA') ? __('- Beta %s', constant('CACTI_VERSION_BETA')):'')));
-||||||| 7dd05ee12
-		return trim(__('%s %s', CACTI_VERSION, (defined('CACTI_VERSION_BETA') ? __('- Beta %s', CACTI_VERSION_BETA):'')));
-=======
-		return $version_text;
->>>>>>> origin/fix/jquery-deprecations
 	}
 }
 
@@ -9220,23 +8216,11 @@ function get_nonsystem_data_input(int $data_input_id) : mixed {
 	return $diid;
 }
 
-<<<<<<< HEAD
 function get_rrdtool_version($force = false) {
-||||||| 7dd05ee12
-function get_rrdtool_version() {
-=======
-function get_rrdtool_version() : string {
->>>>>>> origin/fix/jquery-deprecations
 	static $version = '';
 
 	if ($version == '') {
-<<<<<<< HEAD
 		$version = str_replace('rrd-', '', str_replace('.x', '.0', read_config_option('rrdtool_version', $force) ?: read_default_config_option('rrdtool_version') ?: '1.4.0' ));
-||||||| 7dd05ee12
-		$version = str_replace('rrd-', '', str_replace('.x', '.0', read_config_option('rrdtool_version') ?: read_default_config_option('rrdtool_version') ?: '1.4.0' ));
-=======
-		$version = str_replace('rrd-', '', str_replace('.x', '.0', (read_config_option('rrdtool_version') ?: read_default_config_option('rrdtool_version')) ?: '1.4.0'));
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	return $version;
@@ -9249,34 +8233,11 @@ function get_installed_rrdtool_version() : string {
 	if ($version == '') {
 		$rrdtool = read_config_option('path_rrdtool');
 
-<<<<<<< HEAD
 		$version = false;
 		if ($shell && preg_match('/^RRDtool ([0-9.]+) /', $shell, $matches)) {
 			foreach ($rrdtool_versions as $rrdtool_version => $rrdtool_version_text) {
 				if (cacti_version_compare($rrdtool_version, $matches[1], '<=')) {
 					$version = $rrdtool_version;
-||||||| 7dd05ee12
-		$version = false;
-		if (preg_match('/^RRDtool ([0-9.]+) /', $shell, $matches)) {
-			foreach ($rrdtool_versions as $rrdtool_version => $rrdtool_version_text) {
-				if (cacti_version_compare($rrdtool_version, $matches[1], '<=')) {
-					$version = $rrdtool_version;
-=======
-		if (!empty($rrdtool)) {
-			if (CACTI_SERVER_OS == 'win32') {
-				$shell = shell_exec(cacti_escapeshellcmd(read_config_option('path_rrdtool')) . ' -v');
-			} else {
-				$shell = shell_exec(cacti_escapeshellcmd(read_config_option('path_rrdtool')) . ' -v 2>&1');
-			}
-
-			$version = false;
-
-			if (preg_match('/^RRDtool ([0-9.]+) /', (string) ($shell ?? ''), $matches)) {
-				foreach ($rrdtool_versions as $rrdtool_version => $rrdtool_version_text) {
-					if (cacti_version_compare($rrdtool_version, $matches[1], '<=')) {
-						$version = $rrdtool_version;
-					}
->>>>>>> origin/fix/jquery-deprecations
 				}
 			}
 		}
@@ -9296,35 +8257,16 @@ function get_md5_hash(string $path) : string {
 	}
 
 	if (empty($md5)) {
-<<<<<<< HEAD
 		if (file_exists($path)) {
 			$md5 = md5_file($path);
 		} elseif (file_exists(dirname(__FILE__) . '/../' . $path)) {
 			$md5 = md5_file(dirname(__FILE__) . '/../' . $path);
-||||||| 7dd05ee12
-		if (file_exists($path)) {
-			$md5 = md5_file($path);
-		} else {
-			$md5 = md5_file(dirname(__FILE__) . '/../' . $path);
-=======
-		foreach ([$path, __DIR__ . '/../' . $path] as $file) {
-			if (file_exists($file)) {
-				$md5 = md5_file($file);
-
-				break;
-			}
-		}
-
-		if (empty($md5)) {
-			cacti_log('Missing include file, unable to hash: ' . $path, false, 'WARN', POLLER_VERBOSITY_DEVDBG);
->>>>>>> origin/fix/jquery-deprecations
 		}
     }
 
 	return $md5;
 }
 
-<<<<<<< HEAD
 function get_include_relpath($path) {
 	global $config;
 	$basePath = rtrim($config['base_path'],'/') . '/';
@@ -9351,43 +8293,12 @@ function get_md5_include_js($path, $async = false) {
 	$relpath = get_include_relpath($path);
 	if (empty($relpath)) {
 		return '';
-||||||| 7dd05ee12
-function get_md5_include_js($path, $async = false) {
-	global $config;
-
-	if (file_exists($path)) {
-		$npath = str_replace($config['base_path'] . '/', '', $path);
-	} else {
-		$npath = $path;
-=======
-function get_include_relpath(string $path, mixed $basePath = null) : string {
-	if ($basePath === null) {
-		$basePath = CACTI_PATH_BASE;
->>>>>>> origin/fix/jquery-deprecations
 	}
 
-<<<<<<< HEAD
 	if ($async) {
 		return '<script type=\'text/javascript\' src=\'' . $config['url_path'] . $relpath . '?' . get_md5_hash($path) . '\' async></script>' . PHP_EOL;
 	} else {
 		return '<script type=\'text/javascript\' src=\'' . $config['url_path'] . $relpath . '?' . get_md5_hash($path) . '\'></script>' . PHP_EOL;
-||||||| 7dd05ee12
-	if ($async) {
-		return '<script type=\'text/javascript\' src=\'' . $config['url_path'] . $npath . '?' . get_md5_hash($path) . '\' async></script>' . PHP_EOL;
-	} else {
-		return '<script type=\'text/javascript\' src=\'' . $config['url_path'] . $npath . '?' . get_md5_hash($path) . '\'></script>' . PHP_EOL;
-=======
-	$basePath = rtrim($basePath, '/') . '/';
-
-	$npath = '';
-
-	if (!empty($path)) {
-		if (file_exists($path)) {
-			$npath = str_replace($basePath, '', $path);
-		} elseif (file_exists($basePath . $path)) {
-			$npath = $path;
-		}
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	return $npath;
@@ -9412,90 +8323,12 @@ function get_theme_paths(string $format, string $path, string|null $theme = null
 	$output = [];
 	$paths  = [];
 
-<<<<<<< HEAD
 	$relpath = get_include_relpath($path);
 	if (empty($relpath)) {
 		return '';
 	}
 
 	return '<link href=\''. $config['url_path'] . $relpath . '?' . get_md5_hash($relpath) . '\' type=\'text/css\' rel=\'stylesheet\'>' . PHP_EOL;
-||||||| 7dd05ee12
-	return '<link href=\''. $config['url_path'] . $path . '?' . get_md5_hash($path) . '\' type=\'text/css\' rel=\'stylesheet\'>' . PHP_EOL;
-=======
-	$noFile = ($file === null);
-
-	if ($noFile) {
-		// Split the path up into elements
-		$parts = explode('/', $path);
-
-		// Pop the last element as that will be the file
-		$file  = array_pop($parts);
-
-		// Combine the remaining parts
-		$path  = implode('/', $parts);
-	}
-
-	$path = rtrim($path, '/') . '/';
-
-	if ($pathFirst) {
-		// Add the base path first;
-		$paths[] = $path;
-	}
-
-	if (!$noFile) {
-		if (empty($theme)) {
-			// We were passed a file but no theme, so get the current theme
-			$theme = get_selected_theme();
-		}
-
-		if (!empty($theme)) {
-			$themePath = rtrim($theme, '/') . '/';
-			// Add path + theme to see if there is a themed version
-			$paths[] = $path . $themePath;
-
-			// If we aren't expliciting include themes, check them
-			if ($path !== 'include/themes/') {
-				// Add default theme include location
-				$paths[] = 'include/themes/';
-
-				// Add include + theme + path to see if there is a themed version
-				$paths[] = 'include/themes/' . $themePath . $path;
-
-				// Add include + theme to see if there is a themed version
-				$paths[] = 'include/themes/' . $themePath;
-			}
-		}
-	}
-
-	if (!$pathFirst) {
-		// Add the base path last;
-		$paths[] = $path;
-	}
-
-	foreach ($paths as $srcPath) {
-		$srcFile = $srcPath . $file;
-		$relFile = get_include_relpath($srcFile);
-
-		if (!empty($relFile)) {
-			$output[] = sprintf($format, CACTI_PATH_URL . $relFile . '?' . get_md5_hash($relFile), ...$args);
-		}
-	}
-
-	if (empty($output) && debounce_run_notification('missing: ' . $file)) {
-		foreach ($paths as &$srcpath) {
-			$srcpath = CACTI_PATH_BASE . DIRECTORY_SEPARATOR . str_replace(CACTI_PATH_BASE, '', $srcpath);
-		}
-
-		$npath = implode('", "', $paths);
-		$ntext = sprintf('WARNING: Key Cacti Include File "%s" missing.  Please locate and replace this file as we checked in "%s"', $file, $npath);
-		$itext = __('WARNING: Key Cacti Include File "%s" missing.  Please locate and replace this file as we checked in "%s"', $file, $npath);
-
-		cacti_log($ntext, false, 'WEBUI');
-		admin_email(__('Cacti System Warning'), $itext);
-	}
-
-	return implode(PHP_EOL, $output);
->>>>>>> origin/fix/jquery-deprecations
 }
 
 /**
@@ -9784,7 +8617,6 @@ function get_debug_prefix() : string {
 	return sprintf('<[ %s | %7d ]> -- ', $dateTime, getmypid());
 }
 
-<<<<<<< HEAD
 function get_client_addr() {
 	global $config, $allowed_proxy_headers;
 
@@ -9801,87 +8633,10 @@ function get_client_addr() {
 	}
 
 	if (!in_array('REMOTE_ADDR', $proxy_headers)) {
-||||||| 7dd05ee12
-function get_client_addr($client_addr = false) {
-	$http_addr_headers = array(
-		'X-Forwarded-For',
-		'X-Client-IP',
-		'X-Real-IP',
-		'X-ProxyUser-Ip',
-		'CF-Connecting-IP',
-		'True-Client-IP',
-		'HTTP_X_FORWARDED',
-		'HTTP_X_FORWARDED_FOR',
-		'HTTP_X_CLUSTER_CLIENT_IP',
-		'HTTP_FORWARDED_FOR',
-		'HTTP_FORWARDED',
-		'HTTP_CLIENT_IP',
-		'REMOTE_ADDR',
-	);
-=======
-/**
- * Gets the current client addr
- *
- * This function relies on an administrator to set
- * the appropriate proxy headers that are allowed
- * in the `config.php` include.
- *
- * @return string|false
- */
-function get_client_addr() : string|false {
-	global $config, $allowed_proxy_headers;
-
-	$proxy_headers = $config['proxy_headers'] ?? null;
-
-	if ($proxy_headers === null) {
-		$last_time = read_config_option('proxy_alert');
-
-		if (empty($last_time)) {
-			// First run — no record yet; log immediately and record today
-			cacti_log('NOTICE: proxy_headers is not set in config.php; defaulting to false (only REMOTE_ADDR trusted). Set proxy_headers if Cacti is behind a reverse proxy.', false, 'AUTH');
-			set_config_option('proxy_alert', date('Y-m-d'));
-		} else {
-			$last_date = new DateTime($last_time);
-			$this_date = new DateTime();
-
-			$this_diff = $this_date->diff($last_date);
-			$this_days = $this_diff->format('%a');
-
-			if ((int) $this_days >= 1) {
-				cacti_log('NOTICE: proxy_headers is not set in config.php; defaulting to false (only REMOTE_ADDR trusted). Set proxy_headers if Cacti is behind a reverse proxy.', false, 'AUTH');
-				set_config_option('proxy_alert', date('Y-m-d'));
-			}
-		}
-
-		$proxy_headers = false;
-	}
-
-	/* If proxy_headers is true, allow all known headers -- NOT advised
-	 * If proxy_headers is false, allow only REMOTE_ADDR
-	 * IF proxy_headers is an array, filter by known headers
-	 */
-	if ($proxy_headers === true) {
-		$proxy_headers = $allowed_proxy_headers;
-	} elseif (is_array($proxy_headers) && is_array($allowed_proxy_headers)) {
-		$proxy_headers = array_intersect($proxy_headers, $allowed_proxy_headers);
-	}
-
-	if (!is_array($proxy_headers)) {
-		$proxy_headers = [];
-	}
-
-	if (!in_array('REMOTE_ADDR', $proxy_headers, true)) {
->>>>>>> origin/fix/jquery-deprecations
 		$proxy_headers[] = 'REMOTE_ADDR';
 	}
 
 	$client_addr = false;
-<<<<<<< HEAD
-||||||| 7dd05ee12
-	foreach ($http_addr_headers as $header) {
-=======
-
->>>>>>> origin/fix/jquery-deprecations
 	foreach ($proxy_headers as $header) {
 		if (!empty($_SERVER[$header])) {
 			$header_ips = explode(',', $_SERVER[$header]);
@@ -9905,7 +8660,6 @@ function get_client_addr() : string|false {
 }
 
 /**
-<<<<<<< HEAD
  * get_cacti_base_tables - Extracts all the base Cacti tables from the
  * cacti.sql file in the base Cacti directory.
  */
@@ -9933,51 +8687,6 @@ function get_cacti_base_tables() {
 }
 
 function cacti_pton($ipaddr) {
-||||||| 7dd05ee12
-function cacti_pton($ipaddr) {
-=======
- * cacti_is_https - Determine whether the current request was made over HTTPS.
- *
- * Checks $_SERVER['HTTPS'] which is set by the web server. Values of 'off',
- * '0', '' or unset mean HTTP; anything else (typically 'on' or '1') means HTTPS.
- *
- * @return bool True when the connection is HTTPS, false otherwise.
- */
-function cacti_is_https() : bool {
-	if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] === '' || $_SERVER['HTTPS'] === '0') {
-		return false;
-	}
-
-	return strtolower($_SERVER['HTTPS']) !== 'off';
-}
-
-/**
- * get_cacti_base_tables - Extracts all the base Cacti tables from the
- * cacti.sql file in the base Cacti directory.
- */
-function get_cacti_base_tables() : array {
-	$base_tables = [];
-
-	if (file_exists(CACTI_PATH_BASE . '/cacti.sql')) {
-		$schema = file(CACTI_PATH_BASE . '/cacti.sql');
-	} else {
-		return $base_tables;
-	}
-
-	if (cacti_sizeof($schema)) {
-		foreach ($schema as $line) {
-			if (str_contains($line, 'CREATE TABLE')) {
-				$table         = str_replace(['CREATE TABLE', '`', '(', ' '], '', $line);
-				$base_tables[] = trim($table);
-			}
-		}
-	}
-
-	return $base_tables;
-}
-
-function cacti_pton(string $ipaddr) : mixed {
->>>>>>> origin/fix/jquery-deprecations
 	// Strip out the netmask, if there is one.
 	$subnet_pos = strpos($ipaddr, '/');
 
@@ -10080,7 +8789,6 @@ function cacti_ptoa(string $title, string $addr) : void {
 	}
 }
 
-<<<<<<< HEAD
 /**
  * cacti_csv_safe - sanitzes a string for inclusion in a CSV file to prevent formula injection
  *
@@ -10105,15 +8813,6 @@ function cacti_sizeof($array) {
 }
 
 function cacti_count($array) {
-||||||| 7dd05ee12
-function cacti_sizeof($array) {
-	return ($array === false || !is_array($array)) ? 0 : sizeof($array);
-}
-
-function cacti_count($array) {
-=======
-function cacti_sizeof(mixed $array) : int {
->>>>>>> origin/fix/jquery-deprecations
 	return ($array === false || !is_array($array)) ? 0 : count($array);
 }
 
@@ -10178,23 +8877,11 @@ function raise_ajax_permission_denied() : void {
 /**
  * cacti_session_start - Create a Cacti session from the settings set by the administrator
  *
-<<<<<<< HEAD
  * @param bool $regenerate - If you are logging in for the first time, regenerate the token
  *
  * @return - null
-||||||| 7dd05ee12
- * @return - null
-=======
- * @return bool
->>>>>>> origin/fix/jquery-deprecations
  */
-<<<<<<< HEAD
 function cacti_session_start($regenerate = false) {
-||||||| 7dd05ee12
-function cacti_session_start() {
-=======
-function cacti_session_start() : bool {
->>>>>>> origin/fix/jquery-deprecations
 	global $config;
 
 	// initialize php session
@@ -10202,18 +8889,6 @@ function cacti_session_start() : bool {
 		die('PHP Session Management is missing, please install PHP Session module');
 	}
 
-<<<<<<< HEAD
-||||||| 7dd05ee12
-	session_name($config['cacti_session_name']);
-
-=======
-	if (!isset($config[CACTI_SESSION_NAME])) {
-		return false;
-	}
-
-	session_name($config[CACTI_SESSION_NAME]);
-
->>>>>>> origin/fix/jquery-deprecations
 	if (session_status() === PHP_SESSION_NONE) {
 		$session_restart = '';
 
@@ -10222,7 +8897,6 @@ function cacti_session_start() : bool {
 		$session_restart = 're';
 	}
 
-<<<<<<< HEAD
 	if ($regenerate) {
 		$session_data = cacti_session_regenerate();
 	}
@@ -10237,13 +8911,6 @@ function cacti_session_start() : bool {
 	if ($regenerate) {
 		$_SESSION = $session_data;
 	}
-||||||| 7dd05ee12
-	$session_result = session_start($config['cookie_options']);
-=======
-	/** @var array */
-	$session_options = $config[COOKIE_OPTIONS];
-	$session_result  = session_start($session_options);
->>>>>>> origin/fix/jquery-deprecations
 
 	if (!$session_result) {
 		cacti_log('Session "' . session_id() . '" ' . $session_restart . 'start failed! ' . cacti_debug_backtrace('', false, false, 0, 1), false, 'WARNING:');
@@ -10529,16 +9196,8 @@ function cacti_time_zone_set(mixed $gmt_offset = null) : void {
 		} else {
 			// Adding the rounding function as some timezones are Etc/GMT+5.5 which is
 			// not supported in PHP yet.
-<<<<<<< HEAD
 			$php_offset = 'Etc/GMT' . ($hours > 0 ? '-':'+') . abs(round($hours));
 			ini_set('date.timezone', 'Etc/GMT' . ($hours > 0 ? '-':'+') . abs(round($hours)));
-||||||| 7dd05ee12
-			$php_offset = 'Etc/GMT' . ($hours > 0 ? '-':'+') . abs($hours);
-			ini_set('date.timezone', 'Etc/GMT' . ($hours > 0 ? '-':'+') . abs($hours));
-=======
-			$php_offset = 'Etc/GMT' . ($hours > 0 ? '-' : '+') . abs(round($hours));
-			ini_set('date.timezone', 'Etc/GMT' . ($hours > 0 ? '-' : '+') . abs(round($hours)));
->>>>>>> origin/fix/jquery-deprecations
 		}
 
 		$_SESSION[SESS_BROWSER_SYSTEM_TZ] = $sys_offset;
@@ -10621,7 +9280,6 @@ function cacti_time_zone_set(mixed $gmt_offset = null) : void {
 	}
 }
 
-<<<<<<< HEAD
 function debounce_run_notification($id, $frequency = 7200) {
 	$full = 'debounce_' . $id;
 	$key   = substr($full, 0, 50);
@@ -10631,58 +9289,17 @@ function debounce_run_notification($id, $frequency = 7200) {
 	}
 
 	/* debounce admin emails */
-||||||| 7dd05ee12
-function debounce_run_notification($id, $freqnency = 1200) {
-	/* debounce admin emails */
-	$last = read_config_option('debounce_' . $id);
-=======
-function debounce_run_notification(mixed $id, int $frequency = 7200) : bool {
-	$key = 'debounce_' . md5($id);
-
-	// debounce admin emails
->>>>>>> origin/fix/jquery-deprecations
 	$last = read_config_option($key);
 	$now  = time();
 
-<<<<<<< HEAD
 	if (empty($last) || $now - $last > $frequency) {
 		set_config_option($key, $now);
-||||||| 7dd05ee12
-	if (empty($last) || $now - $last > 7200) {
-		set_config_option('debounce_' . $id, $now);
-=======
-	// default to unset
-	$last_timestamp = '';
-
-	if ($last != '' && is_numeric($last)) {
-		$last_timestamp = $last;
-	} elseif ($last != '') {
-		$last = json_decode($last, true);
-
-		if (isset($last['timestamp'])) {
-			$last_timestamp = $last['timestamp'];
-		} else {
-			$last_timestamp = '';
-		}
-	}
-
-	if (empty($last_timestamp) || $now - $last_timestamp > $frequency) {
-		$current = [
-			'id'        => $id,
-			'timestamp' => $now,
-			'frequency' => $frequency
-		];
-
-		set_config_option($key, json_encode($current));
-
->>>>>>> origin/fix/jquery-deprecations
 		return true;
 	}
 
 	return false;
 }
 
-<<<<<<< HEAD
 function cacti_unserialize($strobj) {
 	if ($strobj === null || $strobj === '') {
 		return false;
@@ -10705,585 +9322,4 @@ function cacti_format_ipv6_colon($address) {
 	}
 
 	return($address);
-||||||| 7dd05ee12
-=======
-/**
- * Return an array of sorted and unique IDs
- *
- * @param mixed $ids
- * @param bool  $shouldExplode
- *
- * @return array<int>
- */
-function cacti_unique_ids(mixed $ids, bool $shouldExplode = true) : array {
-	if ($shouldExplode && is_string($ids)) {
-		$ids = explode(',', str_replace(' ', '', $ids));
-	}
-
-	if (!is_array($ids)) {
-		$ids = [$ids];
-	}
-
-	$ids = array_map('intval', array_filter(array_unique($ids)));
-	sort($ids);
-
-	return $ids;
-}
-
-/**
- * Record a log of depreciated use
- *
- * @param string $text text to insert
- *
- * @return void
- */
-function cacti_depreciated(string $text) : void {
-	cacti_debug_backtrace('WARN Depreciated use of ' . $text . ' at ');
-}
-
-function substring_index(string $subject, string $delim, int $count) : string {
-	if ($delim === '') {
-		return $subject;
-	}
-
-	if ($count < 0) {
-		return implode($delim, array_slice(explode($delim, $subject), $count)); // @phpstan-ignore argument.type (guard above ensures $delim is non-empty)
-	} else {
-		return implode($delim, array_slice(explode($delim, $subject), 0, $count)); // @phpstan-ignore argument.type (guard above ensures $delim is non-empty)
-	}
-}
-
-function cacti_format_ipv6_colon(string $address) : string {
-	if (!filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-		return $address;
-	}
-
-	if (str_contains($address, '[')) {
-		return $address;
-	}
-
-	if (str_contains($address, ':')) {
-		return '[' . $address . ']';
-	}
-
-	return ($address);
-}
-
-function text_substitute(mixed $text, bool $isHtml = true, bool $includeStandard = true,
-	mixed $extraSubstitutions = null, mixed $extraMatches = null) : string {
-	if (!empty($text)) {
-		/** @var callable $parser */
-		$parser = 'text_regex_parser' . ($isHtml ? '_html' : '');
-
-		$extraSubstitutions ??= [];
-		$extraMatches ??= [];
-
-		// Get parts for text substitution
-		$extra_search = array_keys($extraSubstitutions);
-		$extra_values = array_values($extraSubstitutions);
-
-		$regex_array = $includeStandard ? text_get_regex_array($extraMatches) : $extraMatches;
-
-		if (!empty($regex_array)) {
-			$regex_complete = '';
-
-			foreach ($regex_array as $regex_setting) {
-				$regex_text = $regex_setting['regex'] ?? '';
-
-				if (!empty($regex_text)) {
-					$regex_complete .= (strlen($regex_complete) ? ')|(' : '') . $regex_text;
-				} else {
-					cacti_log('WARNING: Bad regex search: ' . json_encode($regex_setting), false, 'UTIL');
-				}
-			}
-
-			$regex_complete = '~(' . $regex_complete . ')~';
-
-			if (is_array($text)) {
-				foreach ($text as &$line) {
-					$line = text_substitute_line($line, $regex_complete, $parser, $extra_search, $extra_values);
-				}
-			} else {
-				$text = text_substitute_line($text, $regex_complete, $parser, $extra_search, $extra_values);
-			}
-		}
-	}
-
-	return (string) $text;
-}
-
-function text_substitute_line(string $source, string $regex, callable $parser, array $search, array $values) : string {
-	$result = $source;
-
-	if (!empty($source)) {
-		if (!empty($regex)) {
-			$result = preg_replace_callback($regex, $parser, $result) ?? $result;
-		}
-
-		if (!empty($values) && cacti_sizeof($values) == cacti_sizeof($search)) {
-			$result = str_replace($search, $values, $result);
-		}
-	}
-
-	return $result;
-}
-
-function text_get_regex_array(mixed $extraSubstitutions = []) : array {
-	static $regex_array = [];
-	static $regex_extra = [];
-
-	if ($extraSubstitutions !== null) {
-		$regex_extra = $extraSubstitutions;
-	}
-
-	if (!cacti_sizeof($regex_array)) {
-		$regex_array = [
-			1  => ['name' => 'DS',     'regex' => '( DS\[)([, \d]+)(\])',       'func' => 'text_regex_datasource'],
-			2  => ['name' => 'DQ',     'regex' => '( DQ\[)([, \d]+)(\])',       'func' => 'text_regex_dataquery'],
-			3  => ['name' => 'Device', 'regex' => '( Device\[)([, \d]+)(\])',   'func' => 'text_regex_device'],
-			4  => ['name' => 'Poller', 'regex' => '( Poller\[)([, \d]+)(\])',   'func' => 'text_regex_poller'],
-			5  => ['name' => 'RRA',    'regex' => "([_\/])(\d+)(\.rrd&#039;)",  'func' => 'text_regex_rra'],
-			6  => ['name' => 'GT',     'regex' => '( GT\[)([, \d]+)(\])',       'func' => 'text_regex_graphtemplates'],
-			7  => ['name' => 'Graph',  'regex' => '( Graph\[)([, \d]+)(\])',    'func' => 'text_regex_graphs'],
-			8  => ['name' => 'Graphs', 'regex' => '( Graphs\[)([, \d]+)(\])',   'func' => 'text_regex_graphs'],
-			9  => ['name' => 'User',   'regex' => '( User\[)([, \d]+)(\])',     'func' => 'text_regex_users'],
-			10 => ['name' => 'User',   'regex' => '( Users\[)([, \d]+)(\])',    'func' => 'text_regex_users'],
-			11 => ['name' => 'Rule',   'regex' => '( Rule\[)([, \d]+)(\])',   	 'func' => 'text_regex_rule'],
-		];
-
-		// We will currently issue two hooks, one for the clog portion for backwards
-		// compatibility and one for new name.  In the future, the old hook will be
-		// marked depreciated and removed.
-		$regex_array = api_plugin_hook_function('clog_regex_array', $regex_array);
-		$regex_array = api_plugin_hook_function('text_regex_array', $regex_array);
-	}
-
-	return array_merge($regex_array, $regex_extra);
-}
-
-function text_regex_replace(int $id, string $link, string $url, array $matches, array $cache) : string {
-	if ($link) {
-		return $matches[1] . '<a href=\'' . htmle(CACTI_PATH_URL . sprintf($url,  $id)) . '\'>' . (isset($cache[$id]) ? htmle($cache[$id]) : $id) . '</a>' . $matches[3];
-	} else {
-		return $matches[1] . ($cache[$id] ?? $id) . $matches[3];
-	}
-}
-
-function text_regex_parser_html(array $matches) : string {
-	return text_regex_parser($matches, true);
-}
-
-function text_regex_parser(array $matches, mixed $link = false) : string {
-	$result = $matches[0];
-	$match  = $matches[0];
-
-	$key_match = -1;
-
-	for ($index = 1; $index < cacti_sizeof($matches); $index++) {
-		if ($match == $matches[$index]) {
-			$key_match = $index;
-
-			break;
-		}
-	}
-
-	if ($key_match != -1) {
-		$key_setting = (int) (($key_match - 1) / 4);
-		$regex_array = text_get_regex_array();
-
-		if (cacti_sizeof($regex_array)) {
-			if (array_key_exists($key_setting, $regex_array)) {
-				$regex_setting = $regex_array[$key_setting];
-
-				$rekey_array = [];
-
-				for ($j = 0; $j < 4; $j++) {
-					$rekey_array[$j] = $matches[$key_match + $j];
-				}
-
-				if (function_exists($regex_setting['func'])) {
-					$result = call_user_func_array($regex_setting['func'], [$rekey_array, $link]);
-				} else {
-					$result = $match;
-				}
-			}
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_device(array $matches, mixed $link = false) : string {
-	static $host_cache = null;
-
-	if (!cacti_sizeof($host_cache)) {
-		$host_cache[0] = __('System Device');
-	}
-
-	$result = $matches[0];
-
-	$dev_ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($dev_ids)) {
-		$result = '';
-
-		foreach ($dev_ids as $id) {
-			if (!isset($host_cache[$id])) {
-				$host_cache[$id] = db_fetch_cell_prepared('SELECT description
-					FROM host
-		            WHERE id = ?',
-					[$id]
-				);
-			}
-
-			$result .= text_regex_replace($id, $link, 'host.php?action=edit&id=%s', $matches, $host_cache);
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_datasource(array $matches, mixed $link = false) : string {
-	static $gr_cache = null;
-
-	$result = $matches[0];
-
-	$ds_ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($ds_ids)) {
-		$result     = '';
-		$graph_rows = [];
-
-		foreach ($ds_ids as $ds) {
-			if (!isset($gr_cache[$ds])) {
-				$gr_cache[$ds] = array_rekey(
-					db_fetch_assoc_prepared('SELECT DISTINCT
-						gti.local_graph_id AS id
-						FROM graph_templates_item AS gti
-						INNER JOIN data_template_rrd AS dtr
-						ON gti.task_item_id=dtr.id
-						WHERE gti.local_graph_id > 0
-						AND dtr.local_data_id = ?',
-						[$ds]
-					),
-					'id', 'id'
-				);
-			}
-
-			$graph_rows = array_merge($graph_rows, $gr_cache[$ds]);
-		}
-
-		$graph_results = '';
-
-		if (cacti_sizeof($graph_rows)) {
-			$graph_ids   = implode(',', $graph_rows);
-			$graph_array = [0 => '', 1 => ' Graphs[', 2 => $graph_ids, 3 => ']'];
-
-			$graph_results = text_regex_graphs($graph_array, $link);
-		}
-
-		$result = $matches[1];
-
-		$ds_titles = get_data_source_titles($ds_ids);
-
-		$sep           = '';
-		$ds_matches    = $matches;
-		$ds_matches[1] = $ds_matches[3] = '';
-
-		foreach ($ds_ids as $ds_id) {
-			$result .= $sep . text_regex_replace($ds_id, $link, 'data_sources.php?action=ds_edit&id=%s', $ds_matches, $ds_titles);
-			$sep = ', ';
-		}
-
-		$result .= $matches[3];
-
-		if (!empty($graph_results)) {
-			$result .= ', ' . $graph_results;
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_poller(array $matches, mixed $link = false) : string {
-	static $poller_cache = null;
-
-	if (!cacti_sizeof($poller_cache)) {
-		$poller_cache = array_rekey(
-			db_fetch_assoc('SELECT id, name
-				FROM poller'),
-			'id',
-			'name'
-		);
-	}
-
-	$result = $matches[0];
-
-	$poller_ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($poller_ids)) {
-		$result = '';
-
-		foreach ($poller_ids as $poller_id) {
-			$result .= text_regex_replace($poller_id, $link, 'pollers.php?action=edit&id=%s', $matches, $poller_cache);
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_dataquery(array $matches, mixed $link = false) : string {
-	static $query_cache = null;
-
-	if (!cacti_sizeof($query_cache)) {
-		$query_cache = array_rekey(
-			db_fetch_assoc('SELECT id, name
-				FROM snmp_query'),
-			'id',
-			'name'
-		);
-	}
-
-	$result = $matches[0];
-
-	$query_ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($query_ids)) {
-		$result = '';
-
-		foreach ($query_ids as $query_id) {
-			$result .= text_regex_replace($query_id, $link, 'data_queries.php?action=edit&id=%s', $matches, $query_cache);
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_rra(array $matches, mixed $link = false) : string {
-	$result = $matches[0];
-
-	$local_data_ids = $matches[2];
-
-	if (strlen($local_data_ids)) {
-		$datasource_array  = [0 => '', 1 => ' DS[', 2 => $local_data_ids, 3 => ']'];
-		$datasource_result = text_regex_datasource($datasource_array, $link);
-
-		if (strlen($datasource_result)) {
-			$result .= ' ' . $datasource_result;
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_graphs(array $matches, mixed $link = false) : string {
-	static $graph_cache = null;
-
-	$result = $matches[0];
-
-	$graph_ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($graph_ids)) {
-		$result    = '';
-		$graph_add = CACTI_PATH_URL . 'graph_view.php?page=1&style=selective&action=preview&graph_add=';
-
-		$title = '';
-		$i     = 0;
-
-		foreach ($graph_ids as $id) {
-			if (!isset($graph_cache[$id])) {
-				$graph_cache[$id] = db_fetch_cell_prepared('SELECT title_cache AS title
-					FROM graph_templates_graph AS gtg
-					WHERE local_graph_id = ?',
-					[$id]
-				);
-			}
-		}
-
-		$i = 0;
-
-		foreach ($graph_ids as $id) {
-			$graph_add .= ($i > 0 ? '%2C' : '') . $id;
-			$title .= ($title != '' ? ', ' : '') . htmle((isset($graph_cache[$id]) ? htmle($graph_cache[$id]) : (string) $id));
-			$i++;
-		}
-
-		if ($link) {
-			$result .= $matches[1] . "<a href='" . htmle($graph_add) . '\'>' . $title . '</a>' . $matches[3];
-		} else {
-			$result .= $title . $matches[3];
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_graphtemplates(array $matches, mixed $link = false) : string {
-	static $templates_cache = null;
-
-	if (!cacti_sizeof($templates_cache)) {
-		$templates_cache = array_rekey(
-			db_fetch_assoc('SELECT id, name
-				FROM graph_templates'),
-			'id',
-			'name'
-		);
-	}
-
-	$result = $matches[0];
-
-	$ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($ids)) {
-		$result = '';
-
-		foreach ($ids as $id) {
-			$result .= text_regex_replace($id, $link, 'graph_templates.php?action=template_edit&id=%s', $matches, $templates_cache);
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_users(array $matches, mixed $link = false) : string {
-	static $users_cache = null;
-
-	$result = $matches[0];
-
-	$user_ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($user_ids)) {
-		$result = '';
-
-		foreach ($user_ids as $id) {
-			if (!isset($users_cache[$id])) {
-				$users_cache[$id] = db_fetch_cell_prepared('SELECT username
-					FROM user_auth
-					WHERE id = ?',
-					[$id]
-				);
-			}
-		}
-
-		foreach ($user_ids as $id) {
-			$result .= text_regex_replace($id, $link, 'user_admin.php?action=user_edit&tab=general&id=%s', $matches, $users_cache);
-		}
-	}
-
-	return $result;
-}
-
-function text_regex_rule(array $matches, mixed $link = false) : string {
-	static $rules_cache = null;
-
-	if (!cacti_sizeof($rules_cache)) {
-		$rules_cache = array_rekey(
-			db_fetch_assoc('SELECT id, name
-				FROM automation_graph_rules'),
-			'id', 'name'
-		);
-	}
-
-	$result = $matches[0];
-
-	$dev_ids = cacti_unique_ids($matches[2]);
-
-	if (cacti_sizeof($dev_ids)) {
-		$result = '';
-
-		foreach ($dev_ids as $rule_id) {
-			$result .= text_regex_replace($rule_id, $link, 'automation_graph_rules.php?action=edit&id=%s', $matches, $rules_cache);
-		}
-	}
-
-	return $result;
-}
-
-function get_keyup_delay() : int {
-	$keyup_delay = intval(read_user_setting('autocomplete_delay'));
-
-	if ($keyup_delay < 500) {
-		$keyup_delay = 500;
-	}
-
-	return $keyup_delay;
-}
-
-function cacti_unserialize(string $strobj) : mixed {
-	return unserialize($strobj, ['allowed_classes' => false]);
-}
-
-function detect_cpu_cores() : int {
-	$cpu_cores = 0;
-
-	if (CACTI_SERVER_OS === 'win32') {
-		$output = shell_exec('powershell -Command "Get-WmiObject Win32_Processor | Select-Object NumberOfLogicalProcessors"');
-
-		if (!is_null($output) && $output !== false) {
-			preg_match_all('/\d+/', $output, $matches);
-			$cpu_cores = array_sum($matches[0]);
-		}
-	} elseif (substr_count(cacti_strtolower(PHP_OS), 'darwin')) {
-		$cpu_cores = shell_exec('sysctl -n hw.ncpu');
-	} else {
-		if (file_exists('/usr/bin/nproc')) {
-			$cpu_cores = shell_exec('/usr/bin/nproc');
-		} elseif (file_exists('/bin/nproc')) {
-			$cpu_cores = shell_exec('/bin/nproc');
-		} else {
-			$output = shell_exec('nproc');
-
-			if (!is_null($output) && $output !== false) {
-				$cpu_cores = $output;
-			}
-		}
-	}
-
-	return intval(trim((string) $cpu_cores));
-}
-
-/**
- * wrapper function to emulate pecl stats if it's not installed
- *
- * @param array $items  A list of items to calculate the standard deviation for
- * @param bool  $sample
- *
- * @return mixed False on failure, double otherwise
- */
-if (!function_exists('stats_standard_deviation')) {
-	function stats_standard_deviation(array $items, bool $sample = false) : mixed {
-		$sum         = 0;
-		$total_items = 0;
-
-		// remove NaN entries from the data set
-		if (cacti_sizeof($items)) {
-			foreach ($items as $key => $value) {
-				if (is_int($value) || is_float($value)) {
-					$total_items++;
-					$sum += $value;
-				} else {
-					unset($items[$key]);
-				}
-			}
-		}
-
-		if (($sample && $total_items === 1) || $total_items === 0) {
-			return false;
-		}
-
-		$mean  = $sum / $total_items;
-		$carry = 0.0;
-
-		foreach ($items as $val) {
-			$d = ((float) $val) - $mean;
-			$carry += $d * $d;
-		}
-
-		if ($sample) {
-			--$total_items;
-		}
-
-		return sqrt($carry / $total_items);
-	}
->>>>>>> origin/fix/jquery-deprecations
 }

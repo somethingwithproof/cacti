@@ -36,7 +36,6 @@ function exec_poll(string $command, int $timeout = 5) : string {
 
 	$data = exec_with_timeout($command, $output, $return, $timeout);
 
-<<<<<<< HEAD
 		/* return if the popen command was not successful */
 		if (!is_resource($fp)) {
 			cacti_log('WARNING; Problem with POPEN command.', false, 'POLLER');
@@ -48,22 +47,6 @@ function exec_poll(string $command, int $timeout = 5) : string {
 		pclose($fp);
 	} else {
 		$output = shell_exec($command);
-||||||| 7dd05ee12
-		/* return if the popen command was not successful */
-		if (!is_resource($fp)) {
-			cacti_log('WARNING; Problem with POPEN command.', false, 'POLLER');
-			return 'U';
-		}
-
-		$output = fgets($fp, 8192);
-
-		pclose($fp);
-	} else {
-		$output = `$command`;
-=======
-	if ($return != 0) {
-		cacti_log(sprintf('WARNING: Script:%s, ErrorCode:%d, Output:%s', $command, $return, implode(',', $output)), false, 'POLLER');
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if ($data == '') {
@@ -150,7 +133,6 @@ function exec_background(string $filename, string|array $args = '', string|array
 
 	if (is_array($args)) {
 		$args = implode(' ', array_map('cacti_escapeshellarg', $args));
-<<<<<<< HEAD
 	} else {
 		/* SECURITY: If args are passed as a string, strip shell operators to
 		 * prevent background command chaining if a caller forgot to escape */
@@ -162,11 +144,6 @@ function exec_background(string $filename, string|array $args = '', string|array
 	}
 
 	cacti_log("DEBUG: About to Spawn a Remote Process [CMD: $filename, ARGS: $args]", true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_DEBUG));
-||||||| 7dd05ee12
-	cacti_log("DEBUG: About to Spawn a Remote Process [CMD: $filename, ARGS: $args]", true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_DEBUG));
-=======
-	}
->>>>>>> origin/fix/jquery-deprecations
 
 	/* redirect_args intentionally bypass escapeshellarg because they contain
 	 * shell operators (>, 2>&1, etc.) that must be passed through literally.
@@ -205,7 +182,6 @@ function exec_background(string $filename, string|array $args = '', string|array
  * exec_with_timeout - Execute a command and return it's output. Either wait until the
  * command exits or the timeout has expired.
  *
-<<<<<<< HEAD
  * @param  (string)      $cmd          Command to execute.
  * @param  (string)      $output       A return array of output.
  * @param  (int)         $return_code  The return code from the script
@@ -311,130 +287,6 @@ function exec_with_timeout($cmd, &$output, &$return_code, $timeout = 5) {
 
 function file_escaped($file) {
 	if (substr($file, 0, 1) == '"' && substr($file, -1, 1) == '"') {
-||||||| 7dd05ee12
-function file_escaped($file) {
-	if (substr($file, 0, 1) == '"' && substr($file, -1, 1) == '"') {
-=======
- * @param string $cmd         Command to execute.
- * @param array  $output      A return array of output.
- * @param int    $return_code The return code from the script
- * @param int    $timeout     Timeout in seconds.
- *
- * @return mixed Either the last line of output or false on error
- */
-function exec_with_timeout(string $cmd, array &$output, int &$return_code, int $timeout = 5) : mixed {
-	// File descriptors passed to the process.
-	$descriptors = [
-		0 => ['pipe', 'r'],  // stdin
-		1 => ['pipe', 'w'],  // stdout
-		2 => ['pipe', 'w']   // stderr
-	];
-
-	// Use setsid when available (Linux) so the child becomes a process-group leader,
-	// allowing posix_kill(-pid, 9) to reliably kill the entire subtree on timeout.
-	// Falls back to plain exec on systems without setsid (macOS, BSD).
-	$setsid = '';
-
-	if (CACTI_SERVER_OS != 'win32') {
-		$setsid_path = trim(shell_exec('which setsid 2>/dev/null') ?? '');
-
-		if ($setsid_path !== '') {
-			$setsid = 'setsid -- ';
-		}
-	}
-
-	$cmd_full = $setsid . $cmd;
-
-	// Start the process.
-	$process = proc_open('exec ' . $cmd_full, $descriptors, $pipes);
-
-	if (!is_resource($process)) {
-		return false;
-	}
-
-	// Set the stdout stream to non-blocking.
-	stream_set_blocking($pipes[1], false);
-
-	// Set the stderr stream to non-blocking.
-	stream_set_blocking($pipes[2], false);
-
-	// Turn the timeout into microseconds.
-	$timeout = (int) $timeout * 1000000;
-
-	// Output buffer.
-	$buffer = '';
-
-	// While we have time to wait.
-	while ($timeout > 0) {
-		$start = microtime(true);
-
-		// Wait until we have output or the timer expired.
-		$read  = [$pipes[1]];
-		$write = [];
-		$other = [];
-		stream_select($read, $write, $other, 0, $timeout);
-
-		// Get the status of the process.
-		// Do this before we read from the stream,
-		// this way we can't lose the last bit of output if the process dies between these functions.
-		$status = proc_get_status($process);
-
-		// Read the contents from the buffer.
-		// This function will always return immediately as the stream is non-blocking.
-		$buffer .= stream_get_contents($pipes[1]);
-
-		if (!$status['running']) {
-			// Break from this loop if the process exited before the timeout.
-			break;
-		}
-
-		// Subtract the number of microseconds that we waited.
-		$timeout -= (int) ((microtime(true) - $start) * 1000000);
-	}
-
-	// Check if there were any errors.
-	$errors = stream_get_contents($pipes[2]);
-
-	if (isset($status['exitcode'])) {
-		$return_code = $status['exitcode'];
-	} else {
-		$return_code = 1;
-	}
-
-	// Only surface stderr noise when the command actually failed; successful
-	// commands may write informational output to stderr that isn't actionable.
-	if ($return_code != 0 && !empty($errors)) {
-		cacti_log("WARNING: Command '$cmd' exited with code $return_code, stderr: " . trim($errors), false, 'POLLER', POLLER_VERBOSITY_MEDIUM);
-	}
-
-	// Kill the process in case the timeout expired and it's still running.
-	// If the process already exited this won't do anything.
-	// Use negative PID to kill the entire process group (setsid makes child the group leader).
-	if (isset($status['pid']) && $status['running'] && function_exists('posix_kill')) {
-		posix_kill(-$status['pid'], 9);
-	}
-
-	proc_terminate($process, 9);
-
-	// Close all streams.
-	fclose($pipes[0]);
-	fclose($pipes[1]);
-	fclose($pipes[2]);
-
-	proc_close($process);
-
-	if ($buffer != '') {
-		$output = explode("\n", $buffer);
-
-		return (end($output));
-	} else {
-		return null;
-	}
-}
-
-function file_escaped(string $file) : bool {
-	if (str_starts_with($file, '"') && str_ends_with($file, '"')) {
->>>>>>> origin/fix/jquery-deprecations
 		return true;
 	}
 
@@ -599,23 +451,10 @@ function update_reindex_cache(int $host_id, int $data_query_id) : void {
 					foreach ($primary_indexes as $index) {
 						$assert_value = $index['field_value'];
 
-<<<<<<< HEAD
 					if ($data_query_type == DATA_INPUT_TYPE_SNMP_QUERY) {
 						$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SNMP . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(($data_query_xml['fields'][$data_query['sort_field']]['source'] == 'index') ? $data_query_xml['oid_index'] . '.' . $index['snmp_index']:$data_query_xml['fields'][$data_query['sort_field']]['oid'] . '.' . $index['snmp_index']) . ", 1)";
 					} elseif ($data_query_type == DATA_INPUT_TYPE_SCRIPT_QUERY) {
 						$recache_stack[] = '(' . $host_id . ', ' . $data_query_id . ', ' . POLLER_ACTION_SCRIPT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ': '') . $data_query_xml['arg_get'] . ' ' . $data_query_xml['fields'][$data_query['sort_field']]['query_name'] . ' "' . $index['snmp_index'] . '"', $data_query_xml['script_path'], $host_id)) . ", 1)";
-||||||| 7dd05ee12
-					if ($data_query_type == DATA_INPUT_TYPE_SNMP_QUERY) {
-						$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SNMP . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(($data_query_xml['fields'][$data_query['sort_field']]['source'] == 'index') ? $data_query_xml['oid_index']:$data_query_xml['fields'][$data_query['sort_field']]['oid'] . '.' . $index['snmp_index']) . ", 1)";
-					} elseif ($data_query_type == DATA_INPUT_TYPE_SCRIPT_QUERY) {
-						$recache_stack[] = '(' . $host_id . ', ' . $data_query_id . ', ' . POLLER_ACTION_SCRIPT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ': '') . $data_query_xml['arg_get'] . ' ' . $data_query_xml['fields'][$data_query['sort_field']]['query_name'] . ' ' . $index['snmp_index'], $data_query_xml['script_path'], $host_id)) . ", 1)";
-=======
-						if ($data_query_type == DATA_INPUT_TYPE_SNMP_QUERY) {
-							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SNMP . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(($data_query_xml['fields'][$data_query['sort_field']]['source'] == 'index') ? $data_query_xml['oid_index'] . '.' . $index['snmp_index'] : $data_query_xml['fields'][$data_query['sort_field']]['oid'] . '.' . $index['snmp_index']) . ', 1)';
-						} elseif ($data_query_type == DATA_INPUT_TYPE_SCRIPT_QUERY) {
-							$recache_stack[] = '(' . $host_id . ', ' . $data_query_id . ', ' . POLLER_ACTION_SCRIPT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_get'] . ' ' . $data_query_xml['fields'][$data_query['sort_field']]['query_name'] . ' "' . $index['snmp_index'] . '"', $data_query_xml['script_path'], $host_id)) . ', 1)';
-						}
->>>>>>> origin/fix/jquery-deprecations
 					}
 				}
 
@@ -741,17 +580,7 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 	if (cacti_sizeof($results)) {
 		// create an array keyed off of each .rrd file
 		foreach ($results as $item) {
-<<<<<<< HEAD
 			/* trim the default characters, but add single and double quotes */
-||||||| 7dd05ee12
-			/* trim the default characters, but add single and double quotes */
-			$value     = $item['output'];
-			$unix_time = $item['unix_time'];
-			$rrd_path  = $item['rrd_path'];
-			$rrd_name  = $item['rrd_name'];
-=======
-			// trim the default characters, but add single and double quotes
->>>>>>> origin/fix/jquery-deprecations
 			$value            = $item['output'];
 			$unix_time        = $item['unix_time'];
 			$rrd_path         = $item['rrd_path'];
@@ -763,14 +592,7 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 			$rrd_update_array[$rrd_path]['local_data_id'] = $local_data_id;
 
 			if ((is_numeric($value)) || ($value == 'U' && $rrd_name != '')) {
-<<<<<<< HEAD
 				/* single one value output */
-||||||| 7dd05ee12
-			/* single one value output */
-			if ((is_numeric($value)) || ($value == 'U')) {
-=======
-				// single one value output
->>>>>>> origin/fix/jquery-deprecations
 				$rrd_update_array[$rrd_path]['times'][$unix_time][$rrd_name] = $value;
 			} elseif (is_hexadecimal($value)) {
 				/**
@@ -779,13 +601,7 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 				 */
 				$value = str_replace(' ', '', $value);
 
-<<<<<<< HEAD
 				if (strlen($value) <= 8 || ((2147483647+1) == intval(2147483647+1))) {
-||||||| 7dd05ee12
-				if (strlen($value) <= 8 || ((2147483647+1) == intval(2147483647+1))) {
-=======
-				if (strlen($value) <= 8) {
->>>>>>> origin/fix/jquery-deprecations
 					$rrd_update_array[$rrd_path]['times'][$unix_time][$rrd_name] = hexdec($value);
 				} elseif (function_exists('bcpow')) {
 					$dec    = 0;
@@ -799,16 +615,8 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 				} else {
 					$rrd_update_array[$rrd_path]['times'][$unix_time][$rrd_name] = 'U';
 				}
-<<<<<<< HEAD
 			} elseif (strpos($value, ':') !== false) {
 				/* multiple value output */
-||||||| 7dd05ee12
-			/* multiple value output */
-			} elseif (strpos($value, ':') !== false) {
-=======
-			} elseif (str_contains($value, ':')) {
-				// multiple value output
->>>>>>> origin/fix/jquery-deprecations
 				$values = preg_split('/\s+/', $value);
 
 				if ($data_template_id > 0) {
@@ -819,7 +627,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 							ON dtr.id = gti.task_item_id
 							WHERE dtr.local_data_id = ?
 							AND gti.task_item_id IS NULL',
-<<<<<<< HEAD
 							array($local_data_id)),
 						'data_source_name', 'data_source_name'
 					);
@@ -828,18 +635,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 				}
 
 				foreach($values as $value) {
-||||||| 7dd05ee12
-				foreach($values as $value) {
-=======
-							[$local_data_id]),
-						'data_source_name', 'data_source_name'
-					);
-				} else {
-					$unused_data_source_names = [];
-				}
-
-				foreach ($values as $value) {
->>>>>>> origin/fix/jquery-deprecations
 					$matches = explode(':', $value);
 
 					if (cacti_sizeof($matches) == 2) {
@@ -850,14 +645,7 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 								continue;
 							}
 
-<<<<<<< HEAD
 							cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_HIGH));
-||||||| 7dd05ee12
-							foreach($fields as $field) {
-								cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_HIGH));
-=======
-							cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_HIGH));
->>>>>>> origin/fix/jquery-deprecations
 
 							if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
 								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
@@ -867,12 +655,7 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
 							}
 
-<<<<<<< HEAD
 							$rrd_tmpl .= ($rrd_tmpl != '' ? ':':'') . $field;
-||||||| 7dd05ee12
-=======
-							$rrd_tmpl .= ($rrd_tmpl != '' ? ':' : '') . $field;
->>>>>>> origin/fix/jquery-deprecations
 
 							$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
 						} else {
@@ -886,7 +669,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 										INNER JOIN data_input_fields AS dif
 										ON dtr.data_input_field_id = dif.id
 										WHERE dtr.local_data_id = ?',
-<<<<<<< HEAD
 										array($local_data_id)),
 									'data_name', 'data_source_name'
 								);
@@ -898,28 +680,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 										ON dtr.data_input_field_id = dif.id
 										WHERE dtr.local_data_id = ?',
 										array($local_data_id)),
-||||||| 7dd05ee12
-							$nt_rrd_field_names = array_rekey(
-								db_fetch_assoc_prepared('SELECT dtr.data_source_name, dif.data_name
-									FROM data_template_rrd AS dtr
-									INNER JOIN data_input_fields AS dif
-									ON dtr.data_input_field_id=dif.id
-									WHERE dtr.local_data_id = ?', array($item['local_data_id'])),
-								'data_name', 'data_source_name'
-							);
-=======
-										[$local_data_id]),
-									'data_name', 'data_source_name'
-								);
-							} else {
-								$nt_rrd_field_names = array_rekey(
-									db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-										FROM data_template_rrd AS dtr
-										INNER JOIN data_input_fields AS dif
-										ON dtr.data_input_field_id = dif.id
-										WHERE dtr.local_data_id = ?',
-										[$local_data_id]),
->>>>>>> origin/fix/jquery-deprecations
 									'data_name', 'data_source_name'
 								);
 							}
@@ -932,7 +692,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 										continue;
 									}
 
-<<<<<<< HEAD
 									cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_HIGH));
 
 									if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
@@ -944,21 +703,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 									}
 
 									$rrd_tmpl .= ($rrd_tmpl != '' ? ':':'') . $field;
-||||||| 7dd05ee12
-									$rrd_update_array[$item['rrd_path']]['times'][$unix_time][$nt_rrd_field_names[$matches[0]]] = $matches[1];
-=======
-									cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_HIGH));
-
-									if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
-									} elseif ((function_exists('is_hexadecimal')) && (is_hexadecimal($matches[1]))) {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = hexdec($matches[1]);
-									} else {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
-									}
-
-									$rrd_tmpl .= ($rrd_tmpl != '' ? ':' : '') . $field;
->>>>>>> origin/fix/jquery-deprecations
 								}
 							}
 
@@ -975,7 +719,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 							ON dtr.id = gti.task_item_id
 							WHERE dtr.local_data_id = ?
 							AND gti.task_item_id IS NULL',
-<<<<<<< HEAD
 							array($local_data_id)),
 						'data_source_name', 'data_source_name'
 					);
@@ -1017,57 +760,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 
 						$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
 						$rrd_tmpl .= ($rrd_tmpl != '' ? ':':'') . $field;
-||||||| 7dd05ee12
-=======
-							[$local_data_id]),
-						'data_source_name', 'data_source_name'
-					);
-
-					$nt_rrd_field_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-							FROM graph_templates_item AS gti
-							INNER JOIN data_template_rrd AS dtr
-							ON gti.task_item_id = dtr.id
-							INNER JOIN data_input_fields AS dif
-							ON dtr.data_input_field_id = dif.id
-							WHERE dtr.local_data_id = ?',
-							[$local_data_id]),
-						'data_name', 'data_source_name'
-					);
-				} else {
-					$unused_data_source_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
-							FROM data_template_rrd AS dtr
-							WHERE dtr.local_data_id = ?
-							AND gti.task_item_id IS NULL',
-							[$local_data_id]),
-						'data_source_name', 'data_source_name'
-					);
-
-					$nt_rrd_field_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-							FROM data_template_rrd AS dtr
-							INNER JOIN data_input_fields AS dif
-							ON dtr.data_input_field_id = dif.id
-							WHERE dtr.local_data_id = ?',
-							[$local_data_id]),
-						'data_name', 'data_source_name'
-					);
-				}
-
-				$expected = '';
-
-				if (cacti_sizeof($nt_rrd_field_names)) {
-					foreach ($nt_rrd_field_names as $field) {
-						if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
-							continue;
-						}
-
-						$expected .= ($expected != '' ? ' ' : '') . "$field:value";
-
-						$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
-						$rrd_tmpl .= ($rrd_tmpl != '' ? ':' : '') . $field;
->>>>>>> origin/fix/jquery-deprecations
 					}
 
 					$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
@@ -1084,19 +776,9 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 			}
 		}
 
-<<<<<<< HEAD
 		/* make sure each .rrd file has complete data */
 		$k        = 0;
 		$data_ids = array();
-||||||| 7dd05ee12
-		/* make sure each .rrd file has complete data */
-		$k = 0;
-		$data_ids = array();
-=======
-		// make sure each .rrd file has complete data
-		$k        = 0;
-		$data_ids = [];
->>>>>>> origin/fix/jquery-deprecations
 
 		foreach ($results as $item) {
 			$unix_time = $item['unix_time'];
@@ -2179,7 +1861,6 @@ function replicate_out(int $remote_poller_id = 1, string $class = 'all') : bool 
  *
  * @return void
  */
-<<<<<<< HEAD
 function replicate_out_table($conn, &$data, $table, $remote_poller_id, $truncate = true, $exclude = false, $level = POLLER_VERBOSITY_NONE) {
 	// Get the create table syntax just in case
 	$create_table = db_fetch_row("SHOW CREATE TABLE `$table`");
@@ -2196,12 +1877,6 @@ function replicate_out_table($conn, &$data, $table, $remote_poller_id, $truncate
 		db_execute($create, false, $conn);
 	}
 
-||||||| 7dd05ee12
-function replicate_out_table($conn, &$data, $table, $remote_poller_id, $truncate = true, $exclude = false, $level = POLLER_VERBOSITY_NONE) {
-=======
-function replicate_out_table(mixed $db_conn, array &$data, string $table, int $remote_poller_id, bool $truncate = true,
-	mixed $exclude = false, int $level = POLLER_VERBOSITY_NONE) : void {
->>>>>>> origin/fix/jquery-deprecations
 	if (cacti_sizeof($data)) {
 		if (!db_table_exists($table)) {
 			cacti_log('WARNING: Unable to replicate table ' . $table . ' because it does not exist locally', false, 'REPLICATE');
@@ -2255,26 +1930,12 @@ function replicate_out_table(mixed $db_conn, array &$data, string $table, int $r
 
 			foreach ($cols as $col) {
 				if ($exclude !== false) {
-<<<<<<< HEAD
 					if (array_search($col, $exclude) === false) {
 						$suffix .= ($i > 0 ? ', ':'') . " `$col`=VALUES($col)";
-||||||| 7dd05ee12
-					if (array_search($col, $exclude) === false) {
-						$suffix .= ($i > 0 ? ', ':'') . " $col=VALUES($col)";
-=======
-					if (array_search($col, $exclude, true) === false) {
-						$suffix .= ($i > 0 ? ', ' : '') . " `$col`=VALUES($col)";
->>>>>>> origin/fix/jquery-deprecations
 						$i++;
 					}
 				} else {
-<<<<<<< HEAD
 					$suffix .= ($i > 0 ? ', ':'') . " `$col`=VALUES($col)";
-||||||| 7dd05ee12
-					$suffix .= ($i > 0 ? ', ':'') . " $col=VALUES($col)";
-=======
-					$suffix .= ($i > 0 ? ', ' : '') . " `$col`=VALUES($col)";
->>>>>>> origin/fix/jquery-deprecations
 					$i++;
 				}
 			}
@@ -2291,13 +1952,7 @@ function replicate_out_table(mixed $db_conn, array &$data, string $table, int $r
 			if (!db_column_exists($table, $c, false, $db_conn)) {
 				$skipcols[$index] = $c;
 			} else {
-<<<<<<< HEAD
 				$prefix .= ($colcnt > 0 ? ', ':'') . "`$c`";
-||||||| 7dd05ee12
-				$prefix .= ($colcnt > 0 ? ', ':'') . $c;
-=======
-				$prefix .= ($colcnt > 0 ? ', ' : '') . "`$c`";
->>>>>>> origin/fix/jquery-deprecations
 				$colcnt++;
 			}
 		}
@@ -2341,7 +1996,6 @@ function replicate_out_table(mixed $db_conn, array &$data, string $table, int $r
 
 		replicate_log('INFO: Table ' . $table . ' Replicated to Remote Poller ' . $remote_poller_id . ' With ' . $rows_done . ' Rows Updated', $level);
 	} else {
-<<<<<<< HEAD
 		if (!db_table_exists($table, false, $conn)) {
 			replicate_log('NOTE: Replicate Out Detected a missing remote table for ' . $table, $level);
 
@@ -2361,33 +2015,6 @@ function replicate_out_table(mixed $db_conn, array &$data, string $table, int $r
 			replicate_log('INFO: Table ' . $table . ' Not Replicated to Remote Poller ' . $remote_poller_id . ' Due to No Rows Found', $level);
 
 			db_execute("TRUNCATE TABLE $table", true, $conn);
-||||||| 7dd05ee12
-		if (db_table_exists($table, true, $conn)) {
-			db_execute("TRUNCATE TABLE $table", true, $conn);
-		}
-
-		replicate_log('INFO: Table ' . $table . ' Not Replicated to Remote Poller ' . $remote_poller_id . ' Due to No Rows Found', $level);
-=======
-		if (!db_table_exists($table, false, $db_conn)) {
-			replicate_log('NOTE: Replicate Out Detected a missing remote table for ' . $table, $level);
-
-			$create = db_fetch_row('SHOW CREATE TABLE ' . $table);
-
-			if (isset($create["CREATE TABLE `$table`"]) || isset($create['Create Table'])) {
-				replicate_log('NOTE: Replication Creating Remote Table Structure for ' . $table, $level);
-				db_execute('DROP TABLE IF EXISTS ' . $table, true, $db_conn);
-
-				if (isset($create["CREATE TABLE `$table`"])) {
-					db_execute($create["CREATE TABLE `$table`"], true, $db_conn);
-				} else {
-					db_execute($create['Create Table'], true, $db_conn);
-				}
-			}
-		} else {
-			replicate_log('INFO: Table ' . $table . ' Not Replicated to Remote Poller ' . $remote_poller_id . ' Due to No Rows Found', $level);
-
-			db_execute("TRUNCATE TABLE $table", true, $db_conn);
->>>>>>> origin/fix/jquery-deprecations
 		}
 	}
 }
@@ -2431,27 +2058,14 @@ function poller_push_reindex_data_to_poller(int $device_id = 0, int $data_query_
 		$db_conn = $remote_db_cnn_id;
 	}
 
-<<<<<<< HEAD
 	$sql_params  = array();
 	$sql_params1 = array();
-||||||| 7dd05ee12
-=======
-	$sql_params  = [];
-	$sql_params1 = [];
->>>>>>> origin/fix/jquery-deprecations
 	$sql_where   = '';
 	$sql_where1  = '';
 	$sql_where2  = '';
 
 	if ($device_id > 0) {
-<<<<<<< HEAD
 		$sql_where  .= 'WHERE host_id = ?';
-||||||| 7dd05ee12
-	$sql_where  .= $device_id > 0 ? 'WHERE host_id = ' . $device_id:'';
-	$sql_where1 .= $device_id > 0 ? ' AND host_id = ' . $device_id:'';
-=======
-		$sql_where .= 'WHERE host_id = ?';
->>>>>>> origin/fix/jquery-deprecations
 		$sql_where1 .= 'WHERE host_id = ?';
 
 		$sql_params[]  = $device_id;
@@ -2459,16 +2073,8 @@ function poller_push_reindex_data_to_poller(int $device_id = 0, int $data_query_
 	}
 
 	if ($data_query_id > 0) {
-<<<<<<< HEAD
 		$sql_where  .= ($sql_where  != '' ? ' AND':'WHERE') . ' snmp_query_id = ?';
 		$sql_where1 .= ($sql_where1 != '' ? ' AND':'WHERE') . ' snmp_query_id = ?';
-||||||| 7dd05ee12
-		$sql_where .= ($sql_where != '' ? ' AND':'WHERE ') . ' snmp_query_id = ' . $data_query_id;
-		$sql_where1 .= ' AND snmp_query_id = ' . $data_query_id;
-=======
-		$sql_where .= ($sql_where  != '' ? ' AND' : 'WHERE') . ' snmp_query_id = ?';
-		$sql_where1 .= ($sql_where1 != '' ? ' AND' : 'WHERE') . ' snmp_query_id = ?';
->>>>>>> origin/fix/jquery-deprecations
 
 		$sql_params[]  = $data_query_id;
 		$sql_params1[] = $data_query_id;
@@ -2481,12 +2087,7 @@ function poller_push_reindex_data_to_poller(int $device_id = 0, int $data_query_
 		$sql_params);
 
 	if (!$force) {
-<<<<<<< HEAD
 		$sql_where2    = $sql_where1 . ($sql_where1 != '' ? ' AND':'WHERE') . ' UNIX_TIMESTAMP(last_updated) > ?';
-||||||| 7dd05ee12
-=======
-		$sql_where2    = $sql_where1 . ($sql_where1 != '' ? ' AND' : 'WHERE') . ' UNIX_TIMESTAMP(last_updated) > ?';
->>>>>>> origin/fix/jquery-deprecations
 		$sql_params2   = $sql_params1;
 		$sql_params2[] = $min_reindex_cache;
 
@@ -2508,13 +2109,7 @@ function poller_push_reindex_data_to_poller(int $device_id = 0, int $data_query_
 	}
 
 	if (cacti_sizeof($recache_hosts)) {
-<<<<<<< HEAD
 		$sql_where1 .= ($sql_where1 != '' ? ' AND':'WHERE') . ' host_id IN (' . implode(', ', $recache_hosts) . ')';
-||||||| 7dd05ee12
-		$local_data_ids = db_fetch_assoc("SELECT *
-=======
-		$sql_where1 .= ($sql_where1 != '' ? ' AND' : 'WHERE') . ' host_id IN (' . implode(', ', $recache_hosts) . ')';
->>>>>>> origin/fix/jquery-deprecations
 
 		$local_data_ids = db_fetch_assoc_prepared("SELECT *
 			FROM data_local
@@ -2583,14 +2178,8 @@ function replicate_table_to_poller(mixed $db_conn, array &$data, string $table, 
 				$skipcols[$index] = $c;
 			} elseif ($exclude !== false && array_search($c, $exclude, true) !== false) {
 				$skipcols[$index] = $c;
-<<<<<<< HEAD
 			} elseif ($exclude !== false && array_search($c, $exclude, true) !== false) {
 				$skipcols[$index] = $c;
-||||||| 7dd05ee12
-			} elseif ($exclude !== false && array_search($c, $exclude) === true) {
-				// Do not update this column
-=======
->>>>>>> origin/fix/jquery-deprecations
 			} else {
 				$prefix .= ($colcnt > 0 ? ', ' : '') . $c;
 				$suffix .= ($colcnt > 0 ? ', ' : '') . "$c=VALUES($c)";

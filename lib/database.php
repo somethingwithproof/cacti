@@ -114,20 +114,9 @@ function db_connect_real(string $device, string $user, string $pass, string $db_
 		}
 	}
 
-<<<<<<< HEAD
 	/* set connection timeout for down servers */
-||||||| 7dd05ee12
-	/* set connection timout for down servers */
-=======
-	// set connection timeout for down servers
->>>>>>> origin/fix/jquery-deprecations
 	$flags[PDO::ATTR_TIMEOUT] = 2;
-<<<<<<< HEAD
 	$flags[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
-||||||| 7dd05ee12
-	$flage[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
-=======
->>>>>>> origin/fix/jquery-deprecations
 
 	while ($i <= $retries) {
 		try {
@@ -141,13 +130,7 @@ function db_connect_real(string $device, string $user, string $pass, string $db_
 				error_log(sprintf('NOTE: New connection to %s:%s/%s.', $device, $port, $db_name));
 			}
 
-<<<<<<< HEAD
 			$bad_modes = array(
-||||||| 7dd05ee12
-			$bad_modes = array(
-=======
-			$bad_modes = [
->>>>>>> origin/fix/jquery-deprecations
 				'STRICT_TRANS_TABLES',
 				'STRICT_ALL_TABLES',
 				'TRADITIONAL',
@@ -192,32 +175,15 @@ function db_connect_real(string $device, string $user, string $pass, string $db_
 
 			$ver = db_get_global_variable('version', $cnn_id);
 
-<<<<<<< HEAD
 			if (strpos($ver, 'MariaDB') !== false) {
 				$srv = 'MariaDB';
 				$ver  = str_replace('-MariaDB', '', $ver);
-||||||| 7dd05ee12
-			if (strpos($ver, 'MariaDB') !== false) {
-				$srv = 'MariaDB';
-				$ver  = str_replace('-MariaDB', '', $ver);
-=======
-			if (str_contains($ver, 'MariaDB')) {
-				$srv              = 'MariaDB';
-				$ver              = str_replace('-MariaDB', '', $ver);
->>>>>>> origin/fix/jquery-deprecations
 				$required_modes[] = 'NO_ENGINE_SUBSTITUTION';
 			} else {
 				$srv = 'MySQL';
 
 				if (version_compare('8.0.0', $ver, '<=')) {
-<<<<<<< HEAD
 					$bad_modes[] = 'NO_AUTO_CREATE_USER';
-||||||| 7dd05ee12
-			if (version_compare('8.0.0', $ver, '<=')) {
-				$bad_modes[] = 'NO_AUTO_CREATE_USER';
-=======
-					$bad_modes[]      = 'NO_AUTO_CREATE_USER';
->>>>>>> origin/fix/jquery-deprecations
 					$required_modes[] = 'NO_ENGINE_SUBSTITUTION';
 				}
 
@@ -300,7 +266,6 @@ function db_connect_real(string $device, string $user, string $pass, string $db_
  * db_check_reconnect - Check the database connection.  If the connection is gone
  *  attempt to reconnect, otherwise return the connection
  *
-<<<<<<< HEAD
  * @param bool|object  The connection to check
  * @param bool         Whether or not to log the connection check
  *
@@ -308,45 +273,13 @@ function db_connect_real(string $device, string $user, string $pass, string $db_
  */
 function db_check_reconnect($db_conn = false, $log = true) {
 	global $config, $database_details;
-||||||| 7dd05ee12
-function db_check_reconnect($db_conn = false) {
-	global $config, $database_details;
-=======
- * @param mixed $db_conn The connection to check
- * @param bool  $log     Whether or not to log the connection check
- *
- * @return bool The database true is the database is connected else false
- */
-function db_check_reconnect(mixed $db_conn = false, bool $log = true) : bool {
-	global $database_details;
-	global $database_hostname;
-	global $database_username;
-	global $database_password;
-	global $database_default;
-	global $database_type;
-	global $database_port;
-	global $database_retries;
-	global $database_ssl;
-	global $database_ssl_key;
-	global $database_ssl_cert;
-	global $database_ssl_ca;
-	global $database_ssl_capath;
-	global $database_ssl_verify_server_cert;
->>>>>>> origin/fix/jquery-deprecations
 
-<<<<<<< HEAD
 	if (file_exists($config['base_path'] . '/include/config.php')) {
 		include($config['base_path'] . '/include/config.php');
 	} else {
 		global $database_hostname, $database_username, $database_password, $database_default;
 		global $database_type, $database_port, $database_retries;
 		global $database_ssl, $database_ssl_key, $database_ssl_cert, $database_ssl_ca;
-||||||| 7dd05ee12
-	include($config['base_path'] . '/include/config.php');
-=======
-	if (file_exists(CACTI_PATH_INCLUDE . '/config.php')) {
-		include(CACTI_PATH_INCLUDE . '/config.php');
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if (cacti_sizeof($database_details) && $db_conn !== false) {
@@ -485,16 +418,8 @@ function db_get_active_replicas() : array {
  *
  * @return bool the result of the close command
  */
-<<<<<<< HEAD
 function db_close(&$db_conn = false) {
 	global $database_sessions, $error_logged, $database_default, $database_hostname, $database_port, $database_details;
-||||||| 7dd05ee12
-function db_close($db_conn = false) {
-	global $database_sessions, $database_default, $database_hostname, $database_port;
-=======
-function db_close(mixed &$db_conn = false) : bool {
-	global $config, $database_sessions, $error_logged, $database_default, $database_hostname, $database_port, $database_persist, $database_details;
->>>>>>> origin/fix/jquery-deprecations
 
 	// check for a connection being passed, if not use legacy behavior
 	if (!is_object($db_conn)) {
@@ -502,15 +427,7 @@ function db_close(mixed &$db_conn = false) : bool {
 			error_log(sprintf('NOTE: Disconnecting from %s:%s/%s.', $database_hostname, $database_port, $database_default));
 		}
 
-<<<<<<< HEAD
 		$db_conn = $database_sessions["$database_hostname:$database_port:$database_default"];
-||||||| 7dd05ee12
-		$db_conn = $database_sessions["$database_hostname:$database_port:$database_default"];
-=======
-		if (isset($database_sessions["$database_hostname:$database_port:$database_default"])) {
-			$db_conn = $database_sessions["$database_hostname:$database_port:$database_default"];
-		}
->>>>>>> origin/fix/jquery-deprecations
 
 		if (!is_object($db_conn)) {
 			if (!empty($config['DEBUG_SQL_CONNECT'])) {
@@ -528,11 +445,6 @@ function db_close(mixed &$db_conn = false) : bool {
 	} elseif (!empty($config['DEBUG_SQL_CONNECT'])) {
 		$id   = spl_object_id($db_conn);
 		$hash = spl_object_hash($db_conn);
-<<<<<<< HEAD
-||||||| 7dd05ee12
-=======
-
->>>>>>> origin/fix/jquery-deprecations
 		if (isset($database_details[$hash])) {
 			$det = $database_details[$hash];
 
@@ -584,14 +496,7 @@ function db_execute(string $sql, bool $log = true, mixed $db_conn = false) : mix
  *
  * @return mixed '1' for success, false for failed, or the return value of the return function
  */
-<<<<<<< HEAD
 function db_execute_prepared($sql, $params = array(), $log = true, $db_conn = false, $execute_name = 'Exec', $default_value = true, $return_func = 'no_return_function', $return_params = array()) {
-||||||| 7dd05ee12
-function db_execute_prepared($sql, $params = array(), $log = true, $db_conn = false, $execute_name = 'Exec', $default_value = true, $return_func = 'no_return_function', $return_params = array()) {
-	global $database_sessions, $database_default, $config, $database_hostname, $database_port, $database_total_queries, $database_last_error, $database_log, $affected_rows;
-=======
-function db_execute_prepared(string $sql, array $params = [], bool $log = true, mixed $db_conn = false, string $execute_name = 'Exec', mixed $default_value = true, string $return_func = 'no_return_function', mixed $return_params = []) : mixed {
->>>>>>> origin/fix/jquery-deprecations
 	global $database_sessions, $error_logged, $database_default, $config, $database_hostname, $database_port, $database_total_queries, $database_last_error, $database_log, $affected_rows, $database_details;
 
 	$database_total_queries++;
@@ -628,12 +533,7 @@ function db_execute_prepared(string $sql, array $params = [], bool $log = true, 
 			if (isset($database_details[$hash])) {
 				$det = $database_details[$hash];
 
-<<<<<<< HEAD
 				error_log(sprintf("NOTE: Execute Using %s:%s/%s.", $det['database_hostname'], $det['database_port'], $det['database_default']));
-||||||| 7dd05ee12
-=======
-				error_log(sprintf('NOTE: Execute Using %s:%s/%s.', $det['database_hostname'], $det['database_port'], $det['database_default']));
->>>>>>> origin/fix/jquery-deprecations
 			} else {
 				error_log("WARNING: Execute Using Object ID: $id.");
 			}
@@ -661,13 +561,7 @@ function db_execute_prepared(string $sql, array $params = [], bool $log = true, 
 			db_echo_sql('db_' . $execute_name . ' Memory [Before]: ' . memory_get_usage() . ' / ' . memory_get_peak_usage() . "\n");
 		}
 
-<<<<<<< HEAD
 		set_error_handler('db_warning_handler',E_WARNING | E_NOTICE);
-||||||| 7dd05ee12
-		set_error_handler('db_warning_handler',E_WARNING | E_NOTICE);
-=======
-		set_error_handler('db_warning_handler', E_WARNING | E_NOTICE);
->>>>>>> origin/fix/jquery-deprecations
 
 		try {
 			if (empty($params) || cacti_count($params) == 0) {
@@ -745,7 +639,6 @@ function db_execute_prepared(string $sql, array $params = [], bool $log = true, 
 
 			unset($query);
 
-<<<<<<< HEAD
 			if ($log) {
 				if ($en == 1213 || $en == 1205 || $en == 1020) {
 					$errors++;
@@ -754,20 +647,6 @@ function db_execute_prepared(string $sql, array $params = [], bool $log = true, 
 						$database_last_error = "Too many Lock/Deadlock errors occurred!";
 					} else {
 						usleep(200000);
-||||||| 7dd05ee12
-			if ($log) {
-				if ($en == 1213 || $en == 1205) {
-					$errors++;
-					if ($errors > 30) {
-						cacti_log("ERROR: Too many Lock/Deadlock errors occurred! SQL:'" . clean_up_lines($sql) . "'", true, 'DBCALL', POLLER_VERBOSITY_DEBUG);
-						$database_last_error = "Too many Lock/Deadlock errors occurred!";
-					} else {
-						usleep(200000);
-=======
-			if ($en == 2002 || $en == 2006) {
-				$log = false;
-			}
->>>>>>> origin/fix/jquery-deprecations
 
 			if ($en == 1213 || $en == 1205 || $en == 1020) {
 				$errors++;
@@ -803,7 +682,6 @@ function db_execute_prepared(string $sql, array $params = [], bool $log = true, 
 					if ($errors < 5) {
 						continue;
 					}
-<<<<<<< HEAD
 				} elseif ($en == 1153) {
 					if (strlen($sql) > 1024) {
 						$sql = substr($sql, 0, 1024) . '...';
@@ -833,25 +711,6 @@ function db_execute_prepared(string $sql, array $params = [], bool $log = true, 
 					cacti_debug_backtrace('SQL', false, true, 0, 1);
 
 					$database_last_error = 'DB ' . $execute_name . ' Failed!, Error ' . $en . ': ' . (isset($errorinfo[2]) ? $errorinfo[2] : '<no error>');
-||||||| 7dd05ee12
-				} elseif ($en == 1153) {
-					if (strlen($sql) > 1024) {
-						$sql = substr($sql, 0, 1024) . '...';
-					}
-
-					cacti_log('ERROR: A DB ' . $execute_name . ' Too Large!, Error: ' . $en . ', SQL: \'' . clean_up_lines($sql) . '\'', false, 'DBCALL', POLLER_VERBOSITY_DEBUG);
-					cacti_log('ERROR: A DB ' . $execute_name . ' Too Large!, Error: ' . $errorinfo[2], false, 'DBCALL', POLLER_VERBOSITY_DEBUG);
-					cacti_debug_backtrace('SQL', false, true, 0, 1);
-
-					$database_last_error = 'DB ' . $execute_name . ' Too Large!, Error ' . $en . ': ' . $errorinfo[2];
-				} else {
-					cacti_log('ERROR: A DB ' . $execute_name . ' Failed!, Error: ' . $en . ', SQL: \'' . clean_up_lines($sql) . '\'', false, 'DBCALL', POLLER_VERBOSITY_DEBUG);
-					cacti_log('ERROR: A DB ' . $execute_name . ' Failed!, Error: ' . $errorinfo[2], false);
-					cacti_debug_backtrace('SQL', false, true, 0, 1);
-
-					$database_last_error = 'DB ' . $execute_name . ' Failed!, Error ' . $en . ': ' . (isset($errorinfo[2]) ? $errorinfo[2] : '<no error>');
-=======
->>>>>>> origin/fix/jquery-deprecations
 				}
 			} elseif ($log) {
 				cacti_log('ERROR: A DB ' . $execute_name . ' Failed!, Error: ' . $en . ', SQL: \'' . clean_up_lines($sql) . '\'', false, 'DBCALL', POLLER_VERBOSITY_DEBUG);
@@ -1663,13 +1522,7 @@ function db_update_table(string $table, array $data, bool $removecolumns = false
 		}
 	}
 
-<<<<<<< HEAD
 	if (isset($data['row_format']) && strtolower(db_get_global_variable('innodb_file_format', $db_conn)) == 'barracuda') {
-||||||| 7dd05ee12
-	if (isset($data['row_format']) && db_get_global_variable('innodb_file_format', $db_conn) == 'Barracuda') {
-=======
-	if (isset($data['row_format']) && cacti_strtolower(db_get_global_variable('innodb_file_format', $db_conn)) == 'barracuda') {
->>>>>>> origin/fix/jquery-deprecations
 		db_execute("ALTER TABLE `$table` ROW_FORMAT = " . $data['row_format'], $log, $db_conn);
 	}
 
@@ -1988,13 +1841,7 @@ function db_table_create(string $table, array $data, bool $log = true, mixed $db
 			$sql .= " COMMENT = '" . $data['comment'] . "'";
 		}
 
-<<<<<<< HEAD
 		if (isset($data['row_format']) && strtolower(db_get_global_variable('innodb_file_format', $db_conn)) == 'barracuda') {
-||||||| 7dd05ee12
-		if (isset($data['row_format']) && db_get_global_variable('innodb_file_format', $db_conn) == 'Barracuda') {
-=======
-		if (isset($data['row_format']) && cacti_strtolower(db_get_global_variable('innodb_file_format', $db_conn)) == 'barracuda') {
->>>>>>> origin/fix/jquery-deprecations
 			$sql .= ' ROW_FORMAT = ' . $data['row_format'];
 		}
 
@@ -2402,15 +2249,9 @@ function db_qstr(mixed $s, mixed $db_conn = false) : string {
 		return $db_conn->quote($s);
 	}
 
-<<<<<<< HEAD
 	cacti_log('WARNING: db_qstr() called without a valid database connection. Escaping may be unsafe.', false, 'DBCALL');
 
 	$s = str_replace(array('\\', "\0", "\n", "\r", "'", '"', "\x1a"), array('\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'), $s);
-||||||| 7dd05ee12
-	$s = str_replace(array('\\', "\0", "'"), array('\\\\', "\\\0", "\\'"), $s);
-=======
-	$s = str_replace(['\\', "\0", "'"], ['\\\\', "\\\0", "\\'"], $s);
->>>>>>> origin/fix/jquery-deprecations
 
 	return "'" . $s . "'";
 }
@@ -2646,37 +2487,16 @@ function db_switch_main_to_local() : bool {
 /**
  * db_dump_data - dump data into a file by mysqldump, minimize password be caught.
  *
-<<<<<<< HEAD
  * @param  (string)     $database - default $database_default
  * @param  (string)     $tables - default all tables
  * @param  (array)      $credentials - array($name => value, ...) for user, password, host, port, ssl ...
  * @param  (string|bool) $output_file - dump file name, default /tmp/cacti.dump.sql
  * @param  (string)     $options - option strings for mysqldump, if --defaults-extra-file set, dump the data directly
-||||||| 7dd05ee12
- * @param  (string)     $database - default $database_default
- * @param  (string)     $tables - default all tables
- * @param  (array)      $credentials - array($name => value, ...) for user, password, host, port, ssl ...
- * @param  (sting|bool) $output_file - dump file name, default /tmp/cacti.dump.sql
- * @param  (string)     $options - option strings for mysqldump, if --defaults-extra-file set, dump the data directly
-=======
- * @param string $database    default $database_default
- * @param string $tables      default all tables
- * @param array  $credentials array($name => value, ...) for user, password, host, port, ssl ...
- * @param mixed  $output_file dump file name, default /tmp/cacti.dump.sql
- * @param string $options     option strings for mysqldump, if --defaults-extra-file set, dump the data directly
->>>>>>> origin/fix/jquery-deprecations
  *
  * @return int Return status of the executed command
  */
 function db_dump_data(string $database = '', string $tables = '', array $credentials = [], mixed $output_file = false, string $options = '--extended-insert=FALSE') : int {
 	global $database_default, $database_username, $database_password;
-<<<<<<< HEAD
-||||||| 7dd05ee12
-	$credentials_string = '';
-=======
-
-	$credentials_string = '';
->>>>>>> origin/fix/jquery-deprecations
 
 	$database    = ($database == '') ? $database_default : $database;
 	$output_file = ($output_file === false) ? '/tmp/cacti.dump.sql' : $output_file;
@@ -2691,7 +2511,6 @@ function db_dump_data(string $database = '', string $tables = '', array $credent
 		$dump_binary = 'mariadb-dump';
 	}
 
-<<<<<<< HEAD
 	$command = array(
 		$dump_binary,
 		$options,
@@ -2707,69 +2526,10 @@ function db_dump_data(string $database = '', string $tables = '', array $credent
 		foreach ($table_arr as $table) {
 			if (trim($table) != '') {
 				$command[] = trim($table);
-||||||| 7dd05ee12
-	if (cacti_sizeof($credentials)) {
-		foreach ($credentials as $key => $value) {
-			$name = trim($key);
-			if (strstr($name, '--') !== false) {      //name like --host
-				if($name == '--password') {
-					$password = $value;
-				} elseif ($name == '--user') {
-					$username = $value;
-				} else {
-					$credentials_string .= $name . '=' . $value . ' ';
-				}
-			} elseif(strstr($name, '-') !== false) { //name like -h
-				if($name == '-p') {
-					$password = $value;
-				} elseif ($name == '-u') {
-					$username = $value;
-				} else {
-					$credentials_string .= $name . $value . ' ';
-				}
-			} else {                                  //name like host
-				if($name == 'password') {
-					$password = $value;
-				} elseif ($name == 'user') {
-					$username = $value;
-				} else {
-					$credentials_string .= '--' . $name . '=' . $value . ' ';
-				}
-=======
-	if (cacti_sizeof($credentials)) {
-		foreach ($credentials as $key => $value) {
-			$name = trim($key);
-
-			if (str_contains($name, '--')) {      // name like --host
-				if ($name == '--password') {
-					$password = $value;
-				} elseif ($name == '--user') {
-					$username = $value;
-				} else {
-					$credentials_string .= $name . '=' . $value . ' ';
-				}
-			} elseif (str_contains($name, '-')) { // name like -h
-				if ($name == '-p') {
-					$password = $value;
-				} elseif ($name == '-u') {
-					$username = $value;
-				} else {
-					$credentials_string .= $name . $value . ' ';
-				}
-			} else {                                  // name like host
-				if ($name == 'password') {
-					$password = $value;
-				} elseif ($name == 'user') {
-					$username = $value;
-				} else {
-					$credentials_string .= '--' . $name . '=' . $value . ' ';
-				}
->>>>>>> origin/fix/jquery-deprecations
 			}
 		}
 	}
 
-<<<<<<< HEAD
 	$env = array(
 		'MYSQL_PWD' => $password
 	);
@@ -2784,69 +2544,21 @@ function db_dump_data(string $database = '', string $tables = '', array $credent
 
 	foreach ($command as $arg) {
 		$cmd_string .= cacti_escapeshellarg($arg) . ' ';
-||||||| 7dd05ee12
-	if (!isset($password)) {
-		$password = $database_password;
-=======
-	if (!isset($password)) {
-		$password = $database_password;
->>>>>>> origin/fix/jquery-deprecations
 	}
 
-<<<<<<< HEAD
 	$process = proc_open(trim($cmd_string), $descriptors, $pipes, null, $env);
 
 	if (!is_resource($process)) {
 		cacti_log("ERROR: Failed to initialize mysqldump process for database '$database'", false, 'DBCALL');
 
 		return 1;
-||||||| 7dd05ee12
-	if (!isset($username)) {
-		$username = $database_username;
-=======
-	if (!isset($username)) {
-		$username = $database_username;
->>>>>>> origin/fix/jquery-deprecations
 	}
 
-<<<<<<< HEAD
 	fclose($pipes[2]);
 	$retval = proc_close($process);
 
 	if ($retval !== 0) {
 		cacti_log("ERROR: mysqldump failed with exit code $retval for database '$database'", false, 'DBCALL');
-||||||| 7dd05ee12
-	if (strstr($options, '--defaults-extra-file') !== false) {
-		exec("mysqldump $options $credentials_string $database $tables > " . $output_file, $output, $retval);
-	} else {
-		exec("mysqldump $options $credentials_string " . $database . ' version >/dev/null 2>&1', $output, $retval);
-		if ($retval) {
-			exec("mysqldump $options $credentials_string -u" . $username . ' -p' . $password . ' ' . $database . " $tables > " . $output_file, $output, $retval);
-		} else {
-			exec("mysqldump $options $credentials_string $database $tables > " . $output_file, $output, $retval);
-		}
-=======
-	if (file_exists('/usr/bin/mariadb-dump')) {
-		$dump = '/usr/bin/mariadb-dump';
-	} else {
-		$dump = 'mysqldump';
-	}
-
-	$dump_esc   = cacti_escapeshellcmd($dump);
-	$output_esc = cacti_escapeshellarg((string) $output_file);
-	$tables_esc = $tables !== '' ? implode(' ', array_map('cacti_escapeshellarg', preg_split('/\s+/', trim($tables)))) : '';
-
-	if (str_contains($options, '--defaults-extra-file')) {
-		exec("$dump_esc $options $credentials_string " . cacti_escapeshellarg($database) . ($tables_esc !== '' ? ' ' . $tables_esc : '') . " > $output_esc", $output, $retval);
-	} else {
-		exec("$dump_esc $options $credentials_string " . cacti_escapeshellarg($database) . ' version >/dev/null 2>&1', $output, $retval);
-
-		if ($retval) {
-			exec("$dump_esc $options $credentials_string --user=" . cacti_escapeshellarg($username) . ' --password=' . cacti_escapeshellarg($password) . ' ' . cacti_escapeshellarg($database) . ($tables_esc !== '' ? ' ' . $tables_esc : '') . " > $output_esc", $output, $retval);
-		} else {
-			exec("$dump_esc $options $credentials_string " . cacti_escapeshellarg($database) . ($tables_esc !== '' ? ' ' . $tables_esc : '') . " > $output_esc", $output, $retval);
-		}
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	return $retval;

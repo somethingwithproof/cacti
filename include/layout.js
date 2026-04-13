@@ -1016,50 +1016,20 @@ function applySkin() {
 		copyToClipboard(containerId);
 	});
 
-<<<<<<< HEAD
-	$('i, a, th, img, input, label, select, button, .drillDown, .checkboxSlider')
-	.tooltip({
-		close: true
-	})
-	.on('focus', function() {
-		if ($(this).tooltip('instance')) {
-			$(this).tooltip('close');
-		}
-	})
-	.on('click', function() {
-		if ($(this).tooltip('instance')) {
-			$(this).tooltip('close');
-		}
-	});
-||||||| 7dd05ee12
-	$('i, th, img, input, label, select, button, .drillDown, .checkboxSlider')
-	.tooltip({
-		close: true
-	})
-	.on('focus', function() {
-		if ($(this).tooltip('instance')) {
-			$(this).tooltip('close');
-		}
-	})
-	.on('click', function() {
-		if ($(this).tooltip('instance')) {
-			$(this).tooltip('close');
-		}
-	});
-=======
 	$('i, a, th, td, img, input, label, select, button, .drillDown, .checkboxSlider')
-		.tooltip()
-		.on('focus', function () {
-			if ($(this).tooltip('instance')) {
-				$(this).tooltip('close');
-			}
-		})
-		.on('click', function () {
-			if ($(this).tooltip('instance')) {
-				$(this).tooltip('close');
-			}
-		});
->>>>>>> origin/fix/jquery-deprecations
+	.tooltip({
+		close: true
+	})
+	.on('focus', function() {
+		if ($(this).tooltip('instance')) {
+			$(this).tooltip('close');
+		}
+	})
+	.on('click', function() {
+		if ($(this).tooltip('instance')) {
+			$(this).tooltip('close');
+		}
+	});
 
 	$(document).tooltip({
 		items: 'div.cactiTooltipHint, span.cactiTooltipHint, .checkboxSlider',
@@ -1229,7 +1199,6 @@ function raiseMessage(title, header, detail, level) {
 		sessionMessageSave  = header;
 	}
 
-<<<<<<< HEAD
 	displayMessages();
 
 	if (level == MESSAGE_LEVEL_ERROR) {
@@ -1250,90 +1219,6 @@ function displayMessages() {
 	var error   = false;
 	var title   = '';
 	var header  = '';
-||||||| 7dd05ee12
-function displayMessages() {
-	var error   = false;
-	var title   = '';
-	var header  = '';
-=======
-	sessionMessageDisplay();
-
-	if (level == MESSAGE_LEVEL_ERROR) {
-		errorReasonTitle  = origErrorReasonTitle;
-		errorOnPage       = origErrorOnPage;
-	} else if (level == MESSAGE_LEVEL_MIXED) {
-		mixedOnPage      = origMixedOnPage;
-		mixedReasonTitle = origMixedReasonTitle;
-	} else {
-		sessionMessageTitle = origSessionMessageTitle;
-		sessionMessageSave  = origSessionMessageSave;
-	}
-
-	sessionMessage = origSessionMessage;
-}
-
-function sessionNoticesDisplay() {
-	if (typeof sessionNotices !== 'undefined' && Array.isArray(sessionNotices) && sessionNotices.length > 0) {
-		var currentNotices = sessionNotices;
-		sessionNotices = {};
-
-		currentNotices.forEach(function (notice, index) {
-			var level   = MESSAGE_LEVEL_NONE;
-			var message = 'No message';
-			var title   = '';
-			var id      = '';
-
-			if (typeof notice.message !== 'undefined') {
-				message = notice.message;
-			}
-
-			if (typeof notice.title !== 'undefined') {
-				titLe = notice.tite;
-			}
-
-			if (typeof notice.level !== 'undefined') {
-				level = notice.level;
-			}
-
-			if (typeof notice.id !== 'undefined') {
-				id = '-' + notice.id;
-			}
-
-			switch (notice.level) {
-				case MESSAGE_LEVEL_CSRF:
-					location.reload();
-
-					break;
-				case MESSAGE_LEVEL_INFO:
-					PopupNotice(message, title);
-
-					break;
-				case MESSAGE_LEVEL_MIXED:
-					PopupUnknown(message, title);
-
-					break;
-				case MESSAGE_LEVEL_ERROR:
-					PopupError(message, title);
-
-					break;
-				case MESSAGE_LEVEL_WARN:
-					PopupWarning(message, title);
-
-					break;
-
-				default:
-					console.log('');
-					console.log('noticeDisplay(' + index + id + ') - Failed to find correct popup function for level ' + level + ': ' + message);
-					console.log('');
-			}
-		});
-	}
-}
-
-function sessionMessageDisplay() {
-	var title = '';
-	var header = '';
->>>>>>> origin/fix/jquery-deprecations
 
 	if (typeof sessionMessageTimer == 'function' || sessionMessageTimer !== null) {
 		clearInterval(sessionMessageTimer);
@@ -1767,15 +1652,7 @@ function getMainWidth() {
 function getCactiHelp(cactiPage) {
 	var url = urlPath + 'help.php?page=' + cactiPage;
 
-<<<<<<< HEAD
 	$.getJSON(url, function(data) {
-||||||| 7dd05ee12
-	$.get(url, function(data) {
-		if (data != 'Not Found') {
-			window.open(data, '_blank');
-=======
-	$.getJSON(url, function (data) {
->>>>>>> origin/fix/jquery-deprecations
 		if (data.status == 'Success') {
 			window.open(data.location, '_blank');
 		}
@@ -3353,20 +3230,12 @@ function correctUrlParameters(url) {
 		url = url.replace('action=tree', 'action=tree_content');
 	}
 
-<<<<<<< HEAD
 	if (url.indexOf('header=false') < 0) {
 		url += (url.indexOf('?') > 0 ? '&header=false':'?header=false');
 	}
 
 	url = url.replace('?&', '?').replace('&&', '&');
 
-||||||| 7dd05ee12
-	if (url.indexOf('header=false') < 0) {
-		url += (url.indexOf('?') > 0 ? '&header=false':'?header=false');
-	}
-
-=======
->>>>>>> origin/fix/jquery-deprecations
 	return url;
 }
 
@@ -4120,22 +3989,10 @@ function checkForRedirects(data, href) {
 	} else if (data.indexOf('cactiRedirect') >= 0) {
 		if (typeof href == 'undefined' || href == null) {
 			$.ajaxQ.abortAll();
-<<<<<<< HEAD
 			document.location = stripHeaderSuppression(document.location.href);
-||||||| 7dd05ee12
-			document.location = stripHeaderSuppression(document.location);
-=======
-			location.reload();
->>>>>>> origin/fix/jquery-deprecations
 		} else {
 			$.ajaxQ.abortAll();
-<<<<<<< HEAD
 			document.location = stripHeaderSuppression(href);
-||||||| 7dd05ee12
-			document.location = stripHeaderSuppression(href);
-=======
-			document.location = href;
->>>>>>> origin/fix/jquery-deprecations
 		}
 	} else if (data.indexOf('cactiLoginLogo') >= 0) {
 		$.ajaxQ.abortAll();
@@ -4183,7 +4040,6 @@ function finalizeGraphFilter(options, data) {
 }
 
 function applyGraphFilter() {
-<<<<<<< HEAD
 	statePushed = false;
 
 	var href = appendHeaderSuppression(graphPage+'?action='+pageAction +
@@ -4203,30 +4059,6 @@ function applyGraphFilter() {
 		urlParams.set('host_id', $('#host_id').val());
 	}
 	myHref = urlParts[0]+ '?' + urlParams.toString();
-||||||| 7dd05ee12
-	var href = appendHeaderSuppression(graphPage+'?action='+pageAction+
-		'&rfilter=' + base64_encode($('#rfilter').val())+
-		(typeof $('#host_id').val() != 'undefined' ? '&host_id='+$('#host_id').val():'')+
-		'&columns='+$('#columns').val()+
-		'&graphs='+$('#graphs').val()+
-		'&graph_template_id='+$('#graph_template_id').val()+
-		'&thumbnails='+$('#thumbnails').is(':checked'));
-=======
-	var href = correctUrlParameters(graphPage + '?action=' + pageAction +
-		'&rfilter=' + base64_encode($('#rfilter').val()) +
-		(typeof $('#site_id').val()      != 'undefined' ? '&site_id='      + $('#site_id').val() : '') +
-		(typeof $('#location').val()     != 'undefined' ? '&location='     + $('#location').val() : '') +
-		(typeof $('#host_id').val()      != 'undefined' ? '&host_id='      + $('#host_id').val() : '') +
-		(typeof $('#graph_source').val() != 'undefined' ? '&graph_source=' + $('#graph_source').val() : '') +
-		(typeof $('#graph_order').val()  != 'undefined' ? '&graph_order='  + $('#graph_order').val() : '') +
-		(typeof $('#cf').val()           != 'undefined' ? '&cf='           + $('#cf').val() : '') +
-		(typeof $('#measure').val()      != 'undefined' ? '&measure='      + $('#measure').val() : '') +
-		'&columns=' + $('#columns').val() +
-		'&graphs=' + $('#graphs').val() +
-		'&graph_template_id=' + $('#graph_template_id').val() +
-		'&thumbnails=' + $('#thumbnails').is(':checked') +
-		'&business_hours=' + $('#business_hours').is(':checked'));
->>>>>>> origin/fix/jquery-deprecations
 
 	loadUrl({ url: href });
 }
@@ -4358,61 +4190,7 @@ function removeSpikes(method, dryrun, local_graph_id) {
 	closeDateFilters();
 
 	var href = urlPath + 'spikekill.php' +
-<<<<<<< HEAD
 		'?method='         + method +
-||||||| 7dd05ee12
-		'?method=variance' +
-		'&local_graph_id=' + local_graph_id;
-
-	closeDateFilters();
-
-	$.getJSON(href)
-		.done(function(data) {
-			checkForRedirects(data, href);
-
-			redrawGraph(local_graph_id);
-			$('#spikeresults').remove();
-			$('body').append('<div id="spikeresults" style="overflow-y:scroll;" title="' + spikeKillResults + '"></div>');
-			$('#spikeresults').html(data.results);
-			$('#spikeresults').dialog({ width:1100, maxHeight: 600 });
-		})
-		.fail(function(data) {
-			getPresentHTTPError(data);
-		}
-	);
-}
-
-function removeSpikesInRange(local_graph_id) {
-	var href = urlPath + 'spikekill.php' +
-		'?method=fill' +
-		'&local_graph_id=' + local_graph_id +
-		'&outlier-start='  + graph_start    +
-		'&outlier-end='    + graph_end;
-
-	closeDateFilters();
-
-	$.getJSON(href)
-		.done(function(data) {
-			checkForRedirects(data, href);
-
-			redrawGraph(local_graph_id);
-			$('#spikeresults').remove();
-			$('body').append('<div id="spikeresults" style="overflow-y:scroll;" title="' + spikeKillResults + '"></div>');
-			$('#spikeresults').html(data.results);
-			$('#spikeresults').dialog({ width:1100, maxHeight: 600 });
-		})
-		.fail(function(data) {
-			getPresentHTTPError(data);
-		}
-	);
-}
-
-function removeRangeFill(local_graph_id) {
-	var href = urlPath + 'spikekill.php' +
-		'?method=float'    +
-=======
-		'?method=' + method +
->>>>>>> origin/fix/jquery-deprecations
 		(dryrun ? '&dryrun=true':'') +
 		'&local_graph_id=' + local_graph_id +
 		'&outlier-start='  + graph_start +
@@ -5457,7 +5235,6 @@ function setSNMP() {
 	storeSNMPSecurity();
 	setSNMPSecurity();
 
-<<<<<<< HEAD
 	switch(snmp_version) {
 		case '0': // Not in Use
 			$('#row_snmp_username').hide();
@@ -5474,27 +5251,6 @@ function setSNMP() {
 			$('#row_snmp_timeout').hide();
 			$('#row_max_oids').hide();
 			$('#row_bulk_walk_size').hide();
-||||||| 7dd05ee12
-	switch(snmp_version) {
-		case '0': // Not in Use
-			$('#row_snmp_username').hide();
-			$('#row_snmp_password').hide();
-			$('#row_snmp_community').hide();
-			$('#row_snmp_security_level').hide();
-			$('#row_snmp_auth_password').hide();
-			$('#row_snmp_auth_protocol').hide();
-			$('#row_snmp_priv_passphrase').hide();
-			$('#row_snmp_priv_protocol').hide();
-			$('#row_snmp_engine_id').hide();
-			$('#row_snmp_context').hide();
-			$('#row_snmp_port').hide();
-			$('#row_snmp_timeout').hide();
-			$('#row_max_oids').hide();
-=======
-	let snmp_advanced = snmp_version > 2;
-	let snmp_basic = snmp_version > 0 && !snmp_advanced;
-	let snmp_none = !snmp_advanced && !snmp_basic;
->>>>>>> origin/fix/jquery-deprecations
 
 	if (snmp_version == 3) {
 		if ($('#snmp_security_level').val() == 'noAuthNoPriv') {
@@ -5511,7 +5267,6 @@ function setSNMP() {
 				snmp_priv_passphrase = $('#snmp_priv_passphrase').val();
 			}
 
-<<<<<<< HEAD
 			break;
 		case '1': // SNMP v1
 		case '2': // SNMP v2c
@@ -5529,37 +5284,12 @@ function setSNMP() {
 			$('#row_snmp_timeout').show();
 			$('#row_max_oids').show();
 			$('#row_bulk_walk_size').show();
-||||||| 7dd05ee12
-			break;
-		case '1': // SNMP v1
-		case '2': // SNMP v2c
-			$('#row_snmp_username').hide();
-			$('#row_snmp_password').hide();
-			$('#row_snmp_community').show();
-			$('#row_snmp_security_level').hide();
-			$('#row_snmp_auth_password').hide();
-			$('#row_snmp_auth_protocol').hide();
-			$('#row_snmp_priv_passphrase').hide();
-			$('#row_snmp_priv_protocol').hide();
-			$('#row_snmp_engine_id').hide();
-			$('#row_snmp_context').hide();
-			$('#row_snmp_port').show();
-			$('#row_snmp_timeout').show();
-			$('#row_max_oids').show();
-=======
-			$('#snmp_auth_protocol').val('[None]');
-			$('#snmp_priv_protocol').val('[None]');
-		} else if ($('#snmp_security_level').val() == 'authNoPriv') {
-			$('#snmp_auth_protocol option[value*="None"]').prop('disabled', false);
-			$('#snmp_priv_protocol option[value*="None"]').prop('disabled', false);
->>>>>>> origin/fix/jquery-deprecations
 
 			if ($('#snmp_priv_protocol').val() != '[None]') {
 				snmp_priv_protocol = $('#snmp_priv_protocol').val();
 				snmp_priv_passphrase = $('#snmp_priv_passphrase').val();
 			}
 
-<<<<<<< HEAD
 			if ($('#row_snmp_retries')) {
 				$('#row_snmp_retries').show();
 			}
@@ -5596,53 +5326,6 @@ function setSNMP() {
 				if ($('#snmp_auth_protocol').val() != '[None]') {
 					snmp_auth_protocol   = $('#snmp_auth_protocol').val();
 					snmp_password        = $('#snmp_password').val();
-||||||| 7dd05ee12
-			if ($('#row_snmp_retries')) {
-				$('#row_snmp_retries').show();
-			}
-
-			break;
-		case '3': // SNMP v3
-			$('#row_snmp_username').show();
-			$('#row_snmp_password').show();
-			$('#row_snmp_community').hide();
-			$('#row_snmp_security_level').show();
-			$('#row_snmp_auth_password').show();
-			$('#row_snmp_auth_protocol').show();
-			$('#row_snmp_priv_passphrase').show();
-			$('#row_snmp_priv_protocol').show();
-			$('#row_snmp_engine_id').show();
-			$('#row_snmp_context').show();
-			$('#row_snmp_port').show();
-			$('#row_snmp_timeout').show();
-			$('#row_max_oids').show();
-
-			if ($('#row_snmp_engine_id')) {
-				$('#row_snmp_engine_id').show();
-			}
-
-			if ($('#row_snmp_retries')) {
-				$('#row_snmp_retries').show();
-			}
-
-			if ($('#snmp_security_level').val() == 'noAuthNoPriv') {
-				$('#snmp_auth_protocol option[value*="None"').prop('disabled', false);
-				$('#snmp_priv_protocol option[value*="None"').prop('disabled', false);
-
-				if ($('#snmp_auth_protocol').val() != '[None]') {
-					snmp_auth_protocol   = $('#snmp_auth_protocol').val();
-					snmp_password        = $('#snmp_password').val();
-=======
-			if (snmp_auth_protocol != '[None]' && snmp_auth_protocol != '' && $('#snmp_auth_protocol').val() == '[None]') {
-				$('#snmp_auth_protocol').val(snmp_auth_protocol);
-				$('#snmp_password').val(snmp_password);
-				$('#snmp_password_confirm').val(snmp_password);
-			} else if ($('#snmp_auth_protocol').val() == '[None]' || $('#snmp_auth_protocol').val() == '') {
-				if (defaultSNMPAuthProtocol == '' || defaultSNMPAuthProtocol == '[None]') {
-					$('#snmp_auth_protocol').val('MD5');
-				} else {
-					$('#snmp_auth_protocol').val(defaultSNMPAuthProtocol);
->>>>>>> origin/fix/jquery-deprecations
 				}
 			}
 

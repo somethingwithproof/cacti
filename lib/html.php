@@ -61,16 +61,9 @@
  *
  * @return void
  */
-<<<<<<< HEAD
 function html_start_box($title, $width, $div, $cell_padding, $align, $add_text, $add_label = false) {
    global $config;
 
-||||||| 7dd05ee12
-function html_start_box($title, $width, $div, $cell_padding, $align, $add_text, $add_label = false) {
-=======
-function html_start_box(string $title, string $width, bool $div, int $cell_padding, string $align,
-	mixed $url_or_buttons, mixed $add_label = false, bool $showcols = false) : void {
->>>>>>> origin/fix/jquery-deprecations
 	static $table_suffix = 1;
 	static $help_count   = 0;
 	static $mode_count   = 0;
@@ -80,7 +73,6 @@ function html_start_box(string $title, string $width, bool $div, int $cell_paddi
 		$add_label = __('Add');
 	}
 
-<<<<<<< HEAD
 	if (defined('CACTI_VERSION_BETA') && $title != '' && $beta_count == 0) {
 		$title .= ' [ ' . get_cacti_version_text(false) . ' ]';
 		$beta_count++;
@@ -100,15 +92,6 @@ function html_start_box(string $title, string $width, bool $div, int $cell_paddi
 		$title .= ' ]';
 
 		$mode_count++;
-||||||| 7dd05ee12
-	if (defined('CACTI_VERSION_BETA') && $title != '') {
-		$title .= ' [ ' . get_cacti_version_text(false) . ' ]';
-=======
-	if (!is_cacti_release() && $title != '' && $beta_count == 0) {
-		$title .= ' [ ' . CACTI_VERSION_BRIEF_FULL . ' ]';
-
-		$beta_count++;
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if (POLLER_ID > 1 && $title != '' && $mode_count == 0) { // @phpstan-ignore-line
@@ -339,7 +322,6 @@ function html_filter_end_box() : void {
 	html_end_box(true, true);
 }
 
-<<<<<<< HEAD
 /* html_graph_area - draws an area the contains full sized graphs
    @arg $graph_array - the array to contains graph information. for each graph in the
         array, the following two keys must exist
@@ -356,45 +338,6 @@ function html_graph_area(&$graph_array, $no_graphs_message = '', $extra_url_args
 	global $config;
 
 	$i = 0; $k = 0; $j = 0;
-||||||| 7dd05ee12
-/* html_graph_area - draws an area the contains full sized graphs
-   @arg $graph_array - the array to contains graph information. for each graph in the
-        array, the following two keys must exist
-        $arr[0]["local_graph_id"] // graph id
-        $arr[0]["title_cache"] // graph title
-   @arg $no_graphs_message - display this message if no graphs are found in $graph_array
-   @arg $extra_url_args - extra arguments to append to the url
-   @arg $header - html to use as a header
-   @arg $columns - the number of columns to present
-   @arg $tree_id - the tree id if this is a tree thumbnail
-   @arg $branch_id - the branch id if this is a tree thumbnail
-*/
-function html_graph_area(&$graph_array, $no_graphs_message = '', $extra_url_args = '', $header = '', $columns = 0, $tree_id = 0, $branch_id = 0) {
-	global $config;
-	$i = 0; $k = 0; $j = 0;
-=======
-/**
- * html_graph_area - draws an area the contains full sized graphs
- *
- * @param array  $graph_array       The array to contains graph information. for each graph in the
- *                                  array, the following two keys must exist
- *                                  $arr[0]["local_graph_id"] // graph id
- *                                  $arr[0]["title_cache"] // graph title
- * @param string $no_graphs_message Display this message if no graphs are found in $graph_array
- * @param string $extra_url_args    Extra arguments to append to the url
- * @param string $header            Html to use as a header
- * @param int    $columns           The number of columns to present
- * @param int    $tree_id           The tree id if this is a tree thumbnail
- * @param int    $branch_id         The branch id if this is a tree thumbnail
- *
- * @return void
- */
-function html_graph_area(array &$graph_array, string $no_graphs_message = '', string $extra_url_args = '',
-	string $header = '', int $columns = 0, int $tree_id = 0, int $branch_id = 0) : void {
-	$i = 0;
-	$k = 0;
-	$j = 0;
->>>>>>> origin/fix/jquery-deprecations
 
 	$num_graphs = cacti_sizeof($graph_array);
 
@@ -427,7 +370,6 @@ function html_graph_area(array &$graph_array, string $no_graphs_message = '', st
 
 		foreach ($graph_array as $graph) {
 			if (!isset($graph['host_id'])) {
-<<<<<<< HEAD
 				$graph_data = db_fetch_row_prepared('SELECT host_id, disabled
 					FROM graph_local AS gl
 					LEFT JOIN host AS h
@@ -443,27 +385,10 @@ function html_graph_area(array &$graph_array, string $no_graphs_message = '', st
 
 			if ($i == 0) {
 				print "<tr class='tableRowGraph'>";
-||||||| 7dd05ee12
-			if ($i == 0) {
-				print "<tr class='tableRowGraph'>";
-=======
-				[$graph['host_id'], $graph['disabled']] = db_fetch_row_prepared('SELECT host_id, disabled
-    				FROM graph_local AS gl
-	 				LEFT JOIN host AS h
-					ON gl.host_id = h.id
-     				WHERE gl.id = ?',
-					[$graph['local_graph_id']]);
->>>>>>> origin/fix/jquery-deprecations
 			}
 
 			?>
-<<<<<<< HEAD
 			<td class='graphWrapperOuter' data-disabled='<?php print ($graph['disabled'] == 'on' ? 'true':'false');?>' style='width:<?php print round(100 / $columns, 2);?>%;'>
-||||||| 7dd05ee12
-			<td style='width:<?php print round(100 / $columns, 2);?>%;'>
-=======
-			<div class='graphWrapperOuter cols<?php print $columns; ?>' data-disabled='<?php print($graph['disabled'] == 'on' ? 'true' : 'false'); ?>'>
->>>>>>> origin/fix/jquery-deprecations
 				<div>
 					<div class='graphWrapper' id='wrapper_<?php print $graph['local_graph_id']?>' graph_width='<?php print $graph['width']; ?>' graph_height='<?php print $graph['height']; ?>' title_font_size='<?php print((read_user_setting('custom_fonts') == 'on') ? read_user_setting('title_size') : read_config_option('title_size')); ?>'></div>
 					<?php if (is_realm_allowed(27)) { ?>
@@ -545,12 +470,7 @@ function html_graph_thumbnail_area(array &$graph_array, string $no_graphs_messag
 					LEFT JOIN host AS h
 					ON gl.host_id = h.id
 					WHERE gl.id = ?',
-<<<<<<< HEAD
 					array($graph['local_graph_id']));
-||||||| 7dd05ee12
-=======
-					[$graph['local_graph_id']]);
->>>>>>> origin/fix/jquery-deprecations
 
 				if (cacti_sizeof($gdata)) {
 					$graph['host_id']  = $gdata['host_id'];
@@ -587,7 +507,6 @@ function html_graph_thumbnail_area(array &$graph_array, string $no_graphs_messag
 			}
 
 			?>
-<<<<<<< HEAD
 			<td class='graphWrapperOuter' data-disabled='<?php print ($graph['disabled'] == 'on' ? 'true':'false');?>' style='width:<?php print round(100 / $columns, 2);?>%;'>
 				<div>
 				<table style='text-align:center;margin:auto;'>
@@ -603,33 +522,6 @@ function html_graph_thumbnail_area(array &$graph_array, string $no_graphs_messag
 				</table>
 				</div>
 			</td>
-||||||| 7dd05ee12
-			<td style='width:<?php print round(100 / $columns, 2);?>%;'>
-				<table style='text-align:center;margin:auto;'>
-					<tr>
-						<td>
-							<div class='graphWrapper' id='wrapper_<?php print $graph['local_graph_id']?>' graph_width='<?php print read_user_setting('default_width');?>' graph_height='<?php print read_user_setting('default_height');?>'></div>
-							<?php print (read_user_setting('show_graph_title') == 'on' ? "<span class='center'>" . html_escape($graph['title_cache']) . '</span>' : '');?>
-						</td>
-						<?php if (is_realm_allowed(27)) { ?><td id='dd<?php print $graph['local_graph_id'];?>' class='noprint graphDrillDown'>
-							<?php print graph_drilldown_icons($graph['local_graph_id'], 'graph_buttons_thumbnails', $tree_id, $branch_id);?>
-						</td><?php } ?>
-					</tr>
-				</table>
-			</td>
-=======
-			<div class='graphWrapperOuter cols<?php print $columns; ?>' data-disabled='<?php print($graph['disabled'] == 'on' ? 'true' : 'false'); ?>'>
-				<div>
-					<div class='graphWrapper' id='wrapper_<?php print $graph['local_graph_id']?>' graph_width='<?php print read_user_setting('default_width'); ?>' graph_height='<?php print read_user_setting('default_height'); ?>'></div>
-					<?php if (is_realm_allowed(27)) { ?>
-					<div id='dd<?php print $graph['local_graph_id']; ?>' class='noprint graphDrillDown'>
-						<?php graph_drilldown_icons($graph['local_graph_id'], 'graph_buttons_thumbnails', $tree_id, $branch_id); ?>
-					</div>
-					<?php } ?>
-				</div>
-				<?php print(read_user_setting('show_graph_title') == 'on' ? "<div class='center'>" . htmle($graph['title_cache']) . '</div>' : ''); ?>
-			</div>
->>>>>>> origin/fix/jquery-deprecations
 			<?php
 		}
 	} else {
@@ -685,16 +577,8 @@ function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_button
 	}
 
 	if (is_realm_allowed(10) && $graph_template_id > 0) {
-<<<<<<< HEAD
 		print "<a class='iconLink' role='link' title='" . __esc('Edit Graph Template') . "' href='" . html_escape($config['url_path'] . 'graph_templates.php?action=template_edit&id=' . $graph_template_id) . "'><img src='" . html_escape($config['url_path'] . 'images/template_edit.png') . "'></img></a>";
 		print '<br/>';
-||||||| 7dd05ee12
-		print "<a class='iconLink' role='link' title='" . __esc('Edit Graph Template') . "' href='" . html_escape($config['url_path'] . '/graph_templates.php?action=template_edit&id=' . $graph_template_id) . "'><img src='" . html_escape($config['url_path'] . 'images/template_edit.png') . "'></img></a>";
-		print '<br/>';
-=======
-		print "<a class='iconLink' role='link' href='" . htmle(CACTI_PATH_URL . 'graph_templates.php?action=template_edit&id=' . $graph_template_id) . "'><i class='drillDown ti ti-edit editTemplate' title='" . __esc('Edit Graph Template') . "'></i></a>";
-		print '<br>';
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if (read_config_option('realtime_enabled') == 'on' && is_realm_allowed(25)) {
@@ -830,7 +714,6 @@ function html_nav_bar(string $base_url, int $max_pages, int $current_page, int $
 	return $nav;
 }
 
-<<<<<<< HEAD
 /* html_header_sort - draws a header row suitable for display inside of a box element.  When
         a user selects a column header, the callback function "filename" will be called to handle
         the sort the column and display the altered results.
@@ -848,71 +731,16 @@ function html_header_sort($header_items, $sort_column, $sort_direction, $last_it
 	static $page_count = 0;
 
 	/* reverse the sort direction */
-||||||| 7dd05ee12
-/* html_header_sort - draws a header row suitable for display inside of a box element.  When
-        a user selects a column header, the callback function "filename" will be called to handle
-        the sort the column and display the altered results.
-   @arg $header_items - an array containing a list of column items to display.  The
-        format is similar to the html_header, with the exception that it has three
-        dimensions associated with each element (db_column => display_text, default_sort_order)
-        alternatively (db_column => array('display' = 'blah', 'align' = 'blah', 'sort' = 'blah'))
-   @arg $sort_column - the value of current sort column.
-   @arg $sort_direction - the value the current sort direction.  The actual sort direction
-        will be opposite this direction if the user selects the same named column.
-   @arg $last_item_colspan - the TD 'colspan' to apply to the last cell in the row
-   @arg $url - a base url to redirect sort actions to
-   @arg $return_to - the id of the object to inject output into as a result of the sort action */
-function html_header_sort($header_items, $sort_column, $sort_direction, $last_item_colspan = 1, $url = '', $return_to = '') {
-	/* reverse the sort direction */
-=======
-/**
- * html_header_sort - draws a header row suitable for display inside of a box element.  When
- * a user selects a column header, the callback function "filename" will be called to handle
- * the sort the column and display the altered results.
- *
- * @param array  $header_items      An array containing a list of column items to display.  The
- *                                  format is similar to the html_header, with the exception that it has three
- *                                  dimensions associated with each element (db_column => display_text, default_sort_order)
- *                                  alternatively (db_column => array('display' = 'blah', 'align' = 'blah', 'sort' = 'blah'))
- * @param string $sort_column       The value of current sort column.
- * @param string $sort_direction    The value the current sort direction.  The actual sort direction
- *                                  will be opposite this direction if the user selects the same named column.
- * @param int    $last_item_colspan The TD 'colspan' to apply to the last cell in the row
- * @param string $url               A base url to redirect sort actions to
- * @param string $return_to         The id of the object to inject output into as a result of the sort action
- *
- * @return void
- */
-function html_header_sort(array $header_items, string $sort_column, string $sort_direction, int $last_item_colspan = 1, string $url = '', string $return_to = '') : void {
-	static $page_count = 0;
-
-	$table_id = form_get_table_id();
-
-	$header_items = form_process_visible_display_text($table_id, $header_items);
-
-	// reverse the sort direction
->>>>>>> origin/fix/jquery-deprecations
 	if ($sort_direction == 'ASC') {
 		$new_sort_direction = 'DESC';
 	} else {
 		$new_sort_direction = 'ASC';
 	}
 
-<<<<<<< HEAD
 	$page = $page_count . '_' . str_replace('.php', '', basename($_SERVER['SCRIPT_NAME']));
 
 	if (isset_request_var('action')) {
 		$page .= '_' . get_request_var('action');
-||||||| 7dd05ee12
-	$page = str_replace('.php', '', basename($_SERVER['SCRIPT_NAME']));
-	if (isset_request_var('action')) {
-		$page .= '_' . get_request_var('action');
-=======
-	$page = $page_count . '_' . str_replace('.php', '', get_current_script_name());
-
-	if (isrv('action')) {
-		$page .= '_' . grv('action');
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if (isrv('tab')) {
@@ -1062,18 +890,11 @@ function html_header_sort(array $header_items, string $sort_column, string $sort
 		$i++;
 	}
 
-<<<<<<< HEAD
 	print '</tr>';
-||||||| 7dd05ee12
-	print '</tr>';
-=======
-	print '</tr></thead>';
->>>>>>> origin/fix/jquery-deprecations
 
 	$page_count++;
 }
 
-<<<<<<< HEAD
 /* html_header_sort_checkbox - draws a header row with a 'select all' checkbox in the last cell
         suitable for display inside of a box element.  When a user selects a column header,
         the callback function "filename" will be called to handle the sort the column and display
@@ -1088,46 +909,6 @@ function html_header_sort(array $header_items, string $sort_column, string $sort
    @arg $form_action - the url to post the 'select all' form to
    @arg $return_to - the id of the object to inject output into as a result of the sort action */
 function html_header_sort_checkbox($header_items, $sort_column, $sort_direction, $include_form = true, $form_action = '', $return_to = '', $prefix = 'chk') {
-||||||| 7dd05ee12
-/* html_header_sort_checkbox - draws a header row with a 'select all' checkbox in the last cell
-        suitable for display inside of a box element.  When a user selects a column header,
-        the callback function "filename" will be called to handle the sort the column and display
-        the altered results.
-   @arg $header_items - an array containing a list of column items to display.  The
-        format is similar to the html_header, with the exception that it has three
-        dimensions associated with each element (db_column => display_text, default_sort_order)
-        alternatively (db_column => array('display' = 'blah', 'align' = 'blah', 'sort' = 'blah'))
-   @arg $sort_column - the value of current sort column.
-   @arg $sort_direction - the value the current sort direction.  The actual sort direction
-        will be opposite this direction if the user selects the same named column.
-   @arg $form_action - the url to post the 'select all' form to
-   @arg $return_to - the id of the object to inject output into as a result of the sort action */
-function html_header_sort_checkbox($header_items, $sort_column, $sort_direction, $include_form = true, $form_action = '', $return_to = '', $prefix = 'chk') {
-	static $page = 0;
-=======
-/**
- * html_header_sort_checkbox - draws a header row with a 'select all' checkbox in the last cell
- * suitable for display inside of a box element.  When a user selects a column header,
- * the callback function "filename" will be called to handle the sort the column and display
- * the altered results.
- *
- * @param array  $header_items   An array containing a list of column items to display.  The
- *                               fonrmat is similar to the html_header, with the exception that it has three
- *                               dimensions associated with each element (db_column => display_text, default_sort_order)
- *                               alternatively (db_column => array('display' = 'blah', 'align' = 'blah', 'sort' = 'blah'))
- * @param string $sort_column    The value of current sort column.
- * @param string $sort_direction The value the current sort direction.  The actual sort direction
- *                               will be opposite this direction if the user selects the same named column.
- * @param bool   $include_form   Whether to include the 'select all' form
- * @param string $form_action    The url to post the 'select all' form to
- * @param string $return_to      The id of the object to inject output into as a result of the sort action
- * @param string $prefix         The prefix to use for the checkbox names
- *
- * @return void
- */
-function html_header_sort_checkbox(array $header_items, string $sort_column, string $sort_direction,
-	bool $include_form = true, string $form_action = '', string $return_to = '', string $prefix = 'chk') : void {
->>>>>>> origin/fix/jquery-deprecations
 	static $page_count = 0;
 
 	$table_id = form_get_table_id();
@@ -1141,21 +922,10 @@ function html_header_sort_checkbox(array $header_items, string $sort_column, str
 		$new_sort_direction = 'ASC';
 	}
 
-<<<<<<< HEAD
 	$page = $page_count . '_' . str_replace('.php', '', basename($_SERVER['SCRIPT_NAME']));
 
 	if (isset_request_var('action')) {
 		$page .= '_' . get_request_var('action');
-||||||| 7dd05ee12
-	$page = str_replace('.php', '', basename($_SERVER['SCRIPT_NAME']));
-	if (isset_request_var('action')) {
-		$page .= '_' . get_request_var('action');
-=======
-	$page = $page_count . '_' . str_replace('.php', '', get_current_script_name());
-
-	if (isrv('action')) {
-		$page .= '_' . grv('action');
->>>>>>> origin/fix/jquery-deprecations
 	}
 
 	if (isrv('tab')) {
@@ -1990,7 +1760,6 @@ function is_menu_pick_active(string $menu_url) : bool {
 		return false;
 	}
 
-<<<<<<< HEAD
 	$base_url_path = isset($url_array['path']) ? basename($url_array['path']) : '';
 	if (empty($base_url_path)) {
 		cacti_log('INFO: Empty url path detceted - ' . json_encode($url_array), false, 'MENU', POLLER_VERBOSITY_DEBUG);
@@ -2000,23 +1769,6 @@ function is_menu_pick_active(string $menu_url) : bool {
 	$base_menu_path = isset($url_array['path']) ? basename($menu_array['path']) : '';
 	if (empty($base_menu_path)) {
 		cacti_log('INFO: Empty menu path detceted - ' . json_encode($menu_array), false, 'MENU', POLLER_VERBOSITY_DEBUG);
-||||||| 7dd05ee12
-	if (basename($url_array['path']) == basename($menu_array['path'])) {
-=======
-	$base_url_path = basename($url_array['path']);
-
-	if (empty($base_url_path)) {
-		cacti_log('INFO: Empty url path detceted - ' . json_encode($url_array), false, 'MENU', POLLER_VERBOSITY_DEBUG);
-
-		return false;
-	}
-
-	$base_menu_path = basename($menu_array['path']);
-
-	if (empty($base_menu_path)) {
-		cacti_log('INFO: Empty menu path detceted - ' . json_encode($menu_array), false, 'MENU', POLLER_VERBOSITY_DEBUG);
-
->>>>>>> origin/fix/jquery-deprecations
 		return false;
 	}
 
@@ -2316,34 +2068,11 @@ function DrawMatrixHeaderItem(string $matrix_name, string $matrix_text_color, in
 	<?php
 }
 
-<<<<<<< HEAD
 function form_area($text) {
-||||||| 7dd05ee12
-function form_area($text) { ?>
-=======
-/**
- * Generates an HTML table row with a single cell containing the provided text.
- *
- * This function creates a table row (`<tr>`) with a single table data cell (`<td>`)
- * that contains the provided text. The text is escaped using the `htmle` function
- * to prevent XSS attacks.
- *
- * @param string $text The text to be displayed inside the table cell.
- *
- * @return void
- */
-function form_area(string $text) : void {
->>>>>>> origin/fix/jquery-deprecations
 	?>
 	<tr>
 		<td class='textArea'>
-<<<<<<< HEAD
 			<?php print html_escape($text);?>
-||||||| 7dd05ee12
-			<?php print $text;?>
-=======
-			<?php print htmle($text); ?>
->>>>>>> origin/fix/jquery-deprecations
 		</td>
 	</tr>
 	<?php
@@ -2352,26 +2081,11 @@ function form_area(string $text) : void {
 /**
  * is_console_page - determines if current passed url is considered to be a console page
  *
-<<<<<<< HEAD
  * @param url - url to be checked
  *
  * @return true if console page, false if not
  */
 function is_console_page($url) {
-||||||| 7dd05ee12
-/* is_console_page - determines if current passed url is considered to be
-          a console page
-   @arg url - url to be checked
-   @returns true if console page, false if not
-*/
-function is_console_page($url) {
-=======
- * @param string $url - url to be checked
- *
- * @return bool true if console page, false if not
- */
-function is_console_page(string $url) : bool {
->>>>>>> origin/fix/jquery-deprecations
 	global $menu;
 
 	$basename = basename($url);
@@ -2441,7 +2155,6 @@ function html_show_tabs_left() : void {
 		if (POLLER_ID > 1 && CACTI_CONNECTION != 'online') { // @phpstan-ignore-line
 			// Don't show the graphs tab when offline
 		} else {
-<<<<<<< HEAD
 			$external_links = db_fetch_assoc('SELECT id, title
 				FROM external_links
 				WHERE style="TAB"
@@ -2473,46 +2186,6 @@ function html_show_tabs_left() : void {
 					}
 				}
 			}
-||||||| 7dd05ee12
-			$external_links = db_fetch_assoc('SELECT id, title
-				FROM external_links
-				WHERE style="TAB"
-				AND enabled="on"
-				ORDER BY sortorder');
-
-			if (cacti_sizeof($external_links)) {
-				foreach($external_links as $tab) {
-					if (is_realm_allowed($tab['id']+10000)) {
-						$parsed_url = parse_url($_SERVER['REQUEST_URI']);
-						$down = false;
-
-						if (basename($parsed_url['path']) == 'link.php') {
-							if (isset($parsed_url['query'])) {
-								$queries = explode('&', $parsed_url['query']);
-								foreach($queries as $q) {
-									list($var, $value) = explode('=', $q);
-									if ($var == 'id') {
-										if ($value == $tab['id']) {
-											$down = true;
-											break;
-										}
-									}
-								}
-							}
-						}
-
-						print '<a id="tab-link' . $tab['id'] . '" href="' . $config['url_path'] . 'link.php?id=' . $tab['id'] . '"><img src="' . get_classic_tabimage($tab['title'], $down) . '" alt="' . $tab['title'] . '"></a>';
-					}
-				}
-			}
-=======
-			$tabs_left[] =
-				[
-					'title' => __('Graphs'),
-					'id'	   => 'tab-graphs',
-					'url'   => CACTI_PATH_URL . 'graph_view.php',
-				];
->>>>>>> origin/fix/jquery-deprecations
 		}
 	}
 
@@ -3089,7 +2762,6 @@ function html_site_filter(mixed $site_id = -1, string $call_back = 'applyFilter'
 	<?php
 }
 
-<<<<<<< HEAD
 function html_location_filter($location = '', $call_back = 'applyFilter', $sql_where = '', $noany = false, $nonone = false) {
 	$theme = get_selected_theme();
 
@@ -3132,76 +2804,6 @@ function html_location_filter($location = '', $call_back = 'applyFilter', $sql_w
 
 function html_spikekill_actions() {
 	switch(get_nfilter_request_var('action')) {
-||||||| 7dd05ee12
-function html_spikekill_actions() {
-	switch(get_nfilter_request_var('action')) {
-=======
-/**
- * Generates an HTML dropdown filter for selecting a location.
- *
- * @param string $location  The currently selected location value. Default is an empty string.
- * @param string $call_back The JavaScript function to call when the selection changes. Default is 'applyFilter'.
- * @param string $sql_where Additional SQL WHERE clause to filter the locations. Default is an empty string.
- * @param bool   $noany     If true, the "Any" option will not be included in the dropdown. Default is false.
- * @param bool   $nonone    If true, the "None" option will not be included in the dropdown. Default is false.
- *
- * @return void
- */
-function html_location_filter(string $location = '', string $call_back = 'applyFilter', string $sql_where = '', bool $noany = false, bool $nonone = false) : void {
-	$theme = get_selected_theme();
-
-	if (!str_contains($call_back, '()')) {
-		$call_back .= '()';
-	}
-
-	?>
-	<td>
-		<?php print __('Location'); ?>
-	</td>
-	<td>
-		<select id='location' onChange='<?php print $call_back; ?>'>
-			<?php if (!$noany) {?><option value='-1'<?php if ($location == '-1') {?> selected<?php }?>><?php print __('Any'); ?></option><?php }?>
-			<?php if (!$nonone) {?><option value='0'<?php if ($location == '0') {?> selected<?php }?>><?php print __('None'); ?></option><?php }?>
-			<?php
-
-			if ($sql_where != '' && !str_contains($sql_where, 'WHERE')) {
-				$sql_where = 'WHERE ' . $sql_where;
-			}
-
-	$locations = array_rekey(
-		db_fetch_assoc("SELECT DISTINCT location
-					FROM host AS h
-					$sql_where
-					ORDER BY location ASC"),
-		'location', 'location'
-	);
-
-	if (cacti_sizeof($locations)) {
-		foreach ($locations as $l) {
-			if ($l == '') {
-				continue;
-			}
-
-			print "<option value='" . htmle($l) . "'" . ($location == $l ? ' selected' : '') . '>' . htmle($l) . '</option>';
-		}
-	}
-	?>
-		</select>
-	</td>
-	<?php
-}
-
-/**
- * Generates the HTML for spike kill actions.
- *
- * This function is responsible for creating the HTML elements
- * necessary for spike kill actions within the application.
- *
- * @return void
- */
-function html_spikekill_actions() : void {
-	switch(gnrv('action')) {
->>>>>>> origin/fix/jquery-deprecations
 		case 'spikemenu':
 			html_spikekill_menu(gfrv('local_graph_id'));
 
@@ -3338,45 +2940,15 @@ function html_spikekill_menu(int $local_graph_id) : void {
 	<div class='spikekillParent' style='display:none;z-index:20;position:absolute;text-align:left;white-space:nowrap;padding-right:2px;'>
 	<ul class='spikekillMenu' style='font-size:1em;'>
 	<?php
-<<<<<<< HEAD
 	print html_spikekill_menu_item(__('Remove StdDev'), 'deviceUp fa fa-life-ring', 'rstddev', '',  $local_graph_id);
 	print html_spikekill_menu_item(__('Gap Fill Range'), 'deviceUnknown fa fa-life-ring', 'rfill', '',  $local_graph_id);
 	print html_spikekill_menu_item(__('Float Range'), 'deviceDown fa fa-life-ring', 'rfloat', '',  $local_graph_id);
-||||||| 7dd05ee12
-	print html_spikekill_menu_item(__('Remove StdDev'), 'deviceUp fa fa-life-ring', 'rstddev', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Remove Variance'), 'deviceRecovering fa fa-life-ring', 'rvariance', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Gap Fill Range'), 'deviceUnknown fa fa-life-ring', 'routlier', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Float Range'), 'deviceDown fa fa-life-ring', 'rrangefill', '',  $local_graph_id);
-=======
-	print html_spikekill_menu_item(__('Remove StdDev'), 'deviceUp ti ti-lifebuoy-filled', 'rstddev', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Gap Fill Range'), 'deviceUnknown ti ti-lifebuoy-filled', 'rfill', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Float Range'), 'deviceDown ti ti-lifebuoy-filled', 'rfloat', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Absolute Maximum'), 'deviceError ti ti-lifebuoy-filled', 'rabsolute', '',  $local_graph_id);
->>>>>>> origin/fix/jquery-deprecations
 
-<<<<<<< HEAD
 	print html_spikekill_menu_item(__('Dry Run StdDev'), 'deviceUp fa fa-check', 'dstddev', '',  $local_graph_id);
 	print html_spikekill_menu_item(__('Dry Run Gap Fill Range'), 'deviceUnknown fa fa-check', 'dfill', '',  $local_graph_id);
 	print html_spikekill_menu_item(__('Dry Run Float Range'), 'deviceDown fa fa-check', 'dfloat', '',  $local_graph_id);
-||||||| 7dd05ee12
-	print html_spikekill_menu_item(__('Dry Run StdDev'), 'deviceUp fa fa-check', 'dstddev', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Variance'), 'deviceRecovering fa fa-check', 'dvariance', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Gap Fill Range'), 'deviceUnknown fa fa-check', 'doutlier', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Float Range'), 'deviceDown fa fa-check', 'drangefill', '',  $local_graph_id);
-=======
-	print html_spikekill_menu_item(__('Dry Run StdDev'), 'deviceUp ti ti-check', 'dstddev', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Gap Fill Range'), 'deviceUnknown ti ti-check', 'dfill', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Float Range'), 'deviceDown ti ti-check', 'dfloat', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Absolute Maximum'), 'deviceError ti ti-check', 'dabsolute', '',  $local_graph_id);
->>>>>>> origin/fix/jquery-deprecations
 
-<<<<<<< HEAD
 	print html_spikekill_menu_item(__('Settings'), 'fa fa-cog', '', '', '', $ravgnan . $rstddev . $rkills);
-||||||| 7dd05ee12
-	print html_spikekill_menu_item(__('Settings'), 'fa fa-cog', '', '', '', $ravgnan . $rstddev . $rvarpct . $rvarout . $rkills);
-=======
-	print html_spikekill_menu_item(__('Settings'), 'ti ti-settings-filled', '', '', '', $ravgnan . $rstddev . $rkills . $rabsmax);
->>>>>>> origin/fix/jquery-deprecations
 }
 
 function html_spikekill_js() : void {
@@ -3467,32 +3039,6 @@ function html_spikekill_js() : void {
 
 		$('.dfloat').unbind().click(function() {
 			removeSpikes('float', true, $(this).attr('data-graph'));
-<<<<<<< HEAD
-||||||| 7dd05ee12
-		$('.doutlier').unbind().click(function() {
-			dryRunSpikesInRange($(this).attr('data-graph'));
-			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
-		});
-
-		$('.rrangefill').unbind().click(function() {
-			removeRangeFill($(this).attr('data-graph'));
-			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
-		});
-
-		$('.drangefill').unbind().click(function() {
-			dryRunRangeFill($(this).attr('data-graph'));
-=======
-			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
-		});
-
-		$('.rabsolute').unbind().click(function() {
-			removeSpikes('absolute', false, $(this).attr('data-graph'));
-			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
-		});
-
-		$('.dabsolute').unbind().click(function() {
-			removeSpikes('absolute', true, $(this).attr('data-graph'));
->>>>>>> origin/fix/jquery-deprecations
 			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
 		});
 
@@ -3531,46 +3077,6 @@ function html_spikekill_js() : void {
 				getPresentHTTPError(data);
 			});
 		});
-<<<<<<< HEAD
-||||||| 7dd05ee12
-
-		$('.skvarpct').unbind().click(function() {
-			$('.skvarpct').find('i').removeClass('fa fa-check');
-			$(this).find('i:first').addClass('fa fa-check');
-			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
-
-			strURL = '?action=spikesave&setting=rvarpct&id='+$(this).attr('id').replace('varpct_','');
-			$.get(strURL)
-				.fail(function(data) {
-					getPresentHTTPError(data);
-				});
-		});
-
-		$('.skvarout').unbind().click(function() {
-			$('.skvarout').find('i').removeClass('fa fa-check');
-			$(this).find('i:first').addClass('fa fa-check');
-			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
-
-			strURL = '?action=spikesave&setting=rvarout&id='+$(this).attr('id').replace('varout_','');
-			$.get(strURL)
-				.fail(function(data) {
-					getPresentHTTPError(data);
-				});
-		});
-=======
-
-		$('.skabsmax').unbind().click(function() {
-			$('.skabsmax').find('i').removeClass('ti ti-check');
-			$(this).find('i:first').addClass('ti ti-check');
-			$(this).find('.spikekillMenu').menu('destroy').parent().remove();
-
-			strURL = '?action=spikesave&setting=rabsmax&id='+$(this).attr('id').replace('absmax_','');
-			$.get(strURL)
-			.fail(function(data) {
-				getPresentHTTPError(data);
-			});
-		});
->>>>>>> origin/fix/jquery-deprecations
 	}
 	</script>
 	<?php
@@ -3615,7 +3121,6 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 	<meta http-equiv='Content-Type' content='text/html;charset=utf-8'>
 	<link rel='manifest' href='/manifest.json'>
 	<script type='text/javascript'>
-<<<<<<< HEAD
 		var theme='<?php print $selectedTheme;?>';
 		var hScroll=<?php print read_user_setting('enable_hscroll', '') == 'on' ? 'true':'false';?>;
 		var userSettings=<?php print is_view_allowed('graph_settings') ? 'true':'false';?>;
@@ -3729,248 +3234,6 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 		var zoom_i18n_close='<?php print __esc('Close');?>';
 		var zoom_i18n_settings='<?php print __esc('Settings');?>';
 		var zoom_i18n_3rd_button='<?php print __esc('3rd Mouse Button');?>';
-||||||| 7dd05ee12
-		var theme='<?php print $selectedTheme;?>';
-		var hScroll=<?php print read_user_setting('enable_hscroll', '') == 'on' ? 'true':'false';?>;
-		var userSettings=<?php print is_view_allowed('graph_settings') ? 'true':'false';?>;
-		var tableConstraints='<?php print __('Allow or limit the table columns to extend beyond the current windows limits.');?>';
-		var searchFilter='<?php print __esc('Enter a search term');?>';
-		var searchRFilter='<?php print __esc('Enter a regular expression');?>';
-		var noFileSelected='<?php print __esc('No file selected');?>';
-		var timeGraphView='<?php print __esc('Time Graph View');?>';
-		var filterSettingsSaved='<?php print __esc('Filter Settings Saved');?>';
-		var spikeKillResults='<?php print __esc('SpikeKill Results');?>';
-		var utilityView='<?php print __esc('Utility View');?>';
-		var realtimeClickOn='<?php print __esc('Click to view just this Graph in Realtime');?>';
-		var realtimeClickOff='<?php print __esc('Click again to take this Graph out of Realtime');?>';
-		var treeView='<?php print __esc('Tree View');?>';
-		var listView='<?php print __esc('List View');?>';
-		var previewView='<?php print __esc('Preview View');?>';
-		var editProfile='<?php print __esc('Edit Profile');?>';
-		var cactiConsoleAllowed=<?php print (is_realm_allowed(8) ? 'true':'false');?>;
-		var cactiGraphsAllowed=<?php print (is_realm_allowed(7) ? 'true':'false');?>;
-		var changePassword='<?php print __esc('Change Password');?>';
-		var logout='<?php print __esc('Logout');?>';
-		var standardGraphicalUserInterface='<?php print __esc('Standard Mode');?>';
-		var compactGraphicalUserInterface='<?php print __esc('Compact Mode');?>';
-		var darkColorMode='<?php print __esc('Dark Color Mode');?>';
-		var lightColorMode='<?php print __esc('Light Color Mode');?>';
-		var usePreferredColorTheme='<?php print __esc('Use System Color');?>';
-		var ignorePreferredColorTheme='<?php print __esc('Ignore System Color');?>';
-		var help='<?php print __esc('Help');?>';
-		var cactiHome='<?php print __esc('Cacti Home');?>';
-		var cactiConsole='<?php print __esc('Console');?>';
-		var cactiMisc='<?php print __esc('Miscellaneous');?>';
-		var cactiDashboards='<?php print __esc('Dashboards');?>';
-		var cactiGeneral='<?php print __esc('General');?>';
-		var cactiCharts='<?php print __esc('Charts');?>';
-		var cactiProjectPage='<?php print __esc('Cacti Project Page');?>';
-		var cactiCommunityForum='<?php print __esc('User Community');?>';
-		var cactiUser='<?php print __esc('User');?>';
-		var cactiDocumentation='<?php print __esc('Documentation');?>';
-		var cactiSpine='<?php print __esc('Spine');?>';
-		var cactiRRDProxy='<?php print __esc('RRDProxy');?>';
-		var cactiKeyboard='<?php print __esc('Keyboard');?>';
-		var cactiShortcuts='<?php print __esc('Shortcuts');?>';
-		var cactiContributeTo='<?php print __esc('Contribute to the Cacti Project');?>';
-		var cactiDevHelp='<?php print __esc('Help in Developing');?>';
-		var cactiDonate='<?php print __esc('Donation & Sponsoring');?>';
-		var cactiProfile='<?php print __esc('Profile');?>';
-		var cactiTheme='<?php print __esc('Theme');?>';
-		var cactiClient='<?php print __esc('Client');?>';
-		var cactiTranslate='<?php print __esc('Help in Translating');?>';
-		var reportABug='<?php print __esc('Report a bug');?>';
-		var aboutCacti='<?php print __esc('About Cacti');?>';
-		var justCacti='<?php print __esc('Cacti');?>';
-		var spikeKillResults='<?php print __esc('SpikeKill Results');?>';
-		var showHideFilter='<?php print __esc('Click to Show/Hide Filter');?>';
-		var clearFilterTitle='<?php print __esc('Clear Current Filter');?>';
-		var clipboard='<?php print __esc('Clipboard');?>';
-		var clipboardID='<?php print __esc('Clipboard ID');?>';
-		var clipboardNotAvailable='<?php print __esc('Copy operation is unavailable at this time');?>';
-		var clipboardCopyFailed='<?php print __esc('Failed to find data to copy!');?>';
-		var clipboardUpdated='<?php print __esc('Clipboard has been updated');?>';
-		var clipboardNotUpdated='<?php print __esc('Sorry, your clipboard could not be updated at this time');?>';
-		var defaultSNMPSecurityLevel='<?php print read_config_option('snmp_security_level');?>';
-		var defaultSNMPAuthProtocol='<?php print read_config_option('snmp_auth_protocol');?>';
-		var defaultSNMPPrivProtocol='<?php print read_config_option('snmp_priv_protocol');?>';
-		var passwordPass='<?php print __esc('Passphrase length meets 8 character minimum');?>';
-		var passwordTooShort='<?php print __esc('Passphrase too short');?>';
-		var passwordMatchTooShort='<?php print __esc('Passphrase matches but too short');?>';
-		var passwordNotMatchTooShort='<?php print __esc('Passphrase too short and not matching');?>';
-		var passwordMatch='<?php print __esc('Passphrases match');?>';
-		var passwordNotMatch='<?php print __esc('Passphrases do not match');?>';
-		var errorOnPage='<?php print __esc('Sorry, we could not process your last action.');?>';
-		var errorNumberPrefix='<?php print __esc('Error:');?>';
-		var errorReasonPrefix='<?php print __esc('Reason:');?>';
-		var errorReasonTitle='<?php print __esc('Action failed');?>';
-		var testSuccessful='<?php print __esc('Connection Successful');?>';
-		var testFailed='<?php print __esc('Connection Failed');?>';
-		var errorReasonUnexpected='<?php print __esc('The response to the last action was unexpected.');?>';
-		var mixedReasonTitle='<?php print __esc('Some Actions failed');?>';
-		var mixedOnPage='<?php print __esc('Note, we could not process all your actions.  Details are below.');?>';
-		var sessionMessageTitle='<?php print __esc('Operation successful');?>';
-		var sessionMessageSave='<?php print __esc('The Operation was successful.  Details are below.');?>';
-		var sessionMessageOk='<?php print __esc('Ok');?>';
-		var sessionMessagePause='<?php print __esc('Pause');?>';
-		var sessionMessageContinue='<?php print __esc('Continue');?>';
-		var sessionMessageCancel='<?php print __esc('Cancel');?>';
-		var zoom_i18n_zoom_in='<?php print __esc('Zoom In');?>';
-		var zoom_i18n_zoom_out='<?php print __esc('Zoom Out');?>';
-		var zoom_i18n_zoom_out_factor='<?php print __esc('Zoom Out Factor');?>';
-		var zoom_i18n_timestamps='<?php print __esc('Timestamps');?>';
-		var zoom_i18n_zoom_2='<?php print __esc('2x');?>';
-		var zoom_i18n_zoom_4='<?php print __esc('4x');?>';
-		var zoom_i18n_zoom_8='<?php print __esc('8x');?>';
-		var zoom_i18n_zoom_16='<?php print __esc('16x');?>';
-		var zoom_i18n_zoom_32='<?php print __esc('32x');?>';
-		var zoom_i18n_zoom_out_positioning='<?php print __esc('Zoom Out Positioning');?>';
-		var zoom_i18n_mode='<?php print __esc('Zoom Mode');?>';
-		var zoom_i18n_graph='<?php print __esc('Graph');?>';
-		var zoom_i18n_quick='<?php print __esc('Quick');?>';
-		var zoom_i18n_advanced='<?php print __esc('Advanced');?>';
-		var zoom_i18n_newTab='<?php print __esc('Open in new tab');?>';
-		var zoom_i18n_save_graph='<?php print __esc('Save graph');?>';
-		var zoom_i18n_copy_graph='<?php print __esc('Copy graph');?>';
-		var zoom_i18n_copy_graph_link='<?php print __esc('Copy graph link');?>';
-		var zoom_i18n_on='<?php print __esc('Always On');?>';
-		var zoom_i18n_auto='<?php print __esc('Auto');?>';
-		var zoom_i18n_off='<?php print __esc('Always Off');?>';
-		var zoom_i18n_begin='<?php print __esc('Begin with');?>';
-		var zoom_i18n_center='<?php print __esc('Center');?>';
-		var zoom_i18n_end='<?php print __esc('End with');?>';
-		var zoom_i18n_disabled='<?php print __esc('Disabled');?>';
-		var zoom_i18n_close='<?php print __esc('Close');?>';
-		var zoom_i18n_settings='<?php print __esc('Settings');?>';
-		var zoom_i18n_3rd_button='<?php print __esc('3rd Mouse Button');?>';
-=======
-		var urlPath='<?php print CACTI_PATH_URL; ?>';
-		var aboutCacti = '<?php print __esc('About Cacti'); ?>';
-		var cactiCharts = '<?php print __esc('Charts'); ?>';
-		var cactiClient = '<?php print __esc('Client'); ?>';
-		var cactiCommunityForum = '<?php print __esc('User Community'); ?>';
-		var cactiConsole = '<?php print __esc('Console'); ?>';
-		var cactiConsoleAllowed=<?php print(is_realm_allowed(8) ? 'true' : 'false'); ?>;
-		var cactiContributeTo = '<?php print __esc('Contribute to the Cacti Project'); ?>';
-		var cactiDashboards = '<?php print __esc('Panels'); ?>';
-		var cactiDevHelp = '<?php print __esc('Help in Developing'); ?>';
-		var cactiDocumentation = '<?php print __esc('Documentation'); ?>';
-		var cactiDonate = '<?php print __esc('Donation & Sponsoring'); ?>';
-		var cactiGeneral = '<?php print __esc('General'); ?>';
-		var cactiGraphsAllowed=<?php print(is_realm_allowed(7) ? 'true' : 'false'); ?>;
-		var cactiHome = '<?php print __esc('Cacti Home'); ?>';
-		var cactiKeyboard = '<?php print __esc('Keyboard'); ?>';
-		var cactiMisc = '<?php print __esc('Miscellaneous'); ?>';
-		var cactiProfile = '<?php print __esc('Profile'); ?>';
-		var cactiProjectPage = '<?php print __esc('Cacti Project Page'); ?>';
-		var cactiRRDProxy = '<?php print __esc('RRDProxy'); ?>';
-		var cactiShortcuts = '<?php print __esc('Shortcuts'); ?>';
-		var cactiSpine = '<?php print __esc('Spine'); ?>';
-		var cactiTheme = '<?php print __esc('Theme'); ?>';
-		var cactiTranslate = '<?php print __esc('Help in Translating'); ?>';
-		var cactiUser = '<?php print __esc('User'); ?>';
-		var changePassword = '<?php print __esc('Change Password'); ?>';
-		var clearFilterTitle = '<?php print __esc('Clear Current Filter'); ?>';
-		var clipboard = '<?php print __esc('Clipboard'); ?>';
-		var clipboardCopyFailed = '<?php print __esc('Failed to find data to copy!'); ?>';
-		var clipboardID = '<?php print __esc('Clipboard ID'); ?>';
-		var clipboardNotAvailable = '<?php print __esc('Copy operation is unavailable at this time'); ?>';
-		var clipboardNotUpdated = '<?php print __esc('Sorry, your clipboard could not be updated at this time'); ?>';
-		var clipboardUpdated = '<?php print __esc('Clipboard has been updated'); ?>';
-		var compactGraphicalUserInterface = '<?php print __esc('Compact Mode'); ?>';
-		var keyup_delay = <?php print get_keyup_delay(); ?>;
-		var darkColorMode = '<?php print __esc('Dark Color Mode'); ?>';
-		var defaultSNMPAuthProtocol = '<?php print read_config_option('snmp_auth_protocol'); ?>';
-		var defaultSNMPPrivProtocol = '<?php print read_config_option('snmp_priv_protocol'); ?>';
-		var defaultSNMPSecurityLevel = '<?php print read_config_option('snmp_security_level'); ?>';
-		var editProfile = '<?php print __esc('Edit Profile'); ?>';
-		var errorNumberPrefix = '<?php print __esc('Error:'); ?>';
-		var errorOnPage = '<?php print __esc('Sorry, we could not process your last action.'); ?>';
-		var errorReasonPrefix = '<?php print __esc('Reason:'); ?>';
-		var errorReasonTitle = '<?php print __esc('Action failed'); ?>';
-		var errorReasonUnexpected = '<?php print __esc('The response to the last action was unexpected.'); ?>';
-		var filterSettingsSaved = '<?php print __esc('Filter Settings Saved'); ?>';
-		var hScroll=<?php print read_user_setting('enable_hscroll', '') == 'on' ? 'true' : 'false'; ?>;
-		var help = '<?php print __esc('Help'); ?>';
-		var ignorePreferredColorTheme = '<?php print __esc('Ignore System Color'); ?>';
-		var justCacti = '<?php print __esc('Cacti'); ?>';
-		var lightColorMode = '<?php print __esc('Light Color Mode'); ?>';
-		var listView = '<?php print __esc('List View'); ?>';
-		var logout = '<?php print __esc('Logout'); ?>';
-		var mixedOnPage = '<?php print __esc('Note, we could not process all your actions.  Details are below.'); ?>';
-		var mixedReasonTitle = '<?php print __esc('Some Actions failed'); ?>';
-		var noFileSelected = '<?php print __esc('No file selected'); ?>';
-		var passwordMinChars = <?php print read_config_option('secpass_minlen'); ?>;
-		var passwordMatch = '<?php print __esc('Passphrases match'); ?>';
-		var passwordMatchTooShort = '<?php print __esc('Passphrase matches but too short'); ?>';
-		var passwordNotMatch = '<?php print __esc('Passphrases do not match'); ?>';
-		var passwordNotMatchTooShort = '<?php print __esc('Passphrase too short and not matching'); ?>';
-		var passwordPass = '<?php print __esc('Passphrase length meets 8 character minimum'); ?>';
-		var passwordTooShort = '<?php print __esc('Passphrase too short'); ?>';
-		var passwordValid = '<?php print __esc('Password Validation Passes'); ?>';
-		var previewView = '<?php print __esc('Preview View'); ?>';
-		var realtimeClickOff = '<?php print __esc('Click again to take this Graph out of Realtime'); ?>';
-		var realtimeClickOn = '<?php print __esc('Click to view just this Graph in Realtime'); ?>';
-		var reportABug = '<?php print __esc('Report a bug'); ?>';
-		var searchFilter = '<?php print __esc('Enter a search term'); ?>';
-		var searchRFilter = '<?php print __esc('Enter a regular expression'); ?>';
-		var searchSelect = '<?php print __esc('Select to Search'); ?>';
-		var searchPlaceholder = '<?php print __esc('Search'); ?>';
-		var searchEnterKeyword = '<?php print __esc('Enter keyword'); ?>';
-		var sessionMessageCancel = '<?php print __esc('Cancel'); ?>';
-		var sessionMessageContinue = '<?php print __esc('Continue'); ?>';
-		var sessionMessageOk = '<?php print __esc('Ok'); ?>';
-		var sessionMessagePause = '<?php print __esc('Pause'); ?>';
-		var sessionMessageSave = '<?php print __esc('The Operation was successful.  Details are below.'); ?>';
-		var sessionMessageTitle = '<?php print __esc('Operation successful'); ?>';
-		var showHideFilter = '<?php print __esc('Click to Show/Hide Filter'); ?>';
-		var spikeKillResults = '<?php print __esc('SpikeKill Results'); ?>';
-		var standardGraphicalUserInterface = '<?php print __esc('Standard Mode'); ?>';
-		var tableConstraints = '<?php print __esc('Allow or limit the table columns to extend beyond the current windows limits.'); ?>';
-		var testFailed = '<?php print __esc('Connection Failed'); ?>';
-		var testSuccessful = '<?php print __esc('Connection Successful'); ?>';
-		var theme = '<?php print $selectedTheme; ?>';
-		var timeGraphView = '<?php print __esc('Time Graph View'); ?>';
-		var treeView = '<?php print __esc('Tree View'); ?>';
-		var usePreferredColorTheme = '<?php print __esc('Use System Color'); ?>';
-		var userSettings=<?php print is_view_allowed('graph_settings') ? 'true' : 'false'; ?>;
-		var utilityView = '<?php print __esc('Utility View'); ?>';
-		var allSelectedText = '<?php print __('All Graph Templates'); ?>';
-		var templatesSelected = '<?php print __esc('Templates Selected'); ?>';
-		var notTemplated = '<?php print __esc('Not Templated'); ?>';
-		var allText = '<?php __esc('All'); ?>';
-		var noneText = '<?php print __esc('None'); ?>';
-		var zoom_i18n_3rd_button = '<?php print __esc('3rd Mouse Button'); ?>';
-		var zoom_i18n_advanced = '<?php print __esc('Advanced'); ?>';
-		var zoom_i18n_auto = '<?php print __esc('Auto'); ?>';
-		var zoom_i18n_begin = '<?php print __esc('Begin with'); ?>';
-		var zoom_i18n_center = '<?php print __esc('Center'); ?>';
-		var zoom_i18n_close = '<?php print __esc('Close'); ?>';
-		var zoom_i18n_copy_graph = '<?php print __esc('Copy graph'); ?>';
-		var zoom_i18n_copy_graph_link = '<?php print __esc('Copy graph link'); ?>';
-		var zoom_i18n_disabled = '<?php print __esc('Disabled'); ?>';
-		var zoom_i18n_end = '<?php print __esc('End with'); ?>';
-		var zoom_i18n_graph = '<?php print __esc('Graph'); ?>';
-		var zoom_i18n_mode = '<?php print __esc('Zoom Mode'); ?>';
-		var zoom_i18n_newTab = '<?php print __esc('Open in new tab'); ?>';
-		var zoom_i18n_off = '<?php print __esc('Always Off'); ?>';
-		var zoom_i18n_on = '<?php print __esc('Always On'); ?>';
-		var zoom_i18n_quick = '<?php print __esc('Quick'); ?>';
-		var zoom_i18n_save_graph = '<?php print __esc('Save graph'); ?>';
-		var zoom_i18n_settings = '<?php print __esc('Settings'); ?>';
-		var zoom_i18n_timestamps = '<?php print __esc('Timestamps'); ?>';
-		var zoom_i18n_zoom_2 = '<?php print __esc('2x'); ?>';
-		var zoom_i18n_zoom_4 = '<?php print __esc('4x'); ?>';
-		var zoom_i18n_zoom_8 = '<?php print __esc('8x'); ?>';
-		var zoom_i18n_zoom_16 = '<?php print __esc('16x'); ?>';
-		var zoom_i18n_zoom_32 = '<?php print __esc('32x'); ?>';
-		var zoom_i18n_zoom_in = '<?php print __esc('Zoom In'); ?>';
-		var zoom_i18n_zoom_out = '<?php print __esc('Zoom Out'); ?>';
-		var zoom_i18n_zoom_out_factor = '<?php print __esc('Zoom Out Factor'); ?>';
-		var zoom_i18n_zoom_out_positioning = '<?php print __esc('Zoom Out Positioning'); ?>';
-		var zoom_outOfRangeTitle='<?php print __esc('Zoom Window Out of Range'); ?>';
-		var zoom_outOfRangeMessage='<?php print __esc('Zoom Dates before January 1, 1993 are not supported in Cacti!  Pick a more recent date.'); ?>';
->>>>>>> origin/fix/jquery-deprecations
 	</script>
 	<?php
 	// Global icons
@@ -3981,34 +3244,8 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 	print get_md5_include_css('include/css/jquery.contextMenu.css');
 	print get_md5_include_css('include/css/billboard.css');
 	print get_md5_include_css('include/fa/css/all.css');
-<<<<<<< HEAD
 	print get_md5_include_css('include/vendor/flag-icons/css/flag-icons.css');
 	print get_md5_include_css('include/themes/' . $selectedTheme .'/main.css');
-||||||| 7dd05ee12
-	print get_md5_include_css('include/vendor/flag-icon-css/css/flag-icon.css');
-	print get_md5_include_css('include/themes/' . $selectedTheme .'/main.css');
-=======
-	print get_md5_include_css('include/tabler/dist/tabler-icons.min.css');
-	print get_md5_include_css('include/vendor/lipis/flag-icons/css/flag-icons.css');
-
-	// Theme-based styles
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'jquery.zoom.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'jquery-ui.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'default/style.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'jquery.multiselect.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'jquery.multiselect.filter.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'jquery.timepicker.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'jquery.colorpicker.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'pace.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'Diff.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'jquery.toast.css');
-	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'main.css');
-
-	// Global styles
-	print get_md5_include_css('include/themes/' . $selectedTheme . '/main.css');
-
-	// Global scripts
->>>>>>> origin/fix/jquery-deprecations
 	print get_md5_include_js('include/js/screenfull.js', true);
 	print get_md5_include_js('include/js/jquery.js');
 	print get_md5_include_js('include/js/jquery-ui.js');
