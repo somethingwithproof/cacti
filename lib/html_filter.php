@@ -202,7 +202,17 @@ class CactiTableFilter {
 	}
 
 	private function create_javascript() {
-		$applyFilter = '"' . $this->form_action;
+		/* Escape form_action for JS double-quoted string context. The URL is
+		 * interpolated inside a JS string literal — a bare " in form_action
+		 * would break out. Escape backslashes first, then double-quotes and
+		 * newlines. */
+		$safe_action = str_replace(
+			array('\\', '"', "\n", "\r"),
+			array('\\\\', '\\"', '\\n', '\\r'),
+			$this->form_action
+		);
+
+		$applyFilter = '"' . $safe_action;
 		$clearFilter = $applyFilter;
 
 		if (strpos('?', $applyFilter) === false) {
