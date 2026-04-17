@@ -4504,13 +4504,34 @@ function validate_path_within($filename, $base_dir) {
 		return false;
 	}
 
+	if (strpos($filename, "\0") !== false) {
+		return false;
+	}
+
 	$base_real = realpath($base_dir);
 
 	if ($base_real === false) {
 		return false;
 	}
 
-	return $base_real . '/' . $filename;
+	$combined = $base_real . '/' . $filename;
+
+	/* If the file exists, resolve symlinks and verify the canonical path is
+	 * still within the base directory. Blocks the symlink-TOCTOU bypass where
+	 * an attacker-placed symlink points outside base_real. */
+	$resolved = realpath($combined);
+
+	if ($resolved !== false) {
+		if (strpos($resolved, $base_real . DIRECTORY_SEPARATOR) !== 0 && $resolved !== $base_real) {
+			return false;
+		}
+
+		return $resolved;
+	}
+
+	/* File does not exist yet — basename() has already stripped path components,
+	 * so $combined cannot escape $base_real. Safe for write/create operations. */
+	return $combined;
 }
 
 /**
