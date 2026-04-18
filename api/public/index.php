@@ -40,6 +40,38 @@ function validate_parameters(array $params, array $allowed_params) : string|null
 	return null;
 }
 
+/**
+ * API authentication middleware. Requires a valid Cacti session OR a
+ * pre-shared API token in the Authorization: Bearer <token> header.
+ * Token is read from the `api_token` config option.
+ *
+ * Fix for GHSA-mx5c-qj6m-2w89 / CVE-2026-39954 — 13 REST endpoints
+ * previously required no authentication.
+ */
+$apiAuthMiddleware = function (Request $request, $handler) {
+	// Allow authenticated Cacti sessions.
+	if (!empty($_SESSION[SESS_USER_ID] ?? null)) {
+		return $handler->handle($request);
+	}
+
+	// Otherwise require API token from Authorization: Bearer header.
+	$expected = read_config_option('api_token');
+	$authz    = $request->getHeaderLine('Authorization');
+
+	if ($expected !== '' && $expected !== false && strpos($authz, 'Bearer ') === 0) {
+		$presented = substr($authz, 7);
+
+		if (hash_equals((string) $expected, $presented)) {
+			return $handler->handle($request);
+		}
+	}
+
+	$response = new \Slim\Psr7\Response();
+	$response->getBody()->write(json_encode(['error' => 'Unauthorized']));
+
+	return $response->withStatus(401)->withHeader('Content-Type', 'application/json');
+};
+
 // V1 API Routes Group
 $app->group('/v1', function (RouteCollectorProxy $group) {
 	// Info endpoints
@@ -219,6 +251,6 @@ $app->group('/v1', function (RouteCollectorProxy $group) {
 			});
 		});
 	});
-});
+})->add($apiAuthMiddleware);
 
 $app->run();
