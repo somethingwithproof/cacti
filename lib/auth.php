@@ -4565,16 +4565,17 @@ function auth_login_redirect(string $login_opts = '') : void {
 
 				cacti_log(sprintf("DEBUG: Referer from REDIRECT_URL with Value: '%s', Effective: '%s'", $_SERVER['REDIRECT_URL'], $referer), false, 'AUTH', POLLER_VERBOSITY_DEBUG);
 			} elseif (isset($_SERVER['HTTP_REFERER'])) {
-				$referer = $_SERVER['HTTP_REFERER'];
+				// route the referer through validate_redirect_url so an
+				// attacker-controlled Referer header can not drive an
+				// open-redirect after authentication (GHSA-6gr7-53g8-vchq)
+				$default_referer = !is_realm_allowed(8)
+					? CACTI_PATH_URL . 'graph_view.php' . ($newtheme ? '?newtheme=1' : '')
+					: CACTI_PATH_URL . 'index.php' . ($newtheme ? '?newtheme=1' : '');
+
+				$referer = validate_redirect_url($_SERVER['HTTP_REFERER'], $default_referer);
 
 				if (auth_basename($referer) == 'logout.php') {
 					$referer = CACTI_PATH_URL . 'index.php';
-				} elseif (!str_contains($referer, CACTI_PATH_URL)) {
-					if (!is_realm_allowed(8)) {
-						$referer = CACTI_PATH_URL . 'graph_view.php' . ($newtheme ? '?newtheme=1' : '');
-					} else {
-						$referer = CACTI_PATH_URL . 'index.php' . ($newtheme ? '?newtheme=1' : '');
-					}
 				}
 
 				cacti_log(sprintf("DEBUG: Referer from HTTP_REFERER with Value: '%s', Effective: '%s'", $_SERVER['HTTP_REFERER'], $referer), false, 'AUTH', POLLER_VERBOSITY_DEBUG);
