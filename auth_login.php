@@ -201,6 +201,12 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 		}
 
 		if (!$error) {
+			// regenerate the session id on authentication transition to defeat
+			// session fixation (GHSA-273r-qr93-wgcp)
+			if (session_status() === PHP_SESSION_ACTIVE) {
+				session_regenerate_id(true);
+			}
+
 			// set the php session
 			$_SESSION[SESS_USER_ID]     = $user['id'];
 			$_SESSION[SESS_USER_AGENT]  = $_SERVER['HTTP_USER_AGENT'];

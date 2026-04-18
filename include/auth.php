@@ -83,6 +83,12 @@ if ($auth_method != AUTH_METHOD_BASIC) {
 		$cookie_user = check_auth_cookie();
 
 		if ($cookie_user !== false) {
+			// regenerate the session id on authentication transition to defeat
+			// session fixation (GHSA-273r-qr93-wgcp)
+			if (session_status() === PHP_SESSION_ACTIVE) {
+				session_regenerate_id(true);
+			}
+
 			$_SESSION[SESS_USER_ID]     = $cookie_user;
 			$_SESSION[SESS_USER_AGENT]  = $_SERVER['HTTP_USER_AGENT'];
 			$_SESSION[SESS_CLIENT_ADDR] = get_client_addr();
@@ -106,6 +112,12 @@ if ($auth_method == AUTH_METHOD_BASIC && !isset($_SESSION[SESS_USER_ID])) {
 			[$username]);
 
 		if (cacti_sizeof($current_user)) {
+			// regenerate the session id on authentication transition to defeat
+			// session fixation (GHSA-273r-qr93-wgcp)
+			if (session_status() === PHP_SESSION_ACTIVE) {
+				session_regenerate_id(true);
+			}
+
 			$_SESSION[SESS_USER_ID]     = $current_user['id'];
 			$_SESSION[SESS_USER_AGENT]  = $_SERVER['HTTP_USER_AGENT'];
 			$_SESSION[SESS_CLIENT_ADDR] = get_client_addr();
