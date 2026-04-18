@@ -1697,7 +1697,7 @@ function aggregate_items() : void {
 							<?php print __('Search'); ?>
 						</td>
 						<td>
-							<input type='text' class='ui-state-default ui-corner-all' id='rfilter' size='45' onChange='applyFilter()' value='<?php print grv('rfilter'); ?>'>
+							<input type='text' class='ui-state-default ui-corner-all' id='rfilter' size='45' onChange='applyFilter()' value='<?php print htmle(grv('rfilter')); ?>'>
 						</td>
 						<td>
 							<?php print __('Graphs'); ?>
