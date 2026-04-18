@@ -98,6 +98,16 @@ function form_save() : void {
 		$save['input_string'] = form_input_validate(gnrv('input_string'), 'input_string', '', true, 3);
 		$save['type_id']      = form_input_validate(gnrv('type_id'), 'type_id', '^[0-9]+$', true, 3);
 
+		// Reject shell metacharacters outside of <placeholder> markers to prevent command injection.
+		// Pipes are intentionally allowed for common command chaining.
+		if (!is_error_message()) {
+			if (!cacti_input_string_is_safe($save['input_string'])) {
+				raise_message('validation_error', __('Input string contains dangerous shell characters'), MESSAGE_LEVEL_ERROR);
+				header('Location: data_input.php?action=edit&id=' . (empty($save['id']) ? '' : $save['id']));
+				exit;
+			}
+		}
+
 		if (!is_error_message()) {
 			$data_input_id = sql_save($save, 'data_input');
 
@@ -108,7 +118,7 @@ function form_save() : void {
 				if (!ierv('id')) {
 					db_execute_prepared('UPDATE data_input_fields SET sequence = 0 WHERE data_input_id = ?', [gnrv('id')]);
 
-					generate_data_input_field_sequences(gnrv('input_string'), gnrv('id'));
+					generate_data_input_field_sequences($save['input_string'], $data_input_id);
 
 					update_replication_crc(0, 'poller_replicate_data_input_fields_crc');
 				}
