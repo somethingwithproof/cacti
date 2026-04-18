@@ -495,7 +495,11 @@ function import_read_package_data(string $xmlfile, string &$public_key, bool $pr
 
 	$filename = "compress.zlib://$xmlfile";
 
-	if (!import_validate_signature($xmlfile) && !$preview) {
+	/* Signature validation applies to every read, including previews.
+	 * Allowing a preview to bypass validation lets a self-signed package
+	 * reach simplexml_load_string and surface arbitrary package content
+	 * to the operator, defeating the trusted-key anchor. */
+	if (!import_validate_signature($xmlfile)) {
 		cacti_log('FATAL: Package Public Key is not Official Cacti Public Key for Package ' . $filename, true, 'IMPORT', POLLER_VERBOSITY_LOW);
 
 		return false;
