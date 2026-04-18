@@ -2161,10 +2161,6 @@ function db_qstr($s, $db_conn = false) {
 	return "'" . $s . "'";
 }
 
-function db_qstr_rlike(string $s, mixed $db_conn = false) : string {
-	return 'RLIKE ' . db_qstr($s, $db_conn);
-}
-
 /**
  * db_qstr_rlike - Safely quote a value for use in a RLIKE/REGEXP clause.
  *
