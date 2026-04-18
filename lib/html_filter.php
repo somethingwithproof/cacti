@@ -451,7 +451,7 @@ class CactiTableFilter {
 		}
 
 		if (isset($this->filter_array['rows'])) {
-			print "<form id='" . $this->form_id . "' action='" . $this->form_action . "' method='" . $this->form_method . "'>";
+			print "<form id='" . html_escape($this->form_id) . "' action='" . html_escape($this->form_action) . "' method='" . html_escape($this->form_method) . "'>";
 
 			foreach ($this->filter_array['rows'] as $index => $row) {
 				if ($index > 0 && !$text_appended) {
@@ -693,7 +693,15 @@ class CactiTableFilter {
 	}
 
 	private function create_javascript() : string {
-		$applyFilter   = "'" . $this->form_action;
+		/* Escape form_action for JS single-quoted string context.
+		 * Backslash first, then single-quote, newlines — these break out. */
+		$safe_action = str_replace(
+			array('\\', "'", "\n", "\r"),
+			array('\\\\', "\\'", '\\n', '\\r'),
+			$this->form_action
+		);
+
+		$applyFilter   = "'" . $safe_action;
 		$clearFilter   = $applyFilter;
 		$defaultFilter = $applyFilter;
 
