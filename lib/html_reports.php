@@ -221,6 +221,11 @@ function reports_item_dnd() : void {
 	gfrv('id');
 	// ================= Input validation =================
 
+	// ownership check (GHSA-8p2f-6jvx-j75j)
+	if (!reports_user_may_mutate((int) grv('id'))) {
+		return;
+	}
+
 	$continue = true;
 
 	if (isrv('report_item') && is_array(gnrv('report_item'))) {
@@ -271,6 +276,13 @@ function reports_form_save() : void {
 		if (ierv('id')) {
 			$save['user_id'] = $_SESSION[SESS_USER_ID];
 		} else {
+			// ownership check - non-admins may only save their own reports
+			// (GHSA-8p2f-6jvx-j75j)
+			if (!reports_user_may_mutate((int) $post['id'])) {
+				raise_message('report_idor', __('You do not have permission to modify this report.'), MESSAGE_LEVEL_ERROR);
+				header('Location: reports.php');
+				exit;
+			}
 			$save['user_id'] = db_fetch_cell_prepared('SELECT user_id FROM reports WHERE id = ?', [$post['id']]);
 		}
 
@@ -414,6 +426,12 @@ function reports_form_actions() : void {
 				[$type, $report_id] = explode('_', $report);
 
 				$report_id = intval($report_id);
+
+				// reject mutations against reports the caller does not own
+				// unless they hold the Reports admin realm (GHSA-8p2f-6jvx-j75j)
+				if ($type == 'reports' && !reports_user_may_mutate($report_id)) {
+					continue;
+				}
 
 				if (gnrv('drp_action') == REPORTS_DELETE) { // delete
 					if ($type == 'reports') {
@@ -626,6 +644,11 @@ function reports_item_movedown() : void {
 	gfrv('id');
 	// ====================================================
 
+	// ownership check (GHSA-8p2f-6jvx-j75j)
+	if (!reports_user_may_mutate((int) grv('id'))) {
+		return;
+	}
+
 	move_item_down('reports_items', grv('item_id'), 'report_id=' . grv('id'));
 }
 
@@ -643,6 +666,12 @@ function reports_item_moveup() : void {
 	gfrv('item_id');
 	gfrv('id');
 	// ====================================================
+
+	// ownership check (GHSA-8p2f-6jvx-j75j)
+	if (!reports_user_may_mutate((int) grv('id'))) {
+		return;
+	}
+
 	move_item_up('reports_items', grv('item_id'), 'report_id=' . grv('id'));
 }
 
@@ -658,7 +687,16 @@ function reports_item_remove() : void {
 	// ================= input validation =================
 	gfrv('item_id');
 	// ====================================================
-	db_execute_prepared('DELETE FROM reports_items WHERE id = ?', [grv('item_id')]);
+
+	$item_id = (int) grv('item_id');
+
+	// ownership check - non-admins may only remove items from their own reports
+	// (GHSA-8p2f-6jvx-j75j)
+	if (!reports_user_may_mutate_item($item_id)) {
+		return;
+	}
+
+	db_execute_prepared('DELETE FROM reports_items WHERE id = ?', [$item_id]);
 }
 
 /**
@@ -1837,6 +1875,56 @@ function get_reports_page() : string {
  */
 function is_reports_admin() : bool {
 	return (is_realm_allowed(21) ? true : false);
+}
+
+/**
+ * Authorise the current user to mutate a report. Reports admins (realm 21)
+ * pass unconditionally; every other caller must own the row.
+ *
+ * Used to close the IDOR on Reports mutation endpoints where a non-admin
+ * could act on another user's report just by knowing the id
+ * (GHSA-8p2f-6jvx-j75j).
+ */
+function reports_user_may_mutate(int $report_id) : bool {
+	if ($report_id <= 0) {
+		return false;
+	}
+
+	if (is_reports_admin()) {
+		return true;
+	}
+
+	$owner = db_fetch_cell_prepared(
+		'SELECT user_id FROM reports WHERE id = ?',
+		[$report_id]
+	);
+
+	if ($owner === false || $owner === null || $owner === '') {
+		return false;
+	}
+
+	return (int) $owner === (int) ($_SESSION[SESS_USER_ID] ?? 0);
+}
+
+/**
+ * Authorise the current user to mutate a report item. The item's parent
+ * report must pass reports_user_may_mutate().
+ */
+function reports_user_may_mutate_item(int $item_id) : bool {
+	if ($item_id <= 0) {
+		return false;
+	}
+
+	$report_id = db_fetch_cell_prepared(
+		'SELECT report_id FROM reports_items WHERE id = ?',
+		[$item_id]
+	);
+
+	if ($report_id === false || $report_id === null || $report_id === '') {
+		return false;
+	}
+
+	return reports_user_may_mutate((int) $report_id);
 }
 
 function create_preview_filter() : array {
