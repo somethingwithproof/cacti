@@ -664,6 +664,11 @@ function reports_load_format_file(string $format_file, mixed &$output, bool &$re
 		$format_file = 'cacti_group.format';
 	}
 
+	// defence-in-depth: strip any directory component left over from stored
+	// values so reports can never read outside CACTI_PATH_FORMATS
+	// (GHSA-mjvw-mhj5-9jcj)
+	$format_file = basename($format_file);
+
 	$format_file = CACTI_PATH_FORMATS . '/' . $format_file;
 
 	if (file_exists($format_file) && is_readable($format_file)) {

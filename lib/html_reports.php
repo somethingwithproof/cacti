@@ -280,7 +280,9 @@ function reports_form_save() : void {
 		$save['enabled']       = (isset($post['enabled']) ? 'on' : '');
 
 		$save['cformat']       = (isset($post['cformat']) ? 'on' : '');
-		$save['format_file']   = $post['format_file'];
+		// strip any path component from the submitted format file name so a
+		// malicious POST can not store a traversal sequence (GHSA-mjvw-mhj5-9jcj)
+		$save['format_file']   = basename((string) $post['format_file']);
 		$save['font_size']     = form_input_validate($post['font_size'], 'font_size', '^[0-9]+$', false, 3);
 		$save['alignment']     = form_input_validate($post['alignment'], 'alignment', '^[0-9]+$', false, 3);
 		$save['graph_linked']  = (isset($post['graph_linked']) ? 'on' : '');
