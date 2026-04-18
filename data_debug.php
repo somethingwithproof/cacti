@@ -22,9 +22,9 @@
  +-------------------------------------------------------------------------+
 */
 
-require_once('include/auth.php');
-require_once('lib/rrd.php');
-require_once('lib/dsdebug.php');
+include_once('include/auth.php');
+include_once('lib/rrd.php');
+include_once('lib/dsdebug.php');
 
 $actions = [
 	1 => __('Run Check'),
@@ -35,29 +35,29 @@ ini_set('memory_limit', '-1');
 
 set_default_action();
 
-draw_data_debug_filter(false);
+validate_request_vars();
 
-switch (grv('action')) {
+switch (get_request_var('action')) {
 	case 'actions':
 		form_actions();
 
 		break;
 	case 'run_debug':
-		$id = gfrv('id');
+		$id = get_filter_request_var('id');
 
 		if ($id > 0) {
 			$selected_items = [$id];
 			debug_delete($selected_items);
 			debug_rerun($selected_items);
 			raise_message('rerun', __('Data Source debug started.'), MESSAGE_LEVEL_INFO);
-			header('Location: data_debug.php?action=view&id=' . gfrv('id'));
+			header('Location: data_debug.php?action=view&id=' . get_filter_request_var('id'));
 		} else {
 			raise_message('repair_error', __('Data Source debug received an invalid Data Source ID.'), MESSAGE_LEVEL_ERROR);
 		}
 
 		break;
 	case 'run_repair':
-		$id = gfrv('id');
+		$id = get_filter_request_var('id');
 
 		if ($id > 0) {
 			if (dsdebug_run_repair($id)) {
@@ -73,14 +73,14 @@ switch (grv('action')) {
 
 			raise_message('rerun', __('Automatic Data Source debug being rerun after repair.'), MESSAGE_LEVEL_INFO);
 
-			header('Location: data_debug.php?action=view&id=' . gfrv('id'));
+			header('Location: data_debug.php?action=view&id=' . get_filter_request_var('id'));
 		} else {
 			raise_message('repair_error', __('Data Source repair received an invalid Data Source ID.'), MESSAGE_LEVEL_ERROR);
 		}
 
 		break;
 	case 'view':
-		$id = gfrv('id');
+		$id = get_filter_request_var('id');
 
 		$debug_status = debug_process_status($id);
 
@@ -94,7 +94,7 @@ switch (grv('action')) {
 		if ($debug_status == 'waiting' || $debug_status == 'analysis') {
 			$refresh = [
 				'seconds' => 30,
-				'page'    => 'data_debug.php?action=view&id=' . $id,
+				'page'    => 'data_debug.php?action=view&id=' . $id . '&header=false',
 				'logout'  => 'false'
 			];
 
@@ -109,30 +109,29 @@ switch (grv('action')) {
 	case 'ajax_hosts':
 		$sql_where = '';
 
-		if (grv('site_id') > 0) {
-			$sql_where = 'site_id = ' . grv('site_id');
+		if (get_request_var('site_id') > 0) {
+			$sql_where = 'site_id = ' . get_request_var('site_id');
 		}
 
-		get_allowed_ajax_hosts(true, true, $sql_where);
+		get_allowed_ajax_hosts(true, 'applyFilter', $sql_where);
 
 		break;
 	case 'ajax_hosts_noany':
 		$sql_where = '';
 
-		if (grv('site_id') > 0) {
-			$sql_where = 'site_id = ' . grv('site_id');
+		if (get_request_var('site_id') > 0) {
+			$sql_where = 'site_id = ' . get_request_var('site_id');
 		}
 
-		get_allowed_ajax_hosts(false, true, $sql_where);
+		get_allowed_ajax_hosts(false, 'applyFilter', $sql_where);
 
 		break;
 	case 'runall':
 		debug_runall_filtered();
-
 	default:
 		$refresh = [
-			'seconds' => grv('refresh'),
-			'page'    => 'data_debug.php',
+			'seconds' => get_request_var('refresh'),
+			'page'    => 'data_debug.php?header=false',
 			'logout'  => 'false'
 		];
 
@@ -145,7 +144,7 @@ switch (grv('action')) {
 		break;
 }
 
-function debug_runall_filtered() : void {
+function debug_runall_filtered() {
 	$info = [
 		'rrd_folder_writable' => '',
 		'rrd_exists'          => '',
@@ -163,14 +162,13 @@ function debug_runall_filtered() : void {
 
 	$info = serialize($info);
 
-	$sql_where  = '';
-	$sql_params = [];
-	$dd_join    = '';
-	$now        = time();
+	$sql_where = '';
+	$dd_join   = '';
+	$now       = time();
 
-	debug_get_filter($sql_where, $sql_params, $dd_join);
+	debug_get_filter($sql_where, $dd_join);
 
-	db_execute_prepared("DELETE dd
+	db_execute("DELETE dd
 		FROM data_debug AS dd
 		INNER JOIN data_local AS dl
 		ON dd.datasource = dl.id
@@ -180,12 +178,7 @@ function debug_runall_filtered() : void {
 		ON dt.id=dl.data_template_id
 		INNER JOIN host AS h
 		ON h.id = dl.host_id
-		$sql_where",
-		$sql_params);
-
-	$new_params = [$now, $info, $_SESSION[SESS_USER_ID]];
-
-	$sql_params = $new_params + $sql_params;
+		$sql_where");
 
 	db_execute_prepared("INSERT INTO data_debug
 		(started, done, info, user, datasource)
@@ -198,10 +191,10 @@ function debug_runall_filtered() : void {
 		INNER JOIN host AS h
 		ON h.id = dl.host_id
 		$sql_where",
-		$sql_params);
+		[$now, $info, $_SESSION['sess_user_id']]);
 }
 
-function debug_process_status(int $id) : string {
+function debug_process_status($id) {
 	$status = db_fetch_row_prepared('SELECT done, IFNULL(issue, "waiting") AS issue
 		FROM data_debug
 		WHERE datasource = ?',
@@ -222,22 +215,22 @@ function debug_process_status(int $id) : string {
 	}
 }
 
-function form_actions() : void {
+function form_actions() {
 	global $actions, $assoc_actions;
 
 	// ================= input validation =================
-	gfrv('id');
-	gfrv('drp_action', FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/^([a-zA-Z0-9_]+)$/']]);
+	get_filter_request_var('id');
+	get_filter_request_var('drp_action', FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/^([a-zA-Z0-9_]+)$/']]);
 	// ================= input validation =================
 
 	$selected_items = [];
 
-	if (isrv('save_list')) {
+	if (isset_request_var('save_list')) {
 		// loop through each of the lists selected on the previous page and get more info about them
 		foreach ($_POST as $var=>$val) {
 			if (preg_match('/^chk_([0-9]+)$/', $var, $matches)) {
 				// ================= input validation =================
-				input_validate_input_number($matches[1], 'chk[1]');
+				input_validate_input_number($matches[1]);
 				// ====================================================
 
 				$selected_items[] = $matches[1];
@@ -245,13 +238,13 @@ function form_actions() : void {
 		}
 
 		// if we are to save this form, instead of display it
-		if (isrv('save_list')) {
-			if (grv('drp_action') == '2') { // delete
+		if (isset_request_var('save_list')) {
+			if (get_request_var('drp_action') == '2') { // delete
 				debug_delete($selected_items);
-				header('Location: data_debug.php?debug=-1');
-			} elseif (grv('drp_action') == '1') { // Rerun
+				header('Location: data_debug.php?header=false&debug=-1');
+			} elseif (get_request_var('drp_action') == '1') { // Rerun
 				debug_rerun($selected_items);
-				header('Location: data_debug.php?debug=1');
+				header('Location: data_debug.php?header=false&debug=1');
 			}
 
 			exit;
@@ -259,7 +252,7 @@ function form_actions() : void {
 	}
 }
 
-function debug_rerun(array $selected_items) : void {
+function debug_rerun($selected_items) {
 	$info = [
 		'rrd_folder_writable' => '',
 		'rrd_exists'          => '',
@@ -291,7 +284,7 @@ function debug_rerun(array $selected_items) : void {
 
 				$save['info']       = $info;
 				$save['started']    = time();
-				$save['user']       = intval($_SESSION[SESS_USER_ID]);
+				$save['user']       = intval($_SESSION['sess_user_id']);
 
 				$id = sql_save($save, 'data_debug');
 			} else {
@@ -309,7 +302,7 @@ function debug_rerun(array $selected_items) : void {
 	}
 }
 
-function debug_delete(array $selected_items) : void {
+function debug_delete($selected_items) {
 	if (!empty($selected_items)) {
 		foreach ($selected_items as $id) {
 			db_execute_prepared('DELETE
@@ -320,61 +313,137 @@ function debug_delete(array $selected_items) : void {
 	}
 }
 
-function debug_get_filter(string &$sql_where, array &$sql_params, string &$dd_join) : void {
+function validate_request_vars() {
+	// ================= input validation and session storage =================
+	$filters = [
+		'rows' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'pageset' => true,
+			'default' => '-1'
+			],
+		'refresh' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'default' => '60'
+			],
+		'page' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'default' => '1'
+			],
+		'rfilter' => [
+			'filter'  => FILTER_VALIDATE_IS_REGEX,
+			'pageset' => true,
+			'default' => '',
+			'options' => ['options' => 'sanitize_search_string']
+			],
+		'sort_column' => [
+			'filter'  => FILTER_CALLBACK,
+			'default' => 'name_cache',
+			'options' => ['options' => 'sanitize_search_string']
+			],
+		'sort_direction' => [
+			'filter'  => FILTER_CALLBACK,
+			'default' => 'ASC',
+			'options' => ['options' => 'sanitize_search_string']
+			],
+		'site_id' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'default' => '-1',
+			'pageset' => true,
+			],
+		'host_id' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'default' => '-1',
+			'pageset' => true,
+			],
+		'template_id' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'default' => '-1',
+			'pageset' => true,
+			],
+		'status' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'pageset' => true,
+			'default' => '-1'
+			],
+		'profile' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'pageset' => true,
+			'default' => '-1'
+			],
+		'debug' => [
+			'filter'  => FILTER_VALIDATE_INT,
+			'default' => '-1',
+			'pageset' => true,
+			]
+	];
+
+	validate_store_request_vars($filters, 'sess_dd');
+	// ================= input validation =================
+}
+
+function debug_get_filter(&$sql_where, &$dd_join) {
 	// form the 'where' clause for our main sql query
-	if (grv('rfilter') != '') {
-		$sql_where    = 'WHERE (dtd.name_cache RLIKE ? OR dtd.local_data_id RLIKE ? OR dt.name RLIKE ?)';
-
-		$sql_params[] = grv('rfilter');
-		$sql_params[] = grv('rfilter');
-		$sql_params[] = grv('rfilter');
+	if (get_request_var('rfilter') != '') {
+		$sql_where = 'WHERE (dtd.name_cache ' . db_qstr_rlike(get_request_var('rfilter')) .
+			' OR dtd.local_data_id ' . db_qstr_rlike(get_request_var('rfilter')) .
+			' OR dt.name ' . db_qstr_rlike(get_request_var('rfilter')) . ')';
+	} else {
+		$sql_where = '';
 	}
 
-	if (ierv('host_id')) {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' (dl.host_id = 0 OR dl.host_id IS NULL)';
-	} elseif (grv('host_id') > 0) {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dl.host_id = ?';
-		$sql_params[] = grv('host_id');
+	if (get_request_var('host_id') == '-1') {
+		// Show all items
+	} elseif (isempty_request_var('host_id')) {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' (dl.host_id=0 OR dl.host_id IS NULL)';
+	} elseif (!isempty_request_var('host_id')) {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dl.host_id=' . get_request_var('host_id');
 	}
 
-	if (ierv('site_id')) {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' (h.site_id = 0 OR h.site_id IS NULL)';
-	} elseif (grv('site_id') > 0) {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' h.site_id = ?';
-		$sql_params[] = grv('site_id');
+	if (get_request_var('site_id') == '-1') {
+		// Show all items
+	} elseif (isempty_request_var('site_id')) {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' (h.site_id=0 OR h.site_id IS NULL)';
+	} elseif (!isempty_request_var('site_id')) {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' h.site_id=' . get_request_var('site_id');
 	}
 
-	if (grv('template_id') == '0') {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.data_template_id = 0';
-	} elseif (grv('template_id') > 0) {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.data_template_id = ?';
-		$sql_params[] = grv('template_id');
+	if (get_request_var('template_id') == '-1') {
+		// Show all items
+	} elseif (get_request_var('template_id') == '0') {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.data_template_id=0';
+	} elseif (!isempty_request_var('template_id')) {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.data_template_id=' . get_request_var('template_id');
 	}
 
-	if (grv('profile') > '-1') {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.data_source_profile_id = ?';
-		$sql_params[] = grv('profile');
+	if (get_request_var('profile') == '-1') {
+		// Show all items
+	} else {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.data_source_profile_id=' . get_request_var('profile');
 	}
 
-	if (grv('status') == '0') {
+	if (get_request_var('status') == '-1') {
+		// Show all items
+	} elseif (get_request_var('status') == '0') {
 		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dd.issue != ""';
-	} elseif (grv('status') == '1') {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.active = "on"';
-	} elseif (grv('status') != '-1') {
-		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.active = ""';
+	} elseif (get_request_var('status') == '1') {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.active="on"';
+	} else {
+		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dtd.active=""';
 	}
 
-	if (grv('debug') == '-1') {
+	if (get_request_var('debug') == '-1') {
 		$dd_join = 'LEFT';
-	} elseif (grv('debug') == 0) {
+	} elseif (get_request_var('debug') == 0) {
 		$dd_join = 'LEFT';
 		$sql_where .= ($sql_where != '' ? ' AND' : 'WHERE') . ' dd.datasource IS NULL';
 	} else {
 		$dd_join = 'INNER';
 	}
+
+	// Get the SQL Where and Join
 }
 
-function debug_wizard() : void {
+function debug_wizard() {
 	global $actions;
 
 	$display_text = [
@@ -450,7 +519,7 @@ function debug_wizard() : void {
 		]
 	];
 
-	if (isrv('purge')) {
+	if (isset_request_var('purge')) {
 		db_execute('TRUNCATE TABLE data_debug');
 	}
 
@@ -461,24 +530,23 @@ function debug_wizard() : void {
 		$datefmt = 'Y-m-d H:i:s';
 	}
 
-	draw_data_debug_filter(true);
+	data_debug_filter();
 
 	$total_rows = 0;
 	$checks     = [];
 
-	if (grv('rows') == '-1') {
+	if (get_request_var('rows') == '-1') {
 		$rows = read_config_option('num_rows_table');
 	} else {
-		$rows = grv('rows');
+		$rows = get_request_var('rows');
 	}
 
-	$sql_where  = '';
-	$sql_params = [];
-	$dd_join    = '';
+	$sql_where = '';
+	$dd_join   = '';
 
-	debug_get_filter($sql_where, $sql_params, $dd_join);
+	debug_get_filter($sql_where, $dd_join);
 
-	$total_rows = db_fetch_cell_prepared("SELECT COUNT(*)
+	$total_rows = db_fetch_cell("SELECT COUNT(*)
 		FROM data_local AS dl
 		INNER JOIN data_template_data AS dtd
 		ON dl.id=dtd.local_data_id
@@ -488,14 +556,12 @@ function debug_wizard() : void {
 		ON h.id = dl.host_id
 		$dd_join JOIN data_debug AS dd
 		ON dl.id = dd.datasource
-		$sql_where",
-		$sql_params);
+		$sql_where");
 
 	$sql_order = get_order_string();
-	$sql_limit = ' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows;
+	$sql_limit = ' LIMIT ' . ($rows * (get_request_var('page') - 1)) . ',' . $rows;
 
-	$checks = db_fetch_assoc_prepared("SELECT dd.*, dtd.local_data_id,
-		dtd.name_cache, u.username
+	$checks = db_fetch_assoc("SELECT dd.*, dtd.local_data_id, dtd.name_cache, u.username
 		FROM data_local AS dl
 		INNER JOIN data_template_data AS dtd
 		ON dl.id=dtd.local_data_id
@@ -509,18 +575,17 @@ function debug_wizard() : void {
 		ON u.id = dd.user
 		$sql_where
 		$sql_order
-		$sql_limit",
-		$sql_params);
+		$sql_limit");
 
-	$nav = html_nav_bar('data_debug.php', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Data Sources'), 'page', 'main');
+	$nav = html_nav_bar('data_debug.php', MAX_DISPLAY_PAGES, get_request_var('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Data Sources'), 'page', 'main');
 
 	form_start('data_debug.php', 'chk');
 
 	print $nav;
 
-	html_start_box('', '100%', false, 3, 'center', '');
+	html_start_box('', '100%', '', '3', 'center', '');
 
-	html_header_sort_checkbox($display_text, grv('sort_column'), grv('sort_direction'), false);
+	html_header_sort_checkbox($display_text, get_request_var('sort_column'), get_request_var('sort_direction'), false);
 
 	if (cacti_sizeof($checks)) {
 		foreach ($checks as $check) {
@@ -546,9 +611,7 @@ function debug_wizard() : void {
 
 			form_alternate_row('line' . $check['local_data_id']);
 
-			$url = 'data_debug.php?action=view&id=' . $check['local_data_id'];
-
-			form_selectable_cell(filter_value($check['name_cache'], grv('rfilter'), $url), $check['local_data_id']);
+			form_selectable_cell(filter_value(title_trim($check['name_cache'], read_config_option('max_title_length')), get_request_var('rfilter'), 'data_debug.php?action=view&id=' . $check['local_data_id']), $check['local_data_id']);
 
 			if (!empty($check['datasource'])) {
 				form_selectable_ecell($check['username'], $check['local_data_id']);
@@ -567,7 +630,7 @@ function debug_wizard() : void {
 					form_selectable_cell(debug_icon(($info['rra_timestamp2'] != '' ? 1 : '')), $check['local_data_id'], '', 'center');
 				}
 
-				form_selectable_cell(filter_value($iline != '' ? __('Issues') : __('N/A'), '', '#', $issue_title), $check['local_data_id'], '', 'right');
+				form_selectable_cell('<a class=\'linkEditMain\' href=\'#\' title="' . html_escape($issue_title) . '">' . ($iline != '' ? __esc('Issues') : __esc('N/A')) . '</a>', $check['local_data_id'], '', 'right');
 			} else {
 				form_selectable_cell('-', $check['local_data_id']);
 				form_selectable_cell(__('Not Debugging'), $check['local_data_id'], '', 'right');
@@ -586,7 +649,7 @@ function debug_wizard() : void {
 			form_end_row();
 		}
 	} else {
-		print "<tr class='tableRow odd'><td colspan='" . (cacti_sizeof($display_text) + 1) . "'><em>" . __('No Data Source Checks Found') . '</em></td></tr>';
+		print "<tr><td colspan='" . (cacti_sizeof($display_text) + 1) . "'><em>" . __('No Checks') . '</em></td></tr>';
 	}
 
 	html_end_box(false);
@@ -603,12 +666,12 @@ function debug_wizard() : void {
 	form_end();
 }
 
-function debug_view() : void {
-	global $refresh;
+function debug_view() {
+	global $config, $refresh;
 
 	$refresh = 60;
 
-	$id = gfrv('id');
+	$id = get_filter_request_var('id');
 
 	$check = db_fetch_row_prepared('SELECT *
 		FROM data_debug
@@ -617,7 +680,7 @@ function debug_view() : void {
 
 	$check_exists = cacti_sizeof($check);
 
-	if (cacti_sizeof($check)) {
+	if (isset($check) && is_array($check)) {
 		$check['info'] = cacti_unserialize($check['info']);
 	}
 
@@ -627,7 +690,7 @@ function debug_view() : void {
 		[$id]);
 
 	if (cacti_sizeof($dtd)) {
-		$real_path = htmle(str_replace('<path_rra>', CACTI_PATH_RRA, $dtd['data_source_path']));
+		$real_path = html_escape(str_replace('<path_rra>', $config['rra_path'], $dtd['data_source_path']));
 	} else {
 		$real_path = __('Not Found');
 	}
@@ -746,7 +809,7 @@ function debug_view() : void {
 		[
 			'name'  => 'convert_name',
 			'title' => __('Were we able to convert the title?'),
-			'value' => htmle(get_data_source_title($check['datasource']))
+			'value' => html_escape(get_data_source_title($check['datasource']))
 		],
 		[
 			'name'  => 'rrd_match',
@@ -764,11 +827,11 @@ function debug_view() : void {
 	$debug_status = debug_process_status($id);
 
 	if ($debug_status == 'waiting') {
-		html_start_box(__('Data Source Troubleshooter [ Auto Refreshing till Complete ] %s', '<i class="reloadquery ti ti-refresh" data-id="' . $id . '" title="' . __esc('Refresh Now') . '"></i>'), '100%', false, 3, 'center', '');
+		html_start_box(__('Data Source Troubleshooter [ Auto Refreshing till Complete ] %s', '<i class="reloadquery fa fa-sync" data-id="' . $id . '" title="' . __esc('Refresh Now') . '"></i>'), '100%', '', '3', 'center', '');
 	} elseif ($debug_status == 'analysis') {
-		html_start_box(__('Data Source Troubleshooter [ Auto Refreshing till RRDfile Update ] %s', '<i class="reloadquery ti ti-refresh" data-id="' . $id . '" title="' . __esc('Refresh Now') . '"></i>'), '100%', false, 3, 'center', '');
+		html_start_box(__('Data Source Troubleshooter [ Auto Refreshing till RRDfile Update ] %s', '<i class="reloadquery fa fa-sync" data-id="' . $id . '" title="' . __esc('Refresh Now') . '"></i>'), '100%', '', '3', 'center', '');
 	} else {
-		html_start_box(__('Data Source Troubleshooter [ Analysis Complete! %s ]', '<a href="#" class="rerun linkEditMain" data-id="' . $id . '" style="cursor:pointer;">' . __('Rerun Analysis') . '</a>'), '100%', false, 3, 'center', '');
+		html_start_box(__('Data Source Troubleshooter [ Analysis Complete! %s ]', '<a href="#" class="rerun linkEditMain" data-id="' . $id . '" style="cursor:pointer;">' . __('Rerun Analysis') . '</a>'), '100%', '', '3', 'center', '');
 	}
 
 	html_header(
@@ -801,20 +864,20 @@ function debug_view() : void {
 		}
 
 		if (array_key_exists('value', $field)) {
-			$value = $field['value'];
+			$value = html_escape($field['value']);
 		}
 
 		if (array_key_exists('icon', $field)) {
 			$icon = $field['icon'];
 		}
 
-		$value_title = htmle((string) $value);
+		$value_title = $value;
 
 		if (strlen($value) > 100) {
 			$value = substr($value, 0, 100);
 		}
 
-		form_selectable_ecell($value, $i, '', '', $value_title);
+		form_selectable_cell($value, $i, '', '', $value_title);
 		form_selectable_cell($icon, $i);
 
 		form_end_row();
@@ -824,7 +887,7 @@ function debug_view() : void {
 	html_end_box();
 
 	if ($check_exists > 0 && isset($check['info']['rrd_match_array']['ds']) && $check['info']['rrd_match'] == 0) {
-		html_start_box(__('Data Source Repair Recommendations'), '100%', false, 3, 'center', '');
+		html_start_box(__('Data Source Repair Recommendations'), '', '', '2', 'center', '');
 
 		html_header(
 			[
@@ -838,7 +901,7 @@ function debug_view() : void {
 
 			foreach ($check['info']['rrd_match_array']['ds'] as $data_source => $details) {
 				form_alternate_row('line2_' . $i, true);
-				form_selectable_ecell($data_source, $i);
+				form_selectable_cell($data_source, $i);
 
 				$output = '';
 
@@ -846,7 +909,7 @@ function debug_view() : void {
 					$output .= __('For attribute \'%s\', issue found \'%s\'', $attribute, $recommendation);
 				}
 
-				form_selectable_ecell($output, 'line_2' . $i);
+				form_selectable_cell($output, 'line_2' . $i);
 				form_end_row();
 				$i++;
 			}
@@ -858,9 +921,9 @@ function debug_view() : void {
 			$path = get_data_source_path($id, true);
 
 			if (is_writeable($path)) {
-				html_start_box(__('Repair Steps [ %s ]', '<a href="#" class="repairme linkEditMain" data-id="' . $id . '" style="cursor:pointer;">' . __('Apply Suggested Fixes') . '</a>'), '100%', false, 3, 'center', '');
+				html_start_box(__('Repair Steps [ %s ]', '<a href="#" class="repairme linkEditMain" data-id="' . $id . '" style="cursor:pointer;">' . __('Apply Suggested Fixes') . '</a>'), '', '', '2', 'center', '');
 			} else {
-				html_start_box(__('Repair Steps [ Run Fix from Command Line ]', $path), '100%', false, 3, 'center', '');
+				html_start_box(__('Repair Steps [ Run Fix from Command Line ]', $path), '', '', '2', 'center', '');
 			}
 
 			html_header([__('Command')]);
@@ -870,7 +933,7 @@ function debug_view() : void {
 
 			foreach ($check['info']['rrd_match_array']['tune'] as $options) {
 				form_alternate_row('line3_' . $i, true);
-				form_selectable_ecell($rrdtool_path . ' tune ' . $options, 'line3_' . $i);
+				form_selectable_cell($rrdtool_path . ' tune ' . $options, 'line3_' . $i);
 				form_end_row();
 				$i++;
 			}
@@ -878,7 +941,7 @@ function debug_view() : void {
 			html_end_box();
 		}
 	} else {
-		html_start_box(__('Data Source Repair Recommendations'), '100%', false, 3, 'center', '');
+		html_start_box(__('Data Source Repair Recommendations'), '', '', '2', 'center', '');
 		form_alternate_row('line3_0', true);
 		form_selectable_cell(__('Waiting on Data Source Check to Complete'), 'line3_0');
 		form_end_row();
@@ -891,318 +954,288 @@ function debug_view() : void {
 		$('.repairme').click(function(event) {
 			event.preventDefault();
 			id = $(this).attr('data-id');
-			loadUrl({url:'data_debug.php?action=run_repair&id=' + id})
+			loadPage('data_debug.php?action=run_repair&id=' + id);
 		});
 
 		$('.reloadquery').click(function() {
 			id = $(this).attr('data-id');
-			loadUrl({url:'data_debug.php?action=view&id=' + id})
+			loadPage('data_debug.php?action=view&id=' + id);
 		});
 
 		$('.rerun').click(function(event) {
 			event.preventDefault();
 			id = $(this).attr('data-id');
-			loadUrl({url:'data_debug.php?action=run_debug&id=' + id})
+			loadPage('data_debug.php?action=run_debug&id=' + id);
 		});
 	});
 	</script>
 	<?php
 }
 
-function debug_icon_valid_result(mixed $result) : string {
+function debug_icon_valid_result($result) {
 	if ($result === '' || $result === false) {
-		return '<i class="ti ti-loader fa-pulse fa-fw"></i>';
+		return '<i class="fa fa-spinner fa-pulse fa-fw"></i>';
 	}
 
 	if ($result === '-') {
-		return '<i class="ti ti-info-circle-filled"></i>';
+		return '<i class="fa fa-info-circle"></i>';
 	}
 
 	if (is_array($result)) {
 		foreach ($result as $variable => $value) {
 			if (!prepare_validate_result($value)) {
-				return '<i class="ti ti-x" style="color:red"></i>';
+				return '<i class="fa fa-times" style="color:red"></i>';
 			}
 		}
 
-		return '<i class="ti ti-check" style="color:green"></i>';
+		return '<i class="fa fa-check" style="color:green"></i>';
 	}
 
 	if (prepare_validate_result($result)) {
-		return '<i class="ti ti-check" style="color:green"></i>';
+		return '<i class="fa fa-check" style="color:green"></i>';
 	} else {
-		return '<i class="ti ti-x" style="color:red"></i>';
+		return '<i class="fa fa-times" style="color:red"></i>';
 	}
 }
 
-function debug_icon(mixed $result) : string {
+function debug_icon($result) {
 	if ($result === '' || $result === false) {
-		return '<i class="ti ti-loader fa-pulse fa-fw"></i>';
+		return '<i class="fa fa-spinner fa-pulse fa-fw"></i>';
 	}
 
 	if ($result === '-') {
-		return '<i class="ti ti-info-circle-filled"></i>';
+		return '<i class="fa fa-info-circle"></i>';
 	}
 
 	if ($result === 1 || $result === 'on') {
-		return '<i class="ti ti-check" style="color:green"></i>';
+		return '<i class="fa fa-check" style="color:green"></i>';
 	}
 
 	if ($result === 0 || $result === 'off') {
-		return '<i class="ti ti-x" style="color:red"></i>';
+		return '<i class="fa fa-times" style="color:red"></i>';
 	}
 
-	return '<i class="ti ti-alert-triangle-filled" style="color:orange"></i>';
+	return '<i class="fa fa-exclamation-triangle" style="color:orange"></i>';
 }
 
-function create_data_debug_filter(string $session_var) : array {
+function data_debug_filter() {
 	global $item_rows, $page_refresh_interval;
 
-	$all     = ['-1' => __('All')];
-	$any     = ['-1' => __('Any')];
-	$none    = ['0'  => __('None')];
-	$deleted = ['-2' => __('Deleted/Invalid')];
-
-	$sites   = array_rekey(
-		db_fetch_assoc('SELECT id, name
-			FROM sites
-			ORDER BY name'),
-		'id', 'name'
-	);
-	$sites   = $any + $sites;
-
-	$profiles = array_rekey(
-		db_fetch_assoc('SELECT id, name
-			FROM data_source_profiles
-			ORDER BY name'),
-		'id', 'name'
-	);
-	$profiles = $all + $profiles;
-
-	$status = [
-		'-1' => __('All'),
-		'0'  => __('Failed'),
-		'1'  => __('Enabled'),
-		'2'  => __('Disabled')
-	];
-
-	$debugging = [
-		'-1' => __('All'),
-		'1'  => __('Debugging'),
-		'0'  => __('Not Debugging')
-	];
-
-	unset($page_refresh_interval[5]);
-	unset($page_refresh_interval[10]);
-	unset($page_refresh_interval[20]);
-
-	$sql_where  = '';
-	$sql_params = [];
-
-	if (isrv('host_id')) {
-		$host_id = grv('host_id');
-	} elseif (isset($_SESSION[$session_var . '_host_id'])) {
-		$host_id = $_SESSION[$session_var . '_host_id'];
+	if (get_request_var('site_id') > 0) {
+		$host_where = 'site_id = ' . get_request_var('site_id');
 	} else {
-		$host_id = '-1';
+		$host_where = '';
 	}
 
-	if ($host_id > 0) {
-		// for the templates dropdown
-		$sql_where    = 'AND h.id = ?';
-		$sql_params[] = $host_id;
-
-		$hostname = db_fetch_cell_prepared('SELECT description
-			FROM host
-			WHERE id = ?',
-			[$host_id]);
-	} elseif ($host_id == 0) {
-		$host_id  = '0';
-		$hostname = __('None');
-	} else {
-		$host_id  = '-1';
-		$hostname = __('Any');
-	}
-
-	if (grv('site_id') > 0) {
-		$sql_where    = 'AND site_id = ?';
-		$sql_params[] = grv('site_id');
-	}
-
-	$templates = array_rekey(
-		db_fetch_assoc_prepared("SELECT DISTINCT dt.id, dt.name
-			FROM data_template AS dt
-			INNER JOIN data_template_data AS dtd
-			ON dt.id = dtd.data_template_id
-			LEFT JOIN data_local AS dl
-			ON dtd.local_data_id = dl.id
-			LEFT JOIN host AS h
-			ON dl.host_id = h.id
-			WHERE dtd.local_data_id > 0
-			$sql_where
-			ORDER BY dt.name",
-			$sql_params),
-		'id', 'name'
-	);
-
-	$templates = $any + $templates;
-
-	return [
-		'rows' => [
-			[
-				'site_id' => [
-					'method'        => 'drop_array',
-					'friendly_name' => __('Site'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '-1',
-					'pageset'       => true,
-					'array'         => $sites,
-					'value'         => '-1'
-				],
-				'host_id' => [
-					'method'        => 'drop_callback',
-					'friendly_name' => __('Device'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '-1',
-					'pageset'       => true,
-					'sql'           => 'SELECT DISTINCT id, description AS name FROM host ORDER BY description',
-					'action'        => 'ajax_hosts',
-					'id'            => $host_id,
-					'value'         => $hostname,
-					'on_change'     => 'applyFilter()'
-				],
-				'template_id' => [
-					'method'        => 'drop_array',
-					'friendly_name' => __('Template'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '-1',
-					'pageset'       => true,
-					'array'         => $templates,
-					'value'         => '-1'
-				]
-			],
-			[
-				'profile' => [
-					'method'        => 'drop_array',
-					'friendly_name' => __('Profile'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '-1',
-					'pageset'       => true,
-					'array'         => $profiles,
-					'value'         => '-1'
-				],
-				'status' => [
-					'method'        => 'drop_array',
-					'friendly_name' => __('Status'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '-1',
-					'pageset'       => true,
-					'array'         => $status,
-					'value'         => '-1'
-				],
-				'debug' => [
-					'method'        => 'drop_array',
-					'friendly_name' => __('Debug'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '-1',
-					'pageset'       => true,
-					'array'         => $debugging,
-					'value'         => '-1'
-				],
-				'refresh' => [
-					'method'        => 'drop_array',
-					'friendly_name' => __('Refresh'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '30',
-					'pageset'       => true,
-					'array'         => $page_refresh_interval,
-					'value'         => '30'
-				]
-			],
-			[
-				'rfilter' => [
-					'method'         => 'textbox',
-					'friendly_name'  => __('Search'),
-					'filter'         => FILTER_VALIDATE_IS_REGEX,
-					'placeholder'    => __('Enter a search term'),
-					'size'           => '55',
-					'default'        => '',
-					'pageset'        => true,
-					'max_length'     => '120',
-					'value'          => ''
-				],
-				'rows' => [
-					'method'        => 'drop_array',
-					'friendly_name' => __('Attempts'),
-					'filter'        => FILTER_VALIDATE_INT,
-					'default'       => '-1',
-					'pageset'       => true,
-					'array'         => $item_rows,
-					'value'         => '-1'
-				]
-			]
-		],
-		'buttons' => [
-			'go' => [
-				'method'  => 'submit',
-				'display' => __('Go'),
-				'title'   => __('Apply filter to table'),
-			],
-			'clear' => [
-				'method'  => 'button',
-				'display' => __('Clear'),
-				'title'   => __('Reset filter to default values'),
-			],
-			'purge' => [
-				'method'  => 'button',
-				'display' => __('Purge'),
-				'action'  => 'default',
-				'title'   => __('Purge User log of all but the last login attempt'),
-			],
-			'runall' => [
-				'method'  => 'button',
-				'display' => __('Run All'),
-				'action'  => 'default',
-				'title'   => __('Run a Debug Check on all Data Sources'),
-			]
-		],
-		'sort' => [
-			'sort_column'    => 'name_cache',
-			'sort_direction' => 'DESC'
-		]
-	];
-}
-
-function draw_data_debug_filter(bool $render = false) : void {
-	$filters = create_data_debug_filter('sess_data_debug');
-
-	if (grv('host_id') > 0) {
-		$hostname = db_fetch_cell_prepared('SELECT CONCAT(description, " ( ", hostname, " )")
-			FROM host WHERE id = ?',
-			[grv('host_id')]);
+	if (get_request_var('host_id') > 0) {
+		$hostname = db_fetch_cell_prepared('SELECT CONCAT(description, " ( ", hostname, " )") FROM host WHERE id = ?', [get_request_var('host_id')]);
 	} else {
 		$hostname = '';
 	}
 
-	if (empty($hostname)) {
-		if (grv('host_id') == -1) {
-			$header = __('All Devices');
-		} else {
-			$header = __('No Devices');
+	html_start_box(__('Data Source Troubleshooter [ %s ]', (empty($hostname) ? (get_request_var('host_id') == -1 ? __('All Devices') : __('No Device')) : html_escape($hostname))), '100%', '', '3', 'center', '');
+
+	?>
+	<tr class='even noprint'>
+		<td>
+		<form id='form_data_debug' name='form_data_debug' action='data_debug.php'>
+			<table class='filterTable'>
+				<tr>
+					<?php print html_site_filter(get_request_var('site_id')); ?>
+					<?php print html_host_filter(get_request_var('host_id'), 'applyFilter', $host_where); ?>
+					<td>
+						<?php print __('Template'); ?>
+					</td>
+					<td>
+						<select id='template_id' name='template_id' onChange='applyFilter()'>
+							<option value='-1'<?php if (get_request_var('template_id') == '-1') {?> selected<?php }?>><?php print __('Any'); ?></option>
+							<option value='0'<?php if (get_request_var('template_id') == '0') {?> selected<?php }?>><?php print __('None'); ?></option>
+							<?php
+
+							$templates = db_fetch_assoc('SELECT DISTINCT data_template.id, data_template.name
+								FROM data_template
+								INNER JOIN data_template_data
+								ON data_template.id = data_template_data.data_template_id
+								WHERE data_template_data.local_data_id > 0
+								ORDER BY data_template.name');
+
+	if (cacti_sizeof($templates) > 0) {
+		foreach ($templates as $template) {
+			print "<option value='" . $template['id'] . "'";
+
+			if (get_request_var('template_id') == $template['id']) {
+				print ' selected';
+			} print '>' . html_escape($template['name']) . '</option>';
 		}
-	} else {
-		$header = htmle($hostname);
 	}
+	?>
 
-	// create the page filter
-	$pageFilter = new CactiTableFilter($header, 'data_debug.php', 'form_data_debug', 'sess_data_debug');
+						</select>
+					</td>
+					<td>
+						<span>
+							<input type='button' class='ui-button ui-corner-all ui-widget' id='go' value='<?php print __esc('Go'); ?>' title='<?php print __esc('Set/Refresh Filters'); ?>'>
+							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear'); ?>' title='<?php print __esc('Clear Filters'); ?>'>
+							<input type='button' class='ui-button ui-corner-all ui-widget' id='purge' value='<?php print __esc('Purge'); ?>' title='<?php print __esc('Delete All Checks'); ?>'>
+							<input type='button' class='ui-button ui-corner-all ui-widget' id='runall' value='<?php print __esc('Run All'); ?>' title='<?php print __esc('Run checks on currently filtered Data Sources and preserve other results'); ?>'>
+						</span>
+					</td>
+				</tr>
+			</table>
+			<table class='filterTable'>
+				<tr>
+					<td>
+						<?php print __('Profile'); ?>
+					</td>
+					<td>
+						<select id='profile' name='profile' onChange='applyFilter()'>
+							<option value='-1'<?php print (get_request_var('profile') == '-1' ? ' selected>' : '>') . __('All'); ?></option>
+							<?php
+	$profiles = array_rekey(db_fetch_assoc('SELECT id, name FROM data_source_profiles ORDER BY name'), 'id', 'name');
 
-	$pageFilter->rows_label = __('Data Sources');
-	$pageFilter->set_filter_array($filters);
+	if (cacti_sizeof($profiles)) {
+		foreach ($profiles as $key => $value) {
+			print "<option value='" . $key . "'";
 
-	if ($render) {
-		$pageFilter->render();
-	} else {
-		$pageFilter->sanitize();
+			if (get_request_var('profile') == $key) {
+				print ' selected';
+			} print '>' . html_escape($value) . '</option>';
+		}
 	}
+	?>
+						</select>
+					</td>
+					<td>
+						<?php print __('Status'); ?>
+					</td>
+					<td>
+						<select id='status' name='status' onChange='applyFilter()'>
+							<option value='-1'<?php if (get_request_var('status') == '-1') {?> selected<?php }?>><?php print __('All'); ?></option>
+							<option value='0'<?php if (get_request_var('status') == '0') {?> selected<?php }?>><?php print __('Failed'); ?></option>
+							<option value='1'<?php if (get_request_var('status') == '1') {?> selected<?php }?>><?php print __('Enabled'); ?></option>
+							<option value='2'<?php if (get_request_var('status') == '2') {?> selected<?php }?>><?php print __('Disabled'); ?></option>
+						</select>
+					</td>
+					<td>
+						<?php print __('Debugging'); ?>
+					</td>
+					<td>
+						<select id='debug' name='debug' onChange='applyFilter()'>
+							<option value='-1'<?php print (get_request_var('debug') == '-1' ? ' selected>' : '>') . __('All'); ?></option>
+							<option value='1'<?php print (get_request_var('debug') == '1' ? ' selected>' : '>') . __('Debugging'); ?></option>
+							<option value='0'<?php print (get_request_var('debug') == '0' ? ' selected>' : '>') . __('Not Debugging'); ?></option>
+						</select>
+					</td>
+					<td>
+						<?php print __('Refresh'); ?>
+					</td>
+					<td>
+						<select id='refresh' name='refresh' onChange='applyFilter()'>
+							<?php
+	unset($page_refresh_interval[5]);
+	unset($page_refresh_interval[10]);
+	unset($page_refresh_interval[20]);
+
+	foreach ($page_refresh_interval as $seconds => $display_text) {
+		print "<option value='" . $seconds . "'";
+
+		if (get_request_var('refresh') == $seconds) {
+			print ' selected';
+		}
+		print '>' . $display_text . '</option>';
+	}
+	?>
+						</select>
+					</td>
+				</tr>
+			</table>
+			<table class='filterTable'>
+				<tr>
+					<td>
+						<?php print __('Search'); ?>
+					</td>
+					<td>
+						<input type='text' class='ui-state-default ui-corner-all' id='rfilter' size='30' value='<?php print html_escape_request_var('rfilter'); ?>' onChange='applyFilter()'>
+					</td>
+					<td>
+						<?php print __('Data Sources'); ?>
+					</td>
+					<td>
+						<select id='rows' name='rows' onChange='applyFilter()'>
+							<option value='-1'<?php print (get_request_var('rows') == '-1' ? ' selected>' : '>') . __('Default'); ?></option>
+							<?php
+	if (cacti_sizeof($item_rows) > 0) {
+		foreach ($item_rows as $key => $value) {
+			print "<option value='" . $key . "'";
+
+			if (get_request_var('rows') == $key) {
+				print ' selected';
+			} print '>' . html_escape($value) . '</option>';
+		}
+	}
+	?>
+						</select>
+					</td>
+				</tr>
+			</table>
+		</form>
+		<script type='text/javascript'>
+		function applyFilter() {
+			strURL  = 'data_debug.php' +
+				'?host_id=' + $('#host_id').val() +
+				'&site_id=' + $('#site_id').val() +
+				'&rfilter=' + base64_encode($('#rfilter').val()) +
+				'&rows=' + $('#rows').val() +
+				'&status=' + $('#status').val() +
+				'&refresh=' + $('#refresh').val() +
+				'&profile=' + $('#profile').val() +
+				'&debug=' + $('#debug').val() +
+				'&template_id=' + $('#template_id').val() +
+				'&header=false';
+			loadPageNoHeader(strURL);
+		}
+
+		function clearFilter() {
+			strURL = 'data_debug.php?clear=1&header=false';
+			loadPageNoHeader(strURL);
+		}
+
+		function purgeFilter() {
+			strURL = 'data_debug.php?purge=1&debug=-1&header=false';
+			loadPageNoHeader(strURL);
+		}
+
+		function runallFilter() {
+			strURL = 'data_debug.php?action=runall&debug=-1&header=false';
+			loadPageNoHeader(strURL);
+		}
+
+		$(function() {
+			$('#go').click(function() {
+				applyFilter()
+			});
+
+			$('#clear').click(function() {
+				clearFilter()
+			});
+
+			$('#purge').click(function() {
+				purgeFilter()
+			});
+
+			$('#runall').click(function() {
+				runallFilter()
+			});
+
+			$('#form_data_debug').submit(function(event) {
+				event.preventDefault();
+				applyFilter();
+			});
+		});
+		</script>
+		</td>
+	</tr>
+	<?php
+
+	html_end_box();
 }

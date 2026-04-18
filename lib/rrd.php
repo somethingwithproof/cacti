@@ -32,9 +32,6 @@ if (read_config_option('storage_location')) {
 
 function escape_command(string $command) : string {
 	// Strip shell command substitution patterns that could allow injection
-	// when the command is passed to shell_exec. Backticks enable command
-	// substitution; $() enables subshell execution. Standalone $ in text
-	// (e.g., "$5.00" in graph legends) is preserved.
 	$command = str_replace('`', '', $command);
 	$command = preg_replace('/\$\(/', '(', $command);
 

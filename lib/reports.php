@@ -323,7 +323,7 @@ function reports_interval_start(int $interval, int $count, int $offset, int $tim
 		case REPORTS_SCHED_INTVL_MONTH_WEEKDAY:
 			// add $count months to current mailtime, but if this is the nth weekday, it must be the same nth weekday in the new month
 			// e.g. if this is currently the 3rd Monday of current month
-			// it must be the 3rd Monday of the new month as well
+			// ist must be the 3rd Monday of the new month as well
 			$weekday      = date('l', $timestamp);
 			$day_of_month = date('j', $timestamp);
 			$nth_weekday  = ceil($day_of_month / 7);
@@ -392,7 +392,7 @@ function utime_add(int $timestamp, int $yr = 0, int $mon = 0,
  * @param string $string  The string to append to the log file
  * @param bool   $output  Whether to output the log line to the browser using pring() or not
  * @param string $environ Tell's from where the script was called from
- * @param int    $level   The logging verbosity to use
+ * @param int    $level   The loging verbosity to use
  *
  * @return void
  */
@@ -648,7 +648,7 @@ function generate_report(int $schedule_id, array $report, bool $force = false) :
 }
 
 /**
- * reports_load_format_file  read the format file from disk and determines its formatting
+ * reports_load_format_file  read the format file from disk and determines it's formatting
  *
  * @param string $format_file The file to read from the formats directory
  * @param string $output      The html and css output from that file
@@ -713,7 +713,7 @@ function reports_tree_has_graphs(int $tree_id,int  $branch_id,int  $effective_us
 	$new_graphs = [];
 
 	if ($search_key != '') {
-		$sql_swhere = ' AND gtg.title_cache REGEXP ' . db_qstr($search_key);
+		$sql_swhere = ' AND gtg.title_cache ' . db_qstr_rlike($search_key);
 	}
 
 	$device_id = db_fetch_cell_prepared('SELECT host_id
@@ -1233,7 +1233,7 @@ function reports_expand_device(array &$report, array $item, int $device_id, int 
 	if (cacti_sizeof($graph_templates)) {
 		foreach ($graph_templates as $id => $name) {
 			if ($item['graph_name_regexp'] != '') {
-				$sql_where .= ' AND title_cache REGEXP ' . db_qstr($item['graph_name_regexp']);
+				$sql_where .= ' AND title_cache ' . db_qstr_rlike($item['graph_name_regexp']);
 			}
 
 			$graphs = db_fetch_assoc_prepared("SELECT
@@ -1272,7 +1272,7 @@ function reports_expand_device(array &$report, array $item, int $device_id, int 
 					$outstr .= "\t\t\t<td class='text' style='text-align:" . $alignment[$item['align']] . ';font-size: ' . $item['font_size'] . "pt;'>" . PHP_EOL;
 				}
 
-				$outstr .= "\t\t\t\t<h3>" . htmle($title) . '</h3>' . PHP_EOL;
+				$outstr .= "\t\t\t\t<h3>$title</h3>" . PHP_EOL;
 				$outstr .= "\t\t\t</td>" . PHP_EOL;
 				$outstr .= "\t\t</tr>" . PHP_EOL;
 			}
@@ -1424,7 +1424,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 			}
 
 			if ($item['graph_name_regexp'] != '') {
-				$sql_where .= ' AND title_cache REGEXP ' . db_qstr($item['graph_name_regexp']);
+				$sql_where .= ' AND title_cache ' . db_qstr_rlike($item['graph_name_regexp']);
 			}
 
 			if ($leaf_type == 'header' && $nested) {
@@ -1459,7 +1459,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 						} else {
 							$outstr .= "\t\t\t<td class='text' style='text-align:" . $alignment[$item['align']] . ';font-size: ' . $item['font_size'] . "pt;'>" . PHP_EOL;
 						}
-						$outstr .= "\t\t\t\t<h3>" . htmle($title) . '</h3>' . PHP_EOL;
+						$outstr .= "\t\t\t\t<h3>$title</h3>" . PHP_EOL;
 						$outstr .= "\t\t\t</td>" . PHP_EOL;
 						$outstr .= "\t\t</tr>" . PHP_EOL;
 					}
@@ -1470,7 +1470,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 				$gr_where = '';
 
 				if ($item['graph_name_regexp'] != '') {
-					$gr_where .= ' AND title_cache REGEXP ' . db_qstr($item['graph_name_regexp']);
+					$gr_where .= ' AND title_cache ' . db_qstr_rlike($item['graph_name_regexp']);
 				}
 
 				$graph = db_fetch_row('SELECT local_graph_id, title_cache
@@ -1486,7 +1486,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 				$gr_where = '';
 
 				if ($item['graph_name_regexp'] != '') {
-					$gr_where .= ' AND title_cache REGEXP ' . db_qstr($item['graph_name_regexp']);
+					$gr_where .= ' AND title_cache ' . db_qstr_rlike($item['graph_name_regexp']);
 				}
 
 				$graph = db_fetch_cell('SELECT count(*)
@@ -1503,7 +1503,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 						} else {
 							$outstr .= "\t\t\t<td class='text' style='text-align:" . $alignment[$item['align']] . ';font-size: ' . $item['font_size'] . "pt;'>" . PHP_EOL;
 						}
-						$outstr .= "\t\t\t\t<h3>" . htmle($title) . '</h3>' . PHP_EOL;
+						$outstr .= "\t\t\t\t<h3>$title</h3>" . PHP_EOL;
 						$outstr .= "\t\t\t</td>" . PHP_EOL;
 						$outstr .= "\t\t</tr>" . PHP_EOL;
 					}
@@ -1585,7 +1585,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 										$outstr .= "\t\t\t<td class='text' style='text-align:" . $alignment[$item['align']] . ';font-size: ' . $item['font_size'] . "pt;'>" . PHP_EOL;
 									}
 
-									$outstr .= "\t\t\t\t<h3>" . htmle($title) . '</h3>' . PHP_EOL;
+									$outstr .= "\t\t\t\t<h3>$title</h3>" . PHP_EOL;
 									$outstr .= "\t\t\t</td>" . PHP_EOL;
 									$outstr .= "\t\t</tr>" . PHP_EOL;
 								}
@@ -1652,7 +1652,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 											} else {
 												$outstr .= "\t\t\t<td class='text' style='text-align:" . $alignment[$item['align']] . ';font-size: ' . $item['font_size'] . "pt;'>" . PHP_EOL;
 											}
-											$outstr .= "\t\t\t\t<h3>" . htmle($title) . '</h3>' . PHP_EOL;
+											$outstr .= "\t\t\t\t<h3>$title</h3>" . PHP_EOL;
 											$outstr .= "\t\t\t</td>" . PHP_EOL;
 											$outstr .= "\t\t</tr>" . PHP_EOL;
 										}
@@ -1726,7 +1726,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 							} else {
 								$outstr .= "\t\t\t<td class='text' style='text-align:" . $alignment[$item['align']] . ';font-size: ' . $item['font_size'] . "pt;'>" . PHP_EOL;
 							}
-							$outstr .= "\t\t\t\t<h3>" . htmle($title) . '</h3>' . PHP_EOL;
+							$outstr .= "\t\t\t\t<h3>$title</h3>" . PHP_EOL;
 							$outstr .= "\t\t\t</td>" . PHP_EOL;
 							$outstr .= "\t\t</tr>" . PHP_EOL;
 						}
@@ -1747,7 +1747,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 				} else {
 					$outstr .= "\t\t\t<td class='text' style='text-align:" . $alignment[$item['align']] . ';font-size: ' . $item['font_size'] . "pt;'>" . PHP_EOL;
 				}
-				$outstr .= "\t\t\t\t<h3>" . htmle($title) . '</h3>' . PHP_EOL;
+				$outstr .= "\t\t\t\t<h3>$title</h3>" . PHP_EOL;
 				$outstr .= "\t\t\t</td>" . PHP_EOL;
 				$outstr .= "\t\t</tr>" . PHP_EOL;
 			}
