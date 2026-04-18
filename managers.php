@@ -755,7 +755,11 @@ function form_actions() : void {
 		if (isrv('action_receivers')) {
 			$selected_items = cacti_unserialize(stripslashes(gnrv('selected_graphs_array')));
 
-			if ($selected_items != false) {
+			if (is_array($selected_items) && count($selected_items) > 0) {
+				$selected_items = array_values(array_filter(array_map('intval', $selected_items)));
+			}
+
+			if (is_array($selected_items) && count($selected_items) > 0) {
 				if (gnrv('drp_action') == '1') { // delete
 					db_execute('DELETE FROM snmpagent_managers WHERE id IN (' . implode(',' ,$selected_items) . ')');
 					db_execute('DELETE FROM snmpagent_managers_notifications WHERE manager_id IN (' . implode(',' ,$selected_items) . ')');
