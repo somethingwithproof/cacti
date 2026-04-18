@@ -823,7 +823,7 @@ function manager_logs($id, $header_label) {
 					$description .= html_escape(trim($line)) . '<br>';
 				}
 
-				print '<td><a href="#" onMouseOut="hideTooltip(snmpagentTooltip)" onMouseMove="showTooltip(event, snmpagentTooltip, \'' . $item['notification'] . '\', \'' . $description . '\')">' . $item['notification'] . '</a></td>';
+				print '<td><a href="#" onMouseOut="hideTooltip(snmpagentTooltip)" onMouseMove="showTooltip(event, snmpagentTooltip, \'' . html_escape($item['notification']) . '\', \'' . $description . '\')">' . html_escape($item['notification']) . '</a></td>';
 			} else {
 
 				print "<td>{$item['notification']}</td>";
