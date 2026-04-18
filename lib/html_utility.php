@@ -1373,6 +1373,13 @@ function get_order_string() : string {
 		$sort_column = '';
 	}
 
+	// When the caller submits a malformed sort_column, discard any stale session
+	// cache for this page so a previously-stored ORDER BY can not be reused
+	// to bypass the allowlist (GHSA-84q3-92xc-c3pf).
+	if ($sort_column === '' && get_nfilter_request_var('sort_column') !== '') {
+		unset($_SESSION['sort_string'][$page]);
+	}
+
 	if (isset($_SESSION['sort_string'][$page])) {
 		return $_SESSION['sort_string'][$page];
 	}
@@ -1382,6 +1389,70 @@ function get_order_string() : string {
 	}
 
 	return '';
+}
+
+/**
+ * Validate a caller-supplied sort column against a fixed allowlist.
+ *
+ * Accepts either a bare column name from the allowlist, or a function-style
+ * expression ("INET_ATON(hostname)", "NATURAL_SORT_KEY(name)") whose inner
+ * column name is in the allowlist. Falls back to $default - or '' - when the
+ * caller-supplied value does not pass the allowlist check. Callers may then
+ * interpolate the return value straight into an ORDER BY clause knowing no
+ * attacker-controlled bytes remain.
+ *
+ * Added for GHSA-84q3-92xc-c3pf to close 8 ORDER BY SQLi sites.
+ *
+ * @param string $column  The request-supplied sort column.
+ * @param array  $allowed Allowlist of permitted columns. Keys or values count.
+ * @param string $default The column to fall back to when $column fails.
+ *
+ * @return string Validated column identifier or $default.
+ */
+function cacti_validate_sort_column(string $column, array $allowed, string $default = '') : string {
+	$normalize = static function (array $list) : array {
+		$flat = [];
+		foreach ($list as $k => $v) {
+			if (is_string($k)) {
+				$flat[] = $k;
+			}
+			if (is_string($v)) {
+				$flat[] = $v;
+			}
+		}
+		return array_values(array_unique($flat));
+	};
+
+	$allow = $normalize($allowed);
+
+	if ($column === '') {
+		return $default;
+	}
+
+	if (in_array($column, $allow, true)) {
+		return $column;
+	}
+
+	if (preg_match('/^([A-Z][A-Z0-9_]*)\(([a-zA-Z][a-zA-Z0-9_.]*)\)$/', $column, $m)) {
+		$fn    = $m[1];
+		$inner = $m[2];
+
+		$allowed_functions = ['INET_ATON', 'INET_NTOA', 'INET6_ATON', 'INET6_NTOA', 'NATURAL_SORT_KEY', 'LENGTH', 'LOWER', 'UPPER'];
+
+		if (in_array($fn, $allowed_functions, true) && in_array($inner, $allow, true)) {
+			return $column;
+		}
+	}
+
+	return $default;
+}
+
+/**
+ * Validate the sort_direction request var against the ASC/DESC allowlist.
+ */
+function cacti_validate_sort_direction(string $direction, string $default = 'ASC') : string {
+	$direction = strtoupper(trim($direction));
+	return ($direction === 'ASC' || $direction === 'DESC') ? $direction : $default;
 }
 
 /**

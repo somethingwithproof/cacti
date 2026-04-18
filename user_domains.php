@@ -614,11 +614,17 @@ function domains() : void {
 		$sql_where",
 		$sql_params);
 
+	// validate sort column + direction against allowlist before interpolation
+	// (GHSA-84q3-92xc-c3pf)
+	$sort_allowed   = ['domain_name', 'type', 'defdomain', 'user_id', 'cn_full_name', 'cn_email', 'enabled'];
+	$sort_column    = cacti_validate_sort_column((string) grv('sort_column'), $sort_allowed, 'domain_name');
+	$sort_direction = cacti_validate_sort_direction((string) grv('sort_direction'), 'ASC');
+
 	$domains = db_fetch_assoc_prepared("SELECT *
 		FROM user_domains
 		$sql_where
-		ORDER BY " . grv('sort_column') . ' ' . grv('sort_direction') . '
-		LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows,
+		ORDER BY $sort_column $sort_direction
+		LIMIT " . ($rows * (grv('page') - 1)) . ',' . $rows,
 		$sql_params);
 
 	$display_text = [

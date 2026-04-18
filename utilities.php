@@ -584,6 +584,12 @@ function utilities_view_poller_cache() : void {
 
 	$total_rows = get_total_row_data($_SESSION[SESS_USER_ID], $sql, $sql_params, 'poller_item');
 
+	// validate sort column + direction against allowlist before interpolation
+	// (GHSA-84q3-92xc-c3pf)
+	$sort_allowed   = ['dtd.name_cache', 'h.description'];
+	$sort_column    = cacti_validate_sort_column((string) grv('sort_column'), $sort_allowed, 'dtd.name_cache');
+	$sort_direction = cacti_validate_sort_direction((string) grv('sort_direction'), 'ASC');
+
 	$poller_sql = "SELECT pi.*, dtd.name_cache, h.description, h.id AS host_id
 		FROM poller_item AS pi
 		INNER JOIN data_local AS dl
@@ -593,8 +599,8 @@ function utilities_view_poller_cache() : void {
 		LEFT JOIN host AS h
 		ON pi.host_id = h.id
 		$sql_where
-		ORDER BY " . grv('sort_column') . ' ' . grv('sort_direction') . ', action ASC
-		LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows;
+		ORDER BY $sort_column $sort_direction, action ASC
+		LIMIT " . ($rows * (grv('page') - 1)) . ',' . $rows;
 
 	$items = db_fetch_assoc_prepared($poller_sql, $sql_params);
 

@@ -2083,6 +2083,17 @@ function reports() : void {
 		$sql_join = 'INNER JOIN user_auth AS ua ON ua.id = report.user_id';
 	}
 
+	// allowlist of sortable columns, validated before interpolation into ORDER BY
+	// (GHSA-84q3-92xc-c3pf). Keep in sync with $display_text below.
+	$sort_allowed = [
+		'report.name', 'type', 'report.full_name', 'sched_type',
+		'report.enabled', 'next_start', 'report.last_started',
+		'report.run_limit', 'report.last_runtime',
+	];
+	$sort_column    = cacti_validate_sort_column((string) grv('sort_column'), $sort_allowed, 'report.name');
+	$sort_direction = cacti_validate_sort_direction((string) grv('sort_direction'), 'ASC');
+	$sort_order_by  = 'ORDER BY ' . $sort_column . ' ' . $sort_direction;
+
 	$reports_list = [];
 
 	if (db_table_exists('plugin_reportit_reports')) {
@@ -2114,8 +2125,7 @@ function reports() : void {
 				FROM plugin_reportit_reports AS report
 				$sql_join
 				$sql_where
-				ORDER BY " . grv('sort_column') . ' ' . grv('sort_direction') .
-				' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
+				$sort_order_by LIMIT " . ($rows * (grv('page') - 1)) . ',' . $rows);
 		} elseif (grv('report_type') == 'reports') {
 			$total_rows = db_fetch_cell("SELECT COUNT(report.id)
 				FROM reports AS report
@@ -2129,8 +2139,7 @@ function reports() : void {
 				FROM reports AS report
 				$sql_join
 				$sql_where
-				ORDER BY " . grv('sort_column') . ' ' . grv('sort_direction') .
-				' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
+				$sort_order_by LIMIT " . ($rows * (grv('page') - 1)) . ',' . $rows);
 		} else {
 			$total_rows = db_fetch_cell("SELECT COUNT(report.id)
 				FROM plugin_reportit_reports AS report
@@ -2144,8 +2153,7 @@ function reports() : void {
 				FROM plugin_reportit_reports AS report
 				$sql_join
 				$sql_where
-				ORDER BY " . grv('sort_column') . ' ' . grv('sort_direction') .
-				' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
+				$sort_order_by LIMIT " . ($rows * (grv('page') - 1)) . ',' . $rows);
 		}
 	} else {
 		$total_rows = db_fetch_cell("SELECT COUNT(report.id)
@@ -2160,8 +2168,7 @@ function reports() : void {
 			FROM reports AS report
 			$sql_join
 			$sql_where
-			ORDER BY " . grv('sort_column') . ' ' . grv('sort_direction') .
-			' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
+			$sort_order_by LIMIT " . ($rows * (grv('page') - 1)) . ',' . $rows);
 	}
 
 	$display_text = [

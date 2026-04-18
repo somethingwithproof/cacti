@@ -94,6 +94,12 @@ function view_user_log() : void {
 		$sql_where",
 		$sql_params);
 
+	// validate sort column + direction against allowlist before interpolation
+	// (GHSA-84q3-92xc-c3pf)
+	$sort_allowed   = ['username', 'full_name', 'realm', 'time', 'result', 'ip'];
+	$sort_column    = cacti_validate_sort_column((string) grv('sort_column'), $sort_allowed, 'time');
+	$sort_direction = cacti_validate_sort_direction((string) grv('sort_direction'), 'DESC');
+
 	$user_log_sql = "SELECT ul.username, ua.full_name, ua.realm,
 		ul.time, ul.result, ul.ip
 		FROM user_auth AS ua
@@ -101,8 +107,8 @@ function view_user_log() : void {
 		ON ua.username = ul.username
 		AND ua.id = ul.user_id
 		$sql_where
-		ORDER BY " . grv('sort_column') . ' ' . grv('sort_direction') . '
-		LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows;
+		ORDER BY $sort_column $sort_direction
+		LIMIT " . ($rows * (grv('page') - 1)) . ',' . $rows;
 
 	$user_log = db_fetch_assoc_prepared($user_log_sql, $sql_params);
 
