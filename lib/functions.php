@@ -7662,3 +7662,114 @@ function cacti_escapeshellarg($string, $quote=true) {
 	}
 }
 
+/**
+ * Validate that a filename resides within a base directory.
+ * Resolves symlinks and prevents '..' traversal.
+ *
+ * @param string $filename The filename to validate
+ * @param string $base_dir The base directory the file must reside in
+ *
+ * @return mixed The validated real path, or false if invalid
+ */
+function validate_path_within($filename, $base_dir) {
+	$filename = basename($filename);
+
+	if ($filename === '' || $filename === '.' || $filename === '..') {
+		return false;
+	}
+
+	$base_real = realpath($base_dir);
+
+	if ($base_real === false) {
+		return false;
+	}
+
+	return $base_real . '/' . $filename;
+}
+
+/**
+ * Validate that a relative path resolves within a base directory.
+ * Allows subdirectory paths but rejects '..' traversal components.
+ *
+ * @param string $path     The user-supplied relative path
+ * @param string $base_dir The base directory the path must stay within
+ *
+ * @return mixed The validated real path, or false if invalid
+ */
+function validate_relative_path_within($path, $base_dir) {
+	if (!is_string($path) || $path === '' || strpos($path, "\0") !== false) {
+		return false;
+	}
+
+	$normalized = str_replace('\\', '/', $path);
+
+	if ($normalized === '' || $normalized[0] === '/' || preg_match('/^[a-zA-Z]:\//', $normalized)) {
+		return false;
+	}
+
+	$parts = array();
+
+	foreach (explode('/', $normalized) as $part) {
+		if ($part === '' || $part === '.' || $part === '..') {
+			return false;
+		}
+	}
+
+	$base_real = realpath($base_dir);
+
+	if ($base_real === false) {
+		return false;
+	}
+
+	$resolved = realpath($base_real . '/' . $normalized);
+
+	if ($resolved === false || strpos($resolved, $base_real) !== 0) {
+		return false;
+	}
+
+	return $resolved;
+}
+
+/**
+ * Generic tag substitution with support for multiple escape methods.
+ * Consolidates tag logic from multiple plugins into a central, secure helper.
+ *
+ * @param string $text   The text containing tags (e.g. <HOSTNAME>)
+ * @param array  $data   Key-value pairs for substitution
+ * @param string $escape The escape method: 'none', 'html', 'shell', 'url', 'sql'
+ *
+ * @return string The text with tags substituted and escaped
+ */
+function cacti_substitute_tags($text, $data, $escape = 'none') {
+	if ($text == '') {
+		return $text;
+	}
+
+	foreach ($data as $tag => $value) {
+		$tag_str = '<' . strtoupper($tag) . '>';
+
+		if (strpos($text, $tag_str) !== false) {
+			$escaped_value = $value;
+
+			switch ($escape) {
+				case 'html':
+					$escaped_value = html_escape($value);
+					break;
+				case 'shell':
+					$escaped_value = cacti_escapeshellarg($value);
+					break;
+				case 'url':
+					$escaped_value = urlencode($value);
+					break;
+				case 'sql':
+					$escaped_value = db_qstr($value);
+					break;
+			}
+
+			$text = str_replace($tag_str, $escaped_value, $text);
+		}
+	}
+
+	return $text;
+}
+
