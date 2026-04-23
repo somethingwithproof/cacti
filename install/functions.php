@@ -507,6 +507,9 @@ function install_setup_get_templates() {
 
 	foreach ($templates as $xmlfile) {
 		if ($canUnpack) {
+			if (!cacti_validate_stream_path("$path/$xmlfile")) {
+				continue;
+			}
 			//Loading Template Information from package
 			$filename = "compress.zlib://$path/$xmlfile";
 

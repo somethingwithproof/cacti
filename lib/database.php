@@ -1782,6 +1782,17 @@ function db_replace($table_name, $array_items, $keyCols, $db_conn = false) {
 }
 
 /**
+ * Sanitize a column name for safe SQL interpolation.
+ * Strips backticks and any character that is not alphanumeric or underscore.
+ *
+ * @param string $col  Raw column name
+ * @return string      Safe column name
+ */
+function cacti_safe_column_name($col) {
+	return preg_replace('/[^a-zA-Z0-9_]/', '', $col);
+}
+
+/**
  * _db_replace - Internal function used as a part of the db_replace public function
  *
  * @param  (resource)     The database connection to use
@@ -1818,6 +1829,9 @@ function _db_replace($db_conn, $table, $fieldArray, $keyCols) {
 			$sql  .= ', ';
 			$sql2 .= ', ';
 		}
+
+		$k = cacti_safe_column_name($k);
+
 		$sql   .= "`$k`";
 		$sql2  .= $v;
 		$first  = false;

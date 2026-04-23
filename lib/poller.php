@@ -2544,9 +2544,11 @@ function timeout_kill_registered_processes($tasktype = '', $taskname = '', $task
 
 	if (cacti_sizeof($processes)) {
 		foreach($processes as $r) {
-			if ($r['pid'] > 0 && posix_kill($r['pid'], 0)) {
+			if ($r['pid'] > 100 && posix_kill($r['pid'], 0)) {
 				cacti_log(sprintf('ERROR: Process killed due to timeout! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
 				posix_kill($r['pid'], SIGTERM);
+			} elseif ($r['pid'] > 0 && $r['pid'] <= 100) {
+				cacti_log(sprintf('WARNING: Timeout detected for protected system PID %s, skipping termination!', $r['pid']), false, 'POLLER');
 			} else {
 				cacti_log(sprintf('ERROR: Detected process that is gone and did not unregister first! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
 			}

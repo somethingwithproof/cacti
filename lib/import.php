@@ -351,6 +351,10 @@ function import_package_get_name($xmlfile) {
 }
 
 function import_package_get_details($xmlfile) {
+	if (!cacti_validate_stream_path($xmlfile)) {
+		return array();
+	}
+
 	$filename = "compress.zlib://$xmlfile";
 
 	$return = array();
@@ -431,6 +435,7 @@ function import_read_package_data($xmlfile, &$public_key) {
 
 	// Verify Signature
 	if (strlen($public_key) < 200) {
+		cacti_log('WARNING: Package is using a legacy SHA-1 signature. SHA-1 is deprecated and will be removed in a future version. Please re-sign with SHA-256.', false, 'IMPORT');
 		$ok = openssl_verify($xml, $binary_signature, $public_key, OPENSSL_ALGO_SHA1);
 	} else {
 		$ok = openssl_verify($xml, $binary_signature, $public_key, OPENSSL_ALGO_SHA256);
@@ -519,6 +524,7 @@ function import_package($xmlfile, $profile_id = 1, $remove_orphans = false, $rep
 		$fdata = base64_decode($f['data']);
 
 		if (strlen($public_key) < 200) {
+			cacti_log('WARNING: Package is using a legacy SHA-1 signature. SHA-1 is deprecated and will be removed in a future version. Please re-sign with SHA-256.', false, 'IMPORT');
 			$ok = openssl_verify($fdata, $binary_signature, $public_key, OPENSSL_ALGO_SHA1);
 		} else {
 			$ok = openssl_verify($fdata, $binary_signature, $public_key, OPENSSL_ALGO_SHA256);

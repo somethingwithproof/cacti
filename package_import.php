@@ -368,6 +368,10 @@ function import_validate_public_key($xmlfile, $accept = false) {
 		return false;
 	}
 
+	if (!cacti_validate_stream_path($xmlfile)) {
+		return false;
+	}
+
 	$filename = "compress.zlib://$xmlfile";
 
 	$data = file_get_contents($filename);

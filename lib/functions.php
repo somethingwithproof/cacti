@@ -7600,3 +7600,65 @@ function cacti_format_ipv6_colon($address) {
 	return($address);
 }
 
+/**
+ * Validate that a file path is safe for use with PHP stream wrappers.
+ * Rejects nested wrappers (phar://, php://filter, expect://, data://)
+ * that could lead to deserialization or information disclosure.
+ *
+ * @param string $path  The file path to validate
+ * @return bool  True if safe, false if wrapper injection detected
+ */
+function cacti_validate_stream_path($path) {
+	$dangerous_wrappers = array('phar://', 'php://', 'expect://', 'data://', 'glob://', 'ssh2://');
+
+	$lower = strtolower($path);
+	foreach ($dangerous_wrappers as $wrapper) {
+		if (strpos($lower, $wrapper) !== false) {
+			cacti_log("ERROR: Dangerous stream wrapper detected in path: $path", false, 'IMPORT');
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * mimics escapeshellarg, even for windows
+ * @param $string       - the string to be escaped
+ * @param $quote        - true: do NOT remove quotes from result; false: do remove quotes
+ * @return                      - the escaped [quoted|unquoted] string
+ */
+function cacti_escapeshellarg($string, $quote=true) {
+	global $config;
+
+	if ($string == '') {
+		return $string;
+	}
+
+	/* remove any carriage returns or line feeds from the argument */
+	$string = str_replace(array("\n", "\r"), array('', ''), $string);
+
+	/* we must use an apostrophe to escape community names under Unix in case the user uses
+	characters that the shell might interpret. the ucd-snmp binaries on Windows flip out when
+	you do this, but are perfectly happy with a quotation mark. */
+	if ($config['cacti_server_os'] == 'unix') {
+		$string = escapeshellarg($string);
+		if ($quote) {
+			return $string;
+		} else {
+			# remove first and last char
+			return substr($string, 1, (strlen($string)-2));
+		}
+	} else {
+		if (substr_count($string, CACTI_ESCAPE_CHARACTER)) {
+			$string = str_replace(CACTI_ESCAPE_CHARACTER, "\\" . CACTI_ESCAPE_CHARACTER, $string);
+		}
+
+		if ( $quote ) {
+			return CACTI_ESCAPE_CHARACTER . $string . CACTI_ESCAPE_CHARACTER;
+		} else {
+			return $string;
+		}
+	}
+}
+
