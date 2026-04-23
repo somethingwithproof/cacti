@@ -382,11 +382,11 @@ function automation_snmp_item_remove_confirm() {
     	$('#continue').click(function(data) {
 			$.post('automation_snmp.php?action=item_remove', {
 				__csrf_magic: csrfMagicToken,
-				item_id: <?php print get_request_var('item_id');?>,
-				id: <?php print get_request_var('id');?>
+				item_id: <?php print cacti_js_encode(get_request_var('item_id'));?>,
+				id: <?php print cacti_js_encode(get_request_var('id'));?>
 			}, function(data) {
 				$('#cdialog').dialog('close');
-				loadPageNoHeader('automation_snmp.php?action=edit&header=false&id=<?php print get_request_var('id');?>');
+				loadPageNoHeader('automation_snmp.php?action=edit&header=false&id=<?php print cacti_js_encode(get_request_var('id'));?>');
 			});
 		});
     });

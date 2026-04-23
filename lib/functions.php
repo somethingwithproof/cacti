@@ -7620,51 +7620,10 @@ function cacti_validate_stream_path($path) {
 	}
 
 	return true;
-}
-
-/**
- * mimics escapeshellarg, even for windows
- * @param $string       - the string to be escaped
- * @param $quote        - true: do NOT remove quotes from result; false: do remove quotes
- * @return                      - the escaped [quoted|unquoted] string
- */
-function cacti_escapeshellarg($string, $quote=true) {
-	global $config;
-
-	if ($string == '') {
-		return $string;
 	}
 
-	/* remove any carriage returns or line feeds from the argument */
-	$string = str_replace(array("\n", "\r"), array('', ''), $string);
-
-	/* we must use an apostrophe to escape community names under Unix in case the user uses
-	characters that the shell might interpret. the ucd-snmp binaries on Windows flip out when
-	you do this, but are perfectly happy with a quotation mark. */
-	if ($config['cacti_server_os'] == 'unix') {
-		$string = escapeshellarg($string);
-		if ($quote) {
-			return $string;
-		} else {
-			# remove first and last char
-			return substr($string, 1, (strlen($string)-2));
-		}
-	} else {
-		if (substr_count($string, CACTI_ESCAPE_CHARACTER)) {
-			$string = str_replace(CACTI_ESCAPE_CHARACTER, "\\" . CACTI_ESCAPE_CHARACTER, $string);
-		}
-
-		if ( $quote ) {
-			return CACTI_ESCAPE_CHARACTER . $string . CACTI_ESCAPE_CHARACTER;
-		} else {
-			return $string;
-		}
-	}
-}
-
-/**
- * Validate that a filename resides within a base directory.
- * Resolves symlinks and prevents '..' traversal.
+	/**
+	* Validate that a filename resides within a base directory. * Resolves symlinks and prevents '..' traversal.
  *
  * @param string $filename The filename to validate
  * @param string $base_dir The base directory the file must reside in
@@ -7773,3 +7732,124 @@ function cacti_substitute_tags($text, $data, $escape = 'none') {
 	return $text;
 }
 
+/**
+ * Encode data for use in a JavaScript context.
+ * Uses json_encode to safely escape values for inclusion in <script> blocks.
+ *
+ * @param mixed $data The data to encode
+ * @return string The JSON-encoded string
+ */
+function cacti_js_encode($data) {
+	return json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * Encode data for use in an HTML attribute context.
+ *
+ * @param string $string The string to encode
+ * @return string The escaped string
+ */
+function cacti_attr_encode($string) {
+	return htmlspecialchars((string)$string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+/**
+ * Encode data for use in a CSS context.
+ *
+ * @param string $string The string to encode
+ * @return string The escaped string
+ */
+function cacti_css_encode($string) {
+	return preg_replace_callback('/[^a-zA-Z0-9]/', function ($matches) {
+		return '\\' . str_pad(dechex(ord($matches[0])), 6, '0', STR_PAD_LEFT);
+	}, $string);
+}
+
+/**
+ * Encode data for use in an LDAP filter context.
+ *
+ * @param string $string The string to encode
+ * @return string The escaped string
+ */
+function cacti_ldap_encode($string) {
+	return str_replace(['\\', '*', '(', ')', "\x00"], ['\\5c', '\\2a', '\\28', '\\29', '\\00'], $string);
+}
+
+/**
+ * Log injection protection.
+ *
+ * @param string $string The string to sanitize
+ * @return string The sanitized string
+ */
+function cacti_log_sanitize($string) {
+	return str_replace(["\n", "\r"], [' ', ' '], $string);
+}
+
+/**
+ * Secure process spawning using proc_open with environment-based credential passing.
+ *
+ * @param array       $cmd     The command to execute as an array of arguments
+ * @param array|null  $env     Optional environment variables
+ * @param string|null $cwd     Optional working directory
+ * @return array      ['stdout' => string, 'stderr' => string, 'return' => int]
+ */
+function cacti_spawn_process($cmd, $env = null, $cwd = null) {
+	if (is_array($cmd)) {
+		$cmd = implode(' ', array_map('cacti_escapeshellarg', $cmd));
+	}
+
+	$descriptorspec = [
+		0 => ['pipe', 'r'], // stdin
+		1 => ['pipe', 'w'], // stdout
+		2 => ['pipe', 'w']  // stderr
+	];
+
+	$process = proc_open($cmd, $descriptorspec, $pipes, $cwd, $env);
+
+	if (is_resource($process)) {
+		fclose($pipes[0]);
+
+		$stdout = stream_get_contents($pipes[1]);
+		fclose($pipes[1]);
+
+		$stderr = stream_get_contents($pipes[2]);
+		fclose($pipes[2]);
+
+		$return = proc_close($process);
+
+		return [
+			'stdout' => $stdout,
+			'stderr' => $stderr,
+			'return' => $return
+		];
+	}
+
+	return [
+		'stdout' => '',
+		'stderr' => 'ERROR: Failed to spawn process',
+		'return' => -1
+	];
+}
+
+/**
+ * Generates and retrieves a cryptographically secure nonce for the current request.
+ *
+ * @return string The base64-encoded nonce
+ */
+function get_cacti_nonce() {
+	static $nonce = null;
+
+	if ($nonce === null) {
+		try {
+			if (function_exists('random_bytes')) {
+				$nonce = base64_encode(random_bytes(16));
+			} else {
+				$nonce = base64_encode(md5(uniqid(mt_rand(), true), true));
+			}
+		} catch (Exception $e) {
+			$nonce = base64_encode(md5(uniqid(mt_rand(), true), true));
+		}
+	}
+
+	return $nonce;
+}

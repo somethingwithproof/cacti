@@ -191,7 +191,13 @@ function host_reindex() {
 
 	$start = microtime(true);
 
-	shell_exec(read_config_option('path_php_binary') . ' -q ' . $config['base_path'] . '/cli/poller_reindex_hosts.php --qid=all --id=' . get_filter_request_var('host_id'));
+	cacti_spawn_process([
+		read_config_option('path_php_binary'),
+		'-q',
+		$config['base_path'] . '/cli/poller_reindex_hosts.php',
+		'--qid=all',
+		'--id=' . get_filter_request_var('host_id')
+	]);
 
 	$end = microtime(true);
 

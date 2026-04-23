@@ -211,10 +211,14 @@ case 'countdown':
 
 	/* call poller */
 	$graph_rrd = read_config_option('realtime_cache_path') . '/user_' . $hash . '_lgi_' . get_request_var('local_graph_id') . '.png';
-	$command   = read_config_option('path_php_binary');
-	$args      = sprintf('poller_realtime.php --graph=%s --interval=%d --poller_id=' . $hash, get_request_var('local_graph_id'), $graph_data_array['ds_step']);
-
-	shell_exec("$command $args");
+	
+	cacti_spawn_process([
+		read_config_option('path_php_binary'),
+		'poller_realtime.php',
+		'--graph=' . get_request_var('local_graph_id'),
+		'--interval=' . $graph_data_array['ds_step'],
+		'--poller_id=' . $hash
+	]);
 
 	/* construct the image name  */
 	$graph_data_array['export_realtime'] = $graph_rrd;
