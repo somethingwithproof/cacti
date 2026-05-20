@@ -1218,11 +1218,12 @@ function template_edit() : void {
 			LEFT JOIN automation_templates_rules AS art
 			ON ar.id = art.rule_id
 			AND art.rule_type = 1
-			WHERE ar.id NOT IN (
-				SELECT rule_id
-				FROM automation_templates_rules
-				WHERE rule_type = 1
-				AND template_id = ?
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM automation_templates_rules AS atr2
+				WHERE atr2.rule_id = ar.id
+				AND atr2.rule_type = 1
+				AND atr2.template_id = ?
 			)
 			ORDER BY ar.name',
 			[grv('id')]);
@@ -1329,11 +1330,12 @@ function template_edit() : void {
 			LEFT JOIN automation_templates_rules AS art
 			ON ar.id = art.rule_id
 			AND art.rule_type = 2
-			WHERE ar.id NOT IN (
-				SELECT rule_id
-				FROM automation_templates_rules
-				WHERE rule_type = 2
-				AND template_id = ?
+			WHERE NOT EXISTS (
+				SELECT 1
+				FROM automation_templates_rules AS atr2
+				WHERE atr2.rule_id = ar.id
+				AND atr2.rule_type = 2
+				AND atr2.template_id = ?
 			)
 			ORDER BY ar.name',
 			[grv('id')]);
@@ -1406,10 +1408,11 @@ function template_edit() : void {
 				FROM thold_template AS tt
 				LEFT JOIN plugin_thold_host_template AS tht
 				ON tt.id = tht.thold_template_id
-				WHERE tt.id NOT IN (
-					SELECT thold_template_id
-					FROM plugin_thold_host_template
-					WHERE host_template_id = ?
+				WHERE NOT EXISTS (
+					SELECT 1
+					FROM plugin_thold_host_template AS tht2
+					WHERE tht2.thold_template_id = tt.id
+					AND tht2.host_template_id = ?
 				)
 				ORDER BY tt.name',
 				[$host_template_id]);

@@ -2824,12 +2824,13 @@ function graphs() : void {
 			LEFT JOIN host AS h
 			ON h.id = gl.host_id
 			WHERE graph_type_id IN (4,5,6,7,8,20)
-			AND cdef_id NOT IN (
-				SELECT c.id
+			AND NOT EXISTS (
+				SELECT 1
 				FROM cdef AS c
 				INNER JOIN cdef_items AS ci
 				ON c.id = ci.cdef_id
-				WHERE (ci.type = 4 OR (ci.type = 6 AND value LIKE '%DATA_SOURCE%'))
+				WHERE c.id = gti.cdef_id
+				AND (ci.type = 4 OR (ci.type = 6 AND value LIKE '%DATA_SOURCE%'))
 			)
 			AND (dl.orphan = 1 OR dtr.id IS NULL OR (gl.snmp_query_id > 0 AND gl.snmp_index = ''))
 			$sql_where2

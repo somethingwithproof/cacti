@@ -382,7 +382,7 @@ function simple_checks() : void {
 			ON dtd.local_data_id = did.local_data_id
 			AND did.data_template_data_id = dtd.id
 			AND did.local_data_id > 0
-			AND data_input_field_id NOT IN (SELECT id FROM data_input_fields WHERE data_input_id = dtd.data_input_id)');
+			AND NOT EXISTS (SELECT 1 FROM data_input_fields AS dif WHERE dif.id = did.data_input_field_id AND dif.data_input_id = dtd.data_input_id)');
 
 		$fixes = db_affected_rows();
 
@@ -423,7 +423,7 @@ function detailed_checks() : void {
 	if ($rows > 0) {
 		if ($force) {
 			db_execute('DELETE FROM graph_templates_item
-				WHERE gprint_id NOT IN (SELECT id FROM graph_templates_gprint)
+				WHERE NOT EXISTS (SELECT 1 FROM graph_templates_gprint AS gtp WHERE gtp.id = graph_templates_item.gprint_id)
 				AND gprint_id > 0');
 
 			$fixes = db_affected_rows();
@@ -450,7 +450,7 @@ function detailed_checks() : void {
 	if ($rows > 0) {
 		if ($force) {
 			db_execute('DELETE FROM cdef_items
-				WHERE cdef_id NOT IN (SELECT id FROM cdef)');
+				WHERE NOT EXISTS (SELECT 1 FROM cdef WHERE cdef.id = cdef_items.cdef_id)');
 
 			$fixes = db_affected_rows();
 
@@ -478,7 +478,7 @@ function detailed_checks() : void {
 	if ($rows > 0) {
 		if ($force) {
 			db_execute('DELETE FROM data_template_data
-				WHERE data_input_id NOT IN (SELECT id FROM data_input)');
+				WHERE NOT EXISTS (SELECT 1 FROM data_input AS di WHERE di.id = data_template_data.data_input_id)');
 
 			$fixes = db_affected_rows();
 
@@ -561,7 +561,7 @@ function detailed_checks() : void {
 			$total_repairs += $rows;
 
 			db_execute('DELETE FROM data_input_fields
-				WHERE data_input_fields.data_input_id NOT IN (SELECT id FROM data_input)');
+				WHERE NOT EXISTS (SELECT 1 FROM data_input AS di WHERE di.id = data_input_fields.data_input_id)');
 
 			update_replication_crc(0, 'poller_replicate_data_input_fields_crc');
 		}

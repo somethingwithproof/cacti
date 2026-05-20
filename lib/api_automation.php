@@ -4430,10 +4430,11 @@ function automation_update_device(int $host_id) : void {
 		INNER JOIN host_graph AS hg
 		ON gt.id=hg.graph_template_id
 		WHERE hg.host_id=' . $host_id . '
-		AND gt.id NOT IN (
-			SELECT gl.graph_template_id
+		AND NOT EXISTS (
+			SELECT 1
 			FROM graph_local AS gl
-			WHERE host_id=' . $host_id . '
+			WHERE gl.graph_template_id = gt.id
+			AND gl.host_id=' . $host_id . '
 		)';
 
 	$graph_templates = db_fetch_assoc($sql);

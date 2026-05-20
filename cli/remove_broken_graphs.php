@@ -116,10 +116,11 @@ $sql = "SELECT name, graph_template_id, graphs, local_graph_ids
 		WHERE local_graph_id > 0
 		AND graph_template_id > 0
 		AND task_item_id > 0
-		AND task_item_id NOT IN (
-			SELECT id
-			FROM data_template_rrd
-			WHERE local_data_id > 0
+		AND NOT EXISTS (
+			SELECT 1
+			FROM data_template_rrd AS dtr
+			WHERE dtr.id = graph_templates_item.task_item_id
+			AND dtr.local_data_id > 0
 		)
 		GROUP BY graph_template_id
 	) AS gti

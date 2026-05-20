@@ -935,7 +935,7 @@ function host_edit() : void {
 			WHERE sqg.name IS NULL
 			AND gti.local_graph_id = 0
 			AND dtr.local_data_id = 0
-			AND gt.id NOT IN (SELECT graph_template_id FROM host_graph WHERE host_id = ?)
+			AND NOT EXISTS (SELECT 1 FROM host_graph AS hg WHERE hg.graph_template_id = gt.id AND hg.host_id = ?)
 			ORDER BY gt.name',
 			[grv('id')]
 		);
@@ -1046,7 +1046,7 @@ function host_edit() : void {
 			$sql_where2 = ' WHERE';
 		}
 
-		$sql_where2 .= ' snmp_query.id NOT IN(SELECT snmp_query_id FROM host_snmp_query WHERE host_id = ?)';
+		$sql_where2 .= ' NOT EXISTS (SELECT 1 FROM host_snmp_query AS hsq WHERE hsq.snmp_query_id = snmp_query.id AND hsq.host_id = ?)';
 		$sql_params2[] = grv('id');
 
 		$selected_data_queries = db_fetch_assoc_prepared("SELECT snmp_query.id, host_snmp_query.reindex_last_runtime,
