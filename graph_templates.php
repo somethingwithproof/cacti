@@ -460,8 +460,8 @@ function form_save() : void {
 			$save['graph_template_id'] = grv('graph_template_id');
 			$save['local_graph_id']    = 0;
 			$save['task_item_id']      = form_input_validate(grv('task_item_id'), 'task_item_id', '^[0-9]+$', true, 3);
-			$save['color_id']          = form_input_validate((isset($item['color_id']) ? $item['color_id'] : grv('color_id')), 'color_id', '', true, 3);
-			$save['color2_id']         = form_input_validate((isset($item['color2_id']) ? $item['color2_id'] : grv('color2_id')), 'color2_id', '', true, 3);
+			$save['color_id']          = form_input_validate(($item['color_id'] ?? grv('color_id')), 'color_id', '', true, 3);
+			$save['color2_id']         = form_input_validate(($item['color2_id'] ?? grv('color2_id')), 'color2_id', '', true, 3);
 
 			// if alpha is disabled, use invisible_alpha instead
 			if (!isrv('alpha')) {
@@ -472,14 +472,14 @@ function form_save() : void {
 				srv('alpha2', gnrv('invisible_alpha'));
 			}
 
-			$save['alpha']             = form_input_validate((isset($item['alpha']) ? $item['alpha'] : gnrv('alpha')), 'alpha', '', true, 3);
-			$save['alpha2']            = form_input_validate((isset($item['alpha2']) ? $item['alpha2'] : gnrv('alpha2')), 'alpha2', '', true, 3);
-			$save['gradheight']        = form_input_validate((isset($item['gradheight']) ? $item['gradheight'] : gnrv('gradheight')), 'gradheight', '', true, 3);
+			$save['alpha']             = form_input_validate(($item['alpha'] ?? gnrv('alpha')), 'alpha', '', true, 3);
+			$save['alpha2']            = form_input_validate(($item['alpha2'] ?? gnrv('alpha2')), 'alpha2', '', true, 3);
+			$save['gradheight']        = form_input_validate(($item['gradheight'] ?? gnrv('gradheight')), 'gradheight', '', true, 3);
 
-			$save['graph_type_id']     = form_input_validate((isset($item['graph_type_id']) ? $item['graph_type_id'] : gfrv('graph_type_id')), 'graph_type_id', '^[0-9]+$', true, 3);
+			$save['graph_type_id']     = form_input_validate(($item['graph_type_id'] ?? gfrv('graph_type_id')), 'graph_type_id', '^[0-9]+$', true, 3);
 
 			if (isrv('line_width') || isset($item['line_width'])) {
-				$save['line_width']    = form_input_validate((isset($item['line_width']) ? $item['line_width'] : gnrv('line_width')), 'line_width', '(^[0-9]+[\.,0-9]+$|^[0-9]+$)', true, 3);
+				$save['line_width']    = form_input_validate(($item['line_width'] ?? gnrv('line_width')), 'line_width', '(^[0-9]+[\.,0-9]+$|^[0-9]+$)', true, 3);
 			} else {
 				// make sure to transfer old LINEx style into line_width on save
 				switch ($save['graph_type_id']) {
@@ -505,16 +505,16 @@ function form_save() : void {
 			$save['cdef_id']                   = form_input_validate(gnrv('cdef_id'), 'cdef_id', '^[0-9]+$', true, 3);
 			$save['vdef_id']                   = form_input_validate(gnrv('vdef_id'), 'vdef_id', '^[0-9]+$', true, 3);
 			$save['shift']                     = form_input_validate((isrv('shift') ? gnrv('shift') : ''), 'shift', '^((on)|)$', true, 3);
-			$save['consolidation_function_id'] = form_input_validate((isset($item['consolidation_function_id']) ? $item['consolidation_function_id'] : gnrv('consolidation_function_id')), 'consolidation_function_id', '^[0-9]+$', true, 3);
+			$save['consolidation_function_id'] = form_input_validate(($item['consolidation_function_id'] ?? gnrv('consolidation_function_id')), 'consolidation_function_id', '^[0-9]+$', true, 3);
 
 			$save['textalign']                 = form_input_validate((isrv('textalign') ? gnrv('textalign') : ''), 'textalign', '^[a-z]+$', true, 3);
 
-			$save['text_format']               = form_input_validate((isset($item['text_format']) ? $item['text_format'] : gnrv('text_format')), 'text_format', '', true, 3);
-			$save['legend']                    = form_input_validate((isset($item['legend']) ? $item['legend'] : gnrv('legend')), 'legend', '', true, 3);
+			$save['text_format']               = form_input_validate(($item['text_format'] ?? gnrv('text_format')), 'text_format', '', true, 3);
+			$save['legend']                    = form_input_validate(($item['legend'] ?? gnrv('legend')), 'legend', '', true, 3);
 
 			$save['value']                     = form_input_validate(gnrv('value'), 'value', '', true, 3);
 
-			$save['hard_return']               = form_input_validate(((isset($item['hard_return']) ? $item['hard_return'] : (isrv('hard_return') ? gnrv('hard_return') : ''))), 'hard_return', '', true, 3);
+			$save['hard_return']               = form_input_validate(($item['hard_return'] ?? (isrv('hard_return') ? gnrv('hard_return') : '')), 'hard_return', '', true, 3);
 
 			$save['gprint_id']                 = form_input_validate(gnrv('gprint_id'), 'gprint_id', '^[0-9]+$', true, 3);
 			$save['sequence']                  = $sequence;
@@ -1505,16 +1505,16 @@ function template_edit() : void {
 		$form_array += [$field_name => $struct_graph[$field_name]];
 
 		if ($form_array[$field_name]['method'] != 'spacer') {
-			$form_array[$field_name]['value'] = (isset($template_graph[$field_name]) ? $template_graph[$field_name] : '');
+			$form_array[$field_name]['value'] = ($template_graph[$field_name] ?? '');
 		}
 
-		$form_array[$field_name]['form_id'] = (isset($template_graph['id']) ? $template_graph['id'] : '0');
+		$form_array[$field_name]['form_id'] = ($template_graph['id'] ?? '0');
 
 		if ($form_array[$field_name]['method'] != 'spacer') {
 			$form_array[$field_name]['sub_checkbox'] = [
 				'name'          => 't_' . $field_name,
 				'friendly_name' => __esc('Check this checkbox if you wish to allow the user to override the value on the right during Graph creation.'),
-				'value'         => (isset($template_graph['t_' . $field_name]) ? $template_graph['t_' . $field_name] : '')
+				'value'         => ($template_graph['t_' . $field_name] ?? '')
 			];
 		}
 	}
