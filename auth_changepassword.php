@@ -384,7 +384,7 @@ html_auth_header('change_password', __('Change Password'), __('Change Password')
 		<td>
 			<input type='hidden' name='action' value='changepassword'>
 			<input type='hidden' name='ref' value='<?php print htmle(grv('ref')); ?>'>
-			<input type='hidden' name='name' value='<?php print isset($user['username']) ? htmle($user['username']) : ''; ?>'>
+			<input type='hidden' name='name' value='<?php print htmle($user['username'] ?? ''); ?>'>
 			<input type='text'><input type='password'></td>
 		</td>
 	</tr>

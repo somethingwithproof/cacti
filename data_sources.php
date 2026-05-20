@@ -1116,32 +1116,32 @@ function ds_edit() : void {
 			'none_value'    => __('None'),
 			'sql'           => 'SELECT id, description AS name FROM host ORDER BY name',
 			'action'        => 'ajax_hosts_noany',
-			'id'            => (isset($data_local['host_id']) ? $data_local['host_id'] : 0),
+			'id'            => ($data_local['host_id'] ?? 0),
 			'value'         => $hostDescription
 		],
 		'_data_template_id' => [
 			'method' => 'hidden',
-			'value'  => (isset($data_template['id']) ? $data_template['id'] : '0')
+			'value'  => ($data_template['id'] ?? '0')
 		],
 		'_host_id' => [
 			'method' => 'hidden',
-			'value'  => (isset($data_local['host_id']) ? $data_local['host_id'] : '0')
+			'value'  => ($data_local['host_id'] ?? '0')
 		],
 		'_data_input_id' => [
 			'method' => 'hidden',
-			'value'  => (isset($data['data_input_id']) ? $data['data_input_id'] : '0')
+			'value'  => ($data['data_input_id'] ?? '0')
 		],
 		'data_template_data_id' => [
 			'method' => 'hidden',
-			'value'  => (isset($data['id']) ? $data['id'] : '0')
+			'value'  => ($data['id'] ?? '0')
 		],
 		'local_data_template_data_id' => [
 			'method' => 'hidden',
-			'value'  => (isset($data['local_data_template_data_id']) ? $data['local_data_template_data_id'] : '0')
+			'value'  => ($data['local_data_template_data_id'] ?? '0')
 		],
 		'local_data_id' => [
 			'method' => 'hidden',
-			'value'  => (isset($data['local_data_id']) ? $data['local_data_id'] : '0')
+			'value'  => ($data['local_data_id'] ?? '0')
 		],
 	];
 
@@ -1186,7 +1186,7 @@ function ds_edit() : void {
 					$form_array[$field_name]['description'] = '';
 				}
 
-				$form_array[$field_name]['value']   = (isset($data[$field_name]) ? $data[$field_name] : '');
+				$form_array[$field_name]['value']   = ($data[$field_name] ?? '');
 				$form_array[$field_name]['form_id'] = (empty($data['id']) ? '0' : $data['id']);
 
 				if (!(($use_data_template == false) || (!empty($data_template_data['t_' . $field_name])) || ($field_array['flags'] == 'NOTEMPLATE'))) {
@@ -1215,7 +1215,7 @@ function ds_edit() : void {
 
 		// select the first "rrd" of this data source by default
 		if (ierv('view_rrd')) {
-			srv('view_rrd', (isset($template_data_rrds[0]['id']) ? $template_data_rrds[0]['id'] : '0'));
+			srv('view_rrd', ($template_data_rrds[0]['id'] ?? '0'));
 		}
 
 		// get more information about the rrd we chose

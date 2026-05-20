@@ -697,7 +697,7 @@ function color_template_edit() : void {
 
 	html_end_box(true, true);
 
-	form_hidden_box('color_template_id', (isset($template['color_template_id']) ? $template['color_template_id'] : '0'), '');
+	form_hidden_box('color_template_id', ($template['color_template_id'] ?? '0'), '');
 	form_hidden_box('save_component_color', '1', '');
 
 	// color item list goes here

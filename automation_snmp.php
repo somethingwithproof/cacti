@@ -646,7 +646,7 @@ function automation_snmp_item_edit() : void {
 	html_end_box(true, true);
 
 	form_hidden_box('item_id', (isrv('item_id') ? grv('item_id') : '0'), '');
-	form_hidden_box('id', (isset($automation_snmp_item['snmp_id']) ? $automation_snmp_item['snmp_id'] : '0'), '');
+	form_hidden_box('id', ($automation_snmp_item['snmp_id'] ?? '0'), '');
 	form_hidden_box('save_component_automation_snmp_item', '1', '');
 
 	form_save_button('automation_snmp.php?action=edit&id=' . grv('id'));

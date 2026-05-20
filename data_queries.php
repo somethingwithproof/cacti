@@ -1223,8 +1223,8 @@ function data_query_edit() : void {
 	?>
 	<script type='text/javascript'>
 
-	var snmp_query_id = '<?php print isset($snmp_query['id']) ? $snmp_query['id'] : '0'; ?>';
-	var snmp_query_graph_id = '<?php print isset($snmp_query_graph['id']) ? $snmp_query_graph['id'] : '0'; ?>';
+	var snmp_query_id = '<?php print $snmp_query['id'] ?? '0'; ?>';
+	var snmp_query_graph_id = '<?php print $snmp_query_graph['id'] ?? '0'; ?>';
 
 	$(function() {
 		$('.cdialog').remove();

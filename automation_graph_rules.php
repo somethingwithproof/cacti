@@ -747,8 +747,8 @@ function automation_graph_rules_edit() : void {
 
 		html_end_box(true, true);
 
-		form_hidden_box('id', (isset($rule['id']) ? $rule['id'] : '0'), '');
-		form_hidden_box('item_id', (isset($rule['item_id']) ? $rule['item_id'] : '0'), '');
+		form_hidden_box('id', ($rule['id'] ?? '0'), '');
+		form_hidden_box('item_id', ($rule['item_id'] ?? '0'), '');
 		form_hidden_box('save_component_automation_graph_rule', '1', '');
 
 		// display the rule items -------------------------------------------------------------------------------

@@ -997,7 +997,7 @@ function graphs() : void {
 			});
 		});";
 
-		$script .= "$('.default').click(function() { $.get('graphs_new.php?action=ajax_save&query=" . (isset($snmp_query['id']) ? $snmp_query['id'] : '') . "'+'&item='+$(\".dqselect\").val()).fail(function(data) { getPresentHTTPError(data); });}); $('tr.notemplate').tooltip();</script>";
+		$script .= "$('.default').click(function() { $.get('graphs_new.php?action=ajax_save&query=" . ($snmp_query['id'] ?? '') . "'+'&item='+$(\".dqselect\").val()).fail(function(data) { getPresentHTTPError(data); });}); $('tr.notemplate').tooltip();</script>";
 
 		print $script;
 	}

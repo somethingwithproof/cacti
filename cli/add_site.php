@@ -250,7 +250,7 @@ function addSite() : int {
 	if ($siteData && $replaceSites) {
 		echoQuiet("Updating existing site: $siteName\n" . PHP_EOL);
 
-		$siteId = isset($siteData[0]['id']) ? $siteData[0]['id'] : 0;
+		$siteId = $siteData[0]['id'] ?? 0;
 
 		if (!$siteId) {
 			if (!$quiet) {
@@ -261,19 +261,19 @@ function addSite() : int {
 		}
 
 		$params = [
-			$siteName ? $siteName : (isset($siteData[0]) ? $siteData[0]['name'] : ''),
-			$siteAddr1 ? $siteAddr1 : (isset($siteData[0]) ? $siteData[0]['address1'] : ''),
-			$siteAddr2 ? $siteAddr2 : (isset($siteData[0]) ? $siteData[0]['address2'] : ''),
-			$siteCity ? $siteCity : (isset($siteData[0]) ? $siteData[0]['city'] : ''),
-			$siteState ? $siteState : (isset($siteData[0]) ? $siteData[0]['state'] : ''),
-			$siteZip ? $siteZip : (isset($siteData[0]) ? $siteData[0]['postal_code'] : ''),
-			$siteCountry ? $siteCountry : (isset($siteData[0]) ? $siteData[0]['country'] : ''),
-			$siteTimezone ? $siteTimezone : (isset($siteData[0]) ? $siteData[0]['timezone'] : ''),
-			$siteLatitude ? $siteLatitude : (isset($siteData[0]) ? $siteData[0]['latitude'] : ''),
-			$siteLongitude ? $siteLongitude : (isset($siteData[0]) ? $siteData[0]['longitude'] : ''),
-			$siteAltname ? $siteAltname : (isset($siteData[0]) ? $siteData[0]['alternate_id'] : ''),
+			$siteName ? $siteName : ($siteData[0]['name'] ?? ''),
+			$siteAddr1 ? $siteAddr1 : ($siteData[0]['address1'] ?? ''),
+			$siteAddr2 ? $siteAddr2 : ($siteData[0]['address2'] ?? ''),
+			$siteCity ? $siteCity : ($siteData[0]['city'] ?? ''),
+			$siteState ? $siteState : ($siteData[0]['state'] ?? ''),
+			$siteZip ? $siteZip : ($siteData[0]['postal_code'] ?? ''),
+			$siteCountry ? $siteCountry : ($siteData[0]['country'] ?? ''),
+			$siteTimezone ? $siteTimezone : ($siteData[0]['timezone'] ?? ''),
+			$siteLatitude ? $siteLatitude : ($siteData[0]['latitude'] ?? ''),
+			$siteLongitude ? $siteLongitude : ($siteData[0]['longitude'] ?? ''),
+			$siteAltname ? $siteAltname : ($siteData[0]['alternate_id'] ?? ''),
 			$siteNotes,
-			isset($siteData[0]) ? $siteData[0]['id'] : 0,
+			$siteData[0]['id'] ?? 0,
 		];
 
 		db_execute_prepared('UPDATE sites SET name = ?, address1 = ?, address2 = ?,

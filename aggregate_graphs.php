@@ -251,7 +251,7 @@ function form_save() : void {
 					$item_new['aggregate_graph_id']      = $aggregate_graph_id;
 					$item_new['graph_templates_item_id'] = $item_id;
 
-					$item_new['color_template'] = isset($data['color_template']) ? $data['color_template'] : 0;
+					$item_new['color_template'] = $data['color_template'] ?? 0;
 					$item_new['item_skip']      = isset($data['item_skip']) ? 'on' : '';
 					$item_new['item_total']     = isset($data['item_total']) ? 'on' : '';
 					$item_new['sequence']       = $sequence;
@@ -344,20 +344,20 @@ function form_save() : void {
 			$save['local_graph_template_item_id'] = gfrv('local_graph_template_item_id');
 			$save['local_graph_id']               = gfrv('local_graph_id');
 			$save['task_item_id']                 = form_input_validate(gfrv('task_item_id'), 'task_item_id', '', true, 3);
-			$save['color_id']                     = form_input_validate((isset($item['color_id']) ? $item['color_id'] : gfrv('color_id')), 'color_id', '', true, 3);
+			$save['color_id']                     = form_input_validate(($item['color_id'] ?? gfrv('color_id')), 'color_id', '', true, 3);
 
 			// if alpha is disabled, use invisible_alpha instead
 			if (!isrv('alpha')) {
 				srv('alpha', gnrv('invisible_alpha'));
 			}
 
-			$save['alpha']                        = form_input_validate((isset($item['alpha']) ? $item['alpha'] : gnrv('alpha')), 'alpha', '', true, 3);
-			$save['graph_type_id']                = form_input_validate((isset($item['graph_type_id']) ? $item['graph_type_id'] : gfrv('graph_type_id')), 'graph_type_id', '', true, 3);
+			$save['alpha']                        = form_input_validate(($item['alpha'] ?? gnrv('alpha')), 'alpha', '', true, 3);
+			$save['graph_type_id']                = form_input_validate(($item['graph_type_id'] ?? gfrv('graph_type_id')), 'graph_type_id', '', true, 3);
 			$save['cdef_id']                      = form_input_validate(gfrv('cdef_id'), 'cdef_id', '', true, 3);
-			$save['consolidation_function_id']    = form_input_validate((isset($item['consolidation_function_id']) ? $item['consolidation_function_id'] : gfrv('consolidation_function_id')), 'consolidation_function_id', '', true, 3);
-			$save['text_format']                  = form_input_validate((isset($item['text_format']) ? $item['text_format'] : gnrv('text_format')), 'text_format', '', true, 3);
+			$save['consolidation_function_id']    = form_input_validate(($item['consolidation_function_id'] ?? gfrv('consolidation_function_id')), 'consolidation_function_id', '', true, 3);
+			$save['text_format']                  = form_input_validate(($item['text_format'] ?? gnrv('text_format')), 'text_format', '', true, 3);
 			$save['value']                        = form_input_validate(gnrv('value'), 'value', '', true, 3);
-			$save['hard_return']                  = form_input_validate(((isset($item['hard_return']) ? $item['hard_return'] : (isrv('hard_return') ? gnrv('hard_return') : ''))), 'hard_return', '', true, 3);
+			$save['hard_return']                  = form_input_validate(($item['hard_return'] ?? (isrv('hard_return') ? gnrv('hard_return') : '')), 'hard_return', '', true, 3);
 			$save['gprint_id']                    = form_input_validate(gfrv('gprint_id'), 'gprint_id', '', true, 3);
 			$save['sequence']                     = gfrv('sequence');
 
@@ -1025,7 +1025,7 @@ function graph_edit() : bool {
 		$_SESSION['aggregate_referer'] = $_SERVER['HTTP_REFERER'];
 	}
 
-	$referer = isset($_SESSION['aggregate_referer']) ? $_SESSION['aggregate_referer'] : 'aggregate_graphs.php';
+	$referer = $_SESSION['aggregate_referer'] ?? 'aggregate_graphs.php';
 
 	$use_graph_template = false;
 	$aginfo             = [];

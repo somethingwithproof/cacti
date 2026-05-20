@@ -443,7 +443,7 @@ function item_edit() : void {
 			'method'        => 'drop_array',
 			'friendly_name' => __('CDEF Item Value'),
 			'description'   => __('Enter a value for this CDEF item.'),
-			'value'         => (isset($cdef['value']) ? $cdef['value'] : '')
+			'value'         => ($cdef['value'] ?? '')
 		],
 		'id' => [
 			'method'        => 'hidden',

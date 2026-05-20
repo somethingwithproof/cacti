@@ -5899,8 +5899,8 @@ function parse_email_details(mixed $emails, int $max_records = 0, array $details
 					$name  = $has_name ? $check_email['name'] : '';
 					$email = $has_email ? $check_email['email'] : '';
 				} else {
-					$name  = array_key_exists(1, $check_email) ? $check_email[1] : '';
-					$email = array_key_exists(0, $check_email) ? $check_email[0] : '';
+					$name  = $check_email[1] ?? '';
+					$email = $check_email[0] ?? '';
 				}
 
 				$details[mb_strtolower($email)] = ['name' => $name, 'email' => mb_strtolower($email)];

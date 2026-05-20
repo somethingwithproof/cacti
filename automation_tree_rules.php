@@ -790,8 +790,8 @@ function automation_tree_rules_edit() : void {
 			'fields' => inject_form_variables($form_array, $rule)
 		]);
 
-		form_hidden_box('id', (isset($rule['id']) ? $rule['id'] : '0'), '');
-		form_hidden_box('item_id', (isset($rule['item_id']) ? $rule['item_id'] : '0'), '');
+		form_hidden_box('id', ($rule['id'] ?? '0'), '');
+		form_hidden_box('item_id', ($rule['item_id'] ?? '0'), '');
 		form_hidden_box('save_component_automation_tree_rule', '1', '');
 
 		html_end_box(true, true);

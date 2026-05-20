@@ -1463,7 +1463,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 							$modified_value = (strcmp($matches[1], $value) !== 0) ? $matches[3] : $matches[2];
 							$mode           = 'test value parse';
 						} elseif (preg_match('/^VALUE\/TABLE:(.*)/',$field_array['source'])) {
-							$modified_value = (array_key_exists($value, $const_table)) ? $const_table[$value] : 'N/A';
+							$modified_value = $const_table[$value] ?? 'N/A';
 							$mode           = 'table value parse';
 						} elseif (preg_match('/^VALUE\/HEX2IP:(\d+):(\d+)/', $field_array['source'], $matches)) {
 							// $modified_value = substr(str_replace(':','',$value),$matches[1],$matches[2]);

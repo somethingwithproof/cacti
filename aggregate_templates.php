@@ -236,10 +236,10 @@ function aggregate_form_save() : void {
 		$item_new['aggregate_template_id']   = $id;
 		$item_new['graph_templates_item_id'] = $item_id;
 
-		$item_new['color_template'] = isset($data['color_template']) ? $data['color_template'] : 0;
+		$item_new['color_template'] = $data['color_template'] ?? 0;
 		$item_new['item_skip']      = isset($data['item_skip']) ? 'on' : '';
 		$item_new['item_total']     = isset($data['item_total']) ? 'on' : '';
-		$item_new['sequence']       = isset($data['sequence']) ? $data['sequence'] : 0;
+		$item_new['sequence']       = $data['sequence'] ?? 0;
 
 		// compare with old item to see if we need to push out.
 		if (!isset($aggregate_template_items_old[$item_id])) {
@@ -403,7 +403,7 @@ function aggregate_template_edit() : void {
 	draw_edit_form(
 		[
 			'config' => ['no_form_tag' => true],
-			'fields' => inject_form_variables($struct_aggregate_template, (isset($template) ? $template : []))
+			'fields' => inject_form_variables($struct_aggregate_template, ($template ?? []))
 		]
 	);
 
@@ -416,7 +416,7 @@ function aggregate_template_edit() : void {
 		draw_aggregate_template_graph_config($template['id'], $template['graph_template_id']);
 	}
 
-	form_hidden_box('id', (isset($template['id']) ? $template['id'] : '0'), '0');
+	form_hidden_box('id', ($template['id'] ?? '0'), '0');
 	form_hidden_box('save_component_template', '1', '');
 	form_save_button('aggregate_templates.php', 'return', 'id');
 
