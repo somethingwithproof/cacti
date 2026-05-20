@@ -64,14 +64,16 @@
         "pestphp/pest": "^2",
         "pestphp/pest-plugin-drift": "^2.0",
         "composer/xdebug-handler": "^3.0",
-        "rector/rector": "^2.1.2"
+        "rector/rector": "^2.1.2",
+        "infection/infection": "^0.29"
     },
     "scripts": {
         "lint": "phplint --no-cache --exclude=include/vendor ",
         "phpstan": "phpstan analyse --level 6 ",
         "phpcsfixer": "php-cs-fixer fix --allow-unsupported-php-version=yes --dry-run --diff --config=./.php-cs-fixer.php ",
         "phpcsfixit": "php-cs-fixer fix ",
-        "test": "include/vendor/bin/pest --display-warnings"
+        "test": "include/vendor/bin/pest --display-warnings",
+        "mutate": "infection --threads=4 --min-msi=70 --min-covered-msi=80"
     },
     "authors": [
         {

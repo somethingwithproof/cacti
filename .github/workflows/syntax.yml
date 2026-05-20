@@ -112,6 +112,15 @@ jobs:
       run: composer run-script test
       working-directory: .
 
+    - name: Run E2E Tests
+      run: include/vendor/bin/pest --testsuite=E2E --display-warnings
+      working-directory: .
+
+    - name: Run Mutation Tests
+      run: composer run-script mutate
+      working-directory: .
+      continue-on-error: true
+
     - name: Install github if not already installed
       run: sudo apt-get -y install git
 
