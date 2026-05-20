@@ -1910,7 +1910,7 @@ function user_edit() : void {
 			draw_edit_form(
 				[
 					'config' => ['no_form_tag' => true],
-					'fields' => inject_form_variables($fields_user_edit, (isset($user) ? $user : []))
+					'fields' => inject_form_variables($fields_user_edit, ($user ?? []))
 				]
 			);
 

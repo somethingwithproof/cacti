@@ -1766,7 +1766,7 @@ function group_edit() : void {
 
 			draw_edit_form([
 				'config' => ['no_form_tag' => true],
-				'fields' => inject_form_variables($fields_user_group_edit, (isset($group) ? $group : []))
+				'fields' => inject_form_variables($fields_user_group_edit, ($group ?? []))
 			]);
 
 			html_end_box(true, true);

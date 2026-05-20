@@ -1000,7 +1000,7 @@ function item_edit() : void {
 
 	draw_edit_form([
 		'config' => ['no_form_tag' => true],
-		'fields' => inject_form_variables($fields_profile_rra_edit, (isset($rra) ? $rra : []))
+		'fields' => inject_form_variables($fields_profile_rra_edit, ($rra ?? []))
 		]
 	);
 

@@ -478,28 +478,28 @@ function edit_page() : void {
 				'FRONTTOP'   => __('Top of Console Page')
 			],
 			'description' => __('Where should this page appear?'),
-			'value'       => (isset($data['style']) ? $data['style'] : '')
+			'value'       => ($data['style'] ?? '')
 		],
 		'consolesection' => [
 			'friendly_name' => __('Console Menu Section'),
 			'method'        => 'drop_array',
 			'array'         => $sec_ar,
 			'description'   => __('Under which Console heading should this item appear? (All External Link menus will appear between Configuration and Utilities)'),
-			'value'         => (isset($data['extendedstyle']) ? $data['extendedstyle'] : '')
+			'value'         => ($data['extendedstyle'] ?? '')
 		],
 		'consolenewsection' => [
 			'friendly_name' => __('New Console Section'),
 			'method'        => 'textbox',
 			'max_length'    => 20,
 			'description'   => __('If you don\'t like any of the choices above, type a new title in here.'),
-			'value'         => (isset($data['extendedstyle']) ? $data['extendedstyle'] : '')
+			'value'         => ($data['extendedstyle'] ?? '')
 		],
 		'title' => [
 			'friendly_name' => __('Tab/Menu Name'),
 			'method'        => 'textbox',
 			'max_length'    => 20,
 			'description'   => __('The text that will appear in the tab or menu.'),
-			'value'         => (isset($data['title']) ? $data['title'] : '')
+			'value'         => ($data['title'] ?? '')
 		],
 		'filename' => [
 			'friendly_name' => __('Content File/URL'),
@@ -508,7 +508,7 @@ function edit_page() : void {
 			'exclusions'    => ['README', 'index.php'],
 			'none_value'    => __('Web URL Below'),
 			'description'   => __('The file that contains the content for this page. This file needs to be in the Cacti \'include/content/\' directory.'),
-			'value'         => (isset($data['contentfile']) ? $data['contentfile'] : '')
+			'value'         => ($data['contentfile'] ?? '')
 		],
 		'fileurl' => [
 			'friendly_name' => __('Web URL Location'),
@@ -517,7 +517,7 @@ function edit_page() : void {
 			'max_length'    => 255,
 			'size'          => 80,
 			'default'       => 'http://www.cacti.net',
-			'value'         => (isset($data['contentfile']) ? $data['contentfile'] : '')
+			'value'         => ($data['contentfile'] ?? '')
 		],
 		'enabled' => [
 			'friendly_name' => __('Enabled'),
@@ -531,7 +531,7 @@ function edit_page() : void {
 			'method'        => 'drop_array',
 			'array'         => $myrefresh,
 			'description'   => __('How often do you wish this page to be refreshed automatically.'),
-			'value'         => (isset($data['refresh']) ? $data['refresh'] : '')
+			'value'         => ($data['refresh'] ?? '')
 		],
 	];
 

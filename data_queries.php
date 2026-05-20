@@ -646,7 +646,7 @@ function data_query_item_edit() : void {
 	draw_edit_form(
 		[
 			'config' => ['no_form_tag' => true],
-			'fields' => inject_form_variables($fields_data_query_item_edit, (isset($snmp_query_item) ? $snmp_query_item : []), $_REQUEST)
+			'fields' => inject_form_variables($fields_data_query_item_edit, ($snmp_query_item ?? []), $_REQUEST)
 		]
 	);
 
@@ -1117,7 +1117,7 @@ function data_query_edit() : void {
 	draw_edit_form(
 		[
 			'config' => ['no_form_tag' => true],
-			'fields' => inject_form_variables($fields_data_query_edit, (isset($snmp_query) ? $snmp_query : []))
+			'fields' => inject_form_variables($fields_data_query_edit, ($snmp_query ?? []))
 		]
 	);
 

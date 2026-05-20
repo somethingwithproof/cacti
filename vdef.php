@@ -421,7 +421,7 @@ function vdef_item_edit() : void {
 			'method'        => 'drop_array',
 			'friendly_name' => __('VDEF Item Value'),
 			'description'   => __('Enter a value for this VDEF item.'),
-			'value'         => (isset($vdef['value']) ? $vdef['value'] : '')
+			'value'         => ($vdef['value'] ?? '')
 		],
 		'id' => [
 			'method'        => 'hidden',
@@ -566,7 +566,7 @@ function vdef_edit() : void {
 
 	html_end_box(true, true);
 
-	form_hidden_box('id', (isset($vdef['id']) ? $vdef['id'] : '0'), '');
+	form_hidden_box('id', ($vdef['id'] ?? '0'), '');
 	form_hidden_box('save_component_vdef', '1', '');
 
 	if (cacti_sizeof($vdef) && !ierv('id')) {

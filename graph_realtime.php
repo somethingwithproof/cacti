@@ -292,10 +292,10 @@ switch (grv('action')) {
 			'local_graph_id' => grv('local_graph_id'),
 			'top'            => grv('top'),
 			'left'           => grv('left'),
-			'ds_step'        => htmle(isset($_SESSION['sess_realtime_ds_step']) ? $_SESSION['sess_realtime_ds_step'] : $graph_data_array['ds_step']),
-			'graph_start'    => htmle(isset($_SESSION['sess_realtime_graph_start']) ? $_SESSION['sess_realtime_graph_start'] : $graph_data_array['graph_start']),
-			'size'           => htmle(isset($_SESSION['sess_realtime_size']) ? $_SESSION['sess_realtime_size'] : read_user_setting('realtime_size', 100)),
-			'thumbnails'     => htmle(isset($_SESSION['sess_realtime_nolegend']) ? $_SESSION['sess_realtime_nolegend'] : 'false'),
+			'ds_step'        => htmle($_SESSION['sess_realtime_ds_step'] ?? $graph_data_array['ds_step']),
+			'graph_start'    => htmle($_SESSION['sess_realtime_graph_start'] ?? $graph_data_array['graph_start']),
+			'size'           => htmle($_SESSION['sess_realtime_size'] ?? read_user_setting('realtime_size', 100)),
+			'thumbnails'     => htmle($_SESSION['sess_realtime_nolegend'] ?? 'false'),
 			'data'           => $data,
 			'image_format'   => $graph_data_array['image_format']
 		];

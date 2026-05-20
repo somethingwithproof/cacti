@@ -642,8 +642,8 @@ function form_save() : void {
 			$save['local_graph_template_item_id'] = gnrv('local_graph_template_item_id');
 			$save['local_graph_id']               = gnrv('local_graph_id');
 			$save['task_item_id']                 = form_input_validate(gnrv('task_item_id'), 'task_item_id', '^[0-9]+$', true, 3);
-			$save['color_id']                     = form_input_validate((isset($item['color_id']) ? $item['color_id'] : gnrv('color_id')), 'color_id', '^[0-9]+$', true, 3);
-			$save['color2_id']                    = form_input_validate((isset($item['color2_id']) ? $item['color2_id'] : gnrv('color2_id')), 'color2_id', '^[0-9]+$', true, 3);
+			$save['color_id']                     = form_input_validate(($item['color_id'] ?? gnrv('color_id')), 'color_id', '^[0-9]+$', true, 3);
+			$save['color2_id']                    = form_input_validate(($item['color2_id'] ?? gnrv('color2_id')), 'color2_id', '^[0-9]+$', true, 3);
 
 			// if alpha is disabled, use invisible_alpha instead
 			if (!isrv('alpha')) {
@@ -654,11 +654,11 @@ function form_save() : void {
 				srv('alpha2', gnrv('invisible_alpha'));
 			}
 
-			$save['alpha']          = form_input_validate((isset($item['alpha']) ? $item['alpha'] : gnrv('alpha')), 'alpha', '', true, 3);
-			$save['alpha2']         = form_input_validate((isset($item['alpha2']) ? $item['alpha2'] : gnrv('alpha2')), 'alpha2', '', true, 3);
+			$save['alpha']          = form_input_validate(($item['alpha'] ?? gnrv('alpha')), 'alpha', '', true, 3);
+			$save['alpha2']         = form_input_validate(($item['alpha2'] ?? gnrv('alpha2')), 'alpha2', '', true, 3);
 			$save['gradheight']     = form_input_validate(gnrv('gradheight'), 'gradheight', '', true, 3);
 
-			$save['graph_type_id']  = form_input_validate((isset($item['graph_type_id']) ? $item['graph_type_id'] : gnrv('graph_type_id')), 'graph_type_id', '^[0-9]+$', true, 3);
+			$save['graph_type_id']  = form_input_validate(($item['graph_type_id'] ?? gnrv('graph_type_id')), 'graph_type_id', '^[0-9]+$', true, 3);
 
 			if (isrv('line_width')) {
 				$save['line_width'] = form_input_validate(gnrv('line_width'), 'line_width', '(^[0-9]+[\.,0-9]+$|^[0-9]+$)', true, 3);
@@ -686,13 +686,13 @@ function form_save() : void {
 			$save['cdef_id']                   = form_input_validate(gnrv('cdef_id'), 'cdef_id', '^[0-9]+$', true, 3);
 			$save['vdef_id']                   = form_input_validate(gnrv('vdef_id'), 'vdef_id', '^[0-9]+$', true, 3);
 			$save['shift']                     = form_input_validate((isrv('shift') ? gnrv('shift') : ''), 'shift', '^((on)|)$', true, 3);
-			$save['consolidation_function_id'] = form_input_validate((isset($item['consolidation_function_id']) ? $item['consolidation_function_id'] : gnrv('consolidation_function_id')), 'consolidation_function_id', '^[0-9]+$', true, 3);
+			$save['consolidation_function_id'] = form_input_validate(($item['consolidation_function_id'] ?? gnrv('consolidation_function_id')), 'consolidation_function_id', '^[0-9]+$', true, 3);
 			$save['textalign']                 = form_input_validate((isrv('textalign') ? gnrv('textalign') : ''), 'textalign', '^[a-z]+$', true, 3);
-			$save['text_format']               = form_input_validate((isset($item['text_format']) ? $item['text_format'] : gnrv('text_format')), 'text_format', '', true, 3);
+			$save['text_format']               = form_input_validate(($item['text_format'] ?? gnrv('text_format')), 'text_format', '', true, 3);
 			$save['legend']                    = form_input_validate(gnrv('legend'), 'legend', '', true, 3);
 
 			$save['value']                     = form_input_validate(gnrv('value'), 'value', '', true, 3);
-			$save['hard_return']               = form_input_validate(((isset($item['hard_return']) ? $item['hard_return'] : (isrv('hard_return') ? gnrv('hard_return') : ''))), 'hard_return', '', true, 3);
+			$save['hard_return']               = form_input_validate((($item['hard_return'] ?? (isrv('hard_return') ? gnrv('hard_return') : ''))), 'hard_return', '', true, 3);
 			$save['gprint_id']                 = form_input_validate(gnrv('gprint_id'), 'gprint_id', '^[0-9]+$', true, 3);
 			$save['sequence']                  = $sequence;
 
@@ -1056,13 +1056,13 @@ function item_edit() : void {
 
 		if (read_config_option('autocomplete_enabled')) {
 			if ($field_name != 'task_item_id') {
-				$form_array[$field_name]['value'] = (isset($template_item[$field_name]) ? $template_item[$field_name] : '');
+				$form_array[$field_name]['value'] = ($template_item[$field_name] ?? '');
 			}
 		} else {
-			$form_array[$field_name]['value'] = (isset($template_item[$field_name]) ? $template_item[$field_name] : '');
+			$form_array[$field_name]['value'] = ($template_item[$field_name] ?? '');
 		}
 
-		$form_array[$field_name]['form_id'] = (isset($template_item['id']) ? $template_item['id'] : '0');
+		$form_array[$field_name]['form_id'] = ($template_item['id'] ?? '0');
 	}
 
 	draw_edit_form(
@@ -1511,10 +1511,10 @@ function form_actions() : void {
 						$item_new['aggregate_graph_id']      = $aggregate_graph_id;
 						$item_new['graph_templates_item_id'] = $item_id;
 
-						$item_new['color_template']          = isset($data['color_template']) ? $data['color_template'] : 0;
+						$item_new['color_template']          = $data['color_template'] ?? 0;
 						$item_new['item_skip']               = isset($data['item_skip']) ? 'on' : '';
 						$item_new['item_total']              = isset($data['item_total']) ? 'on' : '';
-						$item_new['sequence']                = isset($data['sequence']) ? $data['sequence'] : 0;
+						$item_new['sequence']                = $data['sequence'] ?? 0;
 
 						$aggregate_graph_items[]             = $item_new;
 					}
@@ -2419,17 +2419,17 @@ function graph_edit() : void {
 				'graph_template_graph_id' => [
 					'method' => 'hidden',
 					'filter' => FILTER_VALIDATE_INT,
-					'value'  => (isset($graph['id']) ? $graph['id'] : '0')
+					'value'  => ($graph['id'] ?? '0')
 				],
 				'local_graph_id' => [
 					'method' => 'hidden',
 					'filter' => FILTER_VALIDATE_INT,
-					'value'  => (isset($graph['local_graph_id']) ? $graph['local_graph_id'] : '0')
+					'value'  => ($graph['local_graph_id'] ?? '0')
 				],
 				'local_graph_template_graph_id' => [
 					'method' => 'hidden',
 					'filter' => FILTER_VALIDATE_INT,
-					'value'  => (isset($graph['local_graph_template_graph_id']) ? $graph['local_graph_template_graph_id'] : '0')
+					'value'  => ($graph['local_graph_template_graph_id'] ?? '0')
 				],
 				'graph_template_id_prev' => [
 					'method' => 'hidden',
@@ -2439,7 +2439,7 @@ function graph_edit() : void {
 				'host_id_prev' => [
 					'method' => 'hidden',
 					'filter' => FILTER_VALIDATE_INT,
-					'value'  => (isset($host_id) ? $host_id : '0')
+					'value'  => ($host_id ?? '0')
 				],
 				'id' => [
 					'method'  => 'validate',
@@ -2456,7 +2456,7 @@ function graph_edit() : void {
 			],
 			[
 				'display' => __('Edit Graph Template'),
-				'url'     => 'graph_templates.php?action=template_edit&id=' . (isset($graph['graph_template_id']) ? $graph['graph_template_id'] : '0'),
+				'url'     => 'graph_templates.php?action=template_edit&id=' . ($graph['graph_template_id'] ?? '0'),
 				'class'   => 'ti ti-edit editTemplate'
 			],
 		]
@@ -2562,7 +2562,7 @@ function graph_edit() : void {
 			$form_array += [$field_name => $struct_graph[$field_name]];
 
 			if (($field_array['method'] != 'header') && ($field_array['method'] != 'spacer')) {
-				$form_array[$field_name]['value']   = (isset($graph[$field_name]) ? $graph[$field_name] : '');
+				$form_array[$field_name]['value']   = ($graph[$field_name] ?? '');
 				$form_array[$field_name]['form_id'] = (isset($graph[$field_name]) ? $graph['id'] : '0');
 
 				if ($use_graph_template == true && isset($graph_template['t_' . $field_name]) && ($graph_template['t_' . $field_name] == 'on')) {

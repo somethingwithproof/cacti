@@ -691,7 +691,7 @@ function color_template_edit() : void {
 	draw_edit_form(
 		[
 			'config' => ['no_form_tag' => true],
-			'fields' => inject_form_variables($fields_color_template_template_edit, (isset($template) ? $template : []))
+			'fields' => inject_form_variables($fields_color_template_template_edit, ($template ?? []))
 		]
 	);
 

@@ -734,7 +734,7 @@ function template_edit() : void {
 		$form_array += [$field_name => $struct_data_source[$field_name]];
 
 		if ($form_array[$field_name]['method'] != 'spacer') {
-			$form_array[$field_name]['value'] = (isset($template_data[$field_name]) ? $template_data[$field_name] : '');
+			$form_array[$field_name]['value'] = ($template_data[$field_name] ?? '');
 		}
 
 		$form_array[$field_name]['form_id'] = $template_data['data_template_id'] ?? 0;
@@ -745,7 +745,7 @@ function template_edit() : void {
 			$form_array[$field_name]['sub_checkbox'] = [
 				'name'          => 't_' . $field_name,
 				'friendly_name' => __esc('Check this checkbox if you wish to allow the user to override the value on the right during Data Source creation.'),
-				'value'         => (isset($template_data['t_' . $field_name]) ? $template_data['t_' . $field_name] : ''),
+				'value'         => ($template_data['t_' . $field_name] ?? ''),
 				'default'       => ''
 			];
 		}
@@ -774,7 +774,7 @@ function template_edit() : void {
 
 	// select the first "rrd" of this data source by default
 	if (ierv('view_rrd')) {
-		srv('view_rrd', (isset($template_data_rrds[0]['id']) ? $template_data_rrds[0]['id'] : '0'));
+		srv('view_rrd', ($template_data_rrds[0]['id'] ?? '0'));
 	}
 
 	// get more information about the rrd we chose
@@ -851,7 +851,7 @@ function template_edit() : void {
 		$form_array[$field_name]['sub_checkbox'] = [
 			'name'          => 't_' . $field_name,
 			'friendly_name' => __esc('Check this checkbox if you wish to allow the user to override the value on the right during Data Source creation.'),
-			'value'         => (isset($template_rrd['t_' . $field_name]) ? $template_rrd['t_' . $field_name] : ''),
+			'value'         => ($template_rrd['t_' . $field_name] ?? ''),
 			'default'       => ''
 		];
 	}

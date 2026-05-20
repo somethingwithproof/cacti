@@ -164,7 +164,7 @@ if (isset($xport_array['meta']['start'])) {
 			$j = 0;
 
 			foreach ($xport_array['data'] as $row) {
-				$data = '"' . date('Y-m-d H:i:s', (isset($row['timestamp']) ? $row['timestamp'] : $xport_array['meta']['start'] + $j * $xport_array['meta']['step'])) . '"';
+				$data = '"' . date('Y-m-d H:i:s', ($row['timestamp'] ?? $xport_array['meta']['start'] + $j * $xport_array['meta']['step'])) . '"';
 
 				for ($i = 1; $i <= $xport_array['meta']['columns']; $i++) {
 					$data .= ',"' . $row['col' . $i] . '"';
@@ -297,7 +297,7 @@ if (isset($xport_array['meta']['start'])) {
 			$j = 0;
 
 			foreach ($xport_array['data'] as $row) {
-				print "<tr><td class='left'>" . date('Y-m-d H:i:s', (isset($row['timestamp']) ? $row['timestamp'] : $xport_array['meta']['start'] + $j * $xport_array['meta']['step'])) . '</td>';
+				print "<tr><td class='left'>" . date('Y-m-d H:i:s', ($row['timestamp'] ?? $xport_array['meta']['start'] + $j * $xport_array['meta']['step'])) . '</td>';
 
 				for ($i = 1; $i <= $xport_array['meta']['columns']; $i++) {
 					$row_data = floatval($row['col' . $i]);
