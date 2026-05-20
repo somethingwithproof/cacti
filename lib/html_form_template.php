@@ -52,6 +52,19 @@ function draw_nontemplated_fields_graph(int $graph_template_id, array &$values_a
 		AND local_graph_id = 0',
 		[$graph_template_id]);
 
+	// batch-fetch all snmp_query_graph_sv field names for this snmp_query_graph_id to avoid N+1 queries
+	$sv_field_names = [];
+
+	if (!empty($snmp_query_graph_id)) {
+		$sv_rows = db_fetch_assoc_prepared('SELECT DISTINCT field_name FROM snmp_query_graph_sv WHERE snmp_query_graph_id = ?', [$snmp_query_graph_id]);
+
+		if (cacti_sizeof($sv_rows)) {
+			foreach ($sv_rows as $sv_row) {
+				$sv_field_names[$sv_row['field_name']] = true;
+			}
+		}
+	}
+
 	foreach ($struct_graph as $field_name => $field_array) {
 		// find our field name
 		$form_field_name = str_replace('|field|', $field_name, $field_name_format);
@@ -71,7 +84,7 @@ function draw_nontemplated_fields_graph(int $graph_template_id, array &$values_a
 			} else {
 				unset($form_array[$form_field_name]);
 			}
-		} elseif ((!empty($snmp_query_graph_id)) && (cacti_sizeof(db_fetch_assoc_prepared('SELECT id FROM snmp_query_graph_sv WHERE snmp_query_graph_id = ? AND field_name = ?', [$snmp_query_graph_id, $field_name])) > 0)) {
+		} elseif ((!empty($snmp_query_graph_id)) && isset($sv_field_names[$field_name])) {
 			if ($include_hidden_fields == true) {
 				$form_array[$form_field_name]['method'] = 'hidden';
 			} else {
@@ -321,6 +334,23 @@ function draw_nontemplated_fields_data_source(int $data_template_id, int $local_
 		AND local_data_id = 0',
 		[$data_template_id]);
 
+	// batch-fetch all snmp_query_graph_rrd_sv field names to avoid N+1 queries in the loop
+	$rrd_sv_field_names = [];
+
+	if (!empty($snmp_query_graph_id)) {
+		$rrd_sv_rows = db_fetch_assoc_prepared('SELECT DISTINCT field_name
+			FROM snmp_query_graph_rrd_sv
+			WHERE snmp_query_graph_id = ?
+			AND data_template_id = ?',
+			[$snmp_query_graph_id, $data_template_id]);
+
+		if (cacti_sizeof($rrd_sv_rows)) {
+			foreach ($rrd_sv_rows as $rrd_sv_row) {
+				$rrd_sv_field_names[$rrd_sv_row['field_name']] = true;
+			}
+		}
+	}
+
 	foreach ($struct_data_source as $field_name => $field_array) {
 		// find our field name
 		$form_field_name = str_replace('|field|', $field_name, $field_name_format);
@@ -341,7 +371,7 @@ function draw_nontemplated_fields_data_source(int $data_template_id, int $local_
 			} else {
 				unset($form_array[$form_field_name]);
 			}
-		} elseif ((!empty($snmp_query_graph_id)) && (cacti_sizeof(db_fetch_assoc_prepared('SELECT id FROM snmp_query_graph_rrd_sv WHERE snmp_query_graph_id = ? AND data_template_id = ? AND field_name = ?', [$snmp_query_graph_id, $data_template_id, $field_name])) > 0)) {
+		} elseif ((!empty($snmp_query_graph_id)) && isset($rrd_sv_field_names[$field_name])) {
 			if ($include_hidden_fields == true) {
 				$form_array[$form_field_name]['method'] = 'hidden';
 			} else {
@@ -405,6 +435,23 @@ function draw_nontemplated_fields_data_source_item(int $data_template_id, array 
 	$draw_any_items   = false;
 	$num_fields_drawn = 0;
 
+	// batch-fetch all snmp_query_graph_rrd_sv field names to avoid N+1 queries in the loop
+	$rrd_sv_item_field_names = [];
+
+	if (!empty($snmp_query_graph_id)) {
+		$rrd_sv_item_rows = db_fetch_assoc_prepared('SELECT DISTINCT field_name
+			FROM snmp_query_graph_rrd_sv
+			WHERE snmp_query_graph_id = ?
+			AND data_template_id = ?',
+			[$snmp_query_graph_id, $data_template_id]);
+
+		if (cacti_sizeof($rrd_sv_item_rows)) {
+			foreach ($rrd_sv_item_rows as $rrd_sv_item_row) {
+				$rrd_sv_item_field_names[$rrd_sv_item_row['field_name']] = true;
+			}
+		}
+	}
+
 	if (cacti_sizeof($values_array)) {
 		foreach ($values_array as $rrd) {
 			$form_array = [];
@@ -449,7 +496,7 @@ function draw_nontemplated_fields_data_source_item(int $data_template_id, array 
 					} else {
 						unset($form_array[$form_field_name]);
 					}
-				} elseif ((!empty($snmp_query_graph_id)) && (cacti_sizeof(db_fetch_assoc_prepared('SELECT id FROM snmp_query_graph_rrd_sv WHERE snmp_query_graph_id = ? AND data_template_id = ? AND field_name = ?', [$snmp_query_graph_id, $data_template_id, $field_name])) > 0)) {
+				} elseif ((!empty($snmp_query_graph_id)) && isset($rrd_sv_item_field_names[$field_name])) {
 					if ($include_hidden_fields == true) {
 						$form_array[$form_field_name]['method'] = 'hidden';
 					} else {

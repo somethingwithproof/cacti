@@ -526,13 +526,20 @@ function html_graph_thumbnail_area(array &$graph_array, string $no_graphs_messag
  */
 function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_buttons', int $tree_id = 0, int $branch_id = 0) : void {
 	static $rand = 0;
+	static $graph_local_cache = [];
 
 	$aggregate_url = aggregate_build_children_url($local_graph_id);
 
-	$graph_template_id = db_fetch_cell_prepared('SELECT graph_template_id
-		FROM graph_local
-		WHERE id = ?',
-		[$local_graph_id]);
+	/* cache graph_local lookups to avoid repeated queries for the same graph */
+	if (!isset($graph_local_cache[$local_graph_id])) {
+		$graph_local_cache[$local_graph_id] = db_fetch_row_prepared('SELECT graph_template_id, host_id
+			FROM graph_local
+			WHERE id = ?',
+			[$local_graph_id]);
+	}
+
+	$graph_local_row = $graph_local_cache[$local_graph_id];
+	$graph_template_id = $graph_local_row['graph_template_id'] ?? 0;
 
 	print "<div class='iconWrapper'>";
 	print "<a class='iconLink utils' href='#' role='link' id='graph_" . $local_graph_id . "_util'><i class='drillDown ti ti-settings-filled actionCog' title='" . __esc('Graph Details, Zooming and Debugging Utilities') . "'></i></a><br>";
@@ -540,10 +547,7 @@ function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_button
 	print "<a class='iconLink mrtg' href='#' role='link' id='graph_" . $local_graph_id . "_mrtg'><i class='drillDown ti ti-table threeBars' title='" . __esc('Time Graph View') . "'></i></a><br>";
 
 	if (is_realm_allowed(3)) {
-		$host_id = db_fetch_cell_prepared('SELECT host_id
-			FROM graph_local
-			WHERE id = ?',
-			[$local_graph_id]);
+		$host_id = $graph_local_row['host_id'] ?? 0;
 
 		if ($host_id > 0) {
 			print "<a class='iconLink' href='" . htmle(CACTI_PATH_URL . "host.php?action=edit&id=$host_id") . "' data-graph='" . $local_graph_id . "' id='graph_" . $local_graph_id . "_de'><i id='de" . $host_id . '_' . $rand . "' class='drillDown ti ti-server editDevice' title='" . __esc('Edit Device') . "'></i></a>";
