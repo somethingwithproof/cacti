@@ -626,6 +626,25 @@ function html_graph_custom_data(int $host_id, int $host_template_id, int $snmp_q
 			$header  = __('Create Graph from %s', htmle($graph_template_name));
 		}
 	} elseif ($form_type == 'sg') {
+		// pre-fetch snmp_query name and graph_template_id mappings to avoid N+1 queries
+		$snmp_query_name_cache = [];
+		$snmp_query_graph_template_cache = [];
+		$sq_graph_ids = array_map('intval', array_keys($form_array2));
+
+		if (!empty($sq_graph_ids)) {
+			$sq_rows = db_fetch_assoc('SELECT sqg.id, sqg.graph_template_id, sq.name AS snmp_query_name
+				FROM snmp_query_graph AS sqg
+				INNER JOIN snmp_query AS sq ON sqg.snmp_query_id = sq.id
+				WHERE sqg.id IN (' . implode(',', $sq_graph_ids) . ')');
+
+			if (cacti_sizeof($sq_rows)) {
+				foreach ($sq_rows as $sq_row) {
+					$snmp_query_graph_template_cache[$sq_row['id']] = $sq_row['graph_template_id'];
+					$snmp_query_name_cache[$sq_row['id']] = $sq_row['snmp_query_name'];
+				}
+			}
+		}
+
 		foreach ($form_array2 as $form_id2 => $form_array3) {
 			// ================= input validation =================
 			input_validate_input_number($snmp_query_id, 'snmp_query_id');
@@ -636,15 +655,11 @@ function html_graph_custom_data(int $host_id, int $host_template_id, int $snmp_q
 			$snmp_query_graph_id = $form_id2;
 			$num_graphs          = cacti_sizeof($form_array3);
 
-			$snmp_query = db_fetch_cell_prepared('SELECT name
-				FROM snmp_query
-				WHERE id = ?',
-				[$snmp_query_id]);
+			$snmp_query = $snmp_query_name_cache[$snmp_query_graph_id]
+				?? db_fetch_cell_prepared('SELECT name FROM snmp_query WHERE id = ?', [$snmp_query_id]);
 
-			$graph_template_id = db_fetch_cell_prepared('SELECT graph_template_id
-				FROM snmp_query_graph
-				WHERE id = ?',
-				[$snmp_query_graph_id]);
+			$graph_template_id = $snmp_query_graph_template_cache[$snmp_query_graph_id]
+				?? db_fetch_cell_prepared('SELECT graph_template_id FROM snmp_query_graph WHERE id = ?', [$snmp_query_graph_id]);
 		}
 
 		if (graph_template_has_override($graph_template_id)) {
@@ -698,15 +713,27 @@ function html_graph_custom_data(int $host_id, int $host_template_id, int $snmp_q
 
 	// DRAW: Data Sources
 	if (cacti_sizeof($data_templates)) {
+		// batch-fetch all data_template_rrd items to avoid N+1 queries in the loop
+		$dt_ids = array_unique(array_map('intval', array_column($data_templates, 'data_template_id')));
+		$all_dt_rrd_items = [];
+
+		if (!empty($dt_ids)) {
+			$all_dt_rrd_rows = db_fetch_assoc('SELECT data_template_rrd.*
+				FROM data_template_rrd
+				WHERE data_template_rrd.data_template_id IN (' . implode(',', $dt_ids) . ')
+				AND local_data_id = 0');
+
+			if (cacti_sizeof($all_dt_rrd_rows)) {
+				foreach ($all_dt_rrd_rows as $dt_rrd_row) {
+					$all_dt_rrd_items[$dt_rrd_row['data_template_id']][] = $dt_rrd_row;
+				}
+			}
+		}
+
 		foreach ($data_templates as $data_template) {
 			array_push($num_output_fields, draw_nontemplated_fields_data_source($data_template['data_template_id'], 0, $data_template, 'd_' . $snmp_query_id . '_' . $graph_template_id . '_' . $data_template['data_template_id'] . '_|field|', __('Data Source [Template: %s]', htmle($data_template['data_template_name'])), true, false, ($snmp_query_graph_id ?? 0)));
 
-			$data_template_items = db_fetch_assoc_prepared('SELECT
-				data_template_rrd.*
-				FROM data_template_rrd
-				WHERE data_template_rrd.data_template_id = ?
-				AND local_data_id = 0',
-				[$data_template['data_template_id']]);
+			$data_template_items = $all_dt_rrd_items[$data_template['data_template_id']] ?? [];
 
 			array_push($num_output_fields, draw_nontemplated_fields_data_source_item($data_template['data_template_id'], $data_template_items, 'di_' . $snmp_query_id . '_' . $graph_template_id . '_' . $data_template['data_template_id'] . '_|id|_|field|', '', true, false, false, ($snmp_query_graph_id ?? 0)));
 			array_push($num_output_fields, draw_nontemplated_fields_custom_data($data_template['id'], 'c_' . $snmp_query_id . '_' . $graph_template_id . '_' . $data_template['data_template_id'] . '_|id|', __('Custom Data [Template: %s]', htmle($data_template['data_template_name'])), true, false, $snmp_query_id));

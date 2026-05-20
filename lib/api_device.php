@@ -295,6 +295,17 @@ function api_device_remove_multi(array $device_ids, int $delete_type = 2) : void
 function api_device_disable_devices(array $device_ids) : void {
 	$raised = [];
 
+	// batch-fetch all poller_ids to avoid N+1 queries in the loop
+	$poller_ids_map = [];
+
+	if (cacti_sizeof($device_ids)) {
+		$poller_rows = db_fetch_assoc('SELECT id, poller_id FROM host WHERE id IN (' . implode(',', array_map('intval', $device_ids)) . ')');
+
+		if (cacti_sizeof($poller_rows)) {
+			$poller_ids_map = array_column($poller_rows, 'poller_id', 'id');
+		}
+	}
+
 	foreach ($device_ids as $device_id) {
 		db_execute_prepared("UPDATE host
 			SET disabled = 'on', status = 0
@@ -302,7 +313,7 @@ function api_device_disable_devices(array $device_ids) : void {
 			AND (deleted = '' OR (deleted = 'on' AND disabled = ''))",
 			[$device_id]);
 
-		$poller_id = db_fetch_cell_prepared('SELECT poller_id FROM host WHERE id = ?', [$device_id]);
+		$poller_id = $poller_ids_map[$device_id] ?? 0;
 
 		if ($poller_id > 1) {
 			if (remote_poller_up($poller_id)) {
@@ -334,11 +345,19 @@ function api_device_disable_devices(array $device_ids) : void {
 function api_device_enable_devices(array $device_ids) : void {
 	$raised = [];
 
+	// batch-fetch all poller_ids to avoid N+1 queries in the loop
+	$poller_ids_map = [];
+
+	if (cacti_sizeof($device_ids)) {
+		$poller_rows = db_fetch_assoc('SELECT id, poller_id FROM host WHERE id IN (' . implode(',', array_map('intval', $device_ids)) . ')');
+
+		if (cacti_sizeof($poller_rows)) {
+			$poller_ids_map = array_column($poller_rows, 'poller_id', 'id');
+		}
+	}
+
 	foreach ($device_ids as $device_id) {
-		$poller_id = db_fetch_cell_prepared('SELECT poller_id
-			FROM host
-			WHERE id = ?',
-			[$device_id]);
+		$poller_id = $poller_ids_map[$device_id] ?? 0;
 
 		db_execute_prepared("UPDATE host
 			SET disabled = ''
