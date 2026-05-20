@@ -1692,9 +1692,9 @@ function form_actions() : void {
 								ON dtr.local_data_id=dtd.local_data_id
 								INNER JOIN graph_templates_item AS gti
 								ON dtr.id=gti.task_item_id
-								WHERE gti.local_graph_id NOT IN(' . implode(',', $iarray) . ')
+								WHERE gti.local_graph_id NOT IN(' . implode(',', array_map('intval', $iarray)) . ')
 								AND NOT EXISTS (SELECT 1 FROM aggregate_graphs AS ag WHERE ag.local_graph_id = gti.local_graph_id)
-								AND dtr.local_data_id IN(' . implode(',', $data_array) . ')
+								AND dtr.local_data_id IN(' . implode(',', array_map('intval', $data_array)) . ')
 								AND dtd.local_data_id > 0'),
 							'local_data_id', 'local_data_id');
 					} else {
@@ -1709,9 +1709,9 @@ function form_actions() : void {
 								ON dtr.local_data_id=dtd.local_data_id
 								INNER JOIN graph_templates_item AS gti
 								ON dtr.id=gti.task_item_id
-								WHERE gti.local_graph_id IN (' . implode(',', $iarray) . ')
+								WHERE gti.local_graph_id IN (' . implode(',', array_map('intval', $iarray)) . ')
 								AND NOT EXISTS (SELECT 1 FROM aggregate_graphs AS ag WHERE ag.local_graph_id = gti.local_graph_id)
-								AND dtr.local_data_id NOT IN (' . implode(',', $not_deletable) . ')
+								AND dtr.local_data_id NOT IN (' . implode(',', array_map('intval', $not_deletable)) . ')
 								AND dtd.local_data_id > 0'),
 							'local_data_id', ['local_data_id', 'name_cache']);
 					}

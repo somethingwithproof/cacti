@@ -206,7 +206,7 @@ if ($host_ids !== false) {
 		}
 	}
 
-	$sql_where = 'WHERE dtd.data_source_path IS NOT NULL AND gl.host_id IN(' . implode(',', $host_ids) . ')';
+	$sql_where = 'WHERE dtd.data_source_path IS NOT NULL AND gl.host_id IN(' . implode(',', array_map('intval', $host_ids)) . ')';
 } else {
 	$sql_where = 'WHERE dtd.data_source_path IS NOT NULL';
 }

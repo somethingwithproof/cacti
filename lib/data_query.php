@@ -640,7 +640,7 @@ function data_query_remap_indexes(array $local_data) : void {
 			foreach ($index_to_graphs as $snmp_index => $local_graph_ids) {
 				db_execute_prepared('UPDATE graph_local
 					SET snmp_index = ?
-					WHERE id IN(' . implode(', ', $local_graph_ids) . ')',
+					WHERE id IN(' . implode(', ', array_map('intval', $local_graph_ids)) . ')',
 					[$snmp_index]);
 			}
 		}

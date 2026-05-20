@@ -917,7 +917,7 @@ function is_tree_branch_empty(int $tree_id, int $parent = 0) : bool {
 
 	$simple_perms = get_simple_graph_perms($_SESSION[SESS_USER_ID]);
 
-	if (cacti_sizeof($graphs) && ($simple_perms || cacti_sizeof(get_allowed_graphs('gl.id IN(' . implode(',', $graphs) . ')'))) > 0) {
+	if (cacti_sizeof($graphs) && ($simple_perms || cacti_sizeof(get_allowed_graphs('gl.id IN(' . implode(',', array_map('intval', $graphs)) . ')'))) > 0) {
 		return false;
 	}
 
@@ -944,7 +944,7 @@ function is_tree_branch_empty(int $tree_id, int $parent = 0) : bool {
 	if (!cacti_sizeof($sites)) {
 		$total_rows = -1;	// Adding to fix pass by reference error in get_allowed_devices
 
-		if (cacti_sizeof($hosts) && cacti_sizeof(get_allowed_devices('h.id IN(' . implode(',', $hosts) . ')', 'description', '', $total_rows)) > 0) {
+		if (cacti_sizeof($hosts) && cacti_sizeof(get_allowed_devices('h.id IN(' . implode(',', array_map('intval', $hosts)) . ')', 'description', '', $total_rows)) > 0) {
 			return false;
 		}
 	} else {
@@ -961,7 +961,7 @@ function is_tree_branch_empty(int $tree_id, int $parent = 0) : bool {
 		}
 		$total_rows = -1;	// Adding to fix pass by reference error in get_allowed_devices
 
-		if (cacti_sizeof($site_hosts) && cacti_sizeof(get_allowed_devices('h.id IN(' . implode(',', $site_hosts) . ')', 'description', '', $total_rows)) > 0) {
+		if (cacti_sizeof($site_hosts) && cacti_sizeof(get_allowed_devices('h.id IN(' . implode(',', array_map('intval', $site_hosts)) . ')', 'description', '', $total_rows)) > 0) {
 			return false;
 		}
 	}
@@ -2995,9 +2995,9 @@ function get_allowed_graph_templates_normalized(string $sql_where = '', string $
 	}
 
 	if ($sql_where != '') {
-		$sql_where = ' WHERE (' . $sql_where . ') AND gl.graph_template_id IN(' . implode(', ', array_keys($templates)) . ') AND (gl.snmp_query_graph_id=0 OR sqg.name IS NOT NULL) AND (gt.name IS NOT NULL)';
+		$sql_where = ' WHERE (' . $sql_where . ') AND gl.graph_template_id IN(' . implode(', ', array_map('intval', array_keys($templates))) . ') AND (gl.snmp_query_graph_id=0 OR sqg.name IS NOT NULL) AND (gt.name IS NOT NULL)';
 	} else {
-		$sql_where = ' WHERE gl.graph_template_id IN(' . implode(', ', array_keys($templates)) . ') AND (gl.snmp_query_graph_id=0 OR sqg.name IS NOT NULL) AND (gt.name IS NOT NULL)';
+		$sql_where = ' WHERE gl.graph_template_id IN(' . implode(', ', array_map('intval', array_keys($templates))) . ') AND (gl.snmp_query_graph_id=0 OR sqg.name IS NOT NULL) AND (gt.name IS NOT NULL)';
 	}
 
 	if ($sql_limit != '' && $sql_limit != -1) {

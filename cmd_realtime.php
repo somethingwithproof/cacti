@@ -176,7 +176,7 @@ if (cacti_sizeof($idbyhost)) {
 			$poller_items = db_fetch_assoc_prepared('SELECT *
 				FROM poller_item
 				WHERE host_id = ?
-				AND local_data_id IN(' . implode(',', $local_data_ids['local_data_ids']) . ')',
+				AND local_data_id IN(' . implode(',', array_map('intval', $local_data_ids['local_data_ids'])) . ')',
 				[$host_id]);
 
 			if (cacti_sizeof($poller_items)) {

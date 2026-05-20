@@ -122,6 +122,8 @@ function repopulate_poller_cache() : void {
 function update_poller_cache_from_query(int $host_id, int $data_query_id, array $local_data_ids) : void {
 	include_once(CACTI_PATH_LIBRARY . '/api_data_source.php');
 
+	$local_data_ids = array_map('intval', $local_data_ids);
+
 	$poller_data = db_fetch_assoc_prepared('SELECT ' . SQL_NO_CACHE . ' *
 		FROM data_local
 		WHERE host_id = ?
@@ -2058,6 +2060,9 @@ function object_cache_get_totals(string $class, mixed $object_ids, bool $diff = 
 	if (!is_array($object_ids)) {
 		$object_ids = explode(',', $object_ids);
 	}
+
+	// Sanitize object_ids to prevent SQL injection
+	$object_ids = array_map('intval', $object_ids);
 
 	// temp variable for object array
 	$variable = [];
