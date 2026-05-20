@@ -200,7 +200,7 @@ class Net_Ping {
 					$result = shell_exec('ping -w ' . ceil($this->timeout / 1000) . ' -c ' . $this->retries . ' ' . cacti_escapeshellarg($this->host['hostname']));
 				} elseif (substr_count(cacti_strtolower(PHP_OS), 'aix')) {
 					$result = shell_exec('ping -i ' . ceil($this->timeout / 1000) . ' -c ' . $this->retries . ' ' . cacti_escapeshellarg($this->host['hostname']));
-				} elseif (cacti_strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+				} elseif (str_starts_with(cacti_strtoupper(PHP_OS), 'WIN')) {
 					$result = shell_exec('chcp 437 && ping -w ' . $this->timeout . ' -n ' . $this->retries . ' ' . cacti_escapeshellarg($this->host['hostname']));
 				} else {
 					/**

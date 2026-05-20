@@ -7304,7 +7304,7 @@ function repair_system_data_input_methods(string $step = 'import') : void {
 	}
 }
 
-if (cacti_strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' && !function_exists('posix_kill')) {
+if (str_starts_with(cacti_strtoupper(PHP_OS), 'WIN') && !function_exists('posix_kill')) {
 	if (!defined('SIGTERM')) {
 		define('SIGTERM', 15);
 	}
