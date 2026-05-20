@@ -1790,6 +1790,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 	$cf_ds_cache     = [];
 	$cdef_cache      = [];
 	$vdef_cache      = [];
+	$rrd_step_cache  = [];
 
 	if (cacti_sizeof($graph_items)) {
 		// we need to add a new column 'cf_reference', so unless PHP 5 is used, this foreach syntax is required
@@ -2237,54 +2238,43 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 					}
 				}
 
-				// allow automatic rate calculations on raw gauge data
+				// Resolve rrd_step once per local_data_id and cache for reuse
 				if (isset($graph_item['local_data_id'])) {
-					$cdef_string = str_replace('CURRENT_DATA_SOURCE_PI', db_fetch_cell_prepared('SELECT rrd_step FROM data_template_data WHERE local_data_id = ?', [$graph_item['local_data_id']]), $cdef_string);
+					$ldid = $graph_item['local_data_id'];
+
+					if (!isset($rrd_step_cache[$ldid])) {
+						$rrd_step_cache[$ldid] = db_fetch_cell_prepared('SELECT rrd_step FROM data_template_data WHERE local_data_id = ?', [$ldid]);
+					}
+
+					$rrd_step = $rrd_step_cache[$ldid];
 				} else {
-					$cdef_string = str_replace('CURRENT_DATA_SOURCE_PI', read_config_option('poller_interval'), $cdef_string);
+					$rrd_step = read_config_option('poller_interval');
 				}
+
+				$cdef_string = str_replace('CURRENT_DATA_SOURCE_PI', $rrd_step, $cdef_string);
 
 				$cdef_string = str_replace('CURRENT_DATA_SOURCE', generate_graph_def_name($cf_ds_cache[$cf_ds_key] ?? 0), $cdef_string);
 
-				// allow automatic rate calculations on raw gauge data
-				if (isset($graph_item['local_data_id'])) {
-					$cdef_string = str_replace('ALL_DATA_SOURCES_DUPS_PI', db_fetch_cell_prepared('SELECT rrd_step FROM data_template_data WHERE local_data_id = ?', [$graph_item['local_data_id']]), $cdef_string);
-				} else {
-					$cdef_string = str_replace('ALL_DATA_SOURCES_DUPS_PI', read_config_option('poller_interval'), $cdef_string);
-				}
+				$cdef_string = str_replace('ALL_DATA_SOURCES_DUPS_PI', $rrd_step, $cdef_string);
 
 				// ALL|SIMILAR_DATA_SOURCES(NO)?DUPS are to be replaced here
 				if (isset($magic_item['ALL_DATA_SOURCES_DUPS'])) {
 					$cdef_string = str_replace('ALL_DATA_SOURCES_DUPS', $magic_item['ALL_DATA_SOURCES_DUPS'], $cdef_string);
 				}
 
-				// allow automatic rate calculations on raw gauge data
-				if (isset($graph_item['local_data_id'])) {
-					$cdef_string = str_replace('ALL_DATA_SOURCES_NODUPS_PI', db_fetch_cell_prepared('SELECT rrd_step FROM data_template_data WHERE local_data_id = ?', [$graph_item['local_data_id']]), $cdef_string);
-				} else {
-					$cdef_string = str_replace('ALL_DATA_SOURCES_NODUPS_PI', read_config_option('poller_interval'), $cdef_string);
-				}
+				$cdef_string = str_replace('ALL_DATA_SOURCES_NODUPS_PI', $rrd_step, $cdef_string);
 
 				if (isset($magic_item['ALL_DATA_SOURCES_NODUPS'])) {
 					$cdef_string = str_replace('ALL_DATA_SOURCES_NODUPS', $magic_item['ALL_DATA_SOURCES_NODUPS'], $cdef_string);
 				}
 
-				// allow automatic rate calculations on raw gauge data
-				if (isset($graph_item['local_data_id'])) {
-					$cdef_string = str_replace('SIMILAR_DATA_SOURCES_DUPS_PI', db_fetch_cell_prepared('SELECT rrd_step FROM data_template_data WHERE local_data_id = ?', [$graph_item['local_data_id']]), $cdef_string);
-				} else {
-					$cdef_string = str_replace('SIMILAR_DATA_SOURCES_DUPS_PI', read_config_option('poller_interval'), $cdef_string);
-				}
+				$cdef_string = str_replace('SIMILAR_DATA_SOURCES_DUPS_PI', $rrd_step, $cdef_string);
 
 				if (isset($magic_item['SIMILAR_DATA_SOURCES_DUPS'])) {
 					$cdef_string = str_replace('SIMILAR_DATA_SOURCES_DUPS', $magic_item['SIMILAR_DATA_SOURCES_DUPS'], $cdef_string);
 				}
 
-				if (isset($graph_item['local_data_id'])) {
-					$cdef_string = str_replace('SIMILAR_DATA_SOURCES_NODUPS_PI', db_fetch_cell_prepared('SELECT rrd_step FROM data_template_data WHERE local_data_id = ?', [$graph_item['local_data_id']]), $cdef_string);
-				} else {
-					$cdef_string = str_replace('SIMILAR_DATA_SOURCES_NODUPS_PI', read_config_option('poller_interval'), $cdef_string);
-				}
+				$cdef_string = str_replace('SIMILAR_DATA_SOURCES_NODUPS_PI', $rrd_step, $cdef_string);
 
 				if (isset($magic_item['SIMILAR_DATA_SOURCES_NODUPS'])) {
 					$cdef_string = str_replace('SIMILAR_DATA_SOURCES_NODUPS', $magic_item['SIMILAR_DATA_SOURCES_NODUPS'], $cdef_string);
