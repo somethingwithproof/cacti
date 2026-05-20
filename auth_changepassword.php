@@ -322,7 +322,7 @@ if (isrv('ref')) {
 
 		if (!filter_var($_SERVER['SERVER_NAME'], FILTER_VALIDATE_IP)) {
 			$server_info = dns_get_record($_SERVER['SERVER_NAME'], DNS_ANY);
-			$server_ref  = gethostbyname($ref_parts['host']);
+			$server_ref  = cacti_gethostbyname($ref_parts['host']);
 
 			if ($server_ref != $server_addr) {
 				$valid = false;
@@ -350,8 +350,8 @@ if (isrv('ref')) {
 				}
 			}
 		} else {
-			$server_ip   = gethostbyname($_SERVER['SERVER_NAME']);
-			$server_ref  = gethostbyname($ref_parts['host']);
+			$server_ip   = cacti_gethostbyname($_SERVER['SERVER_NAME']);
+			$server_ref  = cacti_gethostbyname($ref_parts['host']);
 
 			if ($server_ip == $server_ref) {
 				$valid = true;

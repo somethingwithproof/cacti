@@ -389,7 +389,7 @@ function poller_check_duplicate_poller_id(int $poller_id, string $hostname, stri
 		$ip_addresses[$hostname] = $hostname;
 	} elseif (str_contains($hostname, '.')) {
 		$addresses = @dns_get_record($hostname);
-		$ip        = @gethostbyname($hostname);
+		$ip        = @cacti_gethostbyname($hostname);
 
 		if ($ip != $hostname) {
 			$ip_addresses[$ip] = $ip;
@@ -415,7 +415,7 @@ function poller_check_duplicate_poller_id(int $poller_id, string $hostname, stri
 	} else {
 		$ip_hostname[$hostname] = $hostname;
 
-		$address = @gethostbyname($hostname);
+		$address = @cacti_gethostbyname($hostname);
 
 		if ($address != $hostname) {
 			$ip_addresses[$address] = $address;

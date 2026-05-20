@@ -6181,7 +6181,8 @@ function get_dns_from_ip(string $ip, string $dns, int $timeout = 1000) : string 
 	$data .= "\7in-addr\4arpa\0\0\x0C\0\1";
 
 	// create UDP socket
-	$handle = @fsockopen("udp://$dns", 53);
+	$dns_host = filter_var($dns, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? "[$dns]" : $dns;
+	$handle = @fsockopen("udp://$dns_host", 53);
 
 	if ($handle === false) {
 		return $ip;

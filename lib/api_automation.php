@@ -4283,7 +4283,8 @@ function automation_get_dns_from_ip(string $ip, string $dns, int $timeout = 1000
 	$data .= "\7in-addr\4arpa\0\0\x0C\0\1";
 
 	// create UDP socket
-	$handle = @fsockopen("udp://$dns", 53);
+	$dns_host = filter_var($dns, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? "[$dns]" : $dns;
+	$handle = @fsockopen("udp://$dns_host", 53);
 
 	if ($handle === false) {
 		return cacti_strtoupper($ip);
@@ -4362,7 +4363,8 @@ function automation_get_dns_from_ip(string $ip, string $dns, int $timeout = 1000
  * @return mixed - Returns the netbios name is successful or false otherwise
  */
 function ping_netbios_name(string $ip, int $timeout_ms = 1000) : mixed {
-	$handle = @fsockopen("udp://$ip", 137);
+	$ip_host = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? "[$ip]" : $ip;
+	$handle = @fsockopen("udp://$ip_host", 137);
 
 	if (is_resource($handle)) {
 		stream_set_timeout($handle, intval(floor($timeout_ms / 1000)), ($timeout_ms * 1000) % 1000000);

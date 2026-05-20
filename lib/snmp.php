@@ -73,8 +73,10 @@ function cacti_snmp_session(string $hostname, mixed $community, mixed $version, 
 
 	$timeout_us = (int) ($timeout_ms * 1000);
 
+	$snmp_host = filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '[' . $hostname . ']' : $hostname;
+
 	try {
-		$session = new SNMP($version, $hostname . ':' . $port, ($version == 3 ? $auth_user : $community), $timeout_us, $retries);
+		$session = new SNMP($version, $snmp_host . ':' . $port, ($version == 3 ? $auth_user : $community), $timeout_us, $retries);
 	} catch (Exception $e) {
 		return false;
 	}
@@ -140,12 +142,13 @@ function cacti_snmp_get(string $hostname, mixed $community, string $oid, mixed $
 
 		$timeout_us = (int) ($timeout_ms * 1000);
 		$snmp_value = 'U';
+		$snmp_host  = filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '[' . $hostname . ']' : $hostname;
 
 		try {
 			if ($version == '1') {
-				$snmp_value = @snmpget($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+				$snmp_value = @snmpget($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 			} elseif ($version == '2') {
-				$snmp_value = @snmp2_get($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+				$snmp_value = @snmp2_get($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 			} else {
 				if ($priv_proto == '[None]' || $priv_pass == '') {
 					if ($auth_pass == '' || $auth_proto == '[None]') {
@@ -159,7 +162,7 @@ function cacti_snmp_get(string $hostname, mixed $community, string $oid, mixed $
 					$sec_level = 'authPriv';
 				}
 
-				$snmp_value = snmp3_get($hostname . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
+				$snmp_value = snmp3_get($snmp_host . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
 			}
 		} catch (Exception $ex) {
 			$snmp_error = $ex->getMessage();
@@ -238,15 +241,16 @@ function cacti_snmp_get_raw(string $hostname, mixed $community, string $oid, mix
 		snmp_set_quick_print(false);
 
 		$timeout_us = (int) ($timeout_ms * 1000);
+		$snmp_host  = filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '[' . $hostname . ']' : $hostname;
 
 		if (function_exists('snmp_set_enum_print')) {
 			snmp_set_enum_print(true);
 		}
 
 		if ($version == '1') {
-			$snmp_value = @snmpget($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+			$snmp_value = @snmpget($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 		} elseif ($version == '2') {
-			$snmp_value = @snmp2_get($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+			$snmp_value = @snmp2_get($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 		} else {
 			if ($priv_proto == '[None]' || $priv_pass == '') {
 				if ($auth_pass == '' || $auth_proto == '[None]') {
@@ -260,7 +264,7 @@ function cacti_snmp_get_raw(string $hostname, mixed $community, string $oid, mix
 				$sec_level = 'authPriv';
 			}
 
-			$snmp_value = snmp3_get($hostname . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
+			$snmp_value = snmp3_get($snmp_host . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
 		}
 
 		if ($snmp_value === false) {
@@ -332,11 +336,12 @@ function cacti_snmp_getnext(string $hostname, mixed $community, mixed $oid, mixe
 		snmp_set_quick_print(false);
 
 		$timeout_us = (int) ($timeout_ms * 1000);
+		$snmp_host  = filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '[' . $hostname . ']' : $hostname;
 
 		if ($version == '1') {
-			$snmp_value = snmpgetnext($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+			$snmp_value = snmpgetnext($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 		} elseif ($version == '2') {
-			$snmp_value = snmp2_getnext($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+			$snmp_value = snmp2_getnext($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 		} else {
 			if ($priv_proto == '[None]' || $priv_pass == '') {
 				if ($auth_pass == '' || $auth_proto == '[None]') {
@@ -349,7 +354,7 @@ function cacti_snmp_getnext(string $hostname, mixed $community, mixed $oid, mixe
 				$sec_level = 'authPriv';
 			}
 
-			$snmp_value = snmp3_getnext($hostname . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
+			$snmp_value = snmp3_getnext($snmp_host . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
 		}
 
 		if ($snmp_value === false) {
@@ -644,6 +649,7 @@ function cacti_snmp_walk(string $hostname, mixed $community, string $oid, mixed 
 		we are getting back */
 
 		$timeout_us = (int) ($timeout_ms * 1000);
+		$snmp_host  = filter_var($hostname, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '[' . $hostname . ']' : $hostname;
 
 		// force php to return numeric oid's
 		cacti_oid_numeric_format();
@@ -655,9 +661,9 @@ function cacti_snmp_walk(string $hostname, mixed $community, string $oid, mixed 
 		snmp_set_quick_print(false);
 
 		if ($version == '1') {
-			$temp_array = snmprealwalk($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+			$temp_array = snmprealwalk($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 		} elseif ($version == 2) {
-			$temp_array = snmp2_real_walk($hostname . ':' . $port, $community, $oid, $timeout_us, $retries);
+			$temp_array = snmp2_real_walk($snmp_host . ':' . $port, $community, $oid, $timeout_us, $retries);
 		} else {
 			if ($priv_proto == '[None]' || $priv_pass == '') {
 				if ($auth_pass == '') {
@@ -670,7 +676,7 @@ function cacti_snmp_walk(string $hostname, mixed $community, string $oid, mixed 
 				$sec_level = 'authPriv';
 			}
 
-			$temp_array = snmp3_real_walk($hostname . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
+			$temp_array = snmp3_real_walk($snmp_host . ':' . $port, $auth_user, $sec_level, $auth_proto, $auth_pass, $priv_proto, $priv_pass, $oid, $timeout_us, $retries);
 		}
 
 		// check for bad entries
