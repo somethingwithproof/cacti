@@ -64,7 +64,7 @@ function view_user_log() : void {
 
 	// filter by username
 	if (grv('user_id') == '-2') {
-		$sql_where    = 'WHERE ul.user_id NOT IN (SELECT DISTINCT id FROM user_auth)';
+		$sql_where    = 'WHERE NOT EXISTS (SELECT 1 FROM user_auth AS ua WHERE ua.id = ul.user_id)';
 	} elseif (grv('user_id') != '-1') {
 		$sql_where    = 'WHERE ul.user_id = ?';
 		$sql_params[] = grv('user_id');
@@ -197,8 +197,8 @@ function clear_user_log() : void {
 		// delete inactive users
 		db_execute('DELETE
 			FROM user_log
-			WHERE user_id NOT IN (SELECT id FROM user_auth)
-			OR username NOT IN (SELECT username FROM user_auth)');
+			WHERE NOT EXISTS (SELECT 1 FROM user_auth AS ua WHERE ua.id = user_log.user_id)
+			OR NOT EXISTS (SELECT 1 FROM user_auth AS ua WHERE ua.username = user_log.username)');
 	}
 }
 

@@ -831,7 +831,7 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 
 			if ($running == 0 && !$checked_bad) {
 				// Remove recently deleted items from the poller_output table
-				db_execute('DELETE FROM poller_output WHERE local_data_id NOT IN (SELECT id FROM data_local)');
+				db_execute('DELETE FROM poller_output WHERE NOT EXISTS (SELECT 1 FROM data_local AS dl WHERE dl.id = poller_output.local_data_id)');
 
 				// Identify data sources that are somehow not aligned
 				$items = db_fetch_assoc('SELECT rrd_num,

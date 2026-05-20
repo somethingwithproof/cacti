@@ -535,7 +535,7 @@ function graphs() : void {
 			LEFT JOIN snmp_query_graph AS sqg
 			ON sqg.graph_template_id = gt.id
 			WHERE sqg.name IS NULL
-			AND gt.id NOT IN (SELECT graph_template_id FROM host_graph WHERE host_id = ?)
+			AND NOT EXISTS (SELECT 1 FROM host_graph AS hg WHERE hg.graph_template_id = gt.id AND hg.host_id = ?)
 			AND gt.multiple = ""
 			UNION
 			SELECT id, name

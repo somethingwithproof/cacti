@@ -1324,7 +1324,7 @@ function api_device_update_host_template(int $device_id, int $device_template_id
 	$snmp_queries = db_fetch_assoc_prepared('SELECT snmp_query_id
 		FROM host_template_snmp_query AS htsq
 		WHERE host_template_id = ?
-		AND htsq.snmp_query_id NOT IN (SELECT snmp_query_id FROM host_snmp_cache WHERE host_id = ?)',
+		AND NOT EXISTS (SELECT 1 FROM host_snmp_cache AS hsc WHERE hsc.snmp_query_id = htsq.snmp_query_id AND hsc.host_id = ?)',
 		[$device_template_id, $device_id]);
 
 	if (cacti_sizeof($snmp_queries)) {
@@ -1360,7 +1360,7 @@ function api_device_update_host_template(int $device_id, int $device_template_id
 	$graph_templates = db_fetch_assoc_prepared('SELECT graph_template_id
 		FROM host_template_graph AS hg
 		WHERE host_template_id = ?
-		AND hg.graph_template_id NOT IN (SELECT graph_template_id FROM host_graph WHERE host_id = ?)',
+		AND NOT EXISTS (SELECT 1 FROM host_graph AS hg2 WHERE hg2.graph_template_id = hg.graph_template_id AND hg2.host_id = ?)',
 		[$device_template_id, $device_id]);
 
 	if (cacti_sizeof($graph_templates)) {
@@ -1411,7 +1411,7 @@ function api_device_update_host_template(int $device_id, int $device_template_id
 			WHERE htg.host_template_id = ?
 		) AS result
 		ON hg.graph_template_id=result.gtid
-		WHERE gt.id NOT IN (SELECT graph_template_id FROM snmp_query_graph)
+		WHERE NOT EXISTS (SELECT 1 FROM snmp_query_graph AS sqg WHERE sqg.graph_template_id = gt.id)
 	    HAVING gtid IS NULL
 	    ORDER BY gt.name',
 		[$device_id, $device_template_id]

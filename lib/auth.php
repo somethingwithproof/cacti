@@ -1988,47 +1988,47 @@ function get_policy_where(string|int $graph_auth_method, array $policies, string
 
 			if ($p['type'] == 'user') {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ' OR ';
 
 				if ($p['policy_hosts'] == 1) {
-					$sql_where .= 'h.id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				} else {
-					$sql_where .= 'h.id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				}
 
 				$sql_where .= ' OR ';
 
 				if ($p['policy_graph_templates'] == 1) {
-					$sql_where .= 'gl.graph_template_id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				} else {
-					$sql_where .= 'gl.graph_template_id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				}
 			} else {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ' OR ';
 
 				if ($p['policy_hosts'] == 1) {
-					$sql_where .= 'h.id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				} else {
-					$sql_where .= 'h.id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				}
 
 				$sql_where .= ' OR ';
 
 				if ($p['policy_graph_templates'] == 1) {
-					$sql_where .= 'gl.graph_template_id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				} else {
-					$sql_where .= 'gl.graph_template_id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				}
 			}
 
@@ -2060,49 +2060,49 @@ function get_policy_where(string|int $graph_auth_method, array $policies, string
 
 			if ($p['type'] == 'user') {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ') OR (';
 
 				if ($p['policy_hosts'] == 1) {
-					$sql_where .= 'h.id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				} else {
-					$sql_where .= 'h.id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				}
 
 				$sql_where .= ' AND ';
 
 				if ($p['policy_graph_templates'] == 1) {
-					$sql_where .= ' gl.graph_template_id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= ' NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				} else {
-					$sql_where .= ' gl.graph_template_id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= ' EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				}
 
 				$sql_where .= ')';
 			} else {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ') OR (';
 
 				if ($p['policy_hosts'] == 1) {
-					$sql_where .= 'h.id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				} else {
-					$sql_where .= 'h.id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				}
 
 				$sql_where .= ' AND ';
 
 				if ($p['policy_graph_templates'] == 1) {
-					$sql_where .= 'gl.graph_template_id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				} else {
-					$sql_where .= 'gl.graph_template_id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				}
 
 				$sql_where .= ')';
@@ -2134,31 +2134,31 @@ function get_policy_where(string|int $graph_auth_method, array $policies, string
 
 			if ($p['type'] == 'user') {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ') OR (';
 
 				if ($p['policy_hosts'] == 1) {
-					$sql_where .= 'h.id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				} else {
-					$sql_where .= 'h.id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				}
 			} else {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ') OR (';
 
 				if ($p['policy_hosts'] == 1) {
-					$sql_where .= 'h.id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				} else {
-					$sql_where .= 'h.id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 3 AND item_id = h.id)';
 				}
 			}
 
@@ -2188,31 +2188,31 @@ function get_policy_where(string|int $graph_auth_method, array $policies, string
 
 			if ($p['type'] == 'user') {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ') OR (';
 
 				if ($p['policy_graph_templates'] == 1) {
-					$sql_where .= 'gl.graph_template_id NOT IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				} else {
-					$sql_where .= 'gl.graph_template_id IN (SELECT item_id FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_perms WHERE user_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				}
 			} else {
 				if ($p['policy_graphs'] == 1) {
-					$sql_where .= 'gl.id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				} else {
-					$sql_where .= 'gl.id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 1 AND item_id = gl.id)';
 				}
 
 				$sql_where .= ') OR (';
 
 				if ($p['policy_graph_templates'] == 1) {
-					$sql_where .= 'gl.graph_template_id NOT IN (SELECT item_id FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'NOT EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id = ' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				} else {
-					$sql_where .= 'gl.graph_template_id IN (SELECT item_id FROM user_auth_group_perms WHERE group_id =' . $p['id'] . ' AND type = 4)';
+					$sql_where .= 'EXISTS (SELECT 1 FROM user_auth_group_perms WHERE group_id =' . $p['id'] . ' AND type = 4 AND item_id = gl.graph_template_id)';
 				}
 			}
 

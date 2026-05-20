@@ -643,7 +643,7 @@ function template_edit() : void {
 								ON gt.id=htg.graph_template_id
 								AND htg.host_template_id = ?
 								WHERE htg.host_template_id IS NULL
-								AND gt.id NOT IN (SELECT graph_template_id FROM snmp_query_graph)
+								AND NOT EXISTS (SELECT 1 FROM snmp_query_graph AS sqg WHERE sqg.graph_template_id = gt.id)
 								ORDER BY gt.name', [grv('id')]), 'name', 'id', '', '', ''); ?>
 						</td>
 						<td class='noHide'>

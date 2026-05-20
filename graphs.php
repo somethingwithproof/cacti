@@ -1693,7 +1693,7 @@ function form_actions() : void {
 								INNER JOIN graph_templates_item AS gti
 								ON dtr.id=gti.task_item_id
 								WHERE gti.local_graph_id NOT IN(' . implode(',', $iarray) . ')
-								AND gti.local_graph_id NOT IN(SELECT local_graph_id FROM aggregate_graphs)
+								AND NOT EXISTS (SELECT 1 FROM aggregate_graphs AS ag WHERE ag.local_graph_id = gti.local_graph_id)
 								AND dtr.local_data_id IN(' . implode(',', $data_array) . ')
 								AND dtd.local_data_id > 0'),
 							'local_data_id', 'local_data_id');
@@ -1710,7 +1710,7 @@ function form_actions() : void {
 								INNER JOIN graph_templates_item AS gti
 								ON dtr.id=gti.task_item_id
 								WHERE gti.local_graph_id IN (' . implode(',', $iarray) . ')
-								AND gti.local_graph_id NOT IN(SELECT local_graph_id FROM aggregate_graphs)
+								AND NOT EXISTS (SELECT 1 FROM aggregate_graphs AS ag WHERE ag.local_graph_id = gti.local_graph_id)
 								AND dtr.local_data_id NOT IN (' . implode(',', $not_deletable) . ')
 								AND dtd.local_data_id > 0'),
 							'local_data_id', ['local_data_id', 'name_cache']);
@@ -2364,7 +2364,7 @@ function graph_edit() : void {
 
 		$gtsql = 'SELECT gt.id, gt.name
 			FROM graph_templates AS gt
-			WHERE id NOT IN (SELECT graph_template_id FROM snmp_query_graph)
+			WHERE NOT EXISTS (SELECT 1 FROM snmp_query_graph AS sqg WHERE sqg.graph_template_id = gt.id)
 			ORDER BY name';
 	}
 
