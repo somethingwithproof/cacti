@@ -620,27 +620,28 @@ function query_check_suitable(string $new_sort_field, string $old_sort_field, in
  */
 function data_query_remap_indexes(array $local_data) : void {
 	if (cacti_sizeof($local_data)) {
-		foreach ($local_data as $id) {
-			$index = db_fetch_cell_prepared('SELECT snmp_index
-				FROM data_local
-				WHERE id = ?',
-				[$id]);
+		$id_list = implode(', ', array_map('intval', $local_data));
 
-			$local_graph_ids = array_rekey(
-				db_fetch_assoc_prepared('SELECT DISTINCT gti.local_graph_id
-					FROM graph_templates_item AS gti
-					INNER JOIN data_template_rrd AS dtr
-					ON gti.task_item_id=dtr.id
-					WHERE dtr.local_data_id = ?',
-					[$id]),
-				'local_graph_id', 'local_graph_id'
-			);
+		$rows = db_fetch_assoc("SELECT DISTINCT dl.snmp_index, gti.local_graph_id
+			FROM data_local AS dl
+			INNER JOIN data_template_rrd AS dtr
+			ON dl.id = dtr.local_data_id
+			INNER JOIN graph_templates_item AS gti
+			ON gti.task_item_id = dtr.id
+			WHERE dl.id IN($id_list)");
 
-			if (cacti_sizeof($local_graph_ids)) {
+		if (cacti_sizeof($rows)) {
+			$index_to_graphs = [];
+
+			foreach ($rows as $row) {
+				$index_to_graphs[$row['snmp_index']][$row['local_graph_id']] = $row['local_graph_id'];
+			}
+
+			foreach ($index_to_graphs as $snmp_index => $local_graph_ids) {
 				db_execute_prepared('UPDATE graph_local
 					SET snmp_index = ?
 					WHERE id IN(' . implode(', ', $local_graph_ids) . ')',
-					[$index]);
+					[$snmp_index]);
 			}
 		}
 	}

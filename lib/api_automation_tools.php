@@ -692,12 +692,15 @@ function displayTreeNodes(int $tree_id, string $nodeType = '', int $parentNode =
 
 	$parentID = 0;
 
-	$nodes = db_fetch_assoc_prepared('SELECT id, local_graph_id, title,
-		host_id, host_grouping_type, sort_children_type
-		FROM graph_tree_items
-		WHERE graph_tree_id = ?
-		AND parent = ?
-		ORDER BY position', [$tree_id, $parentNode]);
+	$nodes = db_fetch_assoc_prepared('SELECT gti.id, gti.local_graph_id, gti.title,
+		gti.host_id, gti.host_grouping_type, gti.sort_children_type,
+		gtg.title_cache AS graph_title, h.hostname AS hostname
+		FROM graph_tree_items AS gti
+		LEFT JOIN graph_templates_graph AS gtg ON gtg.local_graph_id = gti.local_graph_id
+		LEFT JOIN host AS h ON h.id = gti.host_id
+		WHERE gti.graph_tree_id = ?
+		AND gti.parent = ?
+		ORDER BY gti.position', [$tree_id, $parentNode]);
 
 	if (cacti_sizeof($nodes)) {
 		foreach ($nodes as $node) {
@@ -743,12 +746,7 @@ function displayTreeNodes(int $tree_id, string $nodeType = '', int $parentNode =
 							print $parentNode . "\t";
 						}
 
-						// fetch the title for that graph
-						$graph_title = db_fetch_cell_prepared('SELECT gtg.title_cache AS name
-							FROM graph_templates_graph AS gtg
-							WHERE gtg.local_graph_id = ?', [$node['local_graph_id']]);
-
-						print $graph_title . "\t";
+						print $node['graph_title'] . "\t";
 						print PHP_EOL;
 					}
 
@@ -764,9 +762,7 @@ function displayTreeNodes(int $tree_id, string $nodeType = '', int $parentNode =
 							print $parentNode . "\t";
 						}
 
-						$name = db_fetch_cell_prepared('SELECT hostname FROM host WHERE id = ?', [$node['host_id']]);
-
-						print $name . "\t";
+						print $node['hostname'] . "\t";
 						print $host_group_types[$node['host_grouping_type']] . "\t";
 						print PHP_EOL;
 					}

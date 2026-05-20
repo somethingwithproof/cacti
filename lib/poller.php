@@ -562,6 +562,8 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 			'keyname', ['data_source_name']);
 	}
 
+	$unused_ds_name_cache = [];
+
 	if (cacti_sizeof($results)) {
 		// create an array keyed off of each .rrd file
 		foreach ($results as $item) {
@@ -605,16 +607,20 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 				$values = preg_split('/\s+/', $value);
 
 				if ($data_template_id > 0) {
-					$unused_data_source_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
-							FROM data_template_rrd AS dtr
-							LEFT JOIN graph_templates_item AS gti
-							ON dtr.id = gti.task_item_id
-							WHERE dtr.local_data_id = ?
-							AND gti.task_item_id IS NULL',
-							[$local_data_id]),
-						'data_source_name', 'data_source_name'
-					);
+					if (!isset($unused_ds_name_cache[$local_data_id])) {
+						$unused_ds_name_cache[$local_data_id] = array_rekey(
+							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
+								FROM data_template_rrd AS dtr
+								LEFT JOIN graph_templates_item AS gti
+								ON dtr.id = gti.task_item_id
+								WHERE dtr.local_data_id = ?
+								AND gti.task_item_id IS NULL',
+								[$local_data_id]),
+							'data_source_name', 'data_source_name'
+						);
+					}
+
+					$unused_data_source_names = $unused_ds_name_cache[$local_data_id];
 				} else {
 					$unused_data_source_names = [];
 				}
