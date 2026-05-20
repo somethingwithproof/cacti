@@ -587,7 +587,7 @@ function detailed_checks() : void {
 			$total_repairs += $rows;
 
 			db_execute('DELETE FROM data_input_data
-				WHERE data_input_data.data_template_data_id NOT IN (SELECT id FROM data_template_data)');
+				WHERE NOT EXISTS (SELECT 1 FROM data_template_data WHERE data_template_data.id = data_input_data.data_template_data_id)');
 		}
 
 		printf('NOTE: Found ' . ($force ? 'and repaired ' : '') . "$rows invalid Data Input Data rows in Data Templates" . PHP_EOL);
@@ -610,7 +610,7 @@ function detailed_checks() : void {
 			$total_repairs += $rows;
 
 			db_execute('DELETE FROM data_input_data
-				WHERE data_input_data.data_input_field_id NOT IN (SELECT id FROM data_input_fields)');
+				WHERE NOT EXISTS (SELECT 1 FROM data_input_fields WHERE data_input_fields.id = data_input_data.data_input_field_id)');
 		}
 
 		printf('NOTE: Found ' . ($force ? 'and repaired ' : '') . "$rows invalid Data Input Data rows based upon field mappings in Data Templates." . PHP_EOL);
