@@ -35,7 +35,8 @@ function ss_apache_stats(string $host = '', string $section = 'all') : mixed {
 		I  --- idle cleanup
 		_O --- open slot
 	*/
-	$url          = "http://$host/server-status?auto";
+	$url_host     = filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? '[' . $host . ']' : $host;
+	$url          = "http://$url_host/server-status?auto";
 	$result       = file_get_contents($url);
 	$array_result = [];
 	$array_result =  explode("\n",$result);

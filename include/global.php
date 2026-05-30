@@ -631,6 +631,7 @@ include_once(CACTI_PATH_LIBRARY . '/mib_cache.php');
 include_once(CACTI_PATH_LIBRARY . '/poller.php');
 include_once(CACTI_PATH_LIBRARY . '/snmpagent.php');
 include_once(CACTI_PATH_LIBRARY . '/aggregate.php');
+include_once(CACTI_PATH_LIBRARY . '/ip_utils.php');
 include_once(CACTI_PATH_LIBRARY . '/api_automation.php');
 include_once(CACTI_PATH_INCLUDE . '/vendor/autoload.php');
 

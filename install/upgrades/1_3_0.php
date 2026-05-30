@@ -995,4 +995,6 @@ function upgrade_dsstats() : void {
 	}
 
 	db_install_execute('ALTER TABLE data_source_stats_hourly_cache ENGINE=InnoDB ROW_FORMAT=Dynamic');
+
+	db_install_change_column('automation_ips', ['name' => 'ip_address', 'type' => 'varchar(45)', 'null' => false, 'default' => '']);
 }

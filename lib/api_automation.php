@@ -3725,15 +3725,9 @@ function automation_debug(string $text) : void {
  * @return float|false The CIDR notation as a float, or false on failure.
  */
 function automation_masktocidr(string $mask) : float|false {
-	$cidr = false;
-	$long = ip2long($mask);
+	$cidr = cacti_mask_to_cidr($mask);
 
-	if ($long !== false) {
-		$base = ip2long('255.255.255.255');
-		$cidr = 32 - log(($long ^ $base) + 1, 2);
-	}
-
-	return $cidr;
+	return $cidr === false ? false : (float) $cidr;
 }
 
 /**
@@ -3743,9 +3737,19 @@ function automation_masktocidr(string $mask) : float|false {
  * @return string|false Returns a valid IP address as a string if found, or false if no valid IP address is found.
  */
 function automation_get_valid_ip(string $range) : string|false {
-	$long = ip2long($range);
+	$range = trim($range);
 
-	return $long === false ? false : long2ip($long);
+	if (cacti_ip_version($range) === false) {
+		return false;
+	}
+
+	$binary = cacti_ip_to_binary($range);
+
+	if ($binary === false) {
+		return false;
+	}
+
+	return cacti_binary_to_ip($binary);
 }
 
 /**
@@ -3756,33 +3760,19 @@ function automation_get_valid_ip(string $range) : string|false {
  *                     otherwise returns false if the range is invalid.
  */
 function automation_get_valid_subnet_cidr(string $range) : array|false {
-	$long = ip2long($range);
-	$cidr = 0;
+	$cidr = cacti_mask_to_cidr($range);
 
-	if ($long !== false) {
-		$bin = decbin($long);
-
-		if (strlen($bin) == 32) {
-			$zero = false;
-			$cidr = 0;
-
-			foreach (str_split($bin) as $char) {
-				if ($char === '0') {
-					$zero = true;
-				} elseif ($zero) {
-					$long = false;
-
-					break;
-				} else {
-					$cidr++;
-				}
-			}
-		} else {
-			$long = false;
-		}
+	if ($cidr === false) {
+		return false;
 	}
 
-	return $long === false ? false : ['cidr' => $cidr, 'subnet' => long2ip($long)];
+	$mask = cacti_cidr_to_mask($cidr);
+
+	if ($mask === false) {
+		return false;
+	}
+
+	return ['cidr' => $cidr, 'subnet' => $mask];
 }
 
 /**
@@ -3795,12 +3785,23 @@ function automation_get_valid_mask(string $range) : array|false {
 	$cidr = false;
 
 	if (is_numeric($range)) {
-		if ($range > 0 && $range < 33) {
-			$cidr = $range;
-			$mask = [
-				'cidr'   => $cidr,
-				'subnet' => long2ip((2 ** $range - 1) << (32 - $range)),
-			];
+		$prefix = (int) $range;
+
+		if ($prefix > 0 && $prefix < 129) {
+			$cidr = $prefix;
+
+			if ($prefix <= 32) {
+				$subnet = cacti_cidr_to_mask($prefix);
+				$mask   = [
+					'cidr'   => $cidr,
+					'subnet' => $subnet !== false ? $subnet : '',
+				];
+			} else {
+				$mask = [
+					'cidr'   => $cidr,
+					'subnet' => '',
+				];
+			}
 		} else {
 			$mask = false;
 		}
@@ -3809,11 +3810,10 @@ function automation_get_valid_mask(string $range) : array|false {
 	}
 
 	if ($mask !== false) {
-		$mask['count'] = bindec(str_repeat('0',$mask['cidr']) . str_repeat('1',32 - $mask['cidr']));
+		$host_bits = ($mask['cidr'] <= 32 ? 32 : 128) - $mask['cidr'];
+		$count     = (int) cacti_binary_host_count($host_bits, false);
 
-		if ($mask['count'] == 0) {
-			$mask['count'] = 1;
-		}
+		$mask['count'] = max(1, $count);
 	}
 
 	return $mask;
@@ -3834,11 +3834,30 @@ function automation_get_network_info(string $range) : array|false {
 	$range = trim($range);
 
 	if (str_contains($range, '/')) {
-		// 10.1.0.0/24 or 10.1.0.0/255.255.255.0
 		$range_parts = explode('/', $range);
 
 		if (!filter_var($range_parts[0], FILTER_VALIDATE_IP)) {
 			return false;
+		}
+
+		$version = cacti_ip_version($range_parts[0]);
+
+		if ($version === 6) {
+			$cidr_result = cacti_cidr_to_range($range);
+
+			if ($cidr_result === false) {
+				return false;
+			}
+
+			return [
+				'network'   => $cidr_result['network'],
+				'broadcast' => $cidr_result['broadcast'],
+				'cidr'      => $cidr_result['prefix'],
+				'type'      => ($cidr_result['prefix'] === 128) ? 'single' : 'subnet',
+				'count'     => (int) $cidr_result['count'],
+				'start'     => $cidr_result['start'],
+				'end'       => $cidr_result['end'],
+			];
 		}
 
 		$mask = automation_get_valid_mask($range_parts[1]);
@@ -3847,10 +3866,12 @@ function automation_get_network_info(string $range) : array|false {
 			$network = automation_get_valid_ip($range_parts[0]);
 
 			if ($network !== false && $mask['cidr'] != 0) {
-				$dec       = ip2long($network) & ip2long($mask['subnet']);
-				$count     = $mask['cidr'] == 32 ? 0 : $mask['count'];
-				$network   = long2ip($dec);
-				$broadcast = long2ip($dec + $count);
+				$net_bin   = cacti_ip_to_binary($network);
+				$mask_bin  = cacti_build_prefix_mask($mask['cidr'], 4);
+				$net_addr  = $net_bin & $mask_bin;
+				$bcast_bin = $net_addr | ~$mask_bin;
+				$network   = cacti_binary_to_ip($net_addr);
+				$broadcast = cacti_binary_to_ip($bcast_bin);
 			}
 		}
 	} elseif (str_contains($range, '*') && !str_contains($range, '-')) {
@@ -3910,22 +3931,45 @@ function automation_get_network_info(string $range) : array|false {
 	}
 
 	if ($network !== false && $broadcast !== false) {
-		if (ip2long($network) <= ip2long($broadcast)) {
+		if (cacti_ip_compare($network, $broadcast) <= 0) {
 			$detail['network']   = $network;
 			$detail['broadcast'] = $broadcast;
 			$detail['cidr']      = $mask['cidr'] ?? false;
 
 			if ($network == $broadcast) {
+				$version = cacti_ip_version($network);
 				$detail['type']  = 'single';
 				$detail['count'] = 1;
-				$detail['cidr']  = 32;
+				$detail['cidr']  = ($version === 6) ? 128 : 32;
 				$detail['start'] = $network;
 				$detail['end']   = $network;
 			} else {
 				$detail['type']  = isset($mask['cidr']) ? 'subnet' : 'range';
-				$detail['count'] = ip2long($broadcast) - ip2long($network) - 1;
-				$detail['start'] = long2ip(ip2long($network) + 1);
-				$detail['end']   = long2ip(ip2long($broadcast) - 1);
+
+				$start = cacti_ip_increment($network, 1);
+				$end   = cacti_ip_increment($broadcast, -1);
+
+				if ($start === false || $end === false) {
+					return false;
+				}
+
+				$net_bin   = cacti_ip_to_binary($network);
+				$bcast_bin = cacti_ip_to_binary($broadcast);
+
+				if ($net_bin !== false && $bcast_bin !== false) {
+					$diff = 0;
+
+					for ($i = 0; $i < strlen($net_bin); $i++) {
+						$diff = ($diff * 256) + ord($bcast_bin[$i]) - ord($net_bin[$i]);
+					}
+
+					$detail['count'] = $diff - 1;
+				} else {
+					$detail['count'] = 0;
+				}
+
+				$detail['start'] = $start;
+				$detail['end']   = $end;
 			}
 		}
 	} else {
@@ -3986,26 +4030,10 @@ function automation_get_next_host(string $start, int $total, int $count, string 
 	}
 
 	if (preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.)\*(\.[0-9]{1,3})$/', $range, $matches)) {
-		// 10.1.*.1
 		return $matches[1] . ++$count . $matches[2];
-	} else {
-		// other cases
-		$ip = explode('.', $start);
-		$y  = 16777216;
-
-		for ($x = 0; $x < 4; $x++) {
-			$ip[$x] += intval($count / $y);
-			$count -= ((intval($count / $y)) * 256);
-			$y /= 256;
-
-			if ($ip[$x] == 256 && $x > 0) {
-				$ip[$x] = 0;
-				$ip[$x - 1] += 1;
-			}
-		}
-
-		return implode('.', $ip);
 	}
+
+	return cacti_ip_increment($start, $count);
 }
 
 /**

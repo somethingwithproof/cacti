@@ -50,7 +50,7 @@ function ss_fping(string $hostname = '', int $ping_sweeps = 6, string $ping_type
 	$total_time     = 0;
 	$failed_results = 0;
 
-	$ping->host['hostname'] = gethostbyname($hostname);
+	$ping->host['hostname'] = cacti_gethostbyname($hostname);
 	$ping->retries          = 1;
 	$ping->port             = $port;
 

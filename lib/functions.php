@@ -5266,7 +5266,7 @@ function admin_email(string $subject, string $message) : bool {
 	$result = false;
 
 	$server_name = gethostname() ?: 'localhost';
-	$server_addr = gethostbyname((string) $server_name);
+	$server_addr = cacti_gethostbyname((string) $server_name);
 
 	$fin_message  = '<h1>Cacti Admin Notification</h1>';
 	$fin_message .= "<h2>$subject</h2>";
@@ -7008,7 +7008,7 @@ function call_remote_data_collector(int $poller_id, string $url, string $logtype
 	}
 
 	if (!is_ipaddress($hostname)) {
-		$ipaddress = gethostbyname($hostname);
+		$ipaddress = cacti_gethostbyname($hostname);
 
 		if (!is_ipaddress($ipaddress)) {
 			if (debounce_run_notification('poller_down:' . $poller_id)) {
@@ -7036,7 +7036,8 @@ function call_remote_data_collector(int $poller_id, string $url, string $logtype
 	$ra_start = microtime(true);
 
 	try {
-		$output = file_get_contents(get_url_type() . '://' . $hostname . $port . $url, false, $fgc_context);
+		$url_host = cacti_format_ipv6_colon($hostname);
+		$output = file_get_contents(get_url_type() . '://' . $url_host . $port . $url, false, $fgc_context);
 	} catch (ErrorException $e) {
 		$ra_end = microtime(true);
 

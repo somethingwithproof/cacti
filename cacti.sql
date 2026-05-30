@@ -279,7 +279,7 @@ CREATE TABLE `automation_graph_rules` (
 --
 
 CREATE TABLE `automation_ips` (
-  `ip_address` varchar(20) NOT NULL default '',
+  `ip_address` varchar(45) NOT NULL default '',
   `hostname` varchar(100) default NULL,
   `network_id` int(10) unsigned default NULL,
   `pid` int(10) unsigned default NULL,
