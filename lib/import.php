@@ -459,6 +459,7 @@ function import_read_package_data($xmlfile, &$public_key) {
 		return false;
 	}
 	$key_details = openssl_pkey_get_details($pkey);
+	openssl_pkey_free($pkey);
 	if ($key_details === false || $key_details['bits'] < 2048) {
 		cacti_log('SECURITY: Package rejected - signing key is ' . ($key_details ? $key_details['bits'] : 'unknown') . ' bits (minimum 2048 required). GHSA-8w9r-xmpr-5q3v', false, 'IMPORT');
 		return false;
