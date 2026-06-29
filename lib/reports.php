@@ -1433,22 +1433,22 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 			}
 
 			if (!empty($tree_name) && empty($leaf_name) && empty($host_name)) {
-				$title           = $title_delimiter . __('Tree:') . " $tree_name";
+				$title           = $title_delimiter . __('Tree:') . ' ' . htmle($tree_name);
 				$title_delimiter = ' > ';
 			}
 
 			if (!empty($leaf_name)) {
-				$title .= $title_delimiter . " $leaf_name";
+				$title .= $title_delimiter . ' ' . htmle($leaf_name);
 				$title_delimiter = ' > ';
 			}
 
 			if (!empty($host_name)) {
-				$title .= $title_delimiter . " $host_name";
+				$title .= $title_delimiter . ' ' . htmle($host_name);
 				$title_delimiter = ' > ';
 			}
 
 			if (!empty($graph_name) && !$nested) {
-				$title .= $title_delimiter . " $graph_name";
+				$title .= $title_delimiter . ' ' . htmle($graph_name);
 				$title_delimiter = ' > ';
 			}
 
