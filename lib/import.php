@@ -22,6 +22,17 @@
  +-------------------------------------------------------------------------+
 */
 
+/* Resolve a package file entry to a safe absolute path under $base_path, or
+   false when the entry escapes the scripts/ or resource/ subtrees. Closes the
+   import_package() traversal sink (GHSA-vp35-4h28-r883, GHSA-j696-m433-87qq). */
+function import_package_resolve_file($name, $base_path) {
+	if (!preg_match('#^(scripts|resource)/#', (string) $name)) {
+		return false;
+	}
+
+	return validate_relative_path_within($name, $base_path);
+}
+
 function import_xml_data(&$xml_data, $import_as_new, $profile_id, $remove_orphans = false, $replace_svalues = false, $import_hashes = array(), $class = '') {
 	global $config, $hash_type_codes, $cacti_version_codes, $ignorable_hashes, $preview_only;
 	global $import_debug_info, $import_messages, $legacy_template;
@@ -595,8 +606,13 @@ function import_package($xmlfile, $profile_id = 1, $remove_orphans = false, $rep
 		$fdata = base64_decode($f['data']);
 		$name = $f['name'];
 
-		if (strpos($name, 'scripts/') !== false || strpos($name, 'resource/') !== false) {
-			$filename = $config['base_path'] . "/$name";
+		if (preg_match('#^(scripts|resource)/#', (string) $name)) {
+			$filename = import_package_resolve_file($name, $config['base_path']);
+
+			if ($filename === false) {
+				cacti_log('ERROR: refusing to import package file with unsafe path: ' . $name, false, 'IMPORT');
+				continue;
+			}
 
 			if (!$preview) {
 				if (!cacti_sizeof($import_files) || in_array($name, $import_files)) {
