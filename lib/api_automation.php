@@ -1841,7 +1841,7 @@ function build_data_query_sql(array $rule) : string {
 	if (cacti_sizeof($field_names) > 0) {
 		foreach ($field_names as $column) {
 			$field_name = $column['field_name'];
-			$sql_query .= ",\n\tMAX(CASE WHEN field_name='$field_name' THEN field_value ELSE NULL END) AS '$field_name'";
+			$sql_query .= ",\n\tMAX(CASE WHEN field_name=" . db_qstr($field_name) . ' THEN field_value ELSE NULL END) AS `' . sanitize_sql_column($field_name) . '`';
 		}
 	}
 
@@ -1948,7 +1948,7 @@ function build_rule_item_filter(array $automation_rule_items, string $prefix = '
 
 			// field name
 			if ($automation_rule_item['field'] != '') {
-				$sql_filter .= ' ' . $prefix . '`' . implode('`.`', explode('.', $automation_rule_item['field'])) . '`';
+				$sql_filter .= ' ' . $prefix . '`' . implode('`.`', explode('.', sanitize_sql_column($automation_rule_item['field']))) . '`';
 				$sql_filter .= ' ' . $automation_op_array['op'][$automation_rule_item['operator']] . ' ';
 
 				if ($automation_op_array['binary'][$automation_rule_item['operator']]) {
@@ -2199,7 +2199,7 @@ function make_host_snnp_cache_sql() : string|false {
 		$sql = "\t\tSELECT host_id ";
 
 		foreach ($fields as $field) {
-			$sql .= ",\n\t\t\tMAX(CASE WHEN field_name = '{$field['field_name']}' THEN field_value ELSE NULL END) AS `{$field['field_name']}`";
+			$sql .= ",\n\t\t\tMAX(CASE WHEN field_name = " . db_qstr($field['field_name']) . ' THEN field_value ELSE NULL END) AS `' . sanitize_sql_column($field['field_name']) . '`';
 		}
 
 		$sql .= "\n\t\t\tFROM host_snmp_cache AS hsc GROUP BY host_id";
@@ -3149,7 +3149,7 @@ function create_dq_graphs(int $host_id, int $snmp_query_id, array $rule) : bool 
 
 	if (cacti_sizeof($field_names) > 0) {
 		foreach ($field_names as $column) {
-			$sql_query .= ", MAX(CASE WHEN field_name ='$column' THEN field_value ELSE NULL END) AS '$column'";
+			$sql_query .= ', MAX(CASE WHEN field_name =' . db_qstr($column) . ' THEN field_value ELSE NULL END) AS `' . sanitize_sql_column($column) . '`';
 			$i++;
 		}
 	}
@@ -5749,6 +5749,15 @@ function automation_graph_rule_import(mixed $json_data) : array {
 
 						$save = $rule_item;
 
+						// defense in depth: reject items whose field could break out of build_rule_item_filter()
+						if (isset($rule_item['field']) && !automation_import_field_is_valid((string) $rule_item['field'])) {
+							cacti_log(sprintf('ERROR: An attempt was made to import an Automation Rule Item with an invalid field \'%s\' (possible SQL Injection) from client address \'%s\'', $rule_item['field'], get_client_addr()), false, 'SECURITY');
+
+							$debug_data['failure'][] = __('Automation Rule Item with invalid field \'%s\' was skipped!', $rule_item['field']);
+
+							continue;
+						}
+
 						$save['id']      = db_fetch_cell_prepared('SELECT id FROM automation_graph_rule_items WHERE hash = ?', [$hash]);
 						$save['rule_id'] = $graph_rule_id;
 
@@ -5882,6 +5891,15 @@ function automation_tree_rule_import(mixed $json_data, bool $tree_branches = fal
 					$hash = $rule_item['hash'];
 
 					$save = $rule_item;
+
+					// defense in depth: reject items whose field could break out of build_rule_item_filter()
+					if (isset($rule_item['field']) && !automation_import_field_is_valid((string) $rule_item['field'])) {
+						cacti_log(sprintf('ERROR: An attempt was made to import an Automation Rule Item with an invalid field \'%s\' (possible SQL Injection) from client address \'%s\'', $rule_item['field'], get_client_addr()), false, 'SECURITY');
+
+						$debug_data['failure'][] = __('Automation Rule Item with invalid field \'%s\' was skipped!', $rule_item['field']);
+
+						continue;
+					}
 
 					$save['id']      = db_fetch_cell_prepared('SELECT id FROM automation_tree_rule_items WHERE hash = ?', [$hash]);
 					$save['rule_id'] = $tree_rule_id;
@@ -6110,6 +6128,15 @@ function automation_template_import(mixed $json_data, bool $tree_branches = fals
 
 								$save = $rule_item;
 
+								// defense in depth: reject items whose field could break out of build_rule_item_filter()
+								if (isset($rule_item['field']) && !automation_import_field_is_valid((string) $rule_item['field'])) {
+									cacti_log(sprintf('ERROR: An attempt was made to import an Automation Rule Item with an invalid field \'%s\' (possible SQL Injection) from client address \'%s\'', $rule_item['field'], get_client_addr()), false, 'SECURITY');
+
+									$debug_data['failure'][] = __('Automation Rule Item with invalid field \'%s\' was skipped!', $rule_item['field']);
+
+									continue;
+								}
+
 								$save['id']      = db_fetch_cell_prepared('SELECT id FROM automation_graph_rule_items WHERE hash = ?', [$hash]);
 								$save['rule_id'] = $graph_rule_id;
 
@@ -6218,6 +6245,15 @@ function automation_template_import(mixed $json_data, bool $tree_branches = fals
 								$hash = $rule_item['hash'];
 
 								$save = $rule_item;
+
+								// defense in depth: reject items whose field could break out of build_rule_item_filter()
+								if (isset($rule_item['field']) && !automation_import_field_is_valid((string) $rule_item['field'])) {
+									cacti_log(sprintf('ERROR: An attempt was made to import an Automation Rule Item with an invalid field \'%s\' (possible SQL Injection) from client address \'%s\'', $rule_item['field'], get_client_addr()), false, 'SECURITY');
+
+									$debug_data['failure'][] = __('Automation Rule Item with invalid field \'%s\' was skipped!', $rule_item['field']);
+
+									continue;
+								}
 
 								$save['id']      = db_fetch_cell_prepared('SELECT id FROM automation_tree_rule_items WHERE hash = ?', [$hash]);
 								$save['rule_id'] = $tree_rule_id;
@@ -6419,6 +6455,41 @@ function automation_validate_import_columns(string $table, array &$data, array &
 	}
 
 	return true;
+}
+
+/**
+ * Validates an imported automation rule item 'field' value the same way the
+ * interactive save paths do (see automation_graph_rules.php and
+ * automation_tree_rules.php). A field that is neither a known host_snmp_cache
+ * field nor a real column on host/host_template/graph_templates/graph_templates_graph
+ * can break out of the backtick-quoted identifier in build_rule_item_filter(), so the
+ * import path must reject it too. automation_validate_import_columns() only checks
+ * array keys, not this value.
+ *
+ * @param string $field The rule item 'field' value from imported JSON.
+ *
+ * @return bool True when the field is safe to store, false otherwise.
+ */
+function automation_import_field_is_valid(string $field) : bool {
+	if ($field == '') {
+		return true;
+	}
+
+	$field_name = str_replace(['ht.', 'h.', 'gt.', 'gtg.'], '', $field);
+
+	if (db_fetch_cell_prepared('SELECT field_name FROM host_snmp_cache WHERE field_name = ? LIMIT 1', [$field_name])) {
+		return true;
+	}
+
+	// no escaping needed means no SQL metacharacters are present
+	if ("'$field_name'" == db_qstr($field_name)) {
+		return true;
+	}
+
+	return db_column_exists('host', $field_name) ||
+		db_column_exists('host_template', $field_name) ||
+		db_column_exists('graph_templates', $field_name) ||
+		db_column_exists('graph_templates_graph', $field_name);
 }
 
 /**
