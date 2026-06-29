@@ -5023,3 +5023,135 @@ function remote_agent_fcrdns_confirmed(string $client_addr, array $forward_recor
 
 	return false;
 }
+
+/**
+ * cacti_authorize_resource - returns true iff the user owns or has admin-level
+ * access to a specific resource row.
+ *
+ * Root-cause mitigation for IDOR bugs: endpoints that take a resource id from
+ * the request and act on it without checking that the caller may touch that row
+ * (GHSA-8p2f-6jvx-j75j, reports). The helper is fail-closed: an unknown
+ * resource_type, a missing row, or a caller who is neither owner nor admin all
+ * return false.
+ *
+ * @param int    $user_id        Acting user id (from $_SESSION[SESS_USER_ID])
+ * @param int    $resource_id    Id of the row being acted on
+ * @param string $resource_type  Resource name ('reports' or 'report_item')
+ *
+ * @return bool true if the user may act on the resource, false otherwise
+ */
+function cacti_authorize_resource(int $user_id, int $resource_id, string $resource_type) : bool {
+	if ($user_id <= 0 || $resource_id <= 0) {
+		return false;
+	}
+
+	// Admins bypass ownership for any resource they can reach via realm perms.
+	if (cacti_authorize_is_admin($user_id)) {
+		return true;
+	}
+
+	switch ($resource_type) {
+		case 'reports':
+			// Reports admins (realm 21) manage any report row.
+			if (cacti_authorize_has_realm($user_id, 21)) {
+				return true;
+			}
+
+			$owner = db_fetch_cell_prepared('SELECT user_id
+				FROM reports
+				WHERE id = ?',
+				[$resource_id]
+			);
+
+			return $owner !== false && $owner !== null && (int) $owner === $user_id;
+
+		case 'report_item':
+			// Item ownership follows the parent report row.
+			if (cacti_authorize_has_realm($user_id, 21)) {
+				return true;
+			}
+
+			$owner = db_fetch_cell_prepared('SELECT r.user_id
+				FROM reports_items AS ri
+				INNER JOIN reports AS r
+				ON ri.report_id = r.id
+				WHERE ri.id = ?',
+				[$resource_id]
+			);
+
+			return $owner !== false && $owner !== null && (int) $owner === $user_id;
+
+		default:
+			// Unknown type - fail closed. Extend this function to opt in.
+			return false;
+	}
+}
+
+/**
+ * cacti_authorize_has_realm - returns true iff the user holds the given realm,
+ * directly via user_auth_realm or through group membership.
+ *
+ * Helper for cacti_authorize_resource so that admins of a resource class
+ * (e.g. realm 21 for reports) bypass per-row ownership.
+ *
+ * @param int $user_id
+ * @param int $realm_id
+ *
+ * @return bool
+ */
+function cacti_authorize_has_realm(int $user_id, int $realm_id) : bool {
+	static $realm_cache = [];
+
+	$key = $user_id . ':' . $realm_id;
+
+	if (isset($realm_cache[$key])) {
+		return $realm_cache[$key];
+	}
+
+	$has = (bool) db_fetch_cell_prepared('SELECT 1
+		FROM user_auth_realm
+		WHERE user_id = ?
+		AND realm_id = ?
+		UNION
+		SELECT 1
+		FROM user_auth_group_realm AS ugr
+		INNER JOIN user_auth_group_members AS ugm
+		ON ugm.group_id = ugr.group_id
+		WHERE ugm.user_id = ?
+		AND ugr.realm_id = ?
+		LIMIT 1',
+		[$user_id, $realm_id, $user_id, $realm_id]
+	);
+
+	$realm_cache[$key] = $has;
+
+	return $has;
+}
+
+/**
+ * cacti_authorize_is_admin - returns true iff the user holds the system admin
+ * realm (realm 1). Cached per-request; callers should use
+ * cacti_authorize_resource(), which consults this internally.
+ *
+ * @param int $user_id
+ *
+ * @return bool
+ */
+function cacti_authorize_is_admin(int $user_id) : bool {
+	static $admin_cache = [];
+
+	if (isset($admin_cache[$user_id])) {
+		return $admin_cache[$user_id];
+	}
+
+	$is_admin = (bool) db_fetch_cell_prepared('SELECT 1
+		FROM user_auth_realm
+		WHERE user_id = ?
+		AND realm_id = 1',
+		[$user_id]
+	);
+
+	$admin_cache[$user_id] = $is_admin;
+
+	return $is_admin;
+}

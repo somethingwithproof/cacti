@@ -221,6 +221,10 @@ function reports_item_dnd() : void {
 	gfrv('id');
 	// ================= Input validation =================
 
+	if (!cacti_authorize_resource((int) $_SESSION[SESS_USER_ID], (int) grv('id'), 'reports')) {
+		return;
+	}
+
 	$continue = true;
 
 	if (isrv('report_item') && is_array(gnrv('report_item'))) {
@@ -271,6 +275,13 @@ function reports_form_save() : void {
 		if (ierv('id')) {
 			$save['user_id'] = $_SESSION[SESS_USER_ID];
 		} else {
+			if (!cacti_authorize_resource((int) $_SESSION[SESS_USER_ID], (int) gnrv('id'), 'reports')) {
+				raise_message('permission_denied');
+				header('Location: ' . get_reports_page());
+
+				exit;
+			}
+
 			$save['user_id'] = db_fetch_cell_prepared('SELECT user_id FROM reports WHERE id = ?', [$post['id']]);
 		}
 
@@ -691,6 +702,10 @@ function reports_item_movedown() : void {
 	gfrv('id');
 	// ====================================================
 
+	if (!cacti_authorize_resource((int) $_SESSION[SESS_USER_ID], (int) grv('id'), 'reports')) {
+		return;
+	}
+
 	move_item_down('reports_items', grv('item_id'), 'report_id=' . grv('id'));
 }
 
@@ -708,6 +723,11 @@ function reports_item_moveup() : void {
 	gfrv('item_id');
 	gfrv('id');
 	// ====================================================
+
+	if (!cacti_authorize_resource((int) $_SESSION[SESS_USER_ID], (int) grv('id'), 'reports')) {
+		return;
+	}
+
 	move_item_up('reports_items', grv('item_id'), 'report_id=' . grv('id'));
 }
 
@@ -723,7 +743,14 @@ function reports_item_remove() : void {
 	// ================= input validation =================
 	gfrv('item_id');
 	// ====================================================
-	db_execute_prepared('DELETE FROM reports_items WHERE id = ?', [grv('item_id')]);
+
+	$item_id = (int) grv('item_id');
+
+	if (!cacti_authorize_resource((int) $_SESSION[SESS_USER_ID], $item_id, 'report_item')) {
+		return;
+	}
+
+	db_execute_prepared('DELETE FROM reports_items WHERE id = ?', [$item_id]);
 }
 
 /**
@@ -1578,6 +1605,13 @@ function reports_edit() : void {
 
 	if (gfrv('id') > 0) {
 		$report = db_fetch_row_prepared('SELECT * FROM reports WHERE id = ?', [grv('id')]);
+
+		if (!empty($report) && !cacti_authorize_resource((int) $_SESSION[SESS_USER_ID], (int) grv('id'), 'reports')) {
+			raise_message('permission_denied');
+			header('Location: ' . get_reports_page());
+
+			exit;
+		}
 	}
 
 	reports_tabs(grv('id'));
