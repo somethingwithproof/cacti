@@ -466,6 +466,13 @@ function push_out_graph_input($graph_template_input_id, $graph_template_item_id,
 		FROM graph_template_input
 		WHERE id = ?', array($graph_template_input_id));
 
+	/* column_name is concatenated raw into the SELECT/UPDATE below; reject any value
+	   that is not a real graph_templates_item column (second-order SQLi, GHSA-jrxg-8wh8-943x) */
+	if (!cacti_sizeof($graph_input) || !db_column_exists('graph_templates_item', $graph_input['column_name'])) {
+		cacti_log(sprintf('ERROR: Refusing to push graph input %s, column_name \'%s\' is not a valid graph_templates_item column', $graph_template_input_id, isset($graph_input['column_name']) ? $graph_input['column_name'] : ''), false, 'SECURITY');
+		return;
+	}
+
 	$graph_input_items = db_fetch_assoc_prepared('SELECT graph_template_item_id
 		FROM graph_template_input_defs
 		WHERE graph_template_input_id = ?', array($graph_template_input_id));

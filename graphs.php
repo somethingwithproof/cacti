@@ -389,6 +389,13 @@ function form_save() {
 
 			if (cacti_sizeof($input_list)) {
 				foreach ($input_list as $input) {
+					/* column_name is concatenated raw into the UPDATE below; reject any value that is
+					   not a real graph_templates_item column (second-order SQLi, GHSA-jrxg-8wh8-943x) */
+					if (!db_column_exists('graph_templates_item', $input['column_name'])) {
+						cacti_log(sprintf('ERROR: Skipping graph input %s, column_name \'%s\' is not a valid graph_templates_item column', $input['id'], $input['column_name']), false, 'SECURITY');
+						continue;
+					}
+
 					/* we need to find out which graph items will be affected by saving this particular item */
 					$item_list = db_fetch_assoc_prepared('SELECT gti.id
 						FROM graph_template_input_defs AS gtid
