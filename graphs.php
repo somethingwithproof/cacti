@@ -496,6 +496,14 @@ function form_save() : void {
 
 				if (cacti_sizeof($input_list)) {
 					foreach ($input_list as $input) {
+						/* column_name is used as a raw SQL identifier below, so it must reference a real
+						   graph_templates_item column (GHSA-jrxg-8wh8-943x / CVE-2024-31458) */
+						if (!db_column_exists('graph_templates_item', $input['column_name'])) {
+							cacti_log(sprintf('ERROR: A client attempted to create a SQL Injection into Cacti likely from an external host with the address %s', get_client_addr()), false, 'SECURITY');
+
+							continue;
+						}
+
 						// we need to find out which graph items will be affected by saving this particular item
 						$item_list = db_fetch_assoc_prepared('SELECT gti.id
 							FROM graph_template_input_defs AS gtid

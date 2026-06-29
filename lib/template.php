@@ -545,6 +545,14 @@ function push_out_graph_input(int $graph_template_input_id, int $graph_template_
 		FROM graph_template_input
 		WHERE id = ?', [$graph_template_input_id]);
 
+	/* column_name is used as a raw SQL identifier below, so it must reference a real
+	   graph_templates_item column (GHSA-jrxg-8wh8-943x / CVE-2024-31458) */
+	if (!cacti_sizeof($graph_input) || !db_column_exists('graph_templates_item', $graph_input['column_name'])) {
+		cacti_log(sprintf('ERROR: A client attempted to create a SQL Injection into Cacti likely from an external host with the address %s', get_client_addr()), false, 'SECURITY');
+
+		return;
+	}
+
 	$graph_input_items = db_fetch_assoc_prepared('SELECT graph_template_item_id
 		FROM graph_template_input_defs
 		WHERE graph_template_input_id = ?', [$graph_template_input_id]);

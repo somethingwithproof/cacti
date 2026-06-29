@@ -644,6 +644,15 @@ function form_save() : void {
 		$save['description']       = form_input_validate(gnrv('description'), 'description', '', true, 3);
 		$save['column_name']       = form_input_validate(gnrv('column_name'), 'column_name', '', true, 3);
 
+		/* column_name is later concatenated as a raw SQL identifier when pushing inputs out to
+		   graphs, so reject anything that is not an actual graph_templates_item column
+		   (GHSA-jrxg-8wh8-943x / CVE-2024-31458) */
+		if ($save['column_name'] != '' && !db_column_exists('graph_templates_item', $save['column_name'])) {
+			raise_message('column_name_invalid', __('The selected Input Field is not a valid graph item column.'), MESSAGE_LEVEL_ERROR);
+
+			$_SESSION[SESS_ERROR_FIELDS]['column_name'] = 'column_name';
+		}
+
 		if (is_error_message() === false) {
 			$graph_template_input_id = sql_save($save, 'graph_template_input');
 
