@@ -1486,7 +1486,18 @@ function get_allowed_graphs(string $sql_where = '', mixed $sql_order = 'gtg.titl
 			) AS rs
 			ON gl.id = rs.local_graph_id";
 
-			$sql_order = 'ORDER BY rs.' . $sql_order['measure'] . ' ' . $sql_order['order'];
+			// measure/order arrive from unfiltered request vars and land in
+			// ORDER BY identifier/direction position. Confine the measure to a
+			// real column of the dsstats partition table and clamp the direction.
+			$measure = (string) $sql_order['measure'];
+
+			if (!db_column_exists($table, $measure)) {
+				$measure = 'average';
+			}
+
+			$dir = (strtoupper(trim((string) $sql_order['order'])) === 'DESC') ? 'DESC' : 'ASC';
+
+			$sql_order = 'ORDER BY rs.`' . $measure . '` ' . $dir;
 		} elseif ($sql_order['data_source'] == '') {
 			cacti_log('WARNING: Graph Order missing Data Source name for ordering.', false, 'AUTH');
 			cacti_log('ORDER, DETAIL: ' . json_encode($sql_order), false, 'AUTH');
