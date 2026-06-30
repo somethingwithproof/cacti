@@ -1273,6 +1273,14 @@ function update_order_string(bool $inplace = false) : void {
 		$_SESSION['sort_string'][$page] = 'ORDER BY ';
 
 		foreach ($_SESSION['sort_data'][$page] as $column => $direction) {
+			/* Re-validate tokens stored in a previous request; skip any that
+			 * do not pass the allow-list (protects against session fixation). */
+			if (!sort_column_is_valid($column)) {
+				continue;
+			}
+
+			$direction = sort_direction_clamp($direction);
+
 			if ($column == 'ip' || $column == 'ip_address') {
 				$order .= ($order != '' ? ', ' : '') . 'INET_ATON(' . $column . ') ' . $direction;
 			} elseif ($column == 'hostname' && $natural) {
@@ -1291,30 +1299,46 @@ function update_order_string(bool $inplace = false) : void {
 			unset($_SESSION['sort_data'][$page]);
 			unset($_SESSION['sort_string'][$page]);
 
-			$_SESSION['sort_data'][$page][get_request_var('sort_column')] = get_request_var('sort_direction');
-
 			$column    = get_request_var('sort_column');
-			$direction = get_request_var('sort_direction');
+			$direction = sort_direction_clamp(get_request_var('sort_direction'));
+
+			/* Reject columns that do not match the identifier allow-list.
+			 * Expression-based special cases (ip, hostname) pass because they
+			 * consist entirely of word characters with no metacharacters. */
+			if (!sort_column_is_valid($column)) {
+				return;
+			}
+
+			$_SESSION['sort_data'][$page][$column] = $direction;
 
 			if ($column == 'ip' || $column == 'ip_address') {
 				$_SESSION['sort_string'][$page] = 'ORDER BY INET_ATON(' . $column . ') ' . $direction;
 			} elseif ($column == 'hostname' && $natural) {
-				$_SESSION['sort_string'][$page] = 'ORDER BY NATURAL_SORT_KEY(' . $del . implode($del . '.' . $del, explode('.', get_request_var('sort_column'))) . $del . ') ' . get_request_var('sort_direction');
+				$_SESSION['sort_string'][$page] = 'ORDER BY NATURAL_SORT_KEY(' . $del . implode($del . '.' . $del, explode('.', $column)) . $del . ') ' . $direction;
 			} else {
-				$_SESSION['sort_string'][$page] = 'ORDER BY ' . $del . implode($del . '.' . $del, explode('.', get_request_var('sort_column'))) . $del . ' ' . get_request_var('sort_direction');
+				$_SESSION['sort_string'][$page] = 'ORDER BY ' . $del . implode($del . '.' . $del, explode('.', $column)) . $del . ' ' . $direction;
 			}
 		} elseif (isset_request_var('sort_column')) {
+			$column    = get_request_var('sort_column');
+			$direction = sort_direction_clamp(get_nfilter_request_var('sort_direction'));
+
+			/* Silently discard requests whose column name contains SQL
+			 * metacharacters; do not update the session at all. */
+			if (!sort_column_is_valid($column)) {
+				return;
+			}
+
 			if (isset_request_var('reset')) {
 				unset($_SESSION['sort_data'][$page]);
 				unset($_SESSION['sort_string'][$page]);
 			}
 
-			$_SESSION['sort_data'][$page][get_request_var('sort_column')] = get_nfilter_request_var('sort_direction');
+			$_SESSION['sort_data'][$page][$column] = $direction;
 
 			$_SESSION['sort_string'][$page] = 'ORDER BY ';
 
-			foreach ($_SESSION['sort_data'][$page] as $column => $direction) {
-				if (!str_contains($column, '(') && !str_contains($column, '`')) {
+			foreach ($_SESSION['sort_data'][$page] as $col => $dir) {
+				if (!str_contains($col, '(') && !str_contains($col, '`')) {
 					$del = '`';
 				} else {
 					$del = '';
@@ -1323,13 +1347,21 @@ function update_order_string(bool $inplace = false) : void {
 				}
 			}
 
-			foreach ($_SESSION['sort_data'][$page] as $column => $direction) {
-				if ($column == 'ip' || $column == 'ip_address') {
-					$order .= ($order != '' ? ', ' : '') . 'INET_ATON(' . $column . ') ' . $direction;
-				} elseif ($column == 'hostname' && $natural) {
-					$order .= ($order != '' ? ', ' : '') . 'NATURAL_SORT_KEY(' . $del . implode($del . '.' . $del, explode('.', $column)) . $del . ') ' . $direction;
+			foreach ($_SESSION['sort_data'][$page] as $col => $dir) {
+				/* Second-pass guard: tokens written by earlier requests must
+				 * also satisfy the allow-list before being emitted. */
+				if (!sort_column_is_valid($col)) {
+					continue;
+				}
+
+				$dir = sort_direction_clamp($dir);
+
+				if ($col == 'ip' || $col == 'ip_address') {
+					$order .= ($order != '' ? ', ' : '') . 'INET_ATON(' . $col . ') ' . $dir;
+				} elseif ($col == 'hostname' && $natural) {
+					$order .= ($order != '' ? ', ' : '') . 'NATURAL_SORT_KEY(' . $del . implode($del . '.' . $del, explode('.', $col)) . $del . ') ' . $dir;
 				} else {
-					$order .= ($order != '' ? ', ' : '') . $del . implode($del . '.' . $del, explode('.', $column)) . $del . ' ' . $direction;
+					$order .= ($order != '' ? ', ' : '') . $del . implode($del . '.' . $del, explode('.', $col)) . $del . ' ' . $dir;
 				}
 			}
 
@@ -1339,6 +1371,34 @@ function update_order_string(bool $inplace = false) : void {
 			unset($_SESSION['sort_string'][$page]);
 		}
 	}
+}
+
+/**
+ * Returns true when $column is a safe SQL identifier or qualified identifier.
+ *
+ * Allows word characters and dots (table.column) only.  Parentheses, backticks,
+ * spaces, dashes, and SQL keywords embedded in the name are all rejected; they
+ * cannot appear in a legitimate Cacti column reference and signal injection.
+ *
+ * @param string $column Raw column value from request or session.
+ *
+ * @return bool
+ */
+function sort_column_is_valid(string $column) : bool {
+	return (bool) preg_match('/^[a-zA-Z][a-zA-Z0-9_.]*$/', $column);
+}
+
+/**
+ * Clamps a sort direction to either 'ASC' or 'DESC', defaulting to 'ASC'.
+ *
+ * @param string $direction Raw direction value from request or session.
+ *
+ * @return string 'ASC' or 'DESC'
+ */
+function sort_direction_clamp(string $direction) : string {
+	$direction = strtoupper(trim($direction));
+
+	return ($direction === 'DESC') ? 'DESC' : 'ASC';
 }
 
 /**
@@ -1368,13 +1428,34 @@ function get_order_string() : string {
 	/**
 	 * Allowlist: identifiers are word chars and dots only; anything else could escape
 	 * backtick quoting.  Validate direction to prevent SQL keyword injection.
+	 *
+	 * The session value is re-validated here because update_order_string() builds
+	 * sort_string from sort_data tokens that could have been written by an older
+	 * code path without this guard.  Never return a cached string that contains
+	 * characters outside the safe identifier set.
 	 */
-	if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_.()]*$/', $sort_column)) {
-		$sort_column = '';
+	if (isset($_SESSION['sort_string'][$page])) {
+		$cached = $_SESSION['sort_string'][$page];
+
+		/* Rebuild from sort_data if the cached string looks tainted, so a
+		 * session-fixation attack cannot bypass the write-path validation. */
+		if (isset($_SESSION['sort_data'][$page]) && is_array($_SESSION['sort_data'][$page])) {
+			foreach ($_SESSION['sort_data'][$page] as $col => $dir) {
+				if (!sort_column_is_valid($col)) {
+					/* Poisoned token in session; discard the whole sort state. */
+					unset($_SESSION['sort_data'][$page]);
+					unset($_SESSION['sort_string'][$page]);
+
+					return '';
+				}
+			}
+		}
+
+		return $cached;
 	}
 
-	if (isset($_SESSION['sort_string'][$page])) {
-		return $_SESSION['sort_string'][$page];
+	if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_.()]*$/', $sort_column)) {
+		$sort_column = '';
 	}
 
 	if ($sort_column != '') {
