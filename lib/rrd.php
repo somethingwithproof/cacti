@@ -265,7 +265,7 @@ function encrypt(string $output, string $rsa_key) : string {
 	}
 }
 
-function decrypt(string $input) : string {
+function decrypt(string $input) : string|false {
 	global $encryption;
 
 	if ($encryption) {
@@ -280,12 +280,21 @@ function decrypt(string $input) : string {
 		$ciphertext     = base64_decode(substr($input, 3 + $aes_key_length), true);
 
 		if ($aes_key === false || $ciphertext === false) {
-			return $input;
+			return false;
 		}
 
 		$aes_key = $public->decrypt($aes_key);
+
+		if ($aes_key === false) {
+			return false;
+		}
+
 		$aes->setKey($aes_key);
 		$plaintext = $aes->decrypt($ciphertext);
+
+		if ($plaintext === false) {
+			return false;
+		}
 
 		return $plaintext;
 	} else {

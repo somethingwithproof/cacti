@@ -7172,11 +7172,13 @@ function get_default_contextoption(mixed $timeout = false) : array {
 	$protocol = get_url_type();
 
 	if (in_array($protocol, ['ssl', 'https', 'ftps'], true)) {
+		$allow_unsafe = read_config_option('allow_unsafe_https') == 'on';
+
 		$fgc_contextoption = [
 			'ssl' => [
-				'verify_peer'       => false,
-				'verify_peer_name'  => false,
-				'allow_self_signed' => true,
+				'verify_peer'       => !$allow_unsafe,
+				'verify_peer_name'  => !$allow_unsafe,
+				'allow_self_signed' => $allow_unsafe,
 			]
 		];
 	}

@@ -127,8 +127,8 @@ function form_save() : void {
 
 					$context = [
 						'ssl' => [
-							'verify_peer'      => false,
-							'verify_peer_name' => false,
+							'verify_peer'      => true,
+							'verify_peer_name' => true,
 						],
 					];
 

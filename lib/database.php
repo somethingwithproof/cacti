@@ -2459,6 +2459,7 @@ function db_dump_data(string $database = '', string $tables = '', array $credent
 		$database = $database_default;
 	}
 
+	/* $options must only ever contain hardcoded strings — never user-supplied input. */
 	if (cacti_sizeof($credentials)) {
 		foreach ($credentials as $key => $value) {
 			$name = trim($key);
@@ -2469,7 +2470,7 @@ function db_dump_data(string $database = '', string $tables = '', array $credent
 				} elseif ($name == '--user') {
 					$username = $value;
 				} else {
-					$credentials_string .= $name . '=' . $value . ' ';
+					$credentials_string .= $name . '=' . cacti_escapeshellarg((string) $value) . ' ';
 				}
 			} elseif (str_contains($name, '-')) { // name like -h
 				if ($name == '-p') {
@@ -2477,7 +2478,7 @@ function db_dump_data(string $database = '', string $tables = '', array $credent
 				} elseif ($name == '-u') {
 					$username = $value;
 				} else {
-					$credentials_string .= $name . $value . ' ';
+					$credentials_string .= $name . cacti_escapeshellarg((string) $value) . ' ';
 				}
 			} else {                                  // name like host
 				if ($name == 'password') {
@@ -2485,7 +2486,7 @@ function db_dump_data(string $database = '', string $tables = '', array $credent
 				} elseif ($name == 'user') {
 					$username = $value;
 				} else {
-					$credentials_string .= '--' . $name . '=' . $value . ' ';
+					$credentials_string .= '--' . $name . '=' . cacti_escapeshellarg((string) $value) . ' ';
 				}
 			}
 		}

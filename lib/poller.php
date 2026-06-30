@@ -147,10 +147,16 @@ function exec_background(string $filename, string|array $args = '', string|array
 				} else {
 					pclose(popen('start "Cactiplus" /I ' . $filename . ' ' . $args . ' ' . $redirect_args, 'r'));
 				}
-			} elseif ($redirect_args == '') {
-				exec($filename . ' ' . $args . ' > /dev/null 2>&1 &');
 			} else {
-				exec($filename . ' ' . $args . ' ' . $redirect_args . ' &');
+				if (!file_escaped($filename)) {
+					$filename = cacti_escapeshellcmd($filename);
+				}
+
+				if ($redirect_args == '') {
+					exec($filename . ' ' . $args . ' > /dev/null 2>&1 &');
+				} else {
+					exec($filename . ' ' . $args . ' ' . $redirect_args . ' &');
+				}
 			}
 		}
 	} else {
