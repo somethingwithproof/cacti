@@ -378,6 +378,11 @@ function api_reapply_suggested_graph_title(int $local_graph_id) : bool {
 						continue;
 					}
 
+					if (!db_column_exists('graph_templates_graph', $suggested_value['field_name'])) {
+						cacti_log('ERROR: Suggested value column error.  Column ' . $suggested_value['field_name'] . ' is not a compatible field name for table graph_templates_graph.  Please correct this suggested value mapping', false);
+						continue;
+					}
+
 					$matches[] = $suggested_value['field_name'];
 
 					db_execute_prepared('UPDATE graph_templates_graph

@@ -5083,6 +5083,27 @@ function sanitize_sql_column(string $column, string $default = 'id') : string {
 }
 
 /**
+ * Checks if a specified column exists in the given tables.
+ *
+ * @param  string $column The name of the column to check for.
+ * @param  array  $tables An array of table names to search for the column.
+ * @return bool   Returns true if the column exists in any of the tables, false otherwise.
+ */
+function api_automation_column_exists(string $column, array $tables) : bool {
+	$column = str_replace(['h.', 'ht.', 'gt.', 'gl.', 'gtg.'], ['', '', '', '', ''], $column);
+
+	if (cacti_sizeof($tables)) {
+		foreach ($tables as $table) {
+			if (db_column_exists($table, $column)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
  * cacti_csv_cell - encode a single value for safe inclusion in a CSV file.
  * Doubles embedded double-quotes (RFC 4180) and prefixes a single quote when
  * the value opens with a spreadsheet formula trigger (= + - @ and the tab/CR

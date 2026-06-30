@@ -1297,27 +1297,6 @@ function display_matching_trees(int $rule_id, int $rule_type, array $item, strin
 }
 
 /**
- * Checks if a specified column exists in the given tables.
- *
- * @param  string $column The name of the column to check for.
- * @param  array  $tables An array of table names to search for the column.
- * @return bool   Returns true if the column exists in any of the tables, false otherwise.
- */
-function api_automation_column_exists(string $column, array $tables) : bool {
-	$column = str_replace(['h.', 'ht.', 'gt.', 'gl.', 'gtg.'], ['', '', '', '', ''], $column);
-
-	if (cacti_sizeof($tables)) {
-		foreach ($tables as $table) {
-			if (db_column_exists($table, $column)) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-/**
  * Displays match rule items.
  *
  * @param string $title     The title to display.

@@ -1678,6 +1678,11 @@ function create_complete_graph_from_template(int $graph_template_id, int $host_i
 	// suggested values: graph, passed from parent
 	if (isset($suggested_vals[$graph_template_id]['graph_template'])) {
 		foreach ($suggested_vals[$graph_template_id]['graph_template'] as $field_name => $field_value) {
+			if (!db_column_exists('graph_templates_graph', $field_name)) {
+				cacti_log('ERROR: Suggested value column error.  Column ' . $field_name . ' is not a compatible field name for table graph_templates_graph.  Please correct this suggested value mapping', false);
+				continue;
+			}
+
 			db_execute_prepared("UPDATE graph_templates_graph
 				SET $field_name = ?
 				WHERE local_graph_id = ?",
@@ -1694,6 +1699,11 @@ function create_complete_graph_from_template(int $graph_template_id, int $host_i
 					WHERE local_graph_template_item_id = ?
 					AND local_graph_id = ?',
 					[$graph_template_item_id, $cache_array['local_graph_id']]);
+
+				if (!db_column_exists('graph_templates_item', $field_name)) {
+					cacti_log('ERROR: Suggested value column error.  Column ' . $field_name . ' is not a compatible field name for table graph_templates_item.  Please correct this suggested value mapping', false);
+					continue;
+				}
 
 				db_execute_prepared("UPDATE graph_templates_item
 					SET $field_name = ?
@@ -1891,6 +1901,11 @@ function create_complete_graph_from_template(int $graph_template_id, int $host_i
 				// suggested values: data source, passed from parent
 				if (isset($suggested_vals[$graph_template_id]['data_template'][$data_template['id']])) {
 					foreach ($suggested_vals[$graph_template_id]['data_template'][$data_template['id']] as $field_name => $field_value) {
+						if (!db_column_exists('data_template_data', $field_name)) {
+							cacti_log('ERROR: Suggested value column error.  Column ' . $field_name . ' is not a compatible field name for table data_template_data.  Please correct this suggested value mapping', false);
+							continue;
+						}
+
 						db_execute_prepared("UPDATE data_template_data
 							SET $field_name = ?
 							WHERE local_data_id = ?",
@@ -1907,6 +1922,11 @@ function create_complete_graph_from_template(int $graph_template_id, int $host_i
 								WHERE local_data_template_rrd_id = ?
 								AND local_data_id = ?',
 								[$data_template_item_id, $cache_array['local_data_id'][$data_template['id']]]);
+
+							if (!db_column_exists('data_template_rrd', $field_name)) {
+								cacti_log('ERROR: Suggested value column error.  Column ' . $field_name . ' is not a compatible field name for table data_template_rrd.  Please correct this suggested value mapping', false);
+								continue;
+							}
 
 							db_execute_prepared("UPDATE data_template_rrd
 								SET $field_name = ?
@@ -2060,6 +2080,11 @@ function create_graph_custom_data_compatible(mixed $suggested_vals, array $previ
 									cacti_log('Item Sub Element Value: "' . $vvalue . '"', false, 'DSTRACE');
 								}
 
+								if (!db_column_exists('data_template_data', $vkey)) {
+									cacti_log('ERROR: Suggested value column error.  Column ' . $vkey . ' is not a compatible field name for table data_template_data.  Please correct this suggested value mapping', false);
+									continue;
+								}
+
 								$previous_value = db_fetch_cell_prepared("SELECT `$vkey`
 									FROM data_template_data
 									WHERE local_data_id = ?
@@ -2089,6 +2114,11 @@ function create_graph_custom_data_compatible(mixed $suggested_vals, array $previ
 								if (read_config_option('data_source_trace') == 'on') {
 									cacti_log('Item Sub Element Key: "' . $vkey . '"', false, 'DSTRACE');
 									cacti_log('Item Sub Element Value: "' . $vvalue . '"', false, 'DSTRACE');
+								}
+
+								if (!db_column_exists('data_template_rrd', $vkey)) {
+									cacti_log('ERROR: Suggested value column error.  Column ' . $vkey . ' is not a compatible field name for table data_template_rrd.  Please correct this suggested value mapping', false);
+									continue;
 								}
 
 								$previous_value = db_fetch_cell_prepared("SELECT `$vkey`
@@ -2162,6 +2192,11 @@ function create_graph_custom_data_compatible(mixed $suggested_vals, array $previ
 												cacti_log('Item Sub Element Value: "' . $vvalue . '"', false, 'DSTRACE');
 											}
 
+											if (!db_column_exists('data_template_data', $vkey)) {
+												cacti_log('ERROR: Suggested value column error.  Column ' . $vkey . ' is not a compatible field name for table data_template_data.  Please correct this suggested value mapping', false);
+												continue;
+											}
+
 											$previous_value = db_fetch_cell_prepared("SELECT `$vkey`
 												FROM data_template_data
 												WHERE local_data_id = ?
@@ -2191,6 +2226,11 @@ function create_graph_custom_data_compatible(mixed $suggested_vals, array $previ
 											if (read_config_option('data_source_trace') == 'on') {
 												cacti_log('Item Sub Element Key: "' . $vkey . '"', false, 'DSTRACE');
 												cacti_log('Item Sub Element Value: "' . $vvalue . '"', false, 'DSTRACE');
+											}
+
+											if (!db_column_exists('data_template_rrd', $vkey)) {
+												cacti_log('ERROR: Suggested value column error.  Column ' . $vkey . ' is not a compatible field name for table data_template_rrd.  Please correct this suggested value mapping', false);
+												continue;
 											}
 
 											$previous_value = db_fetch_cell_prepared("SELECT `$vkey`

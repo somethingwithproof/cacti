@@ -808,7 +808,7 @@ function graphs() : void {
 						if (cacti_sizeof($field_names)) {
 							foreach ($field_names as $column) {
 								$field_name = $column['field_name'];
-								$sql_query .= ", MAX(CASE WHEN field_name='$field_name' THEN field_value ELSE NULL END) AS '$field_name'";
+								$sql_query .= ', MAX(CASE WHEN field_name=' . db_qstr($field_name) . ' THEN field_value ELSE NULL END) AS `' . sanitize_sql_column($field_name) . '`';
 								$i++;
 							}
 						}
