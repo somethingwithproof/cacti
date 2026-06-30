@@ -5071,10 +5071,6 @@ function sanitize_uri(string $uri) : string {
 		''
 	];
 
-	if (is_urlencoded($uri)) {
-		$uri = urldecode($uri);
-	}
-
 	if (str_contains($uri, 'graph_view.php')) {
 		if (!strpos($uri, 'action=')) {
 			$uri = $uri . (strpos($uri, '?') ? '&' : '?') . 'action=' . gnrv('action');

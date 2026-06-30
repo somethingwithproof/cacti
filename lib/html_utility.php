@@ -1486,12 +1486,15 @@ function validate_redirect_url($url = '', $default = 'index.php') {
 		return $default;
 	}
 
-	// Prevent referring off site
+	// Prevent referring off site.
+	// Prefer SERVER_NAME (web-server config) over HTTP_HOST (attacker-controlled header).
 	$ref_host = parse_url($url, PHP_URL_HOST);
 	$srv_host = null;
 
-	if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] != '') {
-		$srv_host = preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST']);
+	$raw_host = $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? '';
+
+	if ($raw_host !== '') {
+		$srv_host = preg_replace('/:\d+$/', '', $raw_host);
 	}
 
 	if ($ref_host === null || ($srv_host !== null && $ref_host === $srv_host)) {
@@ -1499,6 +1502,12 @@ function validate_redirect_url($url = '', $default = 'index.php') {
 		$ref_query = parse_url($url, PHP_URL_QUERY);
 
 		$safe = sanitize_uri($ref_path . ($ref_query !== null ? '?' . $ref_query : ''));
+
+		// Defense-in-depth: sanitize_uri no longer decodes, but a decoded URL
+		// that resolves to a protocol-relative form must still be rejected.
+		if (strpos($safe, '//') === 0) {
+			return $default;
+		}
 
 		return $safe;
 	} else {

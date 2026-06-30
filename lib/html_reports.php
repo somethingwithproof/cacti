@@ -1581,7 +1581,7 @@ function reports_edit() : void {
 			if (!empty($report['id']) && read_config_option('drag_and_drop') == 'on') {
 				?>
 				<script type='text/javascript'>
-					var reportsPage = '<?php print get_reports_page(); ?>';
+					var reportsPage = <?php print json_encode((string) get_reports_page()); ?>;
 					var reportId = <?php print $report['id']; ?>;
 
 					// Switch the table name
