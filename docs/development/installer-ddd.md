@@ -42,8 +42,8 @@ Add a failing PHPUnit test under `tests/Installer` before changing the domain
 or application code. Run:
 
 ```sh
-tests/vendor/bin/phpunit --configuration phpunit.installer.xml
-phpstan analyse --configuration phpstan.installer.neon --no-progress
+include/vendor/bin/phpunit --configuration phpunit.installer.xml
+include/vendor/bin/phpstan analyse --configuration phpstan.installer.neon --no-progress
 ```
 
 The PHPStan configuration is intentionally level 8 and scopes analysis to the
