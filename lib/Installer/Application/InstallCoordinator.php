@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Cacti\Installer\Application;
+
+use Cacti\Installer\Application\Port\InstallationRepository;
+use Cacti\Installer\Application\Port\InstallationTaskRunner;
+
+/** Executes a confirmed plan, persisting the aggregate after every state change. */
+final readonly class InstallCoordinator {
+	public function __construct(
+		private InstallationRepository $installations,
+		private InstallationTaskRunner $tasks,
+	) {
+	}
+
+	public function run(string $installationId): InstallationExecutionResult {
+		$installation = $this->installations->get($installationId);
+		$plan = $installation->plan();
+		$installation->start();
+		$this->installations->save($installation);
+
+		foreach ($plan->tasks() as $task) {
+			$result = $this->tasks->run($task, $installation);
+			if (!$result->successful) {
+				$installation->fail();
+				$this->installations->save($installation);
+
+				return InstallationExecutionResult::failed($result->failure ?? 'The installation task failed.');
+			}
+		}
+
+		$installation->complete();
+		$this->installations->save($installation);
+
+		return InstallationExecutionResult::completed();
+	}
+}
