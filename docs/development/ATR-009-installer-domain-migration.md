@@ -16,7 +16,7 @@ Migrate the installer as a bounded context. Keep business state, plans, and
 invariants in `Domain`; coordinate execution through `Application` ports; and
 put Cacti globals, persistence, processes, and operating-system detection in
 `Infrastructure`. Preserve legacy integer mode and operation contracts only in
-anti-corruption adapters. New installer code uses typed PHP 8.4 constructs and
+anti-corruption adapters. New installer code uses typed PHP 8.1 constructs and
 is analysed at PHPStan level 8 with strict rules.
 
 ## Consequences

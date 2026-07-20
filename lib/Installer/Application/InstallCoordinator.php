@@ -27,7 +27,11 @@ final class InstallCoordinator {
 				$installation->fail();
 				$this->installations->save($installation);
 
-				return InstallationExecutionResult::failed($result->failure ?? 'The installation task failed.');
+				$failure = $result->failure;
+
+				return InstallationExecutionResult::failed(
+					$failure !== null && $failure !== '' ? $failure : 'The installation task failed.'
+				);
 			}
 		}
 
