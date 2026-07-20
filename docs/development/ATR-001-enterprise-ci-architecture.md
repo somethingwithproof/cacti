@@ -36,8 +36,8 @@ suite; it is not inferred from a runner image.
 
 Issues become stale after 120 inactive days and close 30 days later. Pull
 requests become stale after 90 inactive days and close 30 days later. Security,
-pinned, enhancement, and future-release work is exempt. Closed discussions are
-locked only after one year of inactivity.
+pinned, enhancement, and future-release work is exempt. Closed issues and pull
+requests are locked only after one year of inactivity.
 
 ## Consequences
 

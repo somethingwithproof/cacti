@@ -32,9 +32,9 @@ jobs:
       - name: Install locked dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
       - name: Validate the dependency contract
-        run: composer composer:validate
+        run: composer validate --strict
       - name: Check production platform requirements
-        run: composer platform:check
+        run: composer check-platform-reqs --no-dev
       - name: Lint tracked PHP files
         run: git ls-files -z -- '*.php' | xargs -0 -n1 -P2 php -l
       - name: Run project lint and static analysis

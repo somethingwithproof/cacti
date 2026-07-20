@@ -1,4 +1,4 @@
-name: Maintain inactive discussions
+name: Maintain inactive issues and pull requests
 
 on:
   schedule:
@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: maintenance-inactive-discussions
+  group: maintenance-inactive-issues-and-prs
   cancel-in-progress: false
 
 jobs:
