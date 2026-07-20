@@ -7,9 +7,9 @@ namespace Cacti\Installer\Domain;
 use InvalidArgumentException;
 
 /** @phpstan-type TemplateName non-empty-string */
-final readonly class TemplateSelection {
+final class TemplateSelection {
 	/** @var list<TemplateName> */
-	private array $templates;
+	private readonly array $templates;
 
 	/** @param list<string> $templates */
 	public function __construct(array $templates) {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Cacti\Installer\Application;
 
-final readonly class InstallationExecutionResult {
+final class InstallationExecutionResult {
 	private function __construct(
-		public bool $successful,
-		public ?string $failure = null,
+		public readonly bool $successful,
+		public readonly ?string $failure = null,
 	) {
 	}
 

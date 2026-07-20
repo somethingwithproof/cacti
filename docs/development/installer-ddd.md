@@ -1,6 +1,6 @@
 # Installer Domain Architecture
 
-The installer is being migrated to a PHP 8.4 bounded context under
+The installer is being migrated to a PHP 8.1-compatible bounded context under
 `lib/Installer`. The legacy `Installer` class remains an interface adapter
 until the web, JSON, CLI, and background entry points have moved to the new
 application layer.
@@ -30,7 +30,7 @@ interface; they must not be imported into `Domain` or `Application`.
 
 ## Required invariants
 
-- A licence is accepted before confirmation.
+- A license is accepted before confirmation.
 - A mode is selected before confirmation or planning.
 - Only confirmed installations can run.
 - A task failure stops the plan and marks the installation failed.

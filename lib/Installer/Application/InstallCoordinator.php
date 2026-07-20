@@ -8,10 +8,10 @@ use Cacti\Installer\Application\Port\InstallationRepository;
 use Cacti\Installer\Application\Port\InstallationTaskRunner;
 
 /** Executes a confirmed plan, persisting the aggregate after every state change. */
-final readonly class InstallCoordinator {
+final class InstallCoordinator {
 	public function __construct(
-		private InstallationRepository $installations,
-		private InstallationTaskRunner $tasks,
+		private readonly InstallationRepository $installations,
+		private readonly InstallationTaskRunner $tasks,
 	) {
 	}
 

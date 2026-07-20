@@ -16,10 +16,10 @@ use Throwable;
  * Cacti exceptions do not escape into the application service. They are
  * converted into the application's explicit task-result protocol instead.
  */
-final readonly class CactiInstallationTaskRunner implements InstallationTaskRunner {
+final class CactiInstallationTaskRunner implements InstallationTaskRunner {
 	public function __construct(
-		private CactiLegacyInstallOperations $operations,
-		private OperatingSystem $operatingSystem,
+		private readonly CactiLegacyInstallOperations $operations,
+		private readonly OperatingSystem $operatingSystem,
 	) {
 	}
 

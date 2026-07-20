@@ -57,7 +57,7 @@ final class Installation {
 	public function confirm(): void {
 		$this->assertNotTerminal();
 		if (!$this->licenseAccepted) {
-			throw new LogicException('The licence must be accepted before confirmation.');
+			throw new LogicException('The license must be accepted before confirmation.');
 		}
 		if ($this->mode === null) {
 			throw new LogicException('An installation mode must be selected before confirmation.');

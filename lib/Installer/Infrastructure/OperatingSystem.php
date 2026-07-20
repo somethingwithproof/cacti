@@ -14,7 +14,7 @@ enum OperatingSystem: string {
 		return match (strtolower($family)) {
 			'windows' => self::Windows,
 			'linux' => self::Linux,
-			'freebsd' => self::FreeBsd,
+			'bsd', 'freebsd' => self::FreeBsd,
 			default => self::OtherUnix,
 		};
 	}

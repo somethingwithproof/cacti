@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Cacti\Installer\Domain;
 
-final readonly class InstallationPlan {
+final class InstallationPlan {
 	/** @var non-empty-list<InstallTask> */
-	private array $tasks;
+	private readonly array $tasks;
 
 	/** @param non-empty-list<InstallTask> $tasks */
 	public function __construct(array $tasks) {
