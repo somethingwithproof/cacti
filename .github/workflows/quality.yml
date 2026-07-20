@@ -27,7 +27,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.cache/composer
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock', 'composer.json') }}
           restore-keys: composer-${{ runner.os }}-
       - name: Install locked dependencies
         run: composer install --no-interaction --prefer-dist --no-progress

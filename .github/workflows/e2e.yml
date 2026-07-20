@@ -54,8 +54,19 @@ jobs:
           sudo apt-get install --yes apache2 snmp rrdtool
       - name: Install Cacti plugins used by integration tests
         run: |
+          declare -A plugin_refs=(
+            [thold]=948c22953ead999ca32b4954d3b97f2b92098411
+            [monitor]=11c7b6c6422d7ffaba9c2dcac25b729d9cb6ff12
+            [mactrack]=87d92a1e79d867b8632dd4b384a1ab2f9f4cdc22
+            [audit]=5bf7a4f8def975e0fa1ec233f71522721b26ead7
+            [flowview]=0fa732fc5fed91ead08f4d32ff502402c138e1eb
+            [syslog]=713da14ff5afac062363bd5311f2c52f2eef2d82
+          )
           for plugin in thold monitor mactrack audit flowview syslog; do
-            git clone --depth=1 "https://github.com/Cacti/plugin_${plugin}.git" "plugins/${plugin}"
+            git init "plugins/${plugin}"
+            git -C "plugins/${plugin}" remote add origin "https://github.com/Cacti/plugin_${plugin}.git"
+            git -C "plugins/${plugin}" fetch --depth=1 origin "${plugin_refs[$plugin]}"
+            git -C "plugins/${plugin}" checkout --detach FETCH_HEAD
           done
           cp -p plugins/syslog/config.php.dist plugins/syslog/config.php
           sed -i "s|//\\$syslog_install_options|\\$syslog_install_options|" plugins/syslog/config.php

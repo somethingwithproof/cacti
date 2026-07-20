@@ -31,7 +31,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.cache/composer
-          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('composer.lock', 'composer.json') }}
           restore-keys: composer-${{ runner.os }}-${{ matrix.php }}-
       - run: composer install --no-interaction --prefer-dist --no-progress
       - name: Run installer tests when the bounded context is present

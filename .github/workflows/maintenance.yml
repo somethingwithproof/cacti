@@ -40,3 +40,4 @@ jobs:
           issue-inactive-days: 365
           pr-inactive-days: 365
           exclude-any-issue-labels: future release
+          exclude-any-pr-labels: future release
