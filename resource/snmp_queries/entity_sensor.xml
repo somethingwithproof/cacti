@@ -1,0 +1,78 @@
+<interface>
+	<name>Entity Sensors (ENTITY-SENSOR-MIB)</name>
+	<description>Queries a host for physical sensors (temperature, voltage, current, fan speed, humidity, etc.) exposed through the ENTITY-SENSOR-MIB entPhySensorTable, labelled from the ENTITY-MIB entPhysicalTable</description>
+	<oid_index>.1.3.6.1.2.1.99.1.1.1.1</oid_index>
+	<index_order>entPhysicalName:entPhysicalDescr:entPhysicalIndex</index_order>
+	<index_order_type>numeric</index_order_type>
+	<index_title_format>|chosen_order_field|</index_title_format>
+
+	<fields>
+		<entPhysicalIndex>
+			<name>Index</name>
+			<method>walk</method>
+			<source>OID/REGEXP:.*\.([0-9]+)$</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.99.1.1.1.1</oid>
+		</entPhysicalIndex>
+		<entPhysicalName>
+			<name>Name (ENTITY-MIB)</name>
+			<method>walk</method>
+			<output_format>ascii</output_format>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.47.1.1.1.1.7</oid>
+		</entPhysicalName>
+		<entPhysicalDescr>
+			<name>Description (ENTITY-MIB)</name>
+			<method>walk</method>
+			<output_format>ascii</output_format>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.47.1.1.1.1.2</oid>
+		</entPhysicalDescr>
+		<entPhySensorType>
+			<name>Sensor Type</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.99.1.1.1.1</oid>
+		</entPhySensorType>
+		<entPhySensorScale>
+			<name>Scale</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.99.1.1.1.2</oid>
+		</entPhySensorScale>
+		<entPhySensorPrecision>
+			<name>Precision</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.99.1.1.1.3</oid>
+		</entPhySensorPrecision>
+		<entPhySensorUnitsDisplay>
+			<name>Units</name>
+			<method>walk</method>
+			<output_format>ascii</output_format>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.99.1.1.1.6</oid>
+		</entPhySensorUnitsDisplay>
+		<entPhySensorOperStatus>
+			<name>Operational Status</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input-output</direction>
+			<oid>.1.3.6.1.2.1.99.1.1.1.5</oid>
+		</entPhySensorOperStatus>
+
+		<entPhySensorValue>
+			<name>Sensor Value</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>output</direction>
+			<oid>.1.3.6.1.2.1.99.1.1.1.4</oid>
+		</entPhySensorValue>
+	</fields>
+</interface>
