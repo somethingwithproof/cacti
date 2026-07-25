@@ -496,7 +496,9 @@ function import_read_package_data(string $xmlfile, string &$public_key, bool $pr
 
 	$filename = "compress.zlib://$xmlfile";
 
-	if (!import_validate_signature($xmlfile) && !$preview) {
+	$sig = import_validate_signature($xmlfile);
+
+	if (!$preview && (!is_array($sig) || empty($sig['valid']))) {
 		cacti_log('FATAL: Package Public Key is not Official Cacti Public Key for Package ' . $filename, true, 'IMPORT', POLLER_VERBOSITY_LOW);
 
 		return false;
