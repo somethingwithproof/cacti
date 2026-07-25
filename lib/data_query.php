@@ -2778,8 +2778,19 @@ function get_script_query_path(string $args, string $script_path, int $host_id) 
 		$extra_arguments = '';
 	}
 
-	// get a complete path for out target script
-	return substitute_script_query_path($script_path) . ' ' . $extra_arguments;
+	// SECURITY: the base script path must be sanitized to prevent RCE from malicious templates
+	$parsed_script_path = substitute_script_query_path($script_path);
+
+	if (strpos($parsed_script_path, '..') !== false) {
+		cacti_log('FATAL: Malicious path traversal detected in Data Query script path: ' . $parsed_script_path, true, 'REINDEX');
+
+		return '';
+	}
+
+	$safe_script_path = cacti_escapeshellcmd($parsed_script_path);
+
+	// get a complete path for our target script
+	return $safe_script_path . ' ' . $extra_arguments;
 }
 
 /**
