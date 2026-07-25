@@ -110,7 +110,12 @@ function db_connect_real($device, $user, $pass, $db_name, $db_type = 'mysql', $p
 			} else {
 				$cnn_id = new PDO("$db_type:host=$device;port=$port;dbname=$db_name;charset=utf8", $user, $pass, $flags);
 			}
-			$cnn_id->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+			/* #6993: WARNING rather than SILENT so a query error a caller
+			 * forgets to check still reaches the log instead of vanishing.
+			 * EXCEPTION would make every db_* call throw, so it is avoided.
+			 * The db_execute_prepared() catch below recovers the driver
+			 * error code from errorInfo() to keep the deadlock retry intact. */
+			$cnn_id->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
 
 			if (!empty($config['DEBUG_SQL_CONNECT'])) {
 				error_log(sprintf('NOTE: New connection to %s:%s/%s.', $device, $port, $db_name));
@@ -509,9 +514,17 @@ function db_execute_prepared($sql, $params = array(), $log = true, $db_conn = fa
 				$query->execute($params);
 			}
 		} catch (Exception $ex) {
-			$code = $ex->getCode();
-			$en = $code;
-			$errorinfo = array(1=>$code, 2=>$ex->getMessage());
+			/* Under ERRMODE_WARNING the failure arrives via db_warning_handler,
+			 * whose exception code is the PHP error level, not the SQL error
+			 * number. Read the statement's errorInfo() so the deadlock/lock
+			 * retry below still matches on the real driver code. */
+			$errorinfo = $query->errorInfo();
+			$en   = (isset($errorinfo[1]) && $errorinfo[1] != 0) ? $errorinfo[1] : $ex->getCode();
+			$code = $en;
+
+			if (!isset($errorinfo[2]) || $errorinfo[2] === null) {
+				$errorinfo[2] = $ex->getMessage();
+			}
 		}
 		restore_error_handler();
 
