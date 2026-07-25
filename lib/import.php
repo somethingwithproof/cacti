@@ -596,7 +596,15 @@ function import_package($xmlfile, $profile_id = 1, $remove_orphans = false, $rep
 		$name = $f['name'];
 
 		if (strpos($name, 'scripts/') !== false || strpos($name, 'resource/') !== false) {
-			$filename = $config['base_path'] . "/$name";
+			$validated_path = validate_relative_path_within($name, $config['base_path']);
+
+			if ($validated_path === false) {
+				cacti_log('FATAL: Skipping package file with unsafe path: ' . $name, true, 'IMPORT', POLLER_VERBOSITY_LOW);
+
+				continue;
+			}
+
+			$filename = $validated_path;
 
 			if (!$preview) {
 				if (!cacti_sizeof($import_files) || in_array($name, $import_files)) {
