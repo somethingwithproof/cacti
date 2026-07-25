@@ -2184,6 +2184,19 @@ function db_replace(string $table_name, array $array_items, string $keyCols, mix
 }
 
 /**
+ * cacti_safe_column_name - strip any character that is not alphanumeric or an
+ *   underscore from a column name before it is interpolated into a backtick
+ *   quoted SQL identifier.
+ *
+ * @param string $col The raw column name
+ *
+ * @return string The sanitized column name
+ */
+function cacti_safe_column_name(string $col) : string {
+	return preg_replace('/[^a-zA-Z0-9_]/', '', $col) ?? '';
+}
+
+/**
  * _db_replace - Internal function used as a part of the db_replace public function
  *
  * @param mixed  $db_conn    The database connection to use
@@ -2223,6 +2236,9 @@ function _db_replace(mixed $db_conn, string $table, array $fieldArray, mixed $ke
 			$sql .= ', ';
 			$sql2 .= ', ';
 		}
+
+		$k = cacti_safe_column_name($k);
+
 		$sql .= "`$k`";
 		$sql2 .= $v;
 		$first  = false;
