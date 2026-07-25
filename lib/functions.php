@@ -5386,6 +5386,38 @@ function cacti_escapeshellcmd(string $string) : string {
 }
 
 /**
+ * cacti_input_string_is_safe - checks a data input command string for shell
+ * metacharacters that would allow command injection when the command is run.
+ *
+ * @param string $input_string The command string to validate
+ *
+ * @return bool true when the string is safe to persist and execute
+ */
+function cacti_input_string_is_safe(string $input_string) : bool {
+	if ($input_string === '') {
+		return true;
+	}
+
+	$bare = preg_replace(
+		'/"<[a-zA-Z0-9_]+>"|\'<[a-zA-Z0-9_]+>\'|<[a-zA-Z0-9_]+>/',
+		'',
+		$input_string
+	);
+
+	// never allow redirects regardless of metachars setting
+	if (str_contains($bare, '>') || str_contains($bare, '<')) {
+		return false;
+	}
+
+	// if the Cacti admin permits unsafe metachars short circuit here
+	if (read_config_option('allow_unsafe_metachars') == 'on') {
+		return true;
+	}
+
+	return !preg_match('/[;&|`$\\\\\n\r\'"<>()\{\}]/', $bare);
+}
+
+/**
  * mimics escapeshellarg, even for windows
  *
  * @param $string The string to be escaped
