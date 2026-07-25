@@ -351,7 +351,24 @@ function import_package_get_name($xmlfile) {
 }
 
 function import_package_get_details($xmlfile) {
-	$filename = "compress.zlib://$xmlfile";
+	/* SECURITY (#7031): resolve to a real local file before applying the
+	 * compress.zlib:// wrapper. realpath() returns false for stream wrappers
+	 * (phar://, php://, a nested compress.zlib://) so a crafted path cannot
+	 * reach the inner wrapper and trigger deserialization. Reject null bytes
+	 * up front; realpath() throws on them under PHP 8. */
+	if (!is_string($xmlfile) || strpos($xmlfile, "\0") !== false) {
+		return array();
+	}
+
+	$local = realpath($xmlfile);
+
+	if ($local === false || !is_file($local)) {
+		cacti_log('FATAL: Package path is not a valid local file.', true, 'IMPORT', POLLER_VERBOSITY_LOW);
+
+		return array();
+	}
+
+	$filename = 'compress.zlib://' . $local;
 
 	$return = array();
 	$data = file_get_contents($filename, 'r');
@@ -413,9 +430,25 @@ function import_package_get_details($xmlfile) {
 }
 
 function import_read_package_data($xmlfile, &$public_key) {
+	/* SECURITY (#7031): resolve to a real local file before applying the
+	 * compress.zlib:// wrapper so a nested stream wrapper (phar://, php://)
+	 * cannot be evaluated. Reject null bytes first; realpath() throws on them
+	 * under PHP 8. */
+	if (!is_string($xmlfile) || strpos($xmlfile, "\0") !== false) {
+		return false;
+	}
+
+	$local = realpath($xmlfile);
+
+	if ($local === false || !is_file($local)) {
+		cacti_log('FATAL: Package path is not a valid local file.', true, 'IMPORT', POLLER_VERBOSITY_LOW);
+
+		return false;
+	}
+
 	$public_key = import_package_get_public_key($xmlfile);
 
-	$filename = "compress.zlib://$xmlfile";
+	$filename = 'compress.zlib://' . $local;
 
 	if (!is_cacti_public_key($public_key)) {
 		cacti_log('FATAL: Package Public Key is not Official Cacti Public Key for Package ' . $filename, true, 'IMPORT', POLLER_VERBOSITY_LOW);
