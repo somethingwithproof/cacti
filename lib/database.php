@@ -872,6 +872,35 @@ function db_affected_rows($db_conn = false) {
 }
 
 /**
+ * db_is_safe_identifier - validate a table, column, or index name used in DDL
+ *
+ *   Cacti composes its schema DDL by interpolating identifiers directly into
+ *   backtick-quoted ALTER TABLE and CREATE TABLE statements.  Those identifiers
+ *   come from the install and upgrade scripts or from plugin schema definitions,
+ *   never from request data, so this is a defense-in-depth guard that keeps a
+ *   malformed or crafted identifier from breaking out of the backticks.
+ *
+ * @param  (string) The identifier to validate
+ *
+ * @return (bool)   True when the identifier is safe for backtick-quoted DDL
+ */
+function db_is_safe_identifier($identifier) {
+	return is_string($identifier) && preg_match('/^[A-Za-z0-9_]+$/', $identifier) === 1;
+}
+
+/**
+ * db_is_safe_index_column - validate an index column name, allowing an optional
+ *   prefix length such as column(10)
+ *
+ * @param  (string) The index column definition to validate
+ *
+ * @return (bool)   True when the definition is safe for index DDL
+ */
+function db_is_safe_index_column($column) {
+	return is_string($column) && preg_match('/^`?[A-Za-z0-9_]+`?(?:\([0-9]+\))?$/', trim($column)) === 1;
+}
+
+/**
  * db_add_column - add a column to table
  *
  * @param  (string)        The name of the table
@@ -892,6 +921,21 @@ function db_add_column($table, $column, $log = true, $db_conn = false) {
 		if (!is_object($db_conn)) {
 			return false;
 		}
+	}
+
+	if (!db_is_safe_identifier($table)) {
+		cacti_log('ERROR: db_add_column() called with an unsafe table identifier', false, 'DBCALL');
+		return false;
+	}
+
+	if (isset($column['name']) && !db_is_safe_identifier($column['name'])) {
+		cacti_log('ERROR: db_add_column() called with an unsafe column identifier', false, 'DBCALL');
+		return false;
+	}
+
+	if (isset($column['after']) && !db_is_safe_identifier($column['after'])) {
+		cacti_log('ERROR: db_add_column() called with an unsafe AFTER column identifier', false, 'DBCALL');
+		return false;
 	}
 
 	$result = db_fetch_assoc('SHOW columns FROM `' . $table . '`', $log, $db_conn);
@@ -978,6 +1022,11 @@ function db_remove_column($table, $column, $log = true, $db_conn = false) {
 		}
 	}
 
+	if (!db_is_safe_identifier($table) || !db_is_safe_identifier($column)) {
+		cacti_log('ERROR: db_remove_column() called with an unsafe identifier', false, 'DBCALL');
+		return false;
+	}
+
 	$result = db_fetch_assoc('SHOW columns FROM `' . $table . '`', $log, $db_conn);
 	$columns = array();
 	foreach($result as $arr) {
@@ -1011,6 +1060,18 @@ function db_remove_column($table, $column, $log = true, $db_conn = false) {
 function db_add_index($table, $type, $key, $columns, $log = true, $db_conn = false) {
 	if (!is_array($columns)) {
 		$columns = array($columns);
+	}
+
+	if (!db_is_safe_identifier($table) || !db_is_safe_identifier($key) || !preg_match('/^(UNIQUE |FULLTEXT |SPATIAL )?(INDEX|KEY)$/i', $type)) {
+		cacti_log('ERROR: db_add_index() called with an unsafe identifier or index type', false, 'DBCALL');
+		return false;
+	}
+
+	foreach ($columns as $column) {
+		if (!db_is_safe_identifier($column)) {
+			cacti_log('ERROR: db_add_index() called with an unsafe index column', false, 'DBCALL');
+			return false;
+		}
 	}
 
 	$sql = 'ALTER TABLE `' . $table . '` ADD ' . $type . ' `' . $key . '`(`' . implode('`,`', $columns) . '`)';
@@ -1301,6 +1362,38 @@ function db_update_table($table, $data, $removecolumns = false, $log = true, $db
 		}
 	}
 
+	if (!db_is_safe_identifier($table)) {
+		cacti_log('ERROR: db_update_table() called with an unsafe table identifier', false, 'DBCALL');
+		return false;
+	}
+
+	if (isset($data['keys']) && is_array($data['keys'])) {
+		foreach ($data['keys'] as $k) {
+			if (!isset($k['name']) || !db_is_safe_identifier($k['name'])) {
+				cacti_log('ERROR: db_update_table() encountered an unsafe index identifier', false, 'DBCALL');
+				return false;
+			}
+
+			$key_columns = isset($k['columns']) ? (is_array($k['columns']) ? $k['columns'] : array($k['columns'])) : array();
+			foreach ($key_columns as $key_column) {
+				if (!db_is_safe_index_column($key_column)) {
+					cacti_log('ERROR: db_update_table() encountered an unsafe index column', false, 'DBCALL');
+					return false;
+				}
+			}
+		}
+	}
+
+	if (isset($data['primary'])) {
+		$primary_columns = is_array($data['primary']) ? $data['primary'] : array($data['primary']);
+		foreach ($primary_columns as $primary_column) {
+			if (!db_is_safe_index_column($primary_column)) {
+				cacti_log('ERROR: db_update_table() encountered an unsafe primary key column', false, 'DBCALL');
+				return false;
+			}
+		}
+	}
+
 	if (!db_table_exists($table, $log, $db_conn)) {
 		return db_table_create($table, $data, $log, $db_conn);
 	}
@@ -1332,6 +1425,11 @@ function db_update_table($table, $data, $removecolumns = false, $log = true, $db
 
 	$allcolumns = array();
 	foreach ($data['columns'] as $column) {
+		if (!isset($column['name']) || !db_is_safe_identifier($column['name'])) {
+			cacti_log('ERROR: db_update_table() encountered an unsafe column identifier', false, 'DBCALL');
+			return false;
+		}
+
 		$allcolumns[] = $column['name'];
 		if (!db_column_exists($table, $column['name'], $log, $db_conn)) {
 			if (!db_add_column($table, $column, $log, $db_conn)) {
@@ -1421,6 +1519,11 @@ function db_update_table($table, $data, $removecolumns = false, $log = true, $db
 	}
 
 	foreach ($allindexes as $n => $index) {
+		if (!db_is_safe_identifier($n)) {
+			cacti_log('ERROR: db_update_table() encountered an unsafe index identifier from the database', false, 'DBCALL');
+			return false;
+		}
+
 		if ($n != 'PRIMARY' && isset($data['keys'])) {
 			$removeindex = true;
 			foreach ($data['keys'] as $k) {
@@ -1539,6 +1642,51 @@ function db_table_create($table, $data, $log = true, $db_conn = false) {
 
 		if (!is_object($db_conn)) {
 			return false;
+		}
+	}
+
+	if (!db_is_safe_identifier($table)) {
+		cacti_log('ERROR: db_table_create() called with an unsafe table identifier', false, 'DBCALL');
+		return false;
+	}
+
+	if (isset($data['columns']) && is_array($data['columns'])) {
+		foreach ($data['columns'] as $column) {
+			if (isset($column['name']) && !db_is_safe_identifier($column['name'])) {
+				cacti_log('ERROR: db_table_create() encountered an unsafe column identifier', false, 'DBCALL');
+				return false;
+			}
+		}
+	}
+
+	if (isset($data['primary'])) {
+		$primary_columns = is_array($data['primary']) ? $data['primary'] : array($data['primary']);
+		foreach ($primary_columns as $primary_column) {
+			if (!db_is_safe_index_column($primary_column)) {
+				cacti_log('ERROR: db_table_create() encountered an unsafe primary key column', false, 'DBCALL');
+				return false;
+			}
+		}
+	}
+
+	if (isset($data['keys']) && is_array($data['keys'])) {
+		foreach ($data['keys'] as $key) {
+			if (!isset($key['name'])) {
+				continue;
+			}
+
+			if (!db_is_safe_identifier($key['name'])) {
+				cacti_log('ERROR: db_table_create() encountered an unsafe index identifier', false, 'DBCALL');
+				return false;
+			}
+
+			$key_columns = isset($key['columns']) ? (is_array($key['columns']) ? $key['columns'] : array($key['columns'])) : array();
+			foreach ($key_columns as $key_column) {
+				if (!db_is_safe_index_column($key_column)) {
+					cacti_log('ERROR: db_table_create() encountered an unsafe index column', false, 'DBCALL');
+					return false;
+				}
+			}
 		}
 	}
 
