@@ -30,6 +30,16 @@ $action = grv('action');
 
 switch ($action) {
 	case 'checkpass':
+		/**
+		 * Probing the password policy requires an authenticated session,
+		 * otherwise an anonymous caller can enumerate the rules.
+		 */
+		if (!isset($_SESSION[SESS_USER_ID])) {
+			$referer = validate_redirect_url($_SERVER['HTTP_REFERER'] ?? '', 'index.php');
+			header("Location: $referer");
+			exit;
+		}
+
 		$error = secpass_check_pass(gnrv('password'));
 
 		if ($error != '') {
