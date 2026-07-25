@@ -1495,7 +1495,23 @@ function db_column_exists(string $table, string $column, bool $log = true, mixed
 		return $results[$index][$table][$column];
 	}
 
-	$results[$index][$table][$column] = (db_fetch_cell("SHOW columns FROM `$table` LIKE '$column'", '', $log, $db_conn) ? true : false);
+	// Identifiers cannot be bound, so validate and backtick-quote the table
+	// the same way db_table_exists() handles an optional database qualifier.
+	preg_match("/([`]{0,1}(?<database>[\w_]+)[`]{0,1}\.){0,1}[`]{0,1}(?<table>[\w_]+)[`]{0,1}/", $table, $matches);
+
+	if (!cacti_sizeof($matches) || !array_key_exists('table', $matches)) {
+		$results[$index][$table][$column] = false;
+
+		return false;
+	}
+
+	if (!empty($matches['database'])) {
+		$safe_table = '`' . $matches['database'] . '`.`' . $matches['table'] . '`';
+	} else {
+		$safe_table = '`' . $matches['table'] . '`';
+	}
+
+	$results[$index][$table][$column] = (db_fetch_cell_prepared("SHOW columns FROM $safe_table LIKE ?", [$column], '', $log, $db_conn) ? true : false);
 
 	return $results[$index][$table][$column];
 }
