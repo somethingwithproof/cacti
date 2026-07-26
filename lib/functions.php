@@ -943,7 +943,7 @@ function form_input_validate(mixed $field_value, string $field_name, string $reg
 
 	if ($allow_nulls == false && $field_value == '') {
 		$report_message = __("Form Validation Failed: Variable '%s' does not allow nulls and variable is null", $field_name);
-	} elseif ($regexp_match != '' && !preg_match('/' . $regexp_match . '/', $field_value)) {
+	} elseif ($regexp_match != '' && !preg_match('/' . $regexp_match . '/', (string) $field_value)) {
 		$report_message = __("Form Validation Failed: Variable '%s' with Value '%s' Failed REGEX '%s'", $field_name, $field_value, $regexp_match);
 	}
 
@@ -1524,7 +1524,7 @@ function cacti_log(mixed $string, bool $output = false, string $environ = 'CMDPH
 
 	if ($depth > 1) {
 		print 'Recursion Loop detected.  Check Database' . PHP_EOL;
-		print 'Message: ' . trim($string) . PHP_EOL;
+		print 'Message: ' . trim((string) $string) . PHP_EOL;
 		exit;
 	}
 
@@ -1534,7 +1534,7 @@ function cacti_log(mixed $string, bool $output = false, string $environ = 'CMDPH
 
 	if (is_array($string)) {
 		$string = json_encode($string);
-	} elseif ($string == '' || trim($string) == '') {
+	} elseif ($string == '' || trim((string) $string) == '') {
 		return false;
 	}
 
@@ -1626,13 +1626,13 @@ function cacti_log(mixed $string, bool $output = false, string $environ = 'CMDPH
 	if ($logdestination == 2 || $logdestination == 3) {
 		$log_type = '';
 
-		if (str_contains($string, 'ERROR:')) {
+		if (str_contains((string) $string, 'ERROR:')) {
 			$log_type = 'err';
-		} elseif (str_contains($string, 'WARNING:')) {
+		} elseif (str_contains((string) $string, 'WARNING:')) {
 			$log_type = 'warn';
-		} elseif (str_contains($string, 'STATS:')) {
+		} elseif (str_contains((string) $string, 'STATS:')) {
 			$log_type = 'stat';
-		} elseif (str_contains($string, 'NOTICE:')) {
+		} elseif (str_contains((string) $string, 'NOTICE:')) {
 			$log_type = 'note';
 		}
 
@@ -2420,7 +2420,7 @@ function prepare_validate_result(string &$result) : mixed {
  */
 function strip_alpha(mixed $string) : mixed {
 	// strip all non numeric data
-	$string = trim(preg_replace('/[^0-9,.+-]/', '', $string));
+	$string = trim((string) preg_replace('/[^0-9,.+-]/', '', (string) $string));
 
 	// check the easy cases first
 	// it has no delimiters, and no space, therefore, must be numeric
@@ -2645,7 +2645,7 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 			} else {
 				// Script server is a bit more complicated
 				$php   = read_config_option('path_php_binary');
-				$parts = explode(' ', $script_path);
+				$parts = explode(' ', (string) $script_path);
 
 				dsv_log('parts', $parts);
 
@@ -3677,7 +3677,7 @@ function get_rrd_cfs(int $local_data_id) : array {
 	 * or similar
 	 */
 	if ($output != '') {
-		$output = explode("\n", $output);
+		$output = explode("\n", (string) $output);
 
 		if (cacti_sizeof($output)) {
 			foreach ($output as $line) {
@@ -4050,7 +4050,7 @@ function build_where_from_array(array $filters, array &$params) : string {
 	$where = [];
 
 	foreach ($filters as $field => $value) {
-		if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $field)) {
+		if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', (string) $field)) {
 			cacti_log('ERROR: Invalid field name in build_where_from_array: ' . $field, false, 'SECURITY');
 
 			continue;
@@ -4329,7 +4329,7 @@ function draw_navigation_text(string $type = 'url') : string {
 		// If it's not set in the array, then default to a generic title
 		$current_array = [
 			'mapping' => 'index.php:',
-			'title'   => ucwords(str_replace('_', ' ', basename(get_current_page(), '.php'))),
+			'title'   => ucwords(str_replace('_', ' ', basename((string) get_current_page(), '.php'))),
 			'level'   => 0
 		];
 	}
@@ -4361,7 +4361,7 @@ function draw_navigation_text(string $type = 'url') : string {
 			// Always use the default for level == 0
 			$url = $navigation[basename($breadcrumb)]['url'];
 
-			if (basename($url) == 'graph_view.php') {
+			if (basename((string) $url) == 'graph_view.php') {
 				continue;
 			}
 		} elseif (isset($current_array['url']) && $current_array['url'] != '') {
@@ -4409,13 +4409,13 @@ function draw_navigation_text(string $type = 'url') : string {
 		$leaf_id = 0;
 
 		if (isrv('node')) {
-			$parts = explode('-', grv('node'));
+			$parts = explode('-', (string) grv('node'));
 
 			// Check for tree anchor
-			if (str_contains(grv('node'), 'tree_anchor')) {
+			if (str_contains((string) grv('node'), 'tree_anchor')) {
 				$tree_id = $parts[1];
 				$leaf_id = 0;
-			} elseif (str_contains(grv('node'), 'tbranch')) {
+			} elseif (str_contains((string) grv('node'), 'tbranch')) {
 				// Check for branch
 				$leaf_id = $parts[1];
 				$tree_id = db_fetch_cell_prepared('SELECT graph_tree_id
@@ -4451,7 +4451,7 @@ function draw_navigation_text(string $type = 'url') : string {
 			}
 
 			if (isrv('hgd') && gnrv('hgd') != '') {
-				$parts = explode(':', gnrv('hgd'));
+				$parts = explode(':', (string) gnrv('hgd'));
 				input_validate_input_number($parts[1], 'hgd[1]');
 
 				if ($parts[0] == 'gt') {
@@ -5228,19 +5228,19 @@ function sanitize_uri(string $uri) : string {
 	 * single '/' so the URI stays a local path. */
 	$trimmed = preg_replace('/^[\x00-\x20]+/', '', $uri);
 
-	if (preg_match('/^[\/\\\\]{2,}/', $trimmed)) {
-		$uri = '/' . ltrim($trimmed, '/\\');
+	if (preg_match('/^[\/\\\\]{2,}/', (string) $trimmed)) {
+		$uri = '/' . ltrim((string) $trimmed, '/\\');
 	} else {
 		$uri = $trimmed;
 	}
 
-	if (str_contains($uri, 'graph_view.php')) {
-		if (!strpos($uri, 'action=')) {
-			$uri = $uri . (strpos($uri, '?') ? '&' : '?') . 'action=' . gnrv('action');
+	if (str_contains((string) $uri, 'graph_view.php')) {
+		if (!strpos((string) $uri, 'action=')) {
+			$uri = $uri . (strpos((string) $uri, '?') ? '&' : '?') . 'action=' . gnrv('action');
 		}
 	}
 
-	return str_replace($drop_char_match, $drop_char_replace, strip_tags($uri));
+	return str_replace($drop_char_match, $drop_char_replace, strip_tags((string) $uri));
 }
 
 /**
@@ -5572,7 +5572,7 @@ function send_mail(mixed $to, mixed $from = null, string $subject = '',
 			}
 		}
 
-		if ($from != '' && !str_contains($from, '<')) {
+		if ($from != '' && !str_contains((string) $from, '<')) {
 			if ($name == '') {
 				$full_name = db_fetch_cell_prepared('SELECT full_name
 					FROM user_auth
@@ -5853,7 +5853,7 @@ function mailer(array|string $from, array|string $to, null|array|string $cc = nu
 		$date = read_config_option('date');
 
 		if (!empty($date)) {
-			$time = strtotime($date);
+			$time = strtotime((string) $date);
 		} else {
 			$time = time();
 		}
@@ -6207,7 +6207,7 @@ function add_email_details(array $emails, bool &$result, callable $addFunc) : st
 			/* Sendmail accepts a bare local address (e.g. "root") and appends
 			 * the local host itself. Symfony's Address requires a domain, so
 			 * qualify the address the same way rather than rejecting it. */
-			if (strpos($address, '@') === false) {
+			if (!str_contains($address, '@')) {
 				$host    = gethostname();
 				$address = $address . '@' . ($host !== false ? $host : 'localhost');
 			}
@@ -6248,7 +6248,7 @@ function parse_email_details(mixed $emails, int $max_records = 0, array $details
 	foreach ($emails as $check_email) {
 		if (!empty($check_email)) {
 			if (!is_array($check_email)) {
-				$emails = explode(',', $check_email);
+				$emails = explode(',', (string) $check_email);
 
 				foreach ($emails as $email) {
 					$email_array = split_emaildetail($email);
@@ -6267,7 +6267,7 @@ function parse_email_details(mixed $emails, int $max_records = 0, array $details
 					$email = array_key_exists(0, $check_email) ? $check_email[0] : '';
 				}
 
-				$details[mb_strtolower($email)] = ['name' => $name, 'email' => mb_strtolower($email)];
+				$details[mb_strtolower((string) $email)] = ['name' => $name, 'email' => mb_strtolower((string) $email)];
 			}
 		}
 	}
@@ -6298,7 +6298,7 @@ function split_emaildetail(mixed $email) : array {
 	$rmail = '';
 
 	if (!is_array($email)) {
-		$email = trim($email);
+		$email = trim((string) $email);
 	}
 
 	/**
@@ -6345,7 +6345,7 @@ function split_emaildetail(mixed $email) : array {
 		$rname = $email[1];
 	}
 
-	return ['name' => $rname, 'email' => mb_strtolower($rmail)];
+	return ['name' => $rname, 'email' => mb_strtolower((string) $rmail)];
 }
 
 function create_emailtext(array $e) : string {
@@ -6703,7 +6703,7 @@ function cacti_debug_backtrace(string $entry = '', bool $html = false, bool $rec
 		if (!empty($entry)) {
 			return trim("$entry Backtrace: " . clean_up_lines($s));
 		} else {
-			return trim(clean_up_lines($s));
+			return trim((string) clean_up_lines($s));
 		}
 	}
 }
@@ -7275,7 +7275,7 @@ function enable_device_debug(int $host_id) : bool {
 	$devices = [];
 
 	if ($device_debug != '') {
-		$devices = array_map('intval', explode(',', $device_debug));
+		$devices = array_map(intval(...), explode(',', (string) $device_debug));
 	}
 
 	if (!in_array($host_id, $devices, true)) {
@@ -7299,7 +7299,7 @@ function disable_device_debug(int $host_id) : bool {
 	$device_debug = read_config_option('selective_device_debug', true);
 
 	if ($device_debug != '') {
-		$devices      = explode(',', $device_debug);
+		$devices      = explode(',', (string) $device_debug);
 		$devices      = array_diff($devices, [$host_id]);
 		$device_debug = implode(',', $devices);
 		set_config_option('selective_device_debug', $device_debug, true);
@@ -7318,7 +7318,7 @@ function disable_device_debug(int $host_id) : bool {
  */
 function is_device_debug_enabled(int $host_id) : bool {
 	$device_debug = read_config_option('selective_device_debug', true);
-	$devices      = array_map('intval', explode(',', $device_debug));
+	$devices      = array_map(intval(...), explode(',', (string) $device_debug));
 
 	if (in_array($host_id, $devices, true)) {
 		return true;
@@ -7920,7 +7920,7 @@ function get_cacti_db_version_raw(bool $force = false) : string {
 	static $version = '';
 
 	if ($version == '' || $force) {
-		$version = trim(db_fetch_cell('SELECT cacti FROM version LIMIT 1'));
+		$version = trim((string) db_fetch_cell('SELECT cacti FROM version LIMIT 1'));
 	}
 
 	return $version;
@@ -9054,7 +9054,7 @@ function cacti_strtoupper(string $string) : string {
 
 function is_function_enabled(string $name) : bool {
 	return function_exists($name) &&
-		!in_array($name, array_map('trim', explode(', ', (string) (ini_get('disable_functions') ?: ''))), true) &&
+		!in_array($name, array_map(trim(...), explode(', ', (string) (ini_get('disable_functions') ?: ''))), true) &&
 		cacti_strtolower((string) (ini_get('safe_mode') ?: '')) != 1;
 }
 
@@ -9162,9 +9162,9 @@ function cacti_cookie_set($session, $val, $timeout = null) : void {
 			'samesite' => 'Strict'
 		];
 
-		setcookie((string) $session, $val, $options);
+		setcookie((string) $session, (string) $val, $options);
 	} else {
-		setcookie((string) $session, $val, ['expires' => time() + 3600, 'path' => CACTI_PATH_URL, 'domain' => $domain, 'secure' => $secure, 'httponly' => true]);
+		setcookie((string) $session, (string) $val, ['expires' => time() + 3600, 'path' => CACTI_PATH_URL, 'domain' => $domain, 'secure' => $secure, 'httponly' => true]);
 	}
 }
 
@@ -9454,7 +9454,7 @@ function cacti_time_zone_set(mixed $gmt_offset = null) : void {
 }
 
 function debounce_run_notification(mixed $id, int $frequency = 7200) : bool {
-	$key = 'debounce_' . md5($id);
+	$key = 'debounce_' . md5((string) $id);
 
 	// debounce admin emails
 	$last = read_config_option($key);
@@ -9466,7 +9466,7 @@ function debounce_run_notification(mixed $id, int $frequency = 7200) : bool {
 	if ($last != '' && is_numeric($last)) {
 		$last_timestamp = $last;
 	} elseif ($last != '') {
-		$last = json_decode($last, true);
+		$last = json_decode((string) $last, true);
 
 		if (isset($last['timestamp'])) {
 			$last_timestamp = $last['timestamp'];
@@ -9507,7 +9507,7 @@ function cacti_unique_ids(mixed $ids, bool $shouldExplode = true) : array {
 		$ids = [$ids];
 	}
 
-	$ids = array_map('intval', array_filter(array_unique($ids)));
+	$ids = array_map(intval(...), array_filter(array_unique($ids)));
 	sort($ids);
 
 	return $ids;
