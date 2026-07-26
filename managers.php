@@ -716,7 +716,7 @@ function form_save() : void {
 				$save['snmp_auth_protocol']   = CactiValidator::validateInput(gnrv('snmp_auth_protocol'), 'snmp_auth_protocol', [new Assert\Regex('/^(\[None\]|MD5|SHA|SHA224|SHA256|SHA392|SHA512)?$/')], 3);
 				$save['snmp_priv_passphrase'] = CactiValidator::validateInput(gnrv('snmp_priv_passphrase'), 'snmp_priv_passphrase', [], 3);
 				$save['snmp_priv_protocol']   = CactiValidator::validateInput(gnrv('snmp_priv_protocol'), 'snmp_priv_protocol', [new Assert\Regex('/^(\[None\]|DES|AES|AES128|AES192|AES192C|AES256|AES256C)?$/')], 3);
-				$save['snmp_engine_id']       = CactiValidator::validateInput(get_request_var_post('snmp_engine_id'), 'snmp_engine_id', [new Assert\NotBlank()], 3);
+				$save['snmp_engine_id']       = CactiValidator::validateInput(get_nfilter_request_var('snmp_engine_id'), 'snmp_engine_id', [new Assert\NotBlank()], 3);
 			} else {
 				$save['snmp_username']        = '';
 				$save['snmp_password']        = '';

@@ -733,7 +733,7 @@ function float_kill_running_processes() : void {
  * @return void
  */
 function display_version() : void {
-	$version = get_cacti_version();
+	$version = CACTI_VERSION;
 	print "Cacti RRDfile Data Float Tool, Version $version " . COPYRIGHT_YEARS . PHP_EOL;
 }
 

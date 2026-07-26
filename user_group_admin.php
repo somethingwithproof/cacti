@@ -1644,14 +1644,14 @@ function user_group_settings_edit(string $header_label) : void {
 
 			if ((isset($field_array['items'])) && (is_array($field_array['items']))) {
 				foreach ($field_array['items'] as $sub_field_name => $sub_field_array) {
-					if (graph_config_value_exists($sub_field_name, grv('id'))) {
+					if (user_setting_exists($sub_field_name, grv('id'))) {
 						$form_array[$field_name]['items'][$sub_field_name]['form_id'] = 1;
 					}
 
 					$form_array[$field_name]['items'][$sub_field_name]['value'] =  db_fetch_cell_prepared('SELECT value FROM settings_user_group WHERE name = ? AND group_id = ?', [$sub_field_name, grv('id')]);
 				}
 			} else {
-				if (graph_config_value_exists($field_name, grv('id'))) {
+				if (user_setting_exists($field_name, grv('id'))) {
 					$form_array[$field_name]['form_id'] = 1;
 				}
 

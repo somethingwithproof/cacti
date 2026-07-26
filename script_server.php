@@ -484,7 +484,7 @@ function sig_handler(int $signo) : void {
  * @return void
  */
 function display_version() : void {
-	$version = get_cacti_version();
+	$version = CACTI_VERSION;
 	print "Cacti Script Server, Version $version " . COPYRIGHT_YEARS . PHP_EOL;
 }
 
