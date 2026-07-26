@@ -181,7 +181,7 @@ function display_matching_hosts(array $rule, int $rule_type, string $url) : void
 	$total_rows     = cacti_sizeof(db_fetch_assoc($details['rows_query'], false));
 	$sort_column    = api_automation_column_exists(grv('sort_column'), ['host', 'graph_local', 'sites', 'graph_templates', 'graph_templates_graph', 'host_template']) ? grv('sort_column') : 'description';
 	$sort_direction = in_array(strtoupper((string) grv('sort_direction')), ['ASC', 'DESC'], true) ? strtoupper((string) grv('sort_direction')) : 'ASC';
-	$sortby         = str_ends_with($sort_column, 'hostname') ? 'INET_ATON(' . $sort_column . ')' : $sort_column;
+	$sortby         = str_ends_with((string) $sort_column, 'hostname') ? 'INET_ATON(' . $sort_column . ')' : $sort_column;
 	$sql_query      = $details['rows_query'] .
 		' ORDER BY ' . $sortby . ' ' . $sort_direction .
 		' LIMIT ' . ($details['rows'] * (grv('page') - 1)) . ',' . $details['rows'];
@@ -1212,7 +1212,7 @@ function display_matching_trees(int $rule_id, int $rule_type, array $item, strin
 
 	$sort_column    = api_automation_column_exists(grv('sort_column'), ['host', 'graph_local', 'sites', 'graph_templates', 'graph_templates_graph', 'host_template']) ? grv('sort_column') : 'description';
 	$sort_direction = in_array(strtoupper((string) grv('sort_direction')), ['ASC', 'DESC'], true) ? strtoupper((string) grv('sort_direction')) : 'ASC';
-	$sortby         = str_ends_with($sort_column, 'hostname') ? 'INET_ATON(' . $sort_column . ')' : $sort_column;
+	$sortby         = str_ends_with((string) $sort_column, 'hostname') ? 'INET_ATON(' . $sort_column . ')' : $sort_column;
 
 	$sql_query = "$rows_query ORDER BY $sortby " .
 		$sort_direction . ' LIMIT ' .
@@ -2532,7 +2532,7 @@ function global_item_edit(int $rule_id, int $rule_item_id, int $rule_type) : voi
 			if (empty($missing_key)) {
 				// Fixed String
 			} elseif (isset($_fields_rule_item_edit) && !array_key_exists($missing_key, $_fields_rule_item_edit['field']['array'])) {
-				$missing_array = explode('.',$missing_key);
+				$missing_array = explode('.',(string) $missing_key);
 
 				if (cacti_sizeof($missing_array) > 1) {
 					$missing_table = cacti_strtoupper($missing_array[0]);
@@ -2734,8 +2734,8 @@ function automation_graph_automation_eligible(int $graph_template_id) : bool {
 	// Check the Graph Template first for adherence
 	if (cacti_sizeof($graph_template)) {
 		foreach ($graph_template as $field => $value) {
-			if (str_starts_with($field, 't_')) {
-				$parent = substr($field, 2);
+			if (str_starts_with((string) $field, 't_')) {
+				$parent = substr((string) $field, 2);
 
 				if (isset($graph_template[$parent])) {
 					if ($value == 'on' && $graph_template[$parent] == '') {
@@ -2762,8 +2762,8 @@ function automation_graph_automation_eligible(int $graph_template_id) : bool {
 	if (cacti_sizeof($data_templates)) {
 		foreach ($data_templates as $dtd) {
 			foreach ($dtd as $field => $value) {
-				if (str_starts_with($field, 't_')) {
-					$parent = substr($field, 2);
+				if (str_starts_with((string) $field, 't_')) {
+					$parent = substr((string) $field, 2);
 
 					if (isset($dtd[$parent])) {
 						if ($value == 'on' && $dtd[$parent] == '') {

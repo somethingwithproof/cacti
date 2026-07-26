@@ -39,7 +39,7 @@ function aggregate_graph_save(int $_local_graph_id, int $_graph_template_id, str
 	error_reporting(E_ALL);
 
 	// install own error handler
-	set_error_handler('aggregate_error_handler');
+	set_error_handler(aggregate_error_handler(...));
 
 	cacti_log(__FUNCTION__ . ' local_graph: ' . $_local_graph_id . ' template: ' . $_graph_template_id . ' graph title: ' . $_graph_title . ' aggregate template: ' . $_aggregate_template_id, true, 'AGGREGATE', POLLER_VERBOSITY_DEVDBG);
 
@@ -117,8 +117,8 @@ function aggregate_graph_templates_graph_save(int $local_graph_id, int $graph_te
 
 		if (cacti_sizeof($aggregate_data)) {
 			foreach ($aggregate_data as $field => $value) {
-				if (str_starts_with($field, 't_') && $value == 'on') {
-					$value_field_name                 = substr($field, 2);
+				if (str_starts_with((string) $field, 't_') && $value == 'on') {
+					$value_field_name                 = substr((string) $field, 2);
 					$template_data[$value_field_name] = $aggregate_data[$value_field_name];
 				}
 			}
@@ -208,7 +208,7 @@ function aggregate_graphs_insert_graph_items(int $_new_graph_id, int $_old_graph
 	error_reporting(E_ALL);
 
 	// install own error handler
-	set_error_handler('aggregate_error_handler');
+	set_error_handler(aggregate_error_handler(...));
 
 	cacti_log(__FUNCTION__ . ' called. Insert example graph:' . $_old_graph_id . ' Graph Template:' . $_graph_template_id . ' into Graph:' . $_new_graph_id . ' at Sequence:' . $_graph_item_sequence . ' Graph_No:' . $_selected_graph_index . ' Type Action: ' . $_graph_type, true, 'AGGREGATE', POLLER_VERBOSITY_DEVDBG);
 
@@ -636,7 +636,7 @@ function aggregate_validate_graph_params(array $posted, bool $has_override = fal
 function aggregate_validate_graph_items(array $posted, array &$graph_items) : void {
 	foreach ($posted as $var => $val) {
 		// work on color_templates
-		if (preg_match('/^agg_color_([0-9]+)$/', $var, $matches)) {
+		if (preg_match('/^agg_color_([0-9]+)$/', (string) $var, $matches)) {
 			// ================= input validation =================
 			input_validate_input_number($matches[1], 'agg_color');
 			// ====================================================
@@ -650,7 +650,7 @@ function aggregate_validate_graph_items(array $posted, array &$graph_items) : vo
 		}
 
 		// work on checkboxed for skipping items
-		if (preg_match('/^agg_skip_([0-9]+)$/', $var, $matches)) {
+		if (preg_match('/^agg_skip_([0-9]+)$/', (string) $var, $matches)) {
 			// ================= input validation =================
 			input_validate_input_number($matches[1], 'agg_skip');
 			// ====================================================
@@ -664,7 +664,7 @@ function aggregate_validate_graph_items(array $posted, array &$graph_items) : vo
 		}
 
 		// work on checkboxed for totalling items
-		if (preg_match('/^agg_total_([0-9]+)$/', $var, $matches)) {
+		if (preg_match('/^agg_total_([0-9]+)$/', (string) $var, $matches)) {
 			// ================= input validation =================
 			input_validate_input_number($matches[1], 'agg_total');
 			// ====================================================
@@ -697,7 +697,7 @@ function aggregate_graphs_cleanup(int $base, int $aggregate, int $reorder) : voi
 	error_reporting(E_ALL);
 
 	// install own error handler
-	set_error_handler('aggregate_error_handler');
+	set_error_handler(aggregate_error_handler(...));
 
 	// restore original error handler
 	restore_error_handler();
@@ -721,7 +721,7 @@ function aggregate_reorder_ds_graph(int $base, string $graph_template_id, int $a
 	error_reporting(E_ALL);
 
 	// install own error handler
-	set_error_handler('aggregate_error_handler');
+	set_error_handler(aggregate_error_handler(...));
 
 	$new_seq       = 1;
 	$base_handler  = false;
@@ -1113,7 +1113,7 @@ function aggregate_create_update(int &$local_graph_id, array $member_graphs, arr
 	error_reporting(E_ALL);
 
 	// install own error handler
-	set_error_handler('aggregate_error_handler');
+	set_error_handler(aggregate_error_handler(...));
 
 	if (cacti_sizeof($member_graphs)) {
 		$graph_title          = ($attribs['graph_title'] ?? '');
@@ -1874,19 +1874,19 @@ function draw_aggregate_graph_items_list(int $_graph_id = 0, int $_graph_templat
 			$force_skip       = false;
 
 			switch (true) {
-				case preg_match('/(TEXTALIGN)/', $_graph_type_name):
+				case preg_match('/(TEXTALIGN)/', (string) $_graph_type_name):
 					$matrix_title = 'TEXTALIGN: ' . ucfirst($item['textalign']);
 
 					break;
-				case preg_match('/(TICK)/', $_graph_type_name):
+				case preg_match('/(TICK)/', (string) $_graph_type_name):
 					$matrix_title = '(' . $item['data_source_name'] . '): ' . $item['text_format'];
 
 					break;
-				case preg_match('/(AREA|STACK|GPRINT|LINE[123])/', $_graph_type_name):
+				case preg_match('/(AREA|STACK|GPRINT|LINE[123])/', (string) $_graph_type_name):
 					$matrix_title = $item['text_format'];
 
 					break;
-				case preg_match('/(HRULE)/', $_graph_type_name):
+				case preg_match('/(HRULE)/', (string) $_graph_type_name):
 					$matrix_title = 'HRULE: ' . $item['value'];
 
 					if (preg_match('/(:bits:|:bytes:|\|sum:)/', $item['value'])) {
@@ -1896,12 +1896,12 @@ function draw_aggregate_graph_items_list(int $_graph_id = 0, int $_graph_templat
 					}
 
 					break;
-				case preg_match('/(VRULE)/', $_graph_type_name):
+				case preg_match('/(VRULE)/', (string) $_graph_type_name):
 					$force_skip   = true;
 					$matrix_title = 'VRULE: ' . $item['value'];
 
 					break;
-				case preg_match('/(COMMENT)/', $_graph_type_name):
+				case preg_match('/(COMMENT)/', (string) $_graph_type_name):
 					$matrix_title = 'COMMENT: ' . $item['text_format'];
 
 					if (preg_match('/(:bits:|:bytes:|\|sum:)/', $item['text_format'])) {

@@ -117,7 +117,7 @@ function api_device_purge_from_remote(array|int $device_ids, int $poller_id = 0)
 	if ($poller_id > 1) {
 		if (remote_poller_up($poller_id)) {
 			if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
-				$int_device_ids = array_map('intval', $device_ids);
+				$int_device_ids = array_map(intval(...), $device_ids);
 
 				db_execute('DELETE FROM host             WHERE      ' . db_in_clause('id', $int_device_ids), true, $rcnn_id);
 				db_execute('DELETE FROM host_graph       WHERE ' . db_in_clause('host_id', $int_device_ids), true, $rcnn_id);
@@ -206,7 +206,7 @@ function api_device_remove_multi(array $device_ids, int $delete_type = 2) : void
 		$data_sources = [];
 		$graphs       = [];
 
-		$int_device_ids    = array_map('intval', $device_ids);
+		$int_device_ids    = array_map(intval(...), $device_ids);
 		$devices_to_delete = implode(', ', $int_device_ids);
 
 		$data_sources = array_rekey(
@@ -1619,7 +1619,7 @@ function api_device_ping_device(string|null $device_id, bool $from_remote = fals
 
 					// modify for some system descriptions
 					// 0000937: System output in host.php poor for Alcatel
-					if (substr_count($snmp_system, '00:')) {
+					if (substr_count((string) $snmp_system, '00:')) {
 						$snmp_system = str_replace('00:', '', $snmp_system);
 						$snmp_system = str_replace(':', ' ', $snmp_system);
 					}

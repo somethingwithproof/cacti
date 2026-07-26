@@ -209,10 +209,10 @@ function api_graph_remove_bad_graphs(array &$local_graph_ids = []) : void {
  */
 function api_graph_remove_aggregate_items(mixed $local_graph_ids) : void {
 	if (!is_array($local_graph_ids)) {
-		$local_graph_ids = explode(',', $local_graph_ids);
+		$local_graph_ids = explode(',', (string) $local_graph_ids);
 	}
 
-	$local_graph_ids = array_values(array_filter(array_map('intval', $local_graph_ids), static fn (int $id): bool => $id > 0));
+	$local_graph_ids = array_values(array_filter(array_map(intval(...), $local_graph_ids), static fn (int $id): bool => $id > 0));
 
 	foreach ($local_graph_ids as $lgid) {
 		$aggregate_graphs = array_rekey(
