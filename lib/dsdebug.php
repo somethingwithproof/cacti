@@ -90,7 +90,7 @@ function dsdebug_error_handler(int $errno, string $errmsg, string $filename, int
 			E_USER_ERROR        => 'User Error',
 			E_USER_WARNING      => 'User Warning',
 			E_USER_NOTICE       => 'User Notice',
-			E_STRICT            => 'Runtime Notice'
+			2048                => 'Runtime Notice' /* legacy E_STRICT, no longer emitted since PHP 8.0 */
 		];
 
 		if (defined('E_RECOVERABLE_ERROR')) {

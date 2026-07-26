@@ -487,7 +487,7 @@ $phperrors =  [
 ];
 
 if (version_compare(PHP_VERSION, '8.4', '<')) {
-	$phperrors[E_STRICT] = 'STRICT';
+	$phperrors[2048] = 'STRICT'; /* legacy E_STRICT, no longer emitted since PHP 8.0 */
 }
 
 if (cacti_version_compare(get_rrdtool_version(), '1.8.0', '>=')) {
