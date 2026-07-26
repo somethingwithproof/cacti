@@ -124,6 +124,24 @@ test('GHSA-vp35: contract — import file paths are validated with validate_rela
 	expect($contents)->toContain('validate_relative_path_within');
 });
 
+test('GHSA-vp35: the write path validates $name against the base and skips on failure', function () use ($importPath) {
+	$contents = file_get_contents($importPath);
+
+	$start = strpos($contents, 'function import_package(');
+	$body  = substr($contents, $start, strpos($contents, "\nfunction ", $start + 1) - $start);
+
+	// The validated result feeds the write, and a rejected path is skipped
+	// rather than written. This runs only for a package signed with Cacti's
+	// release key, so it is asserted as a contract on the source.
+	expect($body)->toContain('$validated_path = validate_relative_path_within($name, $config[\'base_path\']);');
+	expect($body)->toContain('if ($validated_path === false) {');
+	expect($body)->toContain('$filename = $validated_path;');
+
+	$guardOffset = strpos($body, 'validate_relative_path_within($name');
+	$assignOffset = strpos($body, '$filename = $validated_path;');
+	expect($guardOffset)->toBeLessThan($assignOffset);
+});
+
 // ---------------------------------------------------------------------------
 // GHSA-pr9x: Path traversal in package_import.php read
 // ---------------------------------------------------------------------------
