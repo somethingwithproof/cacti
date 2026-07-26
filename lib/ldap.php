@@ -651,7 +651,7 @@ class Ldap {
 			$ldap_conn = ldap_connect('ldaps://' . $this->host . ':' . $this->port_ssl);
 		} else {
 			cacti_log('LDAP: Connect using ldap://' . $this->host . ':' . $this->port, false, 'AUTH', $this->debug);
-			$ldap_conn = ldap_connect($this->host, $this->port);
+			$ldap_conn = ldap_connect('ldap://' . $this->host . ':' . $this->port);
 		}
 
 		if ($ldap_conn) {
