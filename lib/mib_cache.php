@@ -23,15 +23,13 @@
  */
 
 class MibCache {
-	private mixed  $active_mib            = '';
 	private mixed  $active_object         = '';
 	private string $active_table          = '';
 	private string $active_table_entry    = '';
 	private array  $cache__tables         = [];
 	private array  $cache__tables_columns = [];
 
-	public function __construct(string $mib = 'CACTI-MIB') {
-		$this->active_mib = $mib;
+	public function __construct(private string $active_mib = 'CACTI-MIB') {
 	}
 
 	public function __destruct() {

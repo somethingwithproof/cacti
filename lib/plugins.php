@@ -300,7 +300,7 @@ function api_plugin_run_plugin_hook_function(string $hook, string $plugin, strin
 function api_plugin_hook_is_remote_collect(string $hook, string $plugin, array $required_capabilities) : bool {
 	if (isset($required_capabilities[$hook])) {
 		foreach ($required_capabilities[$hook] as $capability) {
-			if (str_contains($capability, 'remote_collect')) {
+			if (str_contains((string) $capability, 'remote_collect')) {
 				return true;
 			}
 		}
@@ -318,7 +318,7 @@ function api_plugin_get_dependencies(string $plugin) : mixed {
 		$info = parse_ini_file($file, true);
 
 		if (isset($info['info']['requires']) && trim($info['info']['requires']) != '') {
-			$parts = array_map('trim', explode(' ', $info['info']['requires']));
+			$parts = array_map(trim(...), explode(' ', $info['info']['requires']));
 
 			foreach ($parts as $p) {
 				$vparts = explode(':', $p);
@@ -428,9 +428,9 @@ function api_plugin_status_run(string $hook, array $required_capabilities, strin
 			if (str_contains($plugin_capabilities, "$capability:1")) {
 				return true;
 			}
-		} elseif ($status == 'online' && !str_contains($capability, 'online')) {
+		} elseif ($status == 'online' && !str_contains((string) $capability, 'online')) {
 			continue;
-		} elseif (($status == 'offline' || $status == 'recovery') && !str_contains($capability, 'offline')) {
+		} elseif (($status == 'offline' || $status == 'recovery') && !str_contains((string) $capability, 'offline')) {
 			continue;
 		}
 
@@ -675,11 +675,11 @@ function api_plugin_can_install(string $plugin, string &$message) : bool {
 	if (is_array($dependencies) && cacti_sizeof($dependencies)) {
 		foreach ($dependencies as $dependency => $version) {
 			if (!plugin_valid_version_range($dependency, $version)) {
-				$message .= __('\'%s\' versions \'%s\' above or in range are required to install \'%s\'. ', ucwords($dependency), $version, ucwords($plugin));
+				$message .= __('\'%s\' versions \'%s\' above or in range are required to install \'%s\'. ', ucwords((string) $dependency), $version, ucwords($plugin));
 
 				$proceed = false;
 			} elseif (!api_plugin_installed($dependency)) {
-				$message .= __('\'%s\' must first be installed before \'%s\' is installed. ', ucwords($dependency), ucwords($plugin));
+				$message .= __('\'%s\' must first be installed before \'%s\' is installed. ', ucwords((string) $dependency), ucwords($plugin));
 
 				$proceed = false;
 			}
@@ -1495,7 +1495,7 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 		$tmpfile  = sys_get_temp_dir() . '/' . $plugin . '_' . random_int(0, mt_getrandmax()) . '.tar.gz';
 		$pharfile = "phar://{$tmpfile}";
 
-		$file_data = base64_decode($archive, true);
+		$file_data = base64_decode((string) $archive, true);
 
 		if ($file_data != '') {
 			// set the restore path to the plugin directory
@@ -1833,7 +1833,7 @@ function plugin_valid_dependencies(string $required) : bool {
 	}
 
 	if (str_contains($required, ' ')) {
-		$requires = array_map('trim', explode(' ', $required));
+		$requires = array_map(trim(...), explode(' ', $required));
 	} else {
 		$requires[] = $required;
 	}
@@ -1934,8 +1934,8 @@ function plugin_fetch_latest_plugins() : mixed {
 
 	$start = microtime(true);
 
-	$repo = trim(read_config_option('github_repository'), "/\n\r ");
-	$user = trim(read_config_option('github_user'));
+	$repo = trim((string) read_config_option('github_repository'), "/\n\r ");
+	$user = trim((string) read_config_option('github_user'));
 
 	if ($repo == '' || $user == '') {
 		if (CACTI_WEB) {

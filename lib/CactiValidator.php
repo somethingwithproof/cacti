@@ -98,7 +98,7 @@ class CactiValidator {
 	 * @return bool True if the path is safe and (when $rraRoot is set) contained, false otherwise.
 	 */
 	public static function isValidRrdPath(string $path, ?string $rraRoot = null): bool {
-		if ($path === '' || strpos($path, "\0") !== false) {
+		if ($path === '' || str_contains($path, "\0")) {
 			return false;
 		}
 

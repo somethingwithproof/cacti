@@ -126,7 +126,7 @@ function __rrd_proxy_init(string $logopt = 'WEBLOG') : mixed {
 	}
 
 	// Detect address family based on server address for IPv6 support
-	$socket_family = filter_var(trim($server, '[]'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? AF_INET6 : AF_INET;
+	$socket_family = filter_var(trim((string) $server, '[]'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? AF_INET6 : AF_INET;
 
 	$rrdp_socket = @socket_create($socket_family, SOCK_STREAM, SOL_TCP);
 
@@ -137,7 +137,7 @@ function __rrd_proxy_init(string $logopt = 'WEBLOG') : mixed {
 	}
 
 	// Strip brackets from IPv6 addresses for socket_connect
-	$connect_server = trim($server, '[]');
+	$connect_server = trim((string) $server, '[]');
 
 	$rrdp = socket_connect($rrdp_socket, $connect_server, $port);
 
@@ -154,8 +154,8 @@ function __rrd_proxy_init(string $logopt = 'WEBLOG') : mixed {
 			$port    = ($rrdp_id == 1) ? $portp : $portb;
 
 			// Re-detect address family for backup server (may differ from primary)
-			$socket_family  = filter_var(trim($server, '[]'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? AF_INET6 : AF_INET;
-			$connect_server = trim($server, '[]');
+			$socket_family  = filter_var(trim((string) $server, '[]'), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ? AF_INET6 : AF_INET;
+			$connect_server = trim((string) $server, '[]');
 
 			$rrdp_socket = @socket_create($socket_family, SOCK_STREAM, SOL_TCP);
 
@@ -281,7 +281,7 @@ function encrypt(string $output, string $rsa_key) : string {
 
 		$aes->setKey($aes_key);
 		$ciphertext     = base64_encode($aes->encrypt($output));
-		$aes_key        = base64_encode($public->encrypt($aes_key));
+		$aes_key        = base64_encode((string) $public->encrypt($aes_key));
 		$aes_key_length = str_pad(dechex(strlen($aes_key)), 3, '0', STR_PAD_LEFT);
 
 		return $aes_key_length . $aes_key . $ciphertext;
@@ -345,7 +345,7 @@ function __rrd_execute(string|array $command_line, bool $log_to_stdout, int $out
 	static $last_command;
 
 	if (is_array($command_line)) {
-		$command_line = implode(' ', array_map('cacti_escapeshellarg', $command_line));
+		$command_line = implode(' ', array_map(cacti_escapeshellarg(...), $command_line));
 	}
 
 	/**
@@ -1405,7 +1405,7 @@ function rrd_function_process_graph_options(int $graph_start, int $graph_end, ar
 
 				break;
 			case 'unit_exponent_value':
-				if (preg_match('/^[0-9]+$/', $value)) {
+				if (preg_match('/^[0-9]+$/', (string) $value)) {
 					$graph_opts .= '--units-exponent=' . $value . RRD_NL;
 				}
 
@@ -1793,7 +1793,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 		$cactiLastDate = date('Y-m-d H:i:s');
 	}
 
-	$dateTime = date($dateTimeFormat, strtotime($cactiLastDate));
+	$dateTime = date($dateTimeFormat, strtotime((string) $cactiLastDate));
 
 	// the following fields will be searched for graph variables
 	$variable_fields = [
@@ -2697,7 +2697,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 							$txt_graph_items .= RRD_NL . 'SHIFT:' . $data_source_name . ':' . $graph_item['value'];
 						}
 
-						$text_format                        = trim(preg_replace('/[^a-z0-9 _()]/i', '', $text_format));
+						$text_format                        = trim((string) preg_replace('/[^a-z0-9 _()]/i', '', (string) $text_format));
 						$xport_meta['legend'][$text_format] = $graph_item_color_code;
 
 						break;
@@ -2724,7 +2724,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 							$txt_graph_items .= RRD_NL . 'SHIFT:' . $data_source_name . ':' . $graph_item['value'];
 						}
 
-						$text_format                        = trim(preg_replace('/[^a-z0-9 _()]/i', '', $text_format));
+						$text_format                        = trim((string) preg_replace('/[^a-z0-9 _()]/i', '', (string) $text_format));
 						$xport_meta['legend'][$text_format] = $graph_item_color_code;
 
 						break;
@@ -2749,7 +2749,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 							$txt_graph_items .= RRD_NL . 'SHIFT:' . $data_source_name . ':' . $graph_item['value'];
 						}
 
-						$text_format                        = trim(preg_replace('/[^a-z0-9 _()]/i', '', $text_format));
+						$text_format                        = trim((string) preg_replace('/[^a-z0-9 _()]/i', '', (string) $text_format));
 						$xport_meta['legend'][$text_format] = $graph_item_color_code;
 
 						break;
@@ -2772,7 +2772,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 							$txt_graph_items .= RRD_NL . 'SHIFT:' . $data_source_name . ':' . $graph_item['value'];
 						}
 
-						$text_format                        = trim(preg_replace('/[^a-z0-9 _()]/i', '', $text_format));
+						$text_format                        = trim((string) preg_replace('/[^a-z0-9 _()]/i', '', (string) $text_format));
 						$xport_meta['legend'][$text_format] = $graph_item_color_code;
 
 						break;
@@ -2912,7 +2912,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 				$output      = rrdtool_execute("graph $graph_opts$graph_defs$txt_graph_items", false, $output_flag, $rrdtool_pipe);
 
 				if ($fp = fopen($graph_data_array['export_realtime'], 'w')) {
-					fwrite($fp, $output, strlen($output));
+					fwrite($fp, (string) $output, strlen((string) $output));
 					fclose($fp);
 					chmod($graph_data_array['export_realtime'], 0644);
 				}
@@ -3969,7 +3969,7 @@ function rrd_datasource_add(array $file_array, array $ds_array, bool $debug) : m
 		 * version 0003 => RRDtool 1.2.x, 1.3.x, 1.4.x, 1.5.x, 1.6.x
 		 */
 		$version_node = $dom->getElementsByTagName('version')->item(0);
-		$version      = $version_node !== null ? trim($version_node->nodeValue) : RRD_FILE_VERSION3;
+		$version      = $version_node !== null ? trim((string) $version_node->nodeValue) : RRD_FILE_VERSION3;
 
 		// now start XML processing
 		foreach ($ds_array as $ds) {
@@ -4540,7 +4540,7 @@ function rrdtool_parse_error(string $string) : string {
 				$rra_name = str_replace(CACTI_PATH_RRA . '/', '', $rra_path);
 				$rra_path = '';
 			} else {
-				$found = stripos($filename, CACTI_PATH_BASE);
+				$found = stripos($filename, (string) CACTI_PATH_BASE);
 
 				if ($found > 0 || $found === 0) {
 					$rra_file = str_replace(CACTI_PATH_RRA . '/', '', $filename);
@@ -4796,10 +4796,10 @@ function gradient(string $vname = '', string $start_color = '#0000a0', string $e
 	$spline_vname = 'var_' . substr(sha1((string) random_int(0, mt_getrandmax())), 1, 4);
 	$vnamet       = $vname . substr(sha1((string) random_int(0, mt_getrandmax())), 1, 4);
 
-	if (preg_match('/^([0-9]{1,3})%$/', $lower, $matches)) {
+	if (preg_match('/^([0-9]{1,3})%$/', (string) $lower, $matches)) {
 		$lower   = $matches[1];
 		$spline .= sprintf('CDEF:%s_min=%s,100,/,%d,* ' . RRD_NL, $vnamet, $vname, $lower);
-	} elseif (preg_match('/^([0-9]+)$/', $lower, $matches)) {
+	} elseif (preg_match('/^([0-9]+)$/', (string) $lower, $matches)) {
 		$lower   = $matches[1];
 		$spline .= sprintf('CDEF:%s_min=%s,%d,- ' . RRD_NL, $vnamet, $vname, $lower);
 	} else {
@@ -4981,17 +4981,17 @@ function add_business_hours(array $data, mixed &$xport_meta) : array {
 			$bh_graph_end   =  $data['end'];
 		}
 
-		preg_match('/(\d+)\:(\d+)/',read_config_option('business_hours_start'), $bh_start_matches);
-		preg_match('/(\d+)\:(\d+)/',read_config_option('business_hours_end'), $bh_end_matches);
+		preg_match('/(\d+)\:(\d+)/',(string) read_config_option('business_hours_start'), $bh_start_matches);
+		preg_match('/(\d+)\:(\d+)/',(string) read_config_option('business_hours_end'), $bh_end_matches);
 
 		// Convert all the responses to integers
-		$bh_start_matches = array_map('intval', $bh_start_matches);
-		$bh_end_matches   = array_map('intval', $bh_end_matches);
+		$bh_start_matches = array_map(intval(...), $bh_start_matches);
+		$bh_end_matches   = array_map(intval(...), $bh_end_matches);
 
-		$bh_start_matches[1] = $bh_start_matches[1] ?? 0;
-		$bh_start_matches[2] = $bh_start_matches[2] ?? 0;
-		$bh_end_matches[1]   = $bh_end_matches[1] ?? 0;
-		$bh_end_matches[2]   = $bh_end_matches[2] ?? 0;
+		$bh_start_matches[1] ??= 0;
+		$bh_start_matches[2] ??= 0;
+		$bh_end_matches[1] ??= 0;
+		$bh_end_matches[2] ??= 0;
 
 		$start_bh_time = mktime($bh_start_matches[1], $bh_start_matches[2], 0, intval(date('m', $bh_graph_start)), intval(date('d', $bh_graph_start)), intval(date('Y', $bh_graph_start)));
 		$end_bh_time   = mktime($bh_end_matches[1], $bh_end_matches[2], 0, intval(date('m', $bh_graph_end)), intval(date('d', $bh_graph_end)), intval(date('Y', $bh_graph_end)));
@@ -5054,7 +5054,7 @@ function add_business_hours(array $data, mixed &$xport_meta) : array {
 					$bh_opacity = '7F';
 				}
 
-				if (preg_match('/[0-9A-Fa-f]{2}/', $bh_opacity)) {
+				if (preg_match('/[0-9A-Fa-f]{2}/', (string) $bh_opacity)) {
 					$bh_color .= $bh_opacity;
 				} else {
 					$bh_color .= '7F';

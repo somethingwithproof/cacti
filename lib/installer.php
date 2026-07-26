@@ -92,7 +92,7 @@ class Installer implements JsonSerializable {
 	const PROGRESS_VERSION_END          = 85;
 	const PROGRESS_COMPLETE             = 100;
 
-	private string $old_cacti_version;
+	private readonly string $old_cacti_version;
 
 	// Common variables
 	private int $mode = -1;
@@ -105,7 +105,7 @@ class Installer implements JsonSerializable {
 	private array $templates;
 	private array $paths;
 	private string $theme;
-	private array $locales;
+	private readonly array $locales;
 	private string $language;
 	private array $tables;
 	private string $runtime;
@@ -119,7 +119,7 @@ class Installer implements JsonSerializable {
 	private array $iconClass;
 	private int $eula;
 	private int $cronInterval;
-	private array $defaultAutomation;
+	private readonly array $defaultAutomation;
 	private array $permissions;
 	private array $extensions;
 	private array $modules;
@@ -901,7 +901,7 @@ class Installer implements JsonSerializable {
 		$paths = [];
 
 		foreach ($this->paths as $name => $array) {
-			if (str_starts_with($name, 'path_') || $name == 'settings_sendmail_path') {
+			if (str_starts_with((string) $name, 'path_') || $name == 'settings_sendmail_path') {
 				if (array_key_exists('default', $array)) {
 					$paths[$name] = $array['default'];
 				} else {
@@ -943,7 +943,7 @@ class Installer implements JsonSerializable {
 				if ($blank && empty($path)) {
 					// allow this
 				} elseif ($check == 'writable') {
-					$should_set = is_resource_writable(dirname($path) . '/') || $optional;
+					$should_set = is_resource_writable(dirname((string) $path) . '/') || $optional;
 
 					if ($should_set) {
 						$should_set = is_resource_writable($path) || $optional;
@@ -2108,7 +2108,7 @@ class Installer implements JsonSerializable {
 				$selected = ' selected';
 			}
 
-			$flags = explode('-', $key);
+			$flags = explode('-', (string) $key);
 
 			if (cacti_count($flags) > 1) {
 				$flagName = cacti_strtolower($flags[1]);
@@ -2171,7 +2171,7 @@ class Installer implements JsonSerializable {
 			$test_request_uri = $_SERVER['REQUEST_URI'];
 		}
 
-		$test_request_parts = parse_url($test_request_uri);
+		$test_request_parts = parse_url((string) $test_request_uri);
 		$test_request_path  = $test_request_parts['path'];
 		$test_request_len   = strlen($test_request_parts['path']);
 
@@ -3455,12 +3455,12 @@ class Installer implements JsonSerializable {
 								if (!empty($sectionId)) {
 									$sections[$sectionId] = $sectionStatus;
 									$output .= '</table>';
-									$output .= $this->sectionSubTitleEnd();
+									$output .= static::sectionSubTitleEnd();
 								}
 
 								$sectionId = str_replace('.', '_', $version);
-								$output .= $this->sectionSubTitle('Database Upgrade - Version ' . $version, $sectionId);
-								$output .= $this->sectionNormal('The following table lists the status of each upgrade performed on the database');
+								$output .= static::sectionSubTitle('Database Upgrade - Version ' . $version, $sectionId);
+								$output .= static::sectionNormal('The following table lists the status of each upgrade performed on the database');
 								$output .= '<table class=\'cactiInstallSqlResults\'>';
 
 								$sectionStatus = DB_STATUS_SKIPPED;
@@ -3512,7 +3512,7 @@ class Installer implements JsonSerializable {
 			}
 		}
 
-		$output .= $this->sectionSubTitle('Process Log');
+		$output .= static::sectionSubTitle('Process Log');
 		$output .= Installer::getInstallLog();
 
 		$this->buttonPrevious->Visible = false;

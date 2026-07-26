@@ -225,7 +225,7 @@ function push_out_data_source_item(int $data_template_rrd_id) : bool {
 	// loop through each data source column name (from the above array)
 	foreach ($struct_data_source_item as $field_name => $field_array) {
 		// are we allowed to push out the column?
-		if (((empty($data_template_rrd['t_' . $field_name])) || (preg_match('/FORCE:/', $field_name))) && ((isset($data_template_rrd['t_' . $field_name])) && (isset($data_template_rrd[$field_name])))) {
+		if (((empty($data_template_rrd['t_' . $field_name])) || (preg_match('/FORCE:/', (string) $field_name))) && ((isset($data_template_rrd['t_' . $field_name])) && (isset($data_template_rrd[$field_name])))) {
 			db_execute_prepared("UPDATE data_template_rrd
 				SET $field_name = ?
 				WHERE local_data_template_rrd_id = ?",
@@ -257,7 +257,7 @@ function push_out_data_source(int $data_template_data_id) : bool {
 	// loop through each data source column name (from the above array)
 	foreach ($struct_data_source as $field_name => $field_array) {
 		// are we allowed to push out the column?
-		if (((empty($data_template_data['t_' . $field_name])) || (preg_match('/FORCE:/', $field_name))) && ((isset($data_template_data['t_' . $field_name])) && (isset($data_template_data[$field_name])))) {
+		if (((empty($data_template_data['t_' . $field_name])) || (preg_match('/FORCE:/', (string) $field_name))) && ((isset($data_template_data['t_' . $field_name])) && (isset($data_template_data[$field_name])))) {
 			db_execute_prepared("UPDATE data_template_data
 				SET $field_name = ?
 				WHERE local_data_template_data_id=?",
@@ -723,7 +723,7 @@ function graph_template_has_override(int $graph_template_id) : bool {
 	// Check the Graph Template first for adherence
 	if (cacti_sizeof($graph_template)) {
 		foreach ($graph_template as $field => $value) {
-			if (str_starts_with($field, 't_')) {
+			if (str_starts_with((string) $field, 't_')) {
 				if ($value == 'on') {
 					return true;
 				}
@@ -747,7 +747,7 @@ function graph_template_has_override(int $graph_template_id) : bool {
 	if (cacti_sizeof($data_templates)) {
 		foreach ($data_templates as $dtd) {
 			foreach ($dtd as $field => $value) {
-				if (str_starts_with($field, 't_')) {
+				if (str_starts_with((string) $field, 't_')) {
 					if ($value == 'on') {
 						return true;
 					}
@@ -790,8 +790,8 @@ function graph_template_has_override(int $graph_template_id) : bool {
 }
 
 function parse_graph_template_id(mixed $value) : mixed {
-	if (str_contains($value, '_')) {
-		$template_parts = explode('_', $value);
+	if (str_contains((string) $value, '_')) {
+		$template_parts = explode('_', (string) $value);
 
 		if (is_numeric($template_parts[0]) && is_numeric($template_parts[1])) {
 			return ['graph_template_id' => $template_parts[0], 'output_type_id' => $template_parts[1]];

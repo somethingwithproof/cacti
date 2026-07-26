@@ -225,7 +225,7 @@ function do_rrdcheck(int $thread_id = 1) : void {
 
 				$matches     = [];
 				$rrd_info    = [];
-				$output      = explode("\n", $output);
+				$output      = explode("\n", (string) $output);
 				$last_update = false;
 				$rrd_step    = false;
 
@@ -380,7 +380,7 @@ function do_rrdcheck(int $thread_id = 1) : void {
 				}
 
 				// don't do anything if RRDfile did not return data
-				$info_array = explode("\n", $info_array);
+				$info_array = explode("\n", (string) $info_array);
 
 				if (cacti_sizeof($info_array)) {
 					$first    = true;

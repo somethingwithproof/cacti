@@ -13,18 +13,10 @@
 */
 
 final class PackageListFilter {
-	private string $filter;
-	private int $rows;
-	private int $page;
-	private string $sortColumn;
-	private string $sortDirection;
+	private readonly int $page;
 
-	private function __construct(string $filter, int $rows, int $page, string $sortColumn, string $sortDirection) {
-		$this->filter        = $filter;
-		$this->rows          = $rows;
+	private function __construct(private readonly string $filter, private readonly int $rows, int $page, private readonly string $sortColumn, private readonly string $sortDirection) {
 		$this->page          = max(1, $page);
-		$this->sortColumn    = $sortColumn;
-		$this->sortDirection = $sortDirection;
 	}
 
 	public static function fromRequest(int $defaultRows) : self {
@@ -97,7 +89,7 @@ final class PackageListFilter {
 	}
 
 	public static function encodeSelectedIds(array $ids) : string {
-		return json_encode(array_values(array_map('intval', $ids)), JSON_THROW_ON_ERROR);
+		return json_encode(array_values(array_map(intval(...), $ids)), JSON_THROW_ON_ERROR);
 	}
 
 	public static function decodeSelectedIds(mixed $ids) : array|false {

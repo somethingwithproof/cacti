@@ -88,7 +88,7 @@ function run_data_query(int $host_id, int $snmp_query_id, bool $automation = fal
 		$response = call_remote_data_collector($poller_id, $url);
 
 		if ($response != '') {
-			$response = json_decode($response, true);
+			$response = json_decode((string) $response, true);
 
 			$_SESSION['debug_log']['data_query'] = $response['data_query'];
 
@@ -378,7 +378,7 @@ function run_data_query(int $host_id, int $snmp_query_id, bool $automation = fal
 				}
 			}
 
-			if ($remap && trim($new_field_value) != '' && $new_sort_field != '') {
+			if ($remap && trim((string) $new_field_value) != '' && $new_sort_field != '') {
 				db_execute_prepared('UPDATE data_input_data
 					SET value = ?
 					WHERE data_input_field_id = ?
@@ -900,14 +900,14 @@ function query_script_host(int $host_id, int $snmp_query_id) : bool {
 				if (cacti_sizeof($script_data_array)) {
 					foreach ($script_data_array as $element) {
 						// We have two spellings for 'delimiter' so keep both for backward compatibility
-						if (isset($script_queries['output_delimeter']) && preg_match('/(.*?)' . preg_quote($script_queries['output_delimeter'], '/') . '(.*)/', $element, $matches)) {
+						if (isset($script_queries['output_delimeter']) && preg_match('/(.*?)' . preg_quote($script_queries['output_delimeter'], '/') . '(.*)/', (string) $element, $matches)) {
 							$script_index = $matches[1];
 							$field_value  = $matches[2];
 
 							$output_array[] = data_query_format_record($host_id, $snmp_query_id, $field_name, $rewrite_value, $field_value, $script_index, '');
 
 							debug_log_insert('data_query', __esc('Found item [%s=\'%s\'] index: %s', $field_name, $field_value, $script_index));
-						} elseif (isset($script_queries['output_delimiter']) && preg_match('/(.*?)' . preg_quote($script_queries['output_delimiter'], '/') . '(.*)/', $element, $matches)) {
+						} elseif (isset($script_queries['output_delimiter']) && preg_match('/(.*?)' . preg_quote($script_queries['output_delimiter'], '/') . '(.*)/', (string) $element, $matches)) {
 							$script_index = $matches[1];
 							$field_value  = $matches[2];
 
@@ -1166,7 +1166,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 		$value_parse_regexp = '/' . str_replace('VALUE/REGEXP:', '', $snmp_queries['value_index_parse']) . '/';
 
 		foreach ($snmp_indexes as $oid => $value) {
-			if (!preg_match($value_parse_regexp, $value)) {
+			if (!preg_match($value_parse_regexp, (string) $value)) {
 				unset($snmp_indexes[$oid]);
 			}
 		}
@@ -1186,8 +1186,8 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 		$parsed_indexes = [];
 
 		foreach ($snmp_indexes as $oid => $value) {
-			if (preg_match($index_parse_regexp, $oid)) {
-				$parsed_indexes[$oid] = preg_replace($index_parse_regexp, '\\1', $oid);
+			if (preg_match($index_parse_regexp, (string) $oid)) {
+				$parsed_indexes[$oid] = preg_replace($index_parse_regexp, '\\1', (string) $oid);
 			}
 		}
 
@@ -1247,7 +1247,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 					// rewrite the oid if required
 					if (isset($oid_rewrite_pattern)) {
 						$orig_oid = $oid;
-						$oid      = preg_replace($oid_rewrite_pattern, $oid_rewrite_replacement, $oid);
+						$oid      = preg_replace($oid_rewrite_pattern, (string) $oid_rewrite_replacement, $oid);
 						query_debug_timer_offset('data_query', __esc('oid_rewrite at OID: \'%s\' new OID: \'%s\'', $orig_oid , $oid));
 					}
 
@@ -1314,7 +1314,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 					} elseif (str_starts_with($field_array['source'], 'OID2HEX/REGEXP:')) {
 						$value = preg_replace('/' . str_replace('OID2HEX/REGEXP:', '', $field_array['source']) . '/', '\\1', $oid);
 
-						$parts    = explode('.', $value);
+						$parts    = explode('.', (string) $value);
 						$ip_value = '';
 
 						foreach ($parts as $idx => $part) {
@@ -1431,7 +1431,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 						$value = cacti_snmp_session_get($session, $oid);
 					}
 
-					$value = preg_replace('/' . str_replace('VALUE/REGEXP:', '', $field_array['source']) . '/', '\\1', $value);
+					$value = preg_replace('/' . str_replace('VALUE/REGEXP:', '', $field_array['source']) . '/', '\\1', (string) $value);
 
 					query_debug_timer_offset('data_query', __esc('Executing SNMP get for data @ \'%s\' [value=\'$value\']', $oid, $value));
 
@@ -1495,11 +1495,11 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 					foreach ($snmp_data as $oid => $value) {
 						$index_regex = ($field_array['oid_index_parse'] ?? $index_parse_regexp) . (isset($field_array['oid_suffix']) ? ('.' . $field_array['oid_suffix']) : '');
 
-						if (!preg_match($index_regex, $oid)) {
+						if (!preg_match($index_regex, (string) $oid)) {
 							continue;
 						}
 
-						$snmp_index = preg_replace($index_regex,'\\1', $oid);
+						$snmp_index = preg_replace($index_regex,'\\1', (string) $oid);
 
 						if (isset($snmp_queries['value_index_parse'])) {
 							if (!in_array($snmp_index, $snmp_indexes, true)) {
@@ -1514,25 +1514,25 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 
 						if ($field_name == 'ifOperStatus' || $field_name == 'ifAdminStatus') {
 							$value = match (true) {
-								preg_match('/^(down|2)/i', $value) > 0 => 'Down',
-								preg_match('/^(up|1)/i', $value) > 0   => 'Up',
-								preg_match('/^(not|6)/i', $value) > 0  => 'notPresent',
-								default                                => 'Testing',
+								preg_match('/^(down|2)/i', (string) $value) > 0 => 'Down',
+								preg_match('/^(up|1)/i', (string) $value) > 0   => 'Up',
+								preg_match('/^(not|6)/i', (string) $value) > 0  => 'notPresent',
+								default                                         => 'Testing',
 							};
 
 							$mode = 'value';
 						} elseif (preg_match('/VALUE\/REGEXP:(.*)/', $field_array['source'], $matches)) {
-							$modified_value = preg_replace('/' . $matches[1] . '/', '\\1', $value);
+							$modified_value = preg_replace('/' . $matches[1] . '/', '\\1', (string) $value);
 							$mode           = 'regexp value parse';
 						} elseif (preg_match('/^VALUE\/TEST:(.*):(.*):(.*)/', $field_array['source'], $matches)) {
-							$modified_value = (strcmp($matches[1], $value) !== 0) ? $matches[3] : $matches[2];
+							$modified_value = (strcmp($matches[1], (string) $value) !== 0) ? $matches[3] : $matches[2];
 							$mode           = 'test value parse';
 						} elseif (preg_match('/^VALUE\/TABLE:(.*)/',$field_array['source'])) {
 							$modified_value = (array_key_exists($value, $const_table)) ? $const_table[$value] : 'N/A';
 							$mode           = 'table value parse';
 						} elseif (preg_match('/^VALUE\/HEX2IP:(\d+):(\d+)/', $field_array['source'], $matches)) {
 							// $modified_value = substr(str_replace(':','',$value),$matches[1],$matches[2]);
-							$modified_value = substr(preg_replace('/(:|HEX-)/','', $value), intval($matches[1]), intval($matches[2]));
+							$modified_value = substr((string) preg_replace('/(:|HEX-)/','', (string) $value), intval($matches[1]), intval($matches[2]));
 							$modified_value = implode('.', unpack('C*', pack('H*', $modified_value)));
 							$mode           = 'hex2ip value parse';
 						} else {
@@ -1550,10 +1550,10 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 						// Re-initialize the index
 						$snmp_index  = '';
 
-						$parse_value = preg_replace('/' . str_replace('OID/REGEXP:', '', $field_array['source']) . '/', '\\1', $oid);
+						$parse_value = preg_replace('/' . str_replace('OID/REGEXP:', '', $field_array['source']) . '/', '\\1', (string) $oid);
 
 						if (isset($snmp_queries['oid_index_parse'])) {
-							$snmp_index = preg_replace($index_parse_regexp, '\\1', $oid);
+							$snmp_index = preg_replace($index_parse_regexp, '\\1', (string) $oid);
 						} elseif ((isset($value)) && ($value != '')) {
 							$snmp_index = $value;
 						}
@@ -1606,10 +1606,10 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 						// Re-initialize the index
 						$snmp_index  = '';
 
-						$parse_value = preg_replace('/' . str_replace('OID2HEX/REGEXP:', '', $field_array['source']) . '/', '\\1', $oid);
+						$parse_value = preg_replace('/' . str_replace('OID2HEX/REGEXP:', '', $field_array['source']) . '/', '\\1', (string) $oid);
 
 						if (isset($snmp_queries['oid_index_parse'])) {
-							$snmp_index = preg_replace($index_parse_regexp, '\\1', $oid);
+							$snmp_index = preg_replace($index_parse_regexp, '\\1', (string) $oid);
 						} elseif ((isset($value)) && ($value != '')) {
 							$snmp_index = $value;
 						}
@@ -1662,10 +1662,10 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 						// Re-initialize the index
 						$snmp_index  = '';
 
-						$parse_value = preg_replace('/' . $regex_array[0] . '/', $regex_array[1], $oid);
+						$parse_value = preg_replace('/' . $regex_array[0] . '/', $regex_array[1], (string) $oid);
 
 						if (isset($snmp_queries['oid_index_parse'])) {
-							$snmp_index = preg_replace($index_parse_regexp, '\\1', $oid);
+							$snmp_index = preg_replace($index_parse_regexp, '\\1', (string) $oid);
 						} elseif ((isset($value)) && ($value != '')) {
 							$snmp_index = $value;
 						}
@@ -1731,8 +1731,8 @@ function data_query_format_record(int $host_id, int $snmp_query_id, string $fiel
 
 	$data_query_rewrite_indexes_cache[$hash][$snmp_index] = $value;
 
-	if (mb_detect_encoding($value, mb_detect_order(), true) === false) {
-		$value = bin2hex($value);
+	if (mb_detect_encoding((string) $value, mb_detect_order(), true) === false) {
+		$value = bin2hex((string) $value);
 	}
 
 	return "($host_id, $snmp_query_id, " . db_qstr($field_name) . ', ' . db_qstr($value) . ', ' . db_qstr($snmp_index) . ', ' . db_qstr($oid) . ', 1)';
@@ -1794,7 +1794,7 @@ function data_query_update_host_cache_from_buffer(int $host_id, int $snmp_query_
 
 		$buffer .= $delim . $record;
 
-		$buf_len += strlen($record);
+		$buf_len += strlen((string) $record);
 
 		if (($overhead + $buf_len) > ($max_packet - 1024)) {
 			db_execute($sql_prefix . $buffer . $sql_suffix);
@@ -1919,7 +1919,7 @@ function data_query_rewrite_indexes(array &$errmsg, int $host_id, int $snmp_quer
 			}
 		}
 
-		$index = str_replace('|index|', trim($num_index), $index);
+		$index = str_replace('|index|', trim((string) $num_index), $index);
 
 		if (!preg_match('/^[0-9.]*$/', $index)) {
 			$errmsg[] = "@'" . $num_index . "': some portions of rewrite_index field were not parsed: '$index'";
@@ -1991,7 +1991,7 @@ function rewrite_snmp_enum_value(string|null $field_name, string|null $value = n
 		$mapcache[$field_name] = [];
 
 		foreach ($map as $src => $dst) {
-			if (preg_match('/^REGEXP(NC)?:(.*)$/', $src, $matches)) {
+			if (preg_match('/^REGEXP(NC)?:(.*)$/', (string) $src, $matches)) {
 				if ($matches[1] == 'NC') {
 					$src = '/' . str_replace('/', '\/', $matches[2]) . '/i';
 				} else {
@@ -2006,8 +2006,8 @@ function rewrite_snmp_enum_value(string|null $field_name, string|null $value = n
 	}
 
 	foreach ($mapcache[$field_name] as $src => $dst) {
-		if (preg_match($src, $value)) {
-			$nvalue = preg_replace($src, $dst, $value);
+		if (preg_match($src, (string) $value)) {
+			$nvalue = preg_replace($src, (string) $dst, (string) $value);
 			debug_log_insert('data_query', __esc("rewrite_value: '%s' => '%s'", $value, $nvalue));
 			$value = $nvalue;
 
@@ -2366,7 +2366,7 @@ function get_formatted_data_query_indexes(int $host_id, int $data_query_id) : ar
 	}
 
 	// sort the data using the 'data query index' sort algorithm
-	uasort($sort_field_data, 'usort_data_query_index');
+	uasort($sort_field_data, usort_data_query_index(...));
 
 	$sorted_results = [];
 
@@ -3034,13 +3034,13 @@ function oid_index_should_strip_trailing_zero_padding(array $indexes, string $in
 	$all_end_with_zero = true;
 
 	foreach ($indexes as $oid => $value) {
-		if (preg_match($index_parse_regexp, $oid, $matches)) {
+		if (preg_match($index_parse_regexp, (string) $oid, $matches)) {
 			$test_indexes[$oid] = $matches[1];
 		} else {
 			return false;
 		}
 
-		if (!preg_match('/(?:\.0)+$/', $oid)) {
+		if (!preg_match('/(?:\.0)+$/', (string) $oid)) {
 			$all_end_with_zero = false;
 		}
 	}
@@ -3060,7 +3060,7 @@ function oid_index_should_strip_trailing_zero_padding(array $indexes, string $in
 	$stripped_indexes = [];
 
 	foreach (array_keys($stripped) as $oid) {
-		if (!preg_match($index_parse_regexp, $oid, $matches)) {
+		if (!preg_match($index_parse_regexp, (string) $oid, $matches)) {
 			return false;
 		}
 
@@ -3105,7 +3105,7 @@ function oid_index_strip_trailing_zero_padding(array $indexes): array {
 	$stripped = [];
 
 	foreach ($indexes as $oid => $value) {
-		$stripped_oid = preg_replace('/(?:\.0)+$/', '', $oid);
+		$stripped_oid = preg_replace('/(?:\.0)+$/', '', (string) $oid);
 
 		if (isset($stripped[$stripped_oid])) {
 			/* Stripping would merge two distinct OIDs into one key,

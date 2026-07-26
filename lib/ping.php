@@ -80,7 +80,7 @@ class Net_Ping {
 	}
 
 	function set_ping_error_handler() : void {
-		set_error_handler([$this, 'ping_error_handler']);
+		set_error_handler($this->ping_error_handler(...));
 	}
 
 	function restore_cacti_error_handler() : void {
@@ -377,7 +377,7 @@ class Net_Ping {
 		$this->time = $this->get_time($this->precision);
 
 		// check result for uptime
-		if ($output !== false && $output != 'U' && strlen($output)) {
+		if ($output !== false && $output != 'U' && strlen((string) $output)) {
 			// calculate total time
 			$this->snmp_status   = $this->time * 1000;
 			$this->snmp_response = 'Device responded to SNMP';

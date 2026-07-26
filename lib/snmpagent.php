@@ -800,7 +800,7 @@ function snmpagent_notification(string $notification, string $mib, array $varbin
 
 		return false;
 	} else {
-		$branches             = explode('.', $enterprise_oid);
+		$branches             = explode('.', (string) $enterprise_oid);
 		$specific_trap_number = array_pop($branches);
 	}
 
@@ -994,9 +994,7 @@ function snmpagent_notification(string $notification, string $mib, array $varbin
 				// uptime placeholders) that are passed empty here; escape each token
 				// directly so empty positions survive as quoted '' rather than being
 				// swallowed when exec_background joins the arguments with spaces.
-				$escaped_args = implode(' ', array_map(static function ($arg) {
-					return $arg === '' ? "''" : cacti_escapeshellarg($arg);
-				}, $args));
+				$escaped_args = implode(' ', array_map(static fn ($arg) => $arg === '' ? "''" : cacti_escapeshellarg($arg), $args));
 
 				exec_background(cacti_escapeshellcmd($path_snmptrap), $escaped_args);
 
