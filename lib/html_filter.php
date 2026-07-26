@@ -101,11 +101,11 @@ class CactiTableFilter {
 			$tab    = gnrv('tab');
 
 			if ($action != '') {
-				$this->session_var .= basename(get_current_page(), '.php') . '_' . $action;
+				$this->session_var .= basename((string) get_current_page(), '.php') . '_' . $action;
 			} elseif ($tab != '') {
-				$this->session_var .= basename(get_current_page(), '.php') . '_' . $tab;
+				$this->session_var .= basename((string) get_current_page(), '.php') . '_' . $tab;
 			} else {
-				$this->session_var .= basename(get_current_page(), '.php');
+				$this->session_var .= basename((string) get_current_page(), '.php');
 			}
 		}
 

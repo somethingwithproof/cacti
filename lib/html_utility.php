@@ -252,7 +252,7 @@ function form_selectable_cell(mixed $contents, mixed $id, mixed $width = '', str
 	$table_id = form_get_table_id();
 
 	if (!isset($tableColumns[$table_id])) {
-		$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+		$tableColumns[$table_id] = json_decode((string) read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
 	}
 
 	static $col_num = null;
@@ -332,17 +332,17 @@ function form_get_table_id(mixed $increment = false) : string {
 	}
 
 	if (isset_request_var('action') && get_nfilter_request_var('action') != '' && isset_request_var('tab') && get_nfilter_request_var('tab') != '') {
-		return basename(get_current_page(), '.php') . ':' . $table_count . ':action-tab-' . get_nfilter_request_var('action') . '-' . get_nfilter_request_var('tab') . ':';
+		return basename((string) get_current_page(), '.php') . ':' . $table_count . ':action-tab-' . get_nfilter_request_var('action') . '-' . get_nfilter_request_var('tab') . ':';
 	}
 
 	if (isset_request_var('action') && get_nfilter_request_var('action') != '') {
-		return basename(get_current_page(), '.php') . ':' . $table_count . ':action-' . get_nfilter_request_var('action') . ':';
+		return basename((string) get_current_page(), '.php') . ':' . $table_count . ':action-' . get_nfilter_request_var('action') . ':';
 	}
 
 	if (isset_request_var('tab') && get_nfilter_request_var('tab') != '') {
-		return basename(get_current_page(), '.php') . ':tab-' . get_nfilter_request_var('tab') . ':';
+		return basename((string) get_current_page(), '.php') . ':tab-' . get_nfilter_request_var('tab') . ':';
 	} else {
-		return basename(get_current_page(), '.php') . ':' . $table_count;
+		return basename((string) get_current_page(), '.php') . ':' . $table_count;
 	}
 }
 
@@ -369,7 +369,7 @@ function form_selectable_vcell(mixed $contents, string $table_id = '', string $c
 	}
 
 	if (!isset($tableColumns[$table_id])) {
-		$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+		$tableColumns[$table_id] = json_decode((string) read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
 	}
 
 	if (isset($tableColumns[$table_id]) && cacti_sizeof($tableColumns[$table_id])) {
@@ -438,7 +438,7 @@ function form_process_visible_display_text(string $table_id, array $display_text
 
 			$tableColumns[$table_id] = [];
 		} else {
-			$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+			$tableColumns[$table_id] = json_decode((string) read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
 		}
 	} else {
 		$tableCount[$table_id]++;
@@ -451,7 +451,7 @@ function form_process_visible_display_text(string $table_id, array $display_text
 
 			$tableColumns[$table_id] = [];
 		} else {
-			$tableColumns[$table_id] = json_decode(read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
+			$tableColumns[$table_id] = json_decode((string) read_user_setting("visible_columns_{$table_id}{$tableCount[$table_id]}"), true);
 		}
 	}
 
@@ -1269,7 +1269,7 @@ function update_order_string(bool $inplace = false) : void {
 
 	$order = '';
 
-	if (!str_contains(get_request_var('sort_column'), '(') && !str_contains(get_request_var('sort_column'), '`')) {
+	if (!str_contains((string) get_request_var('sort_column'), '(') && !str_contains((string) get_request_var('sort_column'), '`')) {
 		$del = '`';
 	} else {
 		$del = '';
@@ -1296,7 +1296,7 @@ function update_order_string(bool $inplace = false) : void {
 				continue;
 			}
 
-			$direction = strtoupper($direction) === 'DESC' ? 'DESC' : 'ASC';
+			$direction = strtoupper((string) $direction) === 'DESC' ? 'DESC' : 'ASC';
 
 			if ($column == 'ip' || $column == 'ip_address') {
 				$order .= ($order != '' ? ', ' : '') . 'INET_ATON(' . $column . ') ' . $direction;
@@ -1316,7 +1316,7 @@ function update_order_string(bool $inplace = false) : void {
 			unset($_SESSION['sort_data'][$page]);
 			unset($_SESSION['sort_string'][$page]);
 
-			$safe_direction = strtoupper(get_request_var('sort_direction')) === 'DESC' ? 'DESC' : 'ASC';
+			$safe_direction = strtoupper((string) get_request_var('sort_direction')) === 'DESC' ? 'DESC' : 'ASC';
 			$sort_column    = sanitize_sql_column(get_request_var('sort_column'), '');
 
 			if ($sort_column === '') {
@@ -1353,12 +1353,12 @@ function update_order_string(bool $inplace = false) : void {
 				return;
 			}
 
-			$_SESSION['sort_data'][$page][$sort_column] = strtoupper(get_nfilter_request_var('sort_direction')) === 'DESC' ? 'DESC' : 'ASC';
+			$_SESSION['sort_data'][$page][$sort_column] = strtoupper((string) get_nfilter_request_var('sort_direction')) === 'DESC' ? 'DESC' : 'ASC';
 
 			$_SESSION['sort_string'][$page] = 'ORDER BY ';
 
 			foreach ($_SESSION['sort_data'][$page] as $column => $direction) {
-				if (!str_contains($column, '(') && !str_contains($column, '`')) {
+				if (!str_contains((string) $column, '(') && !str_contains((string) $column, '`')) {
 					$del = '`';
 				} else {
 					$del = '';
@@ -1417,7 +1417,7 @@ function get_order_string() : string {
 		return '';
 	}
 
-	$sort_dir = strtoupper(get_request_var('sort_direction')) === 'DESC' ? 'DESC' : 'ASC';
+	$sort_dir = strtoupper((string) get_request_var('sort_direction')) === 'DESC' ? 'DESC' : 'ASC';
 
 	if (!str_contains($sort_column, '(') && !str_contains($sort_column, '`')) {
 		$del = '`';
@@ -1516,7 +1516,7 @@ function validate_redirect_url($url = '', $default = 'index.php') {
 	}
 
 	// reject protocol-relative URLs
-	if (strpos($url, '//') === 0) {
+	if (str_starts_with($url, '//')) {
 		return $default;
 	}
 
@@ -1607,7 +1607,7 @@ function validate_is_regex(string $regex) : bool|string {
 	$error = preg_last_error();
 
 	if (!defined('IN_CACTI_INSTALL')) {
-		set_error_handler('CactiErrorHandler');
+		set_error_handler(CactiErrorHandler(...));
 	}
 
 	if (empty($error)) {

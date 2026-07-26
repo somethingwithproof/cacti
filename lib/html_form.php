@@ -667,11 +667,11 @@ function form_filepath_box(string $form_name, mixed $prev_val, mixed $default_va
 
 		if ($prev_val == '') {
 			$extra_text  = '';
-		} elseif (is_file(trim($prev_val))) {
+		} elseif (is_file(trim((string) $prev_val))) {
 			$extra_class = 'fa-check-circle';
 			$extra_color = 'green';
 			$extra_text  = __esc('File Found');
-		} elseif (is_dir(trim($prev_val))) {
+		} elseif (is_dir(trim((string) $prev_val))) {
 			$extra_class = 'fa-times-circle';
 			$extra_color = 'red';
 			$extra_text  = __esc('Path is a Directory and not a File');
@@ -1248,7 +1248,7 @@ function form_text_area(string $form_name, mixed $prev_val, int $form_rows, int 
 function form_multi_dropdown(string $form_name, array $array_display, mixed $prev_vals,
 	string $column_id, string $class = '', string $on_change = '') : void {
 	if (!is_array($prev_vals) && $prev_vals != '') {
-		$values              = explode(',', $prev_vals);
+		$values              = explode(',', (string) $prev_vals);
 		$prev_vals           = [];
 
 		foreach ($values as $value) {

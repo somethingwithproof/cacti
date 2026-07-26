@@ -451,7 +451,7 @@ function reports_form_actions() : void {
 
 		if ($selected_items != false) {
 			foreach ($selected_items as $report) {
-				if (!is_string($report) || strpos($report, '_') === false) {
+				if (!is_string($report) || !str_contains($report, '_')) {
 					continue;
 				}
 
@@ -545,7 +545,7 @@ function reports_form_actions() : void {
 
 		// loop through each of the graphs selected on the previous page and get more info about them
 		foreach ($_POST as $var => $val) {
-			if (preg_match('/^chk_([a-z_0-9]+)$/', $var, $matches)) {
+			if (preg_match('/^chk_([a-z_0-9]+)$/', (string) $var, $matches)) {
 				[$type, $id] = explode('_', $matches[1], 2);
 
 				// Parse and validate identically to the action branch so the
@@ -2189,7 +2189,7 @@ function reports() : void {
 				FROM plugin_reportit_reports AS report
 				$sql_join
 				$sql_where
-				ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
+				ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper((string) grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
 				' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
 		} elseif (grv('report_type') == 'reports') {
 			$total_rows = db_fetch_cell("SELECT COUNT(report.id)
@@ -2204,7 +2204,7 @@ function reports() : void {
 				FROM reports AS report
 				$sql_join
 				$sql_where
-				ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
+				ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper((string) grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
 				' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
 		} else {
 			$total_rows = db_fetch_cell("SELECT COUNT(report.id)
@@ -2219,7 +2219,7 @@ function reports() : void {
 				FROM plugin_reportit_reports AS report
 				$sql_join
 				$sql_where
-				ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
+				ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper((string) grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
 				' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
 		}
 	} else {
@@ -2235,7 +2235,7 @@ function reports() : void {
 			FROM reports AS report
 			$sql_join
 			$sql_where
-			ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
+			ORDER BY " . sanitize_sql_column(grv('sort_column')) . ' ' . (strtoupper((string) grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
 			' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
 	}
 
