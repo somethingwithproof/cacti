@@ -535,7 +535,7 @@ class Ldap {
 		restore_error_handler();
 
 		// set an error handler for ldap
-		set_error_handler([$this, 'ErrorHandler']);
+		set_error_handler($this->ErrorHandler(...));
 
 		cacti_session_close();
 	}
@@ -545,7 +545,7 @@ class Ldap {
 		restore_error_handler();
 
 		// set an error handler for Cacti
-		set_error_handler('CactiErrorHandler');
+		set_error_handler(CactiErrorHandler(...));
 
 		cacti_session_start();
 	}
@@ -759,9 +759,9 @@ class Ldap {
 		$ldap_conn = $this->connection['ldap_conn'];
 
 		// Decode username, and remove bad characters
-		$this->username = html_entity_decode($this->username, $this->GetMask(), 'UTF-8');
+		$this->username = html_entity_decode((string) $this->username, $this->GetMask(), 'UTF-8');
 		$this->username = str_replace(['&', '|', '(', ')', '*', '>', '<', '!', '='], '', $this->username);
-		$this->password = html_entity_decode($this->password, $this->GetMask(), 'UTF-8');
+		$this->password = html_entity_decode((string) $this->password, $this->GetMask(), 'UTF-8');
 		$this->dn       = str_replace('<username>', $this->username, $this->dn);
 
 		if ($this->password == '') {
@@ -895,7 +895,7 @@ class Ldap {
 		$ldap_conn = $this->connection['ldap_conn'];
 
 		// Decode username, and remove bad characters
-		$this->username = html_entity_decode($this->username, $this->GetMask(), 'UTF-8');
+		$this->username = html_entity_decode((string) $this->username, $this->GetMask(), 'UTF-8');
 		$this->username = str_replace(['&', '|', '(', ')', '*', '>', '<', '!', '='], '', $this->username);
 		$this->dn       = str_replace('<username>', $this->username, $this->dn);
 
@@ -1015,7 +1015,7 @@ class Ldap {
 		$ldap_conn = $this->connection['ldap_conn'];
 
 		// Decode username, and remove bad characters
-		$this->username = html_entity_decode($this->username, $this->GetMask(), 'UTF-8');
+		$this->username = html_entity_decode((string) $this->username, $this->GetMask(), 'UTF-8');
 		$this->username = str_replace(['&', '|', '(', ')', '*', '>', '<', '!', '='], '', $this->username);
 		$this->dn       = str_replace('<username>', $this->username, $this->dn);
 

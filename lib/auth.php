@@ -4184,7 +4184,7 @@ function secpass_login_process(string $username) : array {
 			return [];
 		}
 
-		if (trim($password) == '') {
+		if (trim((string) $password) == '') {
 			// error
 			$error     = true;
 			$error_msg = __('Access Denied!  No password provided by user.');
@@ -4664,7 +4664,7 @@ function auth_login_redirect(string $login_opts = '') : void {
 
 				if (auth_basename($referer) == 'logout.php') {
 					$referer = CACTI_PATH_URL . 'index.php';
-				} elseif (!str_contains($referer, CACTI_PATH_URL)) {
+				} elseif (!str_contains((string) $referer, CACTI_PATH_URL)) {
 					if (!is_realm_allowed(8)) {
 						$referer = CACTI_PATH_URL . 'graph_view.php' . ($newtheme ? '?newtheme=1' : '');
 					} else {
@@ -4687,7 +4687,7 @@ function auth_login_redirect(string $login_opts = '') : void {
 				cacti_log(sprintf("DEBUG: Referer Short Circuit to '%s'", 'index.php'), false, 'AUTH', POLLER_VERBOSITY_DEBUG);
 			}
 
-			$referer .= ($newtheme ? (!str_contains($referer, '?') ? '?' : '&') . 'newtheme=1' : '');
+			$referer .= ($newtheme ? (!str_contains((string) $referer, '?') ? '?' : '&') . 'newtheme=1' : '');
 
 			// Strip out the login from the referer if present
 			$referer  = str_replace('?action=login', '', $referer);
@@ -5079,7 +5079,7 @@ function remote_agent_fcrdns_confirmed(string $client_addr, array $forward_recor
 	}
 
 	foreach ($forward_records as $record) {
-		$ip = isset($record['ip']) ? $record['ip'] : (isset($record['ipv6']) ? $record['ipv6'] : '');
+		$ip = $record['ip'] ?? $record['ipv6'] ?? '';
 
 		if ($ip !== '' && filter_var($ip, FILTER_VALIDATE_IP) !== false && inet_pton($ip) === $client_binary) {
 			return true;
