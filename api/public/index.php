@@ -6,6 +6,7 @@ use Slim\Routing\RouteCollectorProxy;
 
 include __DIR__ . '/../include/db_functions.php';
 include __DIR__ . '/../include/arrays.php';
+include __DIR__ . '/../include/auth.php';
 include  '../../include/global.php';
 
 $client_ip = get_client_addr();
@@ -39,6 +40,41 @@ function validate_parameters(array $params, array $allowed_params) : string|null
 
 	return null;
 }
+
+/**
+ * Auth checkpoint for every /v1 route. Rejects unauthenticated callers with a
+ * 401 before any handler (and therefore any database query) runs.
+ *
+ * Fix for GHSA-mx5c-qj6m-2w89 / CVE-2026-39954.
+ */
+$apiAuthMiddleware = function (Request $request, $handler) {
+	global $client_ip;
+
+	$expected_hash = read_config_option('api_token_hash');
+
+	// read_config_option() returns mixed; an unset option must read as "no token".
+	if (!is_string($expected_hash)) {
+		$expected_hash = false;
+	}
+
+	if (api_authenticate($request->getHeaderLine('Authorization'), $request->getQueryParams(), $expected_hash)) {
+		return $handler->handle($request);
+	}
+
+	cacti_log('ERROR: Rejected unauthenticated API request By HOST: ' . $client_ip, false, 'API');
+
+	$problem = [
+		'type'   => 'about:blank',
+		'title'  => 'Unauthorized',
+		'status' => 401,
+		'detail' => 'A valid API token is required.'
+	];
+
+	$response = new \Slim\Psr7\Response();
+	$response->getBody()->write(json_encode($problem));
+
+	return $response->withStatus(401)->withHeader('Content-Type', 'application/problem+json');
+};
 
 // V1 API Routes Group
 $app->group('/v1', function (RouteCollectorProxy $group) {
@@ -219,6 +255,6 @@ $app->group('/v1', function (RouteCollectorProxy $group) {
 			});
 		});
 	});
-});
+})->add($apiAuthMiddleware);
 
 $app->run();
