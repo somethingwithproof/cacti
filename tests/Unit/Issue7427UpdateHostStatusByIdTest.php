@@ -30,6 +30,7 @@
  */
 
 $source = file_get_contents(__DIR__ . '/../../lib/functions.php');
+expect($source)->not->toBeFalse('lib/functions.php must be readable');
 
 $statement = static function () use ($source) : string {
 	$pos = strpos($source, "db_execute_prepared('UPDATE host SET");

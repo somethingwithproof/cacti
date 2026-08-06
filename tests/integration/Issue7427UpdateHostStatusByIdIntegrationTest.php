@@ -104,6 +104,7 @@ class HostStatusPDO extends FakeMySQLPDO {
  */
 function host_status_seed(string $hostname = 'dup.example.net') : HostStatusPDO {
 	$conn = new HostStatusPDO();
+	$quoted_hostname = $conn->quote($hostname);
 
 	$conn->exec('CREATE TABLE settings (name TEXT PRIMARY KEY, value TEXT)');
 	$conn->exec("INSERT INTO settings (name, value) VALUES
@@ -124,7 +125,7 @@ function host_status_seed(string $hostname = 'dup.example.net') : HostStatusPDO 
 			min_time, max_time, cur_time, avg_time,
 			total_polls, failed_polls, availability,
 			snmp_community, snmp_version, deleted)
-			VALUES ($id, '$hostname', " . HOST_UP . ", 0, '', '', '',
+			VALUES ($id, $quoted_hostname, " . HOST_UP . ", 0, '', '', '',
 			0, 0, 0, 0, 10, 0, 100, 'public', 2, '')");
 	}
 
