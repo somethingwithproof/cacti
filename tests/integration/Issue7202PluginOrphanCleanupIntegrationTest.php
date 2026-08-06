@@ -83,8 +83,9 @@ class PluginCleanupPDO extends FakeMySQLPDO {
 }
 
 /**
- * sqlite reports rowCount() as 0 for SELECT, which db_fetch_assoc_return()
- * never sees rows through.
+ * sqlite reports rowCount() as 0 for SELECT. db_execute_prepared() uses that
+ * count to decide whether to invoke db_fetch_assoc_return(), so cache the rows
+ * here and expose their count while keeping fetchAll() available afterwards.
  */
 class PluginCleanupStatement extends PDOStatement {
 	/** @var array<int,array<string,mixed>>|null rows of a SELECT, null otherwise */
