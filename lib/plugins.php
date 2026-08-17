@@ -1616,14 +1616,16 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 					 * repository URL is.  An entry that climbs out of the
 					 * plugin directory is skipped rather than written.
 					 */
-					if (validate_relative_path_within($rfile, $restore_path) === false) {
+					$destination = validate_relative_path_within($rfile, $restore_path);
+
+					if ($destination === false) {
 						cacti_log(sprintf('WARNING: Plugin \'%s\' archive entry \'%s\' escapes the plugin directory and was skipped.', $plugin, $basefile), false, 'PLUGIN');
 
 						continue;
 					}
 
 					if (basename($rfile) != $rfile) {
-						if (!is_dir(dirname($rfile)) && !mkdir(dirname($rfile), 0755, true)) {
+						if (!is_dir(dirname($destination)) && !mkdir(dirname($destination), 0755, true)) {
 							if ($type == 'archive') {
 								raise_message('restore_failed', __('Restore failed!  The archived Plugin \'%s\' Restore failed. Unable to create directory %s', $plugin, dirname($basefile)), MESSAGE_LEVEL_INFO);
 							} else {
@@ -1637,7 +1639,7 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 						}
 					}
 
-					file_put_contents($restore_path . '/' . $basefile, $output);
+					file_put_contents($destination, $output);
 				}
 			}
 

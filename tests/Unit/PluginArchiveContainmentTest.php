@@ -49,10 +49,11 @@ test('the repository URL is validated before it builds a request', function () u
 test('archive entries are contained before they are written', function () use ($pluginsPath) {
 	$source = file_get_contents($pluginsPath);
 
-	expect($source)->toMatch('/validate_relative_path_within\(\$rfile, \$restore_path\) === false/');
+	expect($source)->toContain('$destination = validate_relative_path_within($rfile, $restore_path)');
+	expect($source)->toContain('if ($destination === false)');
 
 	$guard = strpos($source, 'validate_relative_path_within($rfile, $restore_path)');
-	$write = strpos($source, 'file_put_contents($restore_path');
+	$write = strpos($source, 'file_put_contents($destination');
 
 	expect($guard)->toBeLessThan($write);
 });

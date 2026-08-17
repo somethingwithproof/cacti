@@ -10288,12 +10288,20 @@ function validate_relative_path_within(mixed $path, string $base_dir) : mixed {
 		}
 	}
 
-	/**
-	 * An entry that does not exist yet is judged by its parent directory.
-	 * cacti_path_is_within() already fails closed when realpath() cannot
-	 * resolve either side, so both cases share one check.
-	 */
-	$anchor = file_exists($candidate) ? $candidate : dirname($candidate);
+	/* Judge a new entry by its nearest existing ancestor. Archive members do
+	 * not have to include directory entries before nested files, so the
+	 * immediate parent may legitimately be absent. */
+	$anchor = $candidate;
+
+	while (!file_exists($anchor) && $anchor !== $base_real) {
+		$parent = dirname($anchor);
+
+		if ($parent === $anchor) {
+			return false;
+		}
+
+		$anchor = $parent;
+	}
 
 	if (!cacti_path_is_within($anchor, $base_real)) {
 		return false;

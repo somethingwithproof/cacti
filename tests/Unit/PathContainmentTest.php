@@ -84,8 +84,9 @@ test('a symlinked segment under the base is rejected', function () : void {
 	expect(validate_relative_path_within('link/anything.txt', $this->base))->toBeFalse();
 });
 
-test('a path whose parent cannot be resolved is rejected', function () : void {
-	expect(validate_relative_path_within('missing_dir/child/file.txt', $this->base))->toBeFalse();
+test('a nested path with missing parents remains confined to the base', function () : void {
+	expect(validate_relative_path_within('missing_dir/child/file.txt', $this->base))
+		->toBe(realpath($this->base) . '/missing_dir/child/file.txt');
 });
 
 test('cacti_path_is_within accepts the base itself and children', function () : void {
