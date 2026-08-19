@@ -19,6 +19,9 @@ platform manifest.
 - `require` continues to declare Cacti runtime dependencies and extensions.
 - `require-dev` contains test, code-quality, and static-analysis tools.
 - `composer.lock` is committed and is the sole CI installation source.
+- The lock and developer-tool jobs target Cacti's PHP 8.1 baseline; runtime
+  compatibility with newer PHP versions is validated separately from the
+  locked developer toolchain.
 - New bounded contexts may opt into PHPStan level 8 with strict rules.
 - Strict-rules activation is deferred to each bounded-context configuration;
   the installer DDD foundation is the first to include
