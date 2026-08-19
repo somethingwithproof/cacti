@@ -109,7 +109,10 @@
         "sort-packages": true,
         "vendor-dir": "./include/vendor",
         "audit": {
-            "block-insecure": false
+            "block-insecure": false,
+            "ignore": {
+                "GHSA-vvj3-c3rp-c85p": "PHPUnit is development-only; Cacti does not execute third-party PHPT fixtures, and PHP 8.1-compatible Pest 2 caps PHPUnit below the patched release."
+            }
         },
         "allow-plugins": {
             "pestphp/pest-plugin": true

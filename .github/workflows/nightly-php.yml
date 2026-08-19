@@ -35,10 +35,13 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Validate composer files
-        run: composer validate --strict
+        run: composer composer:validate
 
       - name: Run Composer audit
-        run: composer audit --locked --no-interaction
+        run: composer security:audit
+
+      - name: Check production platform requirements
+        run: composer platform:check
 
 #  rector-dry-run:
 #    name: rector dry-run

@@ -20,6 +20,10 @@ platform manifest.
 - `require-dev` contains test, code-quality, and static-analysis tools.
 - `composer.lock` is committed and is the sole CI installation source.
 - New bounded contexts may opt into PHPStan level 8 with strict rules.
+- Strict-rules activation is deferred to each bounded-context configuration;
+  the installer DDD foundation is the first to include
+  `phpstan-strict-rules/rules.neon`, while the shared level 6 script remains
+  unchanged.
 - Composer scripts are the stable local and CI interface, beginning with
   `composer:validate`, `security:audit`, and `platform:check`.
 
