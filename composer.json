@@ -108,10 +108,11 @@
         },
         "sort-packages": true,
         "vendor-dir": "./include/vendor",
-        "audit": {
-            "block-insecure": false,
-            "ignore": {
-                "GHSA-vvj3-c3rp-c85p": "PHPUnit is development-only; Cacti does not execute third-party PHPT fixtures, and PHP 8.1-compatible Pest 2 caps PHPUnit below the patched release."
+        "policy": {
+            "advisories": {
+                "ignore-id": {
+                    "GHSA-vvj3-c3rp-c85p": "Pest 2.36.0 is the last PHP 8.1-compatible release and conflicts with PHPUnit >10.5.36; Cacti does not execute untrusted PHPT fixtures. Remove this exception when the PHP baseline and Pest are upgraded."
+                }
             }
         },
         "allow-plugins": {
