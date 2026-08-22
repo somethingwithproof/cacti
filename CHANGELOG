@@ -1,6 +1,7 @@
 Cacti CHANGELOG
 
 1.2.x
+-security: Escape path_php_binary in resource_cache_out() before it reaches system() (GHSA-4p7f-qcc2-vmx7)
 -issue#7711: Install the matrix PHP MySQL driver in the 1.2.x integration workflow
 -security: Harden advisory command execution and database DDL sink validation
 -security: Restrict graph input fields across the template, graph and import handoffs
