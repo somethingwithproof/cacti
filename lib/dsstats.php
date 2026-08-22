@@ -1035,10 +1035,15 @@ function dsstats_poller_bottom () {
 
 		$command_string = read_config_option('path_php_binary');
 		if (read_config_option('path_dsstats_log') != '') {
+			// exec_background() passes args to the shell unescaped, so this
+			// admin-set log path must be quoted or it becomes command
+			// injection (GHSA-pjq5-3268-g222).
+			$safe_log = cacti_escapeshellarg(read_config_option('path_dsstats_log'));
+
 			if ($config['cacti_server_os'] == 'unix') {
-				$extra_args = '-q ' . $config['base_path'] . '/poller_dsstats.php >> ' . read_config_option('path_dsstats_log') . ' 2>&1';
+				$extra_args = '-q ' . $config['base_path'] . '/poller_dsstats.php >> ' . $safe_log . ' 2>&1';
 			} else {
-				$extra_args = '-q ' . $config['base_path'] . '/poller_dsstats.php >> ' . read_config_option('path_dsstats_log');
+				$extra_args = '-q ' . $config['base_path'] . '/poller_dsstats.php >> ' . $safe_log;
 			}
 		} else {
 			$extra_args = '-q ' . $config['base_path'] . '/poller_dsstats.php';

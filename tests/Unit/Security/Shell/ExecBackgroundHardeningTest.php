@@ -23,6 +23,13 @@ test('poller.php casts poller_id to int', function () use ($pollerSource) {
 	expect($pollerSource)->toContain('$poller_id = (int)$value');
 });
 
+test('dsstats.php escapes log path with cacti_escapeshellarg', function () {
+	$dsstatsSource = file_get_contents(__DIR__ . '/../../../../lib/dsstats.php');
+
+	expect($dsstatsSource)->toContain('$safe_log = cacti_escapeshellarg(read_config_option(\'path_dsstats_log\'));')
+		->and($dsstatsSource)->not->toContain("poller_dsstats.php >> ' . read_config_option('path_dsstats_log')");
+});
+
 test('poller.php escapes stderrlog path', function () use ($pollerSource) {
 	expect($pollerSource)->toContain("cacti_escapeshellarg(read_config_option('path_stderrlog'))");
 });
