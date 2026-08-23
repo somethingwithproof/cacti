@@ -3690,6 +3690,7 @@ Cacti CHANGELOG
 -feature#0001035: Allow for --units=si on logarithmic scaled graphs (rrdtool-1.2.x only).
 -feature#0001069: add opacity/alpha channel to graph items (rrdtool-1.2.x only).
 -feature#0001065: Move to Top for List and Tree View. Omit boring scrolling
+-feature#99981: rebase probe PR
 -feature: add availability pings to host interface
 
 0.8.7
