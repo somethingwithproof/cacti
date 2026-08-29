@@ -815,8 +815,18 @@ function snmpagent_notification(string $notification, string $mib, array $varbin
 		[$notification, $mib]);
 
 	if (cacti_sizeof($notification_managers) == 0) {
-		// No receivers found for the message, record it to the cacti.log
-		cacti_log('WARNING: No notification receivers configured for event: ' . $notification . ' (' . $mib . '), severity: ' . $snmpagent_event_severity[$severity], false, 'SNMPAGENT', POLLER_VERBOSITY_NONE);
+		if (!db_fetch_cell('SELECT COUNT(*) FROM snmpagent_managers')) {
+			// With no receiver at all the facility is unused rather than
+			// misconfigured, so there is nothing to act on
+			$config['snmpagent']['notifications']['ignore'][$notification] = 1;
+
+			cacti_log('DEBUG: No SNMP notification receivers are defined, discarding event: ' . $notification . ' (' . $mib . ')', false, 'SNMPAGENT', POLLER_VERBOSITY_DEBUG);
+
+			return false;
+		}
+
+		// Receivers exist but none subscribe to this event, so name the page that fixes it
+		cacti_log('WARNING: No notification receivers configured for event: ' . $notification . ' (' . $mib . '), severity: ' . $snmpagent_event_severity[$severity] . '.  Subscribe a receiver to it under Console > Utilities > SNMP Managers.', false, 'SNMPAGENT', POLLER_VERBOSITY_NONE);
 
 		if (!in_array($severity, [SNMPAGENT_EVENT_SEVERITY_HIGH, SNMPAGENT_EVENT_SEVERITY_CRITICAL], true)) {
 			// Prevent log spam of messages lower than a high severity
