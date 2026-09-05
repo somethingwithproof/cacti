@@ -3044,7 +3044,7 @@ function ajaxAnchors() {
 		event.preventDefault();
 		event.stopImmediatePropagation();
 
-		var href = $(this).attr('href');
+		var href = $(this).data('url') || $(this).attr('href');
 
 		if (href != null && href != '#') {
 			submitPageUsingPost(href);
