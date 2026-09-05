@@ -10,6 +10,7 @@ Cacti CHANGELOG
 -security: Build forced-HTTPS redirects from the server-configured name
 -security: Replace sibling password-reset links and revoke authentication state after reset
 -issue: Fail closed when OAuth callback state is absent or mismatched
+-issue#7959: Stop source checkouts from loading a partial Composer dependency tree
 -issue#7775: Add plugin-extensible notification API
 -issue#7746: Make PHP 8.1 dependency builds reproducible
 -issue#7672: Block loopback/link-local SSRF targets in call_remote_data_collector
@@ -95,6 +96,7 @@ Cacti CHANGELOG
 -issue#6240: Fix sorting exception in rrdtool_function_create function
 -issue#6255: Fix not showing any graphs in the subtree if there are only graphs without devices
 -issue#6258: Rename 'Data' to 'Data/Statistics' per customer request
+-issue#6515: Serialize process registry admission with database-backed Symfony locks
 -issue#6545: Add 30 and 60 second timeout options for Remote Agent and Poller settings
 -issue#6573: Create new device_change_javascript hook for THOLD plugin by xmacan
 -issue#6669: Show on the Technical Support page whether php-snmp is in use or disabled by $php_snmp_support
