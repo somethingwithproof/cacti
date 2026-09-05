@@ -315,6 +315,10 @@ it('streams large legacy output without retaining it in the parent', function ()
 });
 
 it('reports a killed legacy script as the shell does', function (): void {
+	if (!function_exists('pcntl_fork') || !function_exists('posix_kill') || !defined('SIGKILL')) {
+		$this->markTestSkipped('pcntl and posix signal support are required.');
+	}
+
 	$root   = dirname(__DIR__, 3) . '/fixtures/Console';
 	$runner = dirname(__DIR__, 3) . '/fixtures/Console/kill_runner.php';
 

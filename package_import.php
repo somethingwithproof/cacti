@@ -553,7 +553,11 @@ function form_save() : void {
 		foreach ($_POST as $var => $val) {
 			if (str_contains($var, 'chk_file_')) {
 				$id = base64_decode(str_replace('chk_file_', '', $var), true);
-				$id = json_decode($id, true);
+				$id = json_decode((string) $id, true);
+
+				if (!is_array($id) || !isset($id['pfile']) || !is_string($id['pfile'])) {
+					continue;
+				}
 
 				if (str_contains($id['pfile'], '/')) {
 					$parts = explode('/', $id['pfile']);
@@ -582,7 +586,11 @@ function form_save() : void {
 
 			if (str_contains($var, 'chk_import_')) {
 				$id = base64_decode(str_replace('chk_import_', '', $var), true);
-				$id = json_decode($id, true);
+				$id = json_decode((string) $id, true);
+
+				if (!is_array($id) || !isset($id['hash']) || !is_string($id['hash'])) {
+					continue;
+				}
 
 				$hashes[] = $id['hash'];
 			}
@@ -1164,12 +1172,13 @@ function import_display_package_data(array $templates, array $files, string $pac
 					$s = trim($s);
 
 					if ($s == 'differences') {
-						$url = 'package_import.php' .
-							'?action=diff' .
-							'&package_location=' . grv('package_location') .
-							'&package_file=' . $file_package_file .
-							'&package_name=' . $file_package_name .
-							'&filename=' . CactiPath::makeRelativeIfWithinBase($pfile, CACTI_PATH_BASE);
+						$url = cacti_url('package_import.php', [
+							'action'           => 'diff',
+							'package_location' => grv('package_location'),
+							'package_file'     => $file_package_file,
+							'package_name'     => $file_package_name,
+							'filename'         => CactiPath::makeRelativeIfWithinBase($pfile, CACTI_PATH_BASE),
+						]);
 
 						$nstatus .= ($nstatus != '' ? ', ' : '') .
 							"<a class='diffme linkEditMain' href='" . htmle($url) . "'>" . __('Differences') . '</a>';
