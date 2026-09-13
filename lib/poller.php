@@ -22,6 +22,8 @@
  +-------------------------------------------------------------------------+
 */
 
+require_once __DIR__ . '/CactiProcessLock.php';
+
 /**
  * exec_poll - executes a command and returns its output
  *
@@ -441,39 +443,33 @@ function update_reindex_cache(int $host_id, int $data_query_id) : void {
 						$oid_uptime = '.1.3.6.1.2.1.1.3.0';
 					}
 
-					$session = cacti_snmp_session($host['hostname'], $host['snmp_community'], $host['snmp_version'],
+					$assert_value = '';
+					$session      = cacti_snmp_session($host['hostname'], $host['snmp_community'], $host['snmp_version'],
 						$host['snmp_username'], $host['snmp_password'], $host['snmp_auth_protocol'], $host['snmp_priv_passphrase'],
 						$host['snmp_priv_protocol'], $host['snmp_context'], $host['snmp_engine_id'], $host['snmp_port'],
 						$host['snmp_timeout'], $host['snmp_retries'], $host['max_oids']);
 
 					if ($session !== false) {
 						if ($oid_uptime == '.1.3.6.1.2.1.1.3.0') {
-							$checks = [
-								'.1.3.6.1.6.3.10.2.1.3.0',
-								'.1.3.6.1.2.1.1.3.0'
-							];
+							$engine_time   = cacti_snmp_session_get($session, '.1.3.6.1.6.3.10.2.1.3.0');
+							$system_uptime = cacti_snmp_session_get($session, $oid_uptime);
+							$assert_value  = cacti_snmp_select_uptime($system_uptime, $engine_time);
 
-							foreach ($checks as $oid_uptime) {
-								$assert_value = cacti_snmp_session_get($session, $oid_uptime);
-
-								if (is_numeric($assert_value)) {
-									if ($oid_uptime == '.1.3.6.1.6.3.10.2.1.3.0') {
-										$assert_value *= 100;
-									}
-
-									break;
-								}
+							if ($assert_value === false) {
+								$assert_value = '';
 							}
-
-							$oid_uptime = '.1.3.6.1.2.1.1.3.0';
 						} else {
 							$assert_value = cacti_snmp_session_get($session, $oid_uptime);
+
+							if ($assert_value === false) {
+								$assert_value = '';
+							}
 						}
+
+						$session->close();
 					}
 
-					$session->close();
-
-					$recache_stack[] = "('$host_id', '$data_query_id'," . POLLER_ACTION_SNMP . ", '<', '$assert_value', '$oid_uptime', 1)";
+					$recache_stack[] = "($host_id, $data_query_id," . POLLER_ACTION_SNMP . ", '<', " . db_qstr($assert_value) . ', ' . db_qstr($oid_uptime) . ', 1)';
 				}
 
 				break;
@@ -2747,18 +2743,114 @@ function cacti_process_still_running(int $pid) : bool {
 }
 
 /**
+ * Returns the largest process id accepted by the platform signal adapter.
+ *
+ * Windows process IDs are unsigned 32-bit values and Cacti's posix_kill()
+ * compatibility shim does not narrow them through the POSIX pid_t type.
+ */
+function cacti_process_pid_max() : int {
+	return PHP_OS_FAMILY === 'Windows' && PHP_INT_SIZE >= 8 ? 4294967295 : 2147483647;
+}
+
+/**
+ * Whether this process could deliver a signal to $pid.
+ *
+ * Two things separate this from cacti_process_still_running(). It reads EPERM as
+ * stale rather than live, because a pid this process cannot signal has been
+ * recycled by somebody else and the row naming it is dead. And it skips the
+ * /proc identity check, because its caller reads false as "stale, clear the row
+ * and run"; an identity check that answered no for a live process would clear a
+ * row out from under a running collector and let a second one start.
+ *
+ * Bounded first, so a value pid_t cannot hold never reaches the kernel as -1.
+ *
+ * @param int $pid The pid recorded in a table.
+ *
+ * @return bool True when a signal from this process would reach that pid.
+ */
+function cacti_process_signalable(int $pid) : bool {
+	if ($pid <= 1 || $pid > cacti_process_pid_max() || !function_exists('posix_kill')) {
+		return false;
+	}
+
+	return posix_kill($pid, 0);
+}
+
+/**
+ * Sends a signal to a pid that was read from a process table.
+ *
+ * A stored pid can hold a value the kernel will not read as the caller means
+ * it. processes.pid is int(10) unsigned, so a corrupted row can carry
+ * 4294967295, and posix_kill() narrows that to a 32 bit pid_t of -1, which
+ * kill(2) reads as every process the caller is permitted to signal. From PHP
+ * 8.5 the same value raises a ValueError and ends the collector. Refusing it
+ * ahead of the call covers both, and logs the row so an operator can find it.
+ *
+ * init is refused as well, since a recycled or tampered row naming pid 1 would
+ * otherwise reach the host's own service manager. The floor stops there.
+ * Taking in the rest of the low range would exclude Cacti's own children
+ * inside a pid namespace, where they hold single and double digit pids, and
+ * every caller below unregisters the row whether or not the signal lands.
+ * Refusing there would leave a live collector with no registry row and a
+ * second one free to start against the same RRDs.
+ *
+ * This bounds the pid only. It deliberately does not test liveness, so the
+ * call sites keep the semantics they had; those that want an identity check
+ * still call cacti_process_still_running() first. A caller that owns the
+ * process it is signalling, a child it started itself for instance, already
+ * knows the pid is real and does not need this.
+ *
+ * @param int    $pid     The pid recorded in a process table.
+ * @param int    $signal  The signal to send.
+ * @param string $environ The log environment to record a refusal under.
+ *
+ * @return bool True when the signal was sent.
+ */
+function cacti_process_kill(int $pid, int $signal = SIGTERM, string $environ = 'POLLER') : bool {
+	/* Split, because the two refusals are refused for different reasons and an
+	   operator reading the log should be told which. A non-positive pid is not
+	   out of pid_t range at all: kill(2) reads 0 as this process group and -1
+	   as every process the caller may signal. */
+	if ($pid <= 1) {
+		cacti_log(sprintf('WARNING: Refusing to signal PID %s from a process table, which does not name a process a Cacti task can own!', $pid), false, $environ);
+
+		return false;
+	}
+
+	if ($pid > cacti_process_pid_max()) {
+		cacti_log(sprintf('WARNING: Refusing to signal PID %s from a process table, which is wider than pid_t and would reach the kernel as -1!', $pid), false, $environ);
+
+		return false;
+	}
+
+	if (!function_exists('posix_kill')) {
+		return false;
+	}
+
+	return posix_kill($pid, $signal);
+}
+
+/**
  * Tests whether a pid exists without treating a permissions failure as exit.
  *
  * POSIX kill(2) reports EPERM when the process exists but the caller cannot
  * signal it. PHP exposes errno through posix_get_last_error(), while the
  * numeric EPERM constant is supplied by ext-sockets rather than ext-posix.
  *
+ * A pid wider than pid_t is refused before it reaches posix_kill(). Through PHP
+ * 8.4 that call narrows its argument to a 32 bit pid_t, so a processes.pid of
+ * 4294967295, the maximum its int(10) unsigned column holds, arrives as -1 and
+ * kill(2) reads it as every process the caller may signal; a caller that asks
+ * here first then reads a dead registry row as live and SIGTERMs it. From PHP
+ * 8.5 the same value raises a ValueError, which ends the poller instead. Sites
+ * that signal a stored pid without asking are unaffected by this bound.
+ *
  * @param int $pid The pid to check.
  *
  * @return bool True when the process exists or signalling it is forbidden.
  */
 function cacti_process_pid_exists(int $pid) : bool {
-	if ($pid <= 0 || !function_exists('posix_kill')) {
+	if ($pid <= 0 || $pid > cacti_process_pid_max() || !function_exists('posix_kill')) {
 		return false;
 	}
 
@@ -2769,6 +2861,36 @@ function cacti_process_pid_exists(int $pid) : bool {
 	$eperm = defined('SOCKET_EPERM') ? SOCKET_EPERM : 1;
 
 	return function_exists('posix_get_last_error') && posix_get_last_error() === $eperm;
+}
+
+/**
+ * Creates a database-backed mutex for one logical process-registry entry.
+ *
+ * @param string $tasktype The task type.
+ * @param string $taskname The task name.
+ * @param int    $taskid   The task id.
+ *
+ * @return CactiProcessLock|false The lock, or false when it cannot be created.
+ */
+function cacti_process_registry_lock(string $tasktype, string $taskname, int $taskid) : CactiProcessLock|false {
+	global $database_default, $database_hostname, $database_port, $database_sessions;
+
+	$key        = "$database_hostname:$database_port:$database_default";
+	$connection = $database_sessions[$key] ?? null;
+
+	if (!$connection instanceof PDO) {
+		cacti_log(sprintf('ERROR: Process registry lock has no database connection! (%s, %s, %s)', $tasktype, $taskname, $taskid), false, 'POLLER');
+
+		return false;
+	}
+
+	try {
+		return CactiProcessLock::fromPdo($connection, $tasktype, $taskname, $taskid);
+	} catch (Throwable $e) {
+		cacti_log(sprintf('ERROR: Unable to create process registry lock! (%s, %s, %s): %s', $tasktype, $taskname, $taskid, $e->getMessage()), false, 'POLLER');
+
+		return false;
+	}
 }
 
 /**
@@ -2784,11 +2906,51 @@ function cacti_process_pid_exists(int $pid) : bool {
  *              another version is running and has not ended.
  */
 function register_process_start(string $tasktype, string $taskname, int $taskid = 0, int $timeout = 300) : bool {
-	$pid = getmypid();
-
 	if (!db_table_exists('processes')) {
 		return true;
 	}
+
+	$lock = cacti_process_registry_lock($tasktype, $taskname, $taskid);
+
+	if ($lock === false) {
+		return false;
+	}
+
+	try {
+		if (!$lock->acquire()) {
+			cacti_log(sprintf('NOTE: Process registry is being updated by another process! (%s, %s, %s)', $tasktype, $taskname, $taskid), false, 'POLLER', POLLER_VERBOSITY_MEDIUM);
+
+			return false;
+		}
+	} catch (Throwable $e) {
+		cacti_log(sprintf('ERROR: Unable to acquire process registry lock! (%s, %s, %s): %s', $tasktype, $taskname, $taskid, $e->getMessage()), false, 'POLLER');
+
+		return false;
+	}
+
+	try {
+		return register_process_start_locked($tasktype, $taskname, $taskid, $timeout);
+	} finally {
+		try {
+			$lock->release();
+		} catch (Throwable $e) {
+			cacti_log(sprintf('WARNING: Unable to release process registry lock! (%s, %s, %s): %s', $tasktype, $taskname, $taskid, $e->getMessage()), false, 'POLLER');
+		}
+	}
+}
+
+/**
+ * Performs registration while register_process_start() owns the task mutex.
+ *
+ * @param string $tasktype Mandatory task type.
+ * @param string $taskname Mandatory task name.
+ * @param int    $taskid   Task id supplied by register_process_start().
+ * @param int    $timeout  Timeout supplied by register_process_start().
+ *
+ * @return bool True when this process may start.
+ */
+function register_process_start_locked(string $tasktype, string $taskname, int $taskid, int $timeout) : bool {
+	$pid = getmypid();
 
 	$r = db_fetch_row_prepared('SELECT *,
 		IF(UNIX_TIMESTAMP(started) + timeout < UNIX_TIMESTAMP(), UNIX_TIMESTAMP(started), 0) AS timeout_exceeded,
@@ -2808,7 +2970,7 @@ function register_process_start(string $tasktype, string $taskname, int $taskid 
 			if (cacti_process_still_running((int) $r['pid'])) {
 				cacti_log(sprintf('ERROR: Process being killed due to timeout! (%s, %s, %s, Process %s, Time %s, Timeout %s, Timestamp %s)', $tasktype, $taskname, $taskid, $r['pid'], $r['timeout_exceeded'], $r['timeout'], $r['current_timestamp']), false, 'POLLER');
 
-				posix_kill($r['pid'], SIGTERM);
+				cacti_process_kill((int) $r['pid'], SIGTERM);
 			}
 
 			unregister_process($tasktype, $taskname, $taskid);
@@ -2961,7 +3123,7 @@ function timeout_kill_registered_processes(string $tasktype = '', string $taskna
 		foreach ($processes as $r) {
 			if (cacti_process_still_running((int) $r['pid'])) {
 				cacti_log(sprintf('ERROR: Process killed due to timeout! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
-				posix_kill($r['pid'], SIGTERM);
+				cacti_process_kill((int) $r['pid'], SIGTERM);
 			} else {
 				cacti_log(sprintf('ERROR: Detected process that is gone and did not unregister first! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
 			}

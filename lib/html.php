@@ -75,7 +75,7 @@ function html_start_box(string $title, string $width, bool $div, int $cell_paddi
 	if (!is_cacti_release() && $title != '' && $beta_count == 0) {
 		$title .= ' [ ' . CACTI_VERSION_BRIEF_FULL . ' ]';
 
-		$beta_count++;
+		$beta_count = 1;
 	}
 
 	if (POLLER_ID > 1 && $title != '' && $mode_count == 0) { // @phpstan-ignore-line
@@ -91,7 +91,7 @@ function html_start_box(string $title, string $width, bool $div, int $cell_paddi
 
 		$title .= ' ]';
 
-		$mode_count++;
+		$mode_count = 1;
 	}
 
 	$table_prefix = basename(get_current_page(), '.php');
@@ -131,7 +131,7 @@ function html_start_box(string $title, string $width, bool $div, int $cell_paddi
 
 		if ($help_file !== false && $help_count == 0 && is_realm_allowed(28)) {
 			print "<span class='cactiHelp' title='" . __esc('Get Page Help') . "'><a class='linkOverDark helpPage' data-page='" . htmle(basename($help_file)) . "' href='#'><i class='ti ti-help actionHelp'></i></a></span>";
-			$help_count++;
+			$help_count = 1;
 		}
 
 		if ($showcols) {
@@ -162,13 +162,21 @@ function html_start_box(string $title, string $width, bool $div, int $cell_paddi
 							$href = '#';
 						}
 
+						if (isset($icon['data_url'])) {
+							$href      = '#';
+							$data_url  = " data-url='" . html_escape_url($icon['data_url']) . "'";
+							$classo .= ' linkOverDark cactiPostAction';
+						} else {
+							$data_url = '';
+						}
+
 						if (isset($icon['title'])) {
 							$title = $icon['title'];
 						} else {
 							$title = $add_label;
 						}
 
-						print "<span class='cactiFilterAdd' title='$title'><a" . (isset($icon['id']) ? " id='" . $icon['id'] . "'" : '') . " class='$classo' href='$href'><i class='$classi'></i></a></span>";
+						print "<span class='cactiFilterAdd' title='$title'><a" . (isset($icon['id']) ? " id='" . $icon['id'] . "'" : '') . " class='" . trim($classo) . "' href='$href'$data_url><i class='$classi'></i></a></span>";
 					}
 				}
 			} else {
@@ -604,9 +612,15 @@ function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_button
  */
 function html_nav_bar(string $base_url, int $max_pages, int $current_page, int $rows_per_page, int $total_rows,
 	int $colspan = 30, string $object = '', string $page_var = 'page', string $return_to = '', bool $page_count = true) : string {
+	if (!preg_match('/^[A-Za-z_$][A-Za-z0-9_$]*$/', $page_var)) {
+		$page_var = 'page';
+	}
+
 	if ($object == '') {
 		$object = __('Rows');
 	}
+
+	$object = htmle($object);
 
 	if ($total_rows >= $rows_per_page && $page_count) {
 		if (substr_count($base_url, '?') == 0) {
@@ -662,7 +676,8 @@ function html_nav_bar(string $base_url, int $max_pages, int $current_page, int $
 				$return_to = 'main';
 			}
 
-			$url  = $base_url . $page_var;
+			$url            = cacti_js_encode($base_url . $page_var);
+			$return_to_json = cacti_js_encode($return_to);
 			$nav .= "<script type='text/javascript' " . CactiSecureHeaders::getNonceAttribute() . ">
 			function goto$page_var(pageNo) {
 				if (typeof url_graph === 'function') {
@@ -671,11 +686,11 @@ function html_nav_bar(string $base_url, int $max_pages, int $current_page, int $
 					var url_add='';
 				};
 
-				strURL = '$url='+pageNo+url_add;
+				strURL = $url + '=' + pageNo + url_add;
 
 				loadUrl({
 					url: strURL,
-					elementId: '$return_to',
+					elementId: $return_to_json,
 				});
 			}</script>";
 		}
@@ -1797,18 +1812,18 @@ function draw_graph_items_list(array $item_list, string $filename, string $url_d
 				print "<td class='right nowrap'>";
 
 				if ($i != cacti_sizeof($item_list) - 1) {
-					print "<span><a class='moveArrow ti ti-caret-down-filled' title='" . __esc('Move Down') . "' href='" . htmle("$filename?action=item_movedown&id=" . $item['id'] . "&$url_data") . "'></a></span>";
+					print "<span><a class='moveArrow ti ti-caret-down-filled cactiPostAction' title='" . __esc('Move Down') . "' href='#' data-url='" . html_escape_url("$filename?action=item_movedown&id=" . $item['id'] . "&$url_data") . "'></a></span>";
 				} else {
 					print "<span class='moveArrowNone'></span>";
 				}
 
 				if ($i > 0) {
-					print "<span><a class='moveArrow ti ti-caret-up-filled' title='" . __esc('Move Up') . "' href='" . htmle("$filename?action=item_moveup&id=" . $item['id'] . "&$url_data") . "'></a></span>";
+					print "<span><a class='moveArrow ti ti-caret-up-filled cactiPostAction' title='" . __esc('Move Up') . "' href='#' data-url='" . html_escape_url("$filename?action=item_moveup&id=" . $item['id'] . "&$url_data") . "'></a></span>";
 				} else {
 					print "<span class='moveArrowNone'></span>";
 				}
 
-				print "<a class='deleteMarker ti ti-x' title='" . __esc('Delete') . "' href='" . htmle("$filename?action=item_remove&id=" . $item['id'] . "&nostate=true&$url_data") . "'></a>";
+				print "<a class='deleteMarker ti ti-x cactiPostAction' title='" . __esc('Delete') . "' href='#' data-url='" . html_escape_url("$filename?action=item_remove&id=" . $item['id'] . "&nostate=true&$url_data") . "'></a>";
 
 				print '</td>';
 			}

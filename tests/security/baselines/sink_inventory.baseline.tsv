@@ -15,7 +15,6 @@ cmd_exec	./cli/splice_rrd.php	$response = shell_exec(cacti_escapeshellcmd($rrdto
 cmd_exec	./cli/splice_rrd.php	shell_exec(cacti_escapeshellcmd($rrdtool) . ' dump ' . cacti_escapeshellarg($newrrd) . ' > ' . cacti_escapeshellarg($newxmlfile));
 cmd_exec	./cli/splice_rrd.php	shell_exec(cacti_escapeshellcmd($rrdtool) . ' dump ' . cacti_escapeshellarg($oldrrd) . ' > ' . cacti_escapeshellarg($oldxmlfile));
 cmd_exec	./cli/update_heartbeat.php				$result = exec($command, $output, $return_code);
-cmd_exec	./cmd.php				 * independently of the system (for example OpenBSD snmpd). Prefer
 cmd_exec	./cmd.php			$cactiphp = proc_open($command, $cactides, $pipes);
 cmd_exec	./cmd_realtime.php				$cactiphp = proc_open(read_config_option('path_php_binary') . ' -q ' . CACTI_PATH_BASE . '/script_server.php realtime ' . cacti_escapeshellarg($poller_id), $cactides, $pipes);
 cmd_exec	./graph_realtime.php			shell_exec($php_binary . ' -q ' . $script_path . ' ' . $args);
@@ -122,6 +121,7 @@ dynamic_include	./cli/upgrade_database.php			include($upgrade_file);
 dynamic_include	./include/global.php		require_once($vendor_autoload);
 dynamic_include	./include/global_languages.php				require_once($providerFull);
 dynamic_include	./index.php							require_once($file);
+dynamic_include	./lib/api_queue.php		require_once($queue_autoloader);
 dynamic_include	./lib/installer.php					include_once($upgrade_file);
 dynamic_include	./lib/plugins.php						include_once($full_path);
 dynamic_include	./lib/plugins.php			require_once($setup_file);
@@ -170,7 +170,7 @@ fs_write	./lib/CactiFilesystem.php			$this->filesystem->dumpFile($filename, $con
 fs_write	./lib/CactiFilesystem.php			self::default()->writeFile($filename, $content);
 fs_write	./lib/api_device.php							if (file_put_contents($new_xmlfile, $data) === false) {
 fs_write	./lib/boost.php								if ($fileptr = fopen($cache_file, 'rb')) {
-fs_write	./lib/boost.php							if ($fileptr = fopen($cache_file, 'w')) {
+fs_write	./lib/boost.php		$fileptr = fopen($temp_file, 'wb');
 fs_write	./lib/clog_webapi.php					$log_fh = fopen($logfile, 'w');
 fs_write	./lib/csp_report_endpoint.php	$inputStream = fopen('php://input', 'rb');
 fs_write	./lib/database.php					file_put_contents(sys_get_temp_dir() . '/cacti-option.log',
@@ -605,6 +605,7 @@ header_redirect	./support.php		header('Location: support.php?tab=summary');
 header_redirect	./templates_export.php					header('Location: templates_export.php');
 header_redirect	./templates_import.php				header('Location: templates_import.php');
 header_redirect	./templates_import.php				header('Location: templates_import.php');
+header_redirect	./tests/index.php	header('Location:../index.php');
 header_redirect	./tree.php			header('Location: tree.php');
 header_redirect	./tree.php			header('Location: tree.php');
 header_redirect	./tree.php			header('Location: tree.php');

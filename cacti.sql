@@ -2573,8 +2573,11 @@ CREATE TABLE `poller_output_boost_local_data_ids` (
 
 CREATE TABLE `poller_output_boost_processes` (
   `sock_int_value` bigint(20) unsigned NOT NULL auto_increment,
+  `run_id` char(32) NOT NULL default '',
+  `child_id` int(10) unsigned NOT NULL default 0,
   `status` varchar(255) default NULL,
-  PRIMARY KEY (`sock_int_value`)
+  PRIMARY KEY (`sock_int_value`),
+  UNIQUE KEY `run_child` (`run_id`,`child_id`)
 ) ENGINE=MEMORY;
 
 --
@@ -2667,6 +2670,17 @@ CREATE TABLE `processes` (
   KEY `tasktype` (`tasktype`),
   KEY `id` (`id`)
 ) ENGINE=MEMORY COMMENT='Stores Process Status for Cacti Background Processes';
+
+--
+-- Table structure for table `process_locks`
+--
+
+CREATE TABLE `process_locks` (
+  `key_id` varchar(64) NOT NULL,
+  `key_token` varchar(44) NOT NULL,
+  `key_expiration` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`key_id`)
+) ENGINE=InnoDB COMMENT='Serializes Cacti Process Registry Mutations';
 
 --
 -- Table structure for table `reports`
@@ -2789,6 +2803,36 @@ CREATE TABLE `reports_queued` (
   KEY `source` (`source`),
   KEY `source_id` (`source_id`)
 ) ENGINE=InnoDB COMMENT='Holds Scheduled Reports';
+
+--
+-- Table structure for table `queue_messages`
+--
+
+CREATE TABLE `queue_messages` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `message_id` char(36) NOT NULL,
+  `queue_name` varchar(64) NOT NULL,
+  `topic` varchar(128) NOT NULL,
+  `message_type` varchar(191) NOT NULL,
+  `payload` longblob NOT NULL,
+  `metadata` blob NOT NULL,
+  `status` varchar(16) NOT NULL default 'pending',
+  `priority` tinyint(3) unsigned NOT NULL default 50,
+  `available_at` timestamp NOT NULL default current_timestamp(),
+  `reserved_until` timestamp NULL default NULL,
+  `reservation_token` char(48) default NULL,
+  `attempts` smallint(5) unsigned NOT NULL default 0,
+  `max_attempts` smallint(5) unsigned NOT NULL default 5,
+  `last_error` text,
+  `created_at` timestamp NOT NULL default current_timestamp(),
+  `completed_at` timestamp NULL default NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `message_id` (`message_id`),
+  KEY `queue_ready` (`queue_name`,`status`,`priority`,`available_at`,`id`),
+  KEY `queue_terminal` (`queue_name`,`status`,`completed_at`),
+  KEY `status_completed` (`status`,`completed_at`),
+  KEY `reservation_token` (`reservation_token`)
+) ENGINE=InnoDB COMMENT='Cacti asynchronous queue messages';
 
 --
 -- Table structure for table `settings`
