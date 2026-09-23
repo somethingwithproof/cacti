@@ -65,6 +65,18 @@ function cacti_escapeshellarg(string $argument) : string {
 	return escapeshellarg($argument);
 }
 
+function cacti_escapeshellarg_cmd(string $argument, bool $quote = true, bool $strip_env = false) : string {
+	if (CACTI_SERVER_OS == 'win32') {
+		$argument = str_replace(['"', '&', '|', '^', '<', '>', '(', ')'], '', $argument);
+
+		if ($strip_env) {
+			$argument = str_replace('%', '', $argument);
+		}
+	}
+
+	return cacti_escapeshellarg($argument, $quote);
+}
+
 function debug_log_insert(string $category, string $message) : void {
 	$GLOBALS['snmp_coverage_debug'][] = [$category, $message];
 }
@@ -120,6 +132,17 @@ function cacti_strtolower(string $value) : string {
 }
 
 require_once dirname(__DIR__, 4) . '/lib/snmp.php';
+
+test('uptime selection rejects wall-clock engine times and preserves wrap handling', function () : void {
+	$now = 1784363931;
+
+	expect(cacti_snmp_select_uptime(3015, $now, $now))->toBe(3015)
+		->and(cacti_snmp_select_uptime(3015, 'U', $now))->toBe(3015)
+		->and(cacti_snmp_select_uptime(250000, 50000000, $now))->toBe(5000000000)
+		->and(cacti_snmp_select_uptime(4000000, 600, $now))->toBe(4000000)
+		->and(cacti_snmp_select_uptime(false, 600, $now))->toBe(60000)
+		->and(cacti_snmp_select_uptime('U', 'U', $now))->toBeFalse();
+});
 
 final class CoverageSnmpSession {
 	public array $info              = ['timeout' => 1500, 'hostname' => 'coverage-host'];
@@ -285,7 +308,7 @@ test('OID validation, escaping, method selection, options, and v3 auth cover all
 		->and(cacti_snmp_validate_oid('.'))->toBeFalse()
 		->and(cacti_snmp_validate_oid('1.bad'))->toBeFalse()
 		->and(snmp_escape_string('public'))->toBe("'public'")
-		->and(snmp_escape_string('a"b', 'win32'))->toBe('"a\\"b"')
+		->and(snmp_escape_string('a"b', 'win32'))->toBe("'ab'")
 		->and(snmp_escape_string('public', 'win32'))->toBe("'public'")
 		->and(snmp_get_method('get', 1, '', '', SNMP_STRING_OUTPUT_GUESS, false))->toBe(SNMP_METHOD_BINARY)
 		->and(snmp_get_method('get', 1, '', '', SNMP_STRING_OUTPUT_HEX))->toBe(SNMP_METHOD_BINARY)
@@ -329,15 +352,15 @@ test('native sessions cover versions and security levels without network I/O', f
 		->and(cacti_snmp_session('127.0.0.1', 'public', 'invalid'))->toBeFalse();
 
 	// cacti_snmp_session_from_host maps a device row onto the arguments above (#7835).
-	expect(cacti_snmp_session_from_host(array(
+	expect(cacti_snmp_session_from_host([
 		'hostname' => '127.0.0.1', 'snmp_community' => 'public', 'snmp_version' => '2',
-	)))->toBeObject()
-		->and(cacti_snmp_session_from_host(array(
-			'hostname' => '127.0.0.1', 'snmp_version' => '3', 'snmp_username' => 'user',
-			'snmp_password' => 'secretpass', 'snmp_auth_protocol' => 'SHA',
+	]))->toBeObject()
+		->and(cacti_snmp_session_from_host([
+			'hostname'             => '127.0.0.1', 'snmp_version' => '3', 'snmp_username' => 'user',
+			'snmp_password'        => 'secretpass', 'snmp_auth_protocol' => 'SHA',
 			'snmp_priv_passphrase' => 'privatepass', 'snmp_priv_protocol' => 'AES',
-		)))->toBeObject()
-		->and(cacti_snmp_session_from_host(array('hostname' => '127.0.0.1', 'snmp_community' => 'public', 'snmp_version' => 'invalid')))->toBeFalse();
+		]))->toBeObject()
+		->and(cacti_snmp_session_from_host(['hostname' => '127.0.0.1', 'snmp_community' => 'public', 'snmp_version' => 'invalid']))->toBeFalse();
 });
 
 test('native and binary get operations cover success and failure results', function () : void {

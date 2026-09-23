@@ -1518,21 +1518,21 @@ function display_graph_rule_items(string $title, array &$rule, int $rule_type, s
 			$form_data = '';
 
 			if ($i != cacti_sizeof($items) - 1) {
-				$form_data .= '<a class="pic ti ti-caret-down-filled moveArrow" href="' . htmle($module . '?action=item_movedown&item_id=' . $item['id'] . '&id=' . $rule_id . '&rule_type=' . $rule_type) . '" title="' . __esc('Move Down') . '"></a>';
+				$form_data .= '<a class="pic ti ti-caret-down-filled moveArrow cactiPostAction" href="#" data-url="' . html_escape_url($module . '?action=item_movedown&item_id=' . $item['id'] . '&id=' . $rule_id . '&rule_type=' . $rule_type) . '" title="' . __esc('Move Down') . '"></a>';
 			} else {
 				$form_data .= '<span class="moveArrowNone"></span>';
 			}
 
 			if ($i > 0) {
-				$form_data .= '<a class="pic ti ti-caret-up-filled moveArrow" href="' . htmle($module . '?action=item_moveup&item_id=' . $item['id'] . '&id=' . $rule_id . '&rule_type=' . $rule_type) . '" title="' . __esc('Move Up') . '"></a>';
+				$form_data .= '<a class="pic ti ti-caret-up-filled moveArrow cactiPostAction" href="#" data-url="' . html_escape_url($module . '?action=item_moveup&item_id=' . $item['id'] . '&id=' . $rule_id . '&rule_type=' . $rule_type) . '" title="' . __esc('Move Up') . '"></a>';
 			} else {
 				$form_data .= '<span class="moveArrowNone"></span>';
 			}
 
 			form_selectable_cell($form_data, $i, '32px', 'right nowrap');
 
-			$form_data = '<a class="pic deleteMarker ti ti-x"
-				href="' . htmle($module . '?action=item_remove&item_id=' . $item['id'] . '&id=' . $rule_id . '&rule_type=' . $rule_type) . '" title="' . __esc('Delete') . '"></a>';
+			$form_data = '<a class="pic deleteMarker ti ti-x cactiPostAction"
+				href="#" data-url="' . html_escape_url($module . '?action=item_remove&item_id=' . $item['id'] . '&id=' . $rule_id . '&rule_type=' . $rule_type) . '" title="' . __esc('Delete') . '"></a>';
 
 			form_selectable_cell($form_data, $i, '16px', 'right nowrap');
 
@@ -4285,17 +4285,12 @@ function automation_valid_snmp_device(array &$device) : bool {
 			}
 
 			// get system uptime
-			$snmp_sysUptime = cacti_snmp_session_get($session, '.1.3.6.1.6.3.10.2.1.3.0');
+			$snmp_engine_time   = cacti_snmp_session_get($session, '.1.3.6.1.6.3.10.2.1.3.0');
+			$snmp_system_uptime = cacti_snmp_session_get($session, '.1.3.6.1.2.1.1.3.0');
+			$snmp_sysUptime     = cacti_snmp_select_uptime($snmp_system_uptime, $snmp_engine_time);
 
-			if (!empty($snmp_sysUptime)) {
-				$snmp_sysUptime *= 100;
-			} else {
-				$snmp_sysUptime = cacti_snmp_session_get($session, '.1.3.6.1.2.1.1.3.0');
-			}
-
-			if ($snmp_sysUptime != '') {
-				$snmp_sysUptime           = trim(strtr($snmp_sysUptime,'"',' '));
-				$device['snmp_sysUptime'] = $snmp_sysUptime;
+			if ($snmp_sysUptime !== false) {
+				$device['snmp_sysUptime'] = (string) $snmp_sysUptime;
 			}
 
 			$session->close();
