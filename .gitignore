@@ -152,7 +152,12 @@ verify_task*.php
 /include/js/big.js
 /include/js/lzjs.js
 /include/js/screenfull.js
+/include/js/select2.js
 
 # Local assistant sessions and isolated worktrees
 .omc/
 .worktrees/
+
+# Python tooling caches
+__pycache__/
+*.py[cod]

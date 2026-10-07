@@ -67,7 +67,7 @@ function sig_handler(int $signo) : void {
 				foreach ($running_processes as $process) {
 					if (function_exists('posix_kill')) {
 						cacti_log("WARNING: Termination poller process with pid '" . $process['pid'] . "'", true, 'POLLER', POLLER_VERBOSITY_LOW);
-						posix_kill($process['pid'], SIGTERM);
+						cacti_process_kill((int) $process['pid'], SIGTERM, 'POLLER');
 					}
 				}
 			}
@@ -609,9 +609,8 @@ while ($poller_runs_completed < $poller_runs) {
 		admin_email(__('Cacti System Warning'), __('WARNING: There are %d processes detected as overrunning a polling cycle for Poller[%d], please investigate.', $running_processes, $poller_id));
 	}
 
-	db_execute_prepared("DELETE FROM poller_time
-		WHERE poller_id = ?
-		AND end_time != '0000-00-00 00:00:00'",
+	db_execute_prepared('DELETE FROM poller_time
+		WHERE poller_id = ?',
 		[$poller_id], true, $poller_db_cnn_id);
 
 	/**
@@ -1142,8 +1141,11 @@ function poller_table_maintenance() : void {
 	if (!db_table_exists('poller_output_boost_processes')) {
 		db_execute('CREATE TABLE  `poller_output_boost_processes` (
 			`sock_int_value` bigint(20) unsigned NOT NULL auto_increment,
+			`run_id` char(32) NOT NULL default \'\',
+			`child_id` int(10) unsigned NOT NULL default 0,
 			`status` varchar(255) default NULL,
-			PRIMARY KEY (`sock_int_value`))
+			PRIMARY KEY (`sock_int_value`),
+			UNIQUE KEY `run_child` (`run_id`, `child_id`))
 			ENGINE=MEMORY');
 	}
 

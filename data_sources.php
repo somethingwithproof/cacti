@@ -379,6 +379,25 @@ function form_save() : void {
 	}
 }
 
+/**
+ * Determines whether the current user is authorized to modify the given data source.
+ * Data sources tied to a device (host_id > 0) require the caller to be authorized for
+ * that device; host-independent data sources (host_id = 0) are not device-scoped.
+ *
+ * @param int $local_data_id The data source to check.
+ *
+ * @return bool True if the caller may modify this data source.
+ */
+function data_source_authorized(int $local_data_id) : bool {
+	$host_id = db_fetch_cell_prepared('SELECT host_id FROM data_local WHERE id = ?', [$local_data_id]);
+
+	if (empty($host_id)) {
+		return true;
+	}
+
+	return is_device_allowed((int) $host_id);
+}
+
 function form_actions() : void {
 	global $actions;
 
@@ -450,12 +469,16 @@ function form_actions() : void {
 
 				api_data_source_remove_multi($selected_items);
 			} elseif (gnrv('drp_action') == '2') { // data source disable
-				for ($i = 0; ($i < cacti_count($selected_items)); $i++) {
-					api_data_source_disable($selected_items[$i]);
+				foreach ($selected_items as $local_data_id) {
+					if (data_source_authorized((int) $local_data_id)) {
+						api_data_source_disable($local_data_id);
+					}
 				}
 			} elseif (gnrv('drp_action') == '3') { // data source enable
-				for ($i = 0; ($i < cacti_count($selected_items)); $i++) {
-					api_data_source_enable($selected_items[$i]);
+				foreach ($selected_items as $local_data_id) {
+					if (data_source_authorized((int) $local_data_id)) {
+						api_data_source_enable($local_data_id);
+					}
 				}
 			} elseif (gnrv('drp_action') == '4') { // change host
 				gfrv('host_id');
@@ -477,6 +500,10 @@ function form_actions() : void {
 					$remote_conns = [];
 
 					foreach ($selected_items as $local_data_id) {
+						if (!data_source_authorized((int) $local_data_id)) {
+							continue;
+						}
+
 						$data = db_fetch_row_prepared('SELECT dl.host_id, h.poller_id
 							FROM host AS h
 							INNER JOIN data_local AS dl
@@ -878,6 +905,13 @@ function ds_disable() : void {
 	gfrv('id');
 	// ====================================================
 
+	if (!data_source_authorized((int) grv('id'))) {
+		raise_message('permission_denied');
+		header('Location: data_sources.php');
+
+		return;
+	}
+
 	api_data_source_disable(grv('id'));
 	header('Location: data_sources.php?action=ds_edit&id=' . grv('id'));
 }
@@ -886,6 +920,13 @@ function ds_enable() : void {
 	// ================= input validation =================
 	gfrv('id');
 	// ====================================================
+
+	if (!data_source_authorized((int) grv('id'))) {
+		raise_message('permission_denied');
+		header('Location: data_sources.php');
+
+		return;
+	}
 
 	api_data_source_enable(grv('id'));
 	header('Location: data_sources.php?action=ds_edit&id=' . grv('id'));
@@ -1266,7 +1307,7 @@ function ds_edit() : void {
 				print "<div class='tabs' style='float:left;'><nav><ul role='tablist'>";
 
 				foreach ($template_data_rrds as $template_data_rrd) {
-					print "<li class='subTab'><a " . (($template_data_rrd['id'] == grv('view_rrd')) ? "class='pic selected'" : "class='pic'") . " href='" . htmle('data_sources.php?action=ds_edit&id=' . grv('id') . '&view_rrd=' . $template_data_rrd['id']) . "'>$i: " . htmle($template_data_rrd['data_source_name']) . '</a>' . ($use_data_template == false ? " <a class='pic deleteMarker ti ti-x' href='" . htmle('data_sources.php?action=rrd_remove&id=' . $template_data_rrd['id'] . '&local_data_id=' . grv('id')) . "' title='" . __esc('Delete') . "'></a>" : '') . '</li>';
+					print "<li class='subTab'><a " . (($template_data_rrd['id'] == grv('view_rrd')) ? "class='pic selected'" : "class='pic'") . " href='" . htmle('data_sources.php?action=ds_edit&id=' . grv('id') . '&view_rrd=' . $template_data_rrd['id']) . "'>$i: " . htmle($template_data_rrd['data_source_name']) . '</a>' . ($use_data_template == false ? " <a class='pic deleteMarker ti ti-x cactiPostAction' href='#' data-url='" . html_escape_url('data_sources.php?action=rrd_remove&id=' . $template_data_rrd['id'] . '&local_data_id=' . grv('id')) . "' title='" . __esc('Delete') . "'></a>" : '') . '</li>';
 
 					$i++;
 				}
@@ -1284,7 +1325,7 @@ function ds_edit() : void {
 				" . __esc('Data Source Item %s', $header_label) . "
 			</div>
 			<div class='tableSubHeaderColumn right'>
-				" . ((!ierv('id') && (empty($data_template['id']))) ? "<a class='linkOverDark' href='" . htmle('data_sources.php?action=rrd_add&id=' . grv('id')) . "'>" . __('New') . '</a>&nbsp;' : '') . '
+				" . ((!ierv('id') && (empty($data_template['id']))) ? "<a class='linkOverDark cactiPostAction' href='#' data-url='" . html_escape_url('data_sources.php?action=rrd_add&id=' . grv('id')) . "'>" . __('New') . '</a>&nbsp;' : '') . '
 			</div>
 		</div>';
 

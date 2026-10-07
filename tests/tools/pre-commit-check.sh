@@ -46,30 +46,19 @@ check_merge_conflicts() {
 }
 
 check_composer_lock() {
-    if git diff --cached --name-only | grep -q '^composer\.lock$'; then
-        echo ""
-        echo "ERROR: composer.lock is staged for commit."
-        echo "  Cacti supports multiple PHP versions; composer.lock must not be committed."
-        echo "  Run: git reset HEAD composer.lock"
-        echo ""
-
-        exit 1
+    if git diff --cached --name-only | grep -Eq '^composer\.(json|lock)$'; then
+        if ! command -v composer >/dev/null 2>&1; then
+            echo "ERROR: Composer is required to validate staged dependency files."
+            exit 1
+        fi
+        # The tracked lock is required by locked CI and release installation.
+        # Validate its consistency rather than rejecting reproducible dependencies.
+        composer validate --strict
     fi
 }
 
 check_vendor_dev_deps() {
-    staged_vendor=$(git diff --cached --name-only | grep '^include/vendor/' | head -5)
-
-    if [ -n "$staged_vendor" ]; then
-        echo ""
-        echo "WARNING: Vendor files are staged for commit:"
-        echo "$staged_vendor"
-        echo "  Dev dependencies should not be committed to include/vendor/."
-        echo "  Run: git reset HEAD include/vendor/"
-        echo ""
-
-        exit 1
-    fi
+    php tests/tools/check_vendor_policy.php
 }
 
 check_autoload_freshness() {

@@ -23,6 +23,41 @@
  +-------------------------------------------------------------------------+
 */
 
+/**
+ * Select a reliable uptime value from sysUpTime and snmpEngineTime.
+ *
+ * Some agents, notably OpenBSD snmpd, return the current Unix timestamp for
+ * snmpEngineTime.  That value is not an uptime and must not replace the real
+ * sysUpTime value.  Legitimate engine time remains useful after the 32-bit
+ * TimeTicks value wraps, so retain the existing preference when it is at
+ * least the system uptime and does not resemble wall-clock time.
+ *
+ * @param mixed    $system_uptime sysUpTime in hundredths of a second.
+ * @param mixed    $engine_time   snmpEngineTime in seconds.
+ * @param int|null $now           Current Unix time, injectable for tests.
+ *
+ * @return int|false Selected uptime in hundredths of a second.
+ */
+function cacti_snmp_select_uptime(mixed $system_uptime, mixed $engine_time, ?int $now = null) : int|false {
+	$system_uptime = is_numeric($system_uptime) && $system_uptime >= 0 ? (int) $system_uptime : false;
+
+	if (!is_numeric($engine_time) || $engine_time <= 0) {
+		return $system_uptime;
+	}
+
+	$engine_time = (int) $engine_time;
+	$now         = $now ?? time();
+	$epoch_range = 5 * 366 * 86400;
+
+	if ($now > $epoch_range && abs($engine_time - $now) <= $epoch_range) {
+		return $system_uptime;
+	}
+
+	$engine_uptime = $engine_time * 100;
+
+	return $system_uptime === false || $engine_uptime >= $system_uptime ? $engine_uptime : $system_uptime;
+}
+
 // trim all but hex-string:, which will return 'hex-'
 // define('REGEXP_SNMP_TRIM', '/(counter(32|64):|gauge:|gauge(32|64):|float:|ipaddress:|string:|integer:)$/i');
 define('REGEXP_SNMP_TRIM', '/(counter(32|64)|gauge|gauge(32|64)|float|ipaddress|string|integer):/i');
@@ -192,7 +227,7 @@ function cacti_snmp_get(string $hostname, mixed $community, string $oid, mixed $
 			' -v ' . $version .
 			' -t ' . $timeout_s .
 			' -r ' . $retries .
-			' ' . cacti_escapeshellarg($hostname) . ':' . $port .
+			' ' . cacti_escapeshellarg_cmd($hostname, true, true) . ':' . $port .
 			' ' . cacti_escapeshellarg($oid);
 
 		if (isset($_SESSION)) {
@@ -280,7 +315,7 @@ function cacti_snmp_get_raw(string $hostname, mixed $community, string $oid, mix
 			' -v ' . $version .
 			' -t ' . $timeout_s .
 			' -r ' . $retries .
-			' ' . cacti_escapeshellarg($hostname) . ':' . $port .
+			' ' . cacti_escapeshellarg_cmd($hostname, true, true) . ':' . $port .
 			' ' . cacti_escapeshellarg($oid);
 
 		if (isset($_SESSION)) {
@@ -364,7 +399,7 @@ function cacti_snmp_getnext(string $hostname, mixed $community, mixed $oid, mixe
 			' -v ' . $version .
 			' -t ' . $timeout_s .
 			' -r ' . $retries .
-			' ' . cacti_escapeshellarg($hostname) . ':' . $port .
+			' ' . cacti_escapeshellarg_cmd($hostname, true, true) . ':' . $port .
 			' ' . cacti_escapeshellarg($oid);
 
 		if (isset($_SESSION)) {
@@ -842,7 +877,7 @@ function cacti_snmp_walk(string $hostname, mixed $community, string $oid, mixed 
 				' -r ' . $retries .
 				' -Cr' . $bulk_walk_size .
 				' ' . $oidCheck . ' ' .
-				cacti_escapeshellarg($hostname) . ':' . $port . ' ' .
+				cacti_escapeshellarg_cmd($hostname, true, true) . ':' . $port . ' ' .
 				cacti_escapeshellarg($oid);
 
 			if (isset($_SESSION)) {
@@ -857,7 +892,7 @@ function cacti_snmp_walk(string $hostname, mixed $community, string $oid, mixed 
 				' -t ' . $timeout_s .
 				' -r ' . $retries .
 				' ' . $oidCheck . ' ' .
-				' ' . cacti_escapeshellarg($hostname) . ':' . $port .
+				' ' . cacti_escapeshellarg_cmd($hostname, true, true) . ':' . $port .
 				' ' . cacti_escapeshellarg($oid);
 
 			if (isset($_SESSION)) {
@@ -1120,16 +1155,11 @@ function format_snmp_string(string $string, bool $snmp_oid_included, int $value_
  * @return string Escaped command argument.
  */
 function snmp_escape_string(string $string, string $server_os = CACTI_SERVER_OS) : string {
-	if (!defined('SNMP_ESCAPE_CHARACTER')) {
-		define('SNMP_ESCAPE_CHARACTER', '"');
-	}
-
 	if ($server_os == 'win32') {
-		if (substr_count($string, SNMP_ESCAPE_CHARACTER)) {
-			$string = str_replace(SNMP_ESCAPE_CHARACTER, '\\' . SNMP_ESCAPE_CHARACTER, $string);
-
-			return SNMP_ESCAPE_CHARACTER . $string . SNMP_ESCAPE_CHARACTER;
-		}
+		/* GHSA-rjvj-r52f-8v5q: cmd.exe ignores the \" escape and toggles
+		 * quoting on every ", so wrapping cannot neutralize & | ^ < > ( ).
+		 * SNMP values never legitimately contain these, so strip them. */
+		$string = str_replace(['"', '&', '|', '^', '<', '>', '(', ')'], '', $string);
 	}
 
 	return cacti_escapeshellarg($string);
