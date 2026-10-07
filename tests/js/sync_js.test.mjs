@@ -66,7 +66,7 @@ test('DOMPurify is pinned and generated from the matching npm release', () => {
 
 	assert.equal(packageJson.dependencies.dompurify, '3.4.16');
 	assert.equal(assetMap[source], 'include/js/purify.js');
-	assert.match(readFileSync(source, 'utf8'), /DOMPurify 3\.4\.15/);
+	assert.match(readFileSync(source, 'utf8'), /DOMPurify 3\.4\.16/);
 });
 
 test("screenfull's ESM export is rewritten to a global assignment", () => {
