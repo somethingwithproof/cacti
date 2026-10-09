@@ -73,6 +73,7 @@ RUN set -eux; \
     apk del --no-network .plugin-fetch
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY docker/write-config.php /usr/local/lib/cacti-write-config.php
 RUN chmod +x /usr/local/bin/entrypoint.sh
 RUN printf '%s\n' '[www]' 'ping.path = /ping' > /usr/local/etc/php-fpm.d/zz-cacti-health.conf
 
