@@ -63,6 +63,49 @@ jobs:
             args="-Dsonar.branch.name=$REF_NAME"
           fi
           echo "args=$args" >> "$GITHUB_OUTPUT"
+      - name: Set up PHP for static browser fixtures
+        if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
+        uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Set up Node for coverage collection
+        if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+      - name: Install locked coverage dependencies and Chromium
+        if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
+        working-directory: tests/e2e
+        run: |
+          npm ci --ignore-scripts
+          node node_modules/@playwright/test/cli.js install --with-deps chromium
+      - name: Collect browser coverage against disposable Cacti 1.2
+        if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
+        working-directory: tests/e2e
+        env:
+          CACTI_BROWSER_COVERAGE_DIR: ${{ runner.temp }}/cacti-browser-coverage
+        run: |
+          set -euo pipefail
+          node node_modules/@playwright/test/cli.js test --config=playwright.config.js external-window.spec.js --workers=1
+          docker compose up -d --build --wait --wait-timeout 180
+          docker compose exec -T php mkdir -p /var/www/html/cacti/cache/realtime
+          docker compose exec -T mariadb mariadb -ucactiuser -pcactipass cacti \
+            -e "REPLACE INTO settings (name,value) VALUES ('realtime_enabled','on'),('realtime_cache_path','/var/www/html/cacti/cache/realtime');"
+          node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/client-state.spec.ts
+          node report-browser-coverage.js "$CACTI_BROWSER_COVERAGE_DIR" coverage/sonar-browser.xml
+      - name: Select measured coverage report
+        id: coverage
+        if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
+        run: |
+          test -s tests/e2e/coverage/sonar-browser.xml
+          echo 'args=-Dsonar.coverageReportPaths=tests/e2e/coverage/sonar-browser.xml' >> "$GITHUB_OUTPUT"
+      - name: Tear down coverage fixture
+        if: always() && hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
+        working-directory: tests/e2e
+        run: docker compose down -v
       - name: Analyze and wait for the quality gate
         uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
         env:
@@ -72,3 +115,4 @@ jobs:
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=600
             ${{ steps.context.outputs.args }}
+            ${{ steps.coverage.outputs.args }}

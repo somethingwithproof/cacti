@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",
-    "playwright": "1.64.0"
+    "playwright": "1.64.0",
+    "v8-to-istanbul": "9.3.0"
   }
 }

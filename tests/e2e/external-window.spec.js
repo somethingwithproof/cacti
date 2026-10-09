@@ -8,6 +8,7 @@
 */
 
 const { test, expect } = require('@playwright/test');
+const { writeBrowserCoverage } = require('./browser-coverage');
 
 async function loadPage(page) {
 	await page.route('**/tests/e2e/external-window.html', (route) => route.fulfill({
@@ -22,6 +23,7 @@ async function loadPage(page) {
 
 async function expectCoveredStatement(page, scriptPath, statement) {
 	const coverage = await page.coverage.stopJSCoverage();
+	writeBrowserCoverage(coverage);
 	const script = coverage.find((entry) => new URL(entry.url).pathname === scriptPath);
 	expect(script, `${scriptPath} must be measured`).toBeDefined();
 	const start = script.source.indexOf(statement);

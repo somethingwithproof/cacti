@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+const { writeBrowserCoverage } = require('../browser-coverage');
 
 /* Run against the standard disposable Cacti 1.2 compose installation.
  * These tests authenticate and use server-rendered pages and full production
@@ -28,7 +29,18 @@ async function selectTheme(page: Page, theme: string): Promise<void> {
     await expect(page.locator(`script[src*="themes/${theme}/main.js"]`)).toHaveCount(1);
 }
 
-test.beforeEach(async ({ page }) => { await login(page); });
+test.beforeEach(async ({ page }) => {
+    if (process.env.CACTI_BROWSER_COVERAGE_DIR) {
+        await page.coverage.startJSCoverage({ resetOnNavigation: false });
+    }
+    await login(page);
+});
+
+test.afterEach(async ({ page }) => {
+    if (process.env.CACTI_BROWSER_COVERAGE_DIR) {
+        writeBrowserCoverage(await page.coverage.stopJSCoverage());
+    }
+});
 
 test('Midwinter theme loads through the user profile and respects ready/forced states', async ({ page }) => {
     await selectTheme(page, 'midwinter');
