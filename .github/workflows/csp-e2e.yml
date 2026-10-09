@@ -272,6 +272,9 @@ jobs:
           docker compose exec -T php php cli/add_data_query.php --host-id=1 --data-query-id=1 --reindex-method=0
           docker compose exec -T php php tests/fixtures/Core/GeneralMenuProbe.php > "$CACTI_GENERAL_MENU_FIXTURE"
           node ./node_modules/@playwright/test/cli.js test tests/editor-rendering-semantics.spec.ts
+      - name: Run remaining filter and dialog regressions
+        working-directory: tests/e2e
+        run: node ./node_modules/@playwright/test/cli.js test tests/remaining-filter-labels.spec.ts
 
       - name: Run Playwright suite (plugin CSP -- thold + monitor)
         working-directory: tests/e2e
