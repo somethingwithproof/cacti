@@ -73,6 +73,9 @@ on:
       - include/top_header.php
       - include/top_general_header.php
       - utilities.php
+      - graph.php
+      - lib/html_form.php
+      - tests/fixtures/Core/GeneralMenuProbe.php
       - tests/integration/**
       - tests/e2e/**
       - .github/workflows/csp-e2e.yml
@@ -257,6 +260,18 @@ jobs:
       - name: Run shared filter and tree semantics regressions
         working-directory: tests/e2e
         run: node ./node_modules/@playwright/test/cli.js test tests/shared-filter-semantics.spec.ts
+      - name: Run editor and rendering semantics regressions
+        working-directory: tests/e2e
+        env:
+          CACTI_GENERAL_MENU_FIXTURE: ${{ runner.temp }}/cacti-general-menu.html
+        run: |
+          docker compose exec -T php php cli/import_package.php --filename=install/templates/Generic_SNMP_Device.xml.gz
+          git -C ../.. restore --source=HEAD --worktree -- scripts/ss_hstats.php scripts/ping.pl resource/snmp_queries/interface.xml
+          docker compose exec -T mariadb mariadb -ucactiuser -pcactipass cacti -e "UPDATE host SET disabled='' WHERE id=1;"
+          docker compose exec -T php php cli/add_graphs.php --graph-type=cg --graph-template-id=1 --host-id=1 --graph-title="E2E renderer graph"
+          docker compose exec -T php php cli/add_data_query.php --host-id=1 --data-query-id=1 --reindex-method=0
+          docker compose exec -T php php tests/fixtures/Core/GeneralMenuProbe.php > "$CACTI_GENERAL_MENU_FIXTURE"
+          node ./node_modules/@playwright/test/cli.js test tests/editor-rendering-semantics.spec.ts
 
       - name: Run Playwright suite (plugin CSP -- thold + monitor)
         working-directory: tests/e2e
