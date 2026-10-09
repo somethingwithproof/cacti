@@ -53,6 +53,8 @@ on:
       - automation_templates.php
       - automation_graph_rules.php
       - automation_tree_rules.php
+      - user_admin.php
+      - user_group_admin.php
       - tests/integration/**
       - tests/e2e/**
       - .github/workflows/csp-e2e.yml
@@ -221,6 +223,9 @@ jobs:
       - name: Run automation filter accessibility regressions
         working-directory: tests/e2e
         run: node ./node_modules/@playwright/test/cli.js test tests/automation-filter-labels.spec.ts
+      - name: Run account filter accessibility regressions
+        working-directory: tests/e2e
+        run: node ./node_modules/@playwright/test/cli.js test tests/account-filter-labels.spec.ts
 
       - name: Run Playwright suite (plugin CSP -- thold + monitor)
         working-directory: tests/e2e
