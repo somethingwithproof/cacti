@@ -91,12 +91,31 @@ test('Midwinter enters and exits native browser fullscreen and catches a denied 
 
 test('history full-page navigation normalizes separators and renders the destination', async ({ page }) => {
     await page.goto('/index.php');
-    await page.evaluate(() => {
+    await page.waitForFunction(() => typeof window.onpopstate === 'function');
+    const navigate = () => {
         history.pushState({}, '', '/host.php?&page=1&&rows=30');
         (window as any).lastPage = 'index.php';
         (window as any).popFired = false;
         window.dispatchEvent(new PopStateEvent('popstate'));
-    });
+    };
+    if (process.env.CACTI_BROWSER_COVERAGE_DIR) {
+        // Cancel one departure with the native browser dialog so V8 can
+        // report this handler before its execution context is destroyed.
+        await page.evaluate(() => {
+            window.onbeforeunload = event => { event.preventDefault(); event.returnValue = ''; };
+        });
+        const dialog = page.waitForEvent('dialog');
+        page.once('dialog', dialog => dialog.dismiss());
+        await page.evaluate(navigate);
+        expect((await dialog).type()).toBe('beforeunload');
+        writeBrowserCoverage(await page.coverage.stopJSCoverage());
+        await page.coverage.startJSCoverage({ resetOnNavigation: false });
+        await page.evaluate(() => { window.onbeforeunload = null; });
+    }
+    const navigation = page.waitForRequest(request => request.isNavigationRequest() &&
+        new URL(request.url()).pathname === '/host.php');
+    await page.evaluate(navigate);
+    expect(new URL((await navigation).url()).search).toBe('?page=1&rows=30&nostate=true');
     await expect(page).toHaveURL(/host\.php\?page=1&rows=30&nostate=true$/);
     await expect(page.locator('#main')).toBeVisible();
     await expect(page.locator('script[src*="include/layout.js"]')).toHaveCount(1);
