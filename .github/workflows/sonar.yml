@@ -41,8 +41,28 @@ jobs:
             echo '::error::SONAR_TOKEN must be configured in repository Actions secrets.'
             exit 1
           fi
-      # The scanner detects branch/PR context from GitHub Actions. In particular,
-      # 1.2.x must be reported as its own branch rather than overwriting develop.
+      # workflow_dispatch does not automatically infer the selected branch.
+      # Validate context before passing it to the scanner argument parser.
+      - name: Select branch or pull request context
+        id: context
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == pull_request ]]; then
+            [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+            [[ "$PR_HEAD" =~ ^[A-Za-z0-9._/-]+$ ]]
+            [[ "$PR_BASE" =~ ^[A-Za-z0-9._/-]+$ ]]
+            args="-Dsonar.pullrequest.key=$PR_NUMBER -Dsonar.pullrequest.branch=$PR_HEAD -Dsonar.pullrequest.base=$PR_BASE"
+          else
+            case "$REF_NAME" in develop|1.2.x) ;; *) exit 1 ;; esac
+            args="-Dsonar.branch.name=$REF_NAME"
+          fi
+          echo "args=$args" >> "$GITHUB_OUTPUT"
       - name: Analyze and wait for the quality gate
         uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
         env:
@@ -51,3 +71,4 @@ jobs:
           args: >-
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=600
+            ${{ steps.context.outputs.args }}
