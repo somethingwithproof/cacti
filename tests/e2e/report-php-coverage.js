@@ -7,9 +7,11 @@ const crypto = require('node:crypto');
 
 const root = path.resolve(process.argv[4] || path.join(__dirname, '../..'));
 const [directory, destination] = process.argv.slice(2);
+const selectedFiles = new Set(process.argv.slice(5));
 const files = new Map();
 for (const name of fs.readdirSync(directory).filter(name => name.endsWith('.json'))) {
     for (const [file, coverage] of Object.entries(JSON.parse(fs.readFileSync(path.join(directory, name), 'utf8')))) {
+        if (selectedFiles.size && !selectedFiles.has(file)) continue;
         assert.ok(!path.isAbsolute(file) && !file.split('/').includes('..') && file.endsWith('.php'));
         const hash = crypto.createHash('sha256').update(fs.readFileSync(path.join(root, file))).digest('hex');
         assert.equal(coverage.sha256, hash, `Request coverage differs from checkout: ${file}`);

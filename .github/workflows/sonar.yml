@@ -101,6 +101,11 @@ jobs:
               -e "UPDATE user_auth SET password_change='on' WHERE username='admin';"
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/document-semantics.spec.ts
           fi
+          if [[ -f tests/template-filter-labels.spec.ts ]]; then
+            docker compose exec -T php php cli/import_package.php --filename=install/templates/Generic_SNMP_Device.xml.gz
+            git -C ../.. restore --source=HEAD --worktree -- scripts/ss_hstats.php scripts/ping.pl resource/snmp_queries/interface.xml
+            node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/template-filter-labels.spec.ts
+          fi
           node report-browser-coverage.js "$CACTI_BROWSER_COVERAGE_DIR" coverage/sonar-browser.xml
           node report-php-coverage.js ../../cache/php-coverage coverage/sonar-php.xml
       - name: Select measured coverage report
