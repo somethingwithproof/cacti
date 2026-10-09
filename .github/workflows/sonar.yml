@@ -115,6 +115,9 @@ jobs:
           if [[ -f tests/account-filter-labels.spec.ts ]]; then
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/account-filter-labels.spec.ts
           fi
+          if [[ -f tests/auth-form-semantics.spec.ts ]]; then
+            node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/auth-form-semantics.spec.ts
+          fi
           node report-browser-coverage.js "$CACTI_BROWSER_COVERAGE_DIR" coverage/sonar-browser.xml
           node report-php-coverage.js ../../cache/php-coverage coverage/sonar-php.xml
       - name: Select measured coverage report
