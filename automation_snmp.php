@@ -99,6 +99,11 @@ switch (get_request_var('action')) {
 		break;
 }
 
+/**
+ * Handles the form automation SNMP save. Used as part of Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_automation_snmp_save() {
 	if (isset_request_var('save_component_automation_snmp')) {
 		/* ================= input validation ================= */
@@ -168,6 +173,12 @@ function form_automation_snmp_save() {
 /* ------------------------
  The 'actions' function
  ------------------------ */
+/**
+ * ------------------------ The 'actions' function ------------------------. Used as part of
+ * Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_automation_snmp_actions() {
 	global $config, $automation_snmp_actions;
 
@@ -267,6 +278,15 @@ function form_automation_snmp_actions() {
 /* --------------------------
  SNMP Options Functions
  -------------------------- */
+/**
+ * -------------------------- SNMP Options Functions --------------------------. Used as part of
+ * Cacti's automation SNMP functionality.
+ *
+ * @param int $id The ID.
+ * @param string $new_name The new name.
+ *
+ * @return void No value is returned.
+ */
 
 function automation_duplicate_snmp_option($id, $new_name) {
 	$name = db_fetch_cell_prepared('SELECT name
@@ -298,6 +318,11 @@ function automation_duplicate_snmp_option($id, $new_name) {
 	}
 }
 
+/**
+ * Handles the automation SNMP item dnd. Used as part of Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp_item_dnd() {
    /* ================= Input validation ================= */
     get_filter_request_var('id');
@@ -324,6 +349,12 @@ function automation_snmp_item_dnd() {
 	exit;
 }
 
+/**
+ * Handles the automation SNMP item movedown. Used as part of Cacti's automation SNMP
+ * functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp_item_movedown() {
 	/* ================= input validation ================= */
 	get_filter_request_var('item_id');
@@ -333,6 +364,11 @@ function automation_snmp_item_movedown() {
 	move_item_down('automation_snmp_items', get_request_var('item_id'), 'snmp_id=' . get_request_var('id'));
 }
 
+/**
+ * Handles the automation SNMP item moveup. Used as part of Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp_item_moveup() {
 	/* ================= input validation ================= */
 	get_filter_request_var('item_id');
@@ -342,6 +378,12 @@ function automation_snmp_item_moveup() {
 	move_item_up('automation_snmp_items', get_request_var('item_id'), 'snmp_id=' . get_request_var('id'));
 }
 
+/**
+ * Handles the automation SNMP item remove confirm. Used as part of Cacti's automation SNMP
+ * functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp_item_remove_confirm() {
     /* ================= input validation ================= */
     get_filter_request_var('id');
@@ -400,6 +442,11 @@ function automation_snmp_item_remove_confirm() {
 
 }
 
+/**
+ * Handles the automation SNMP item remove. Used as part of Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp_item_remove() {
 	/* ================= input validation ================= */
 	get_filter_request_var('item_id');
@@ -408,6 +455,11 @@ function automation_snmp_item_remove() {
 	db_execute_prepared('DELETE FROM automation_snmp_items WHERE id = ?', array(get_request_var('item_id')));
 }
 
+/**
+ * Handles the automation SNMP item edit. Used as part of Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp_item_edit() {
 	global $config, $snmp_auth_protocols, $snmp_priv_protocols, $snmp_versions, $snmp_security_levels;
 
@@ -455,6 +507,24 @@ function automation_snmp_item_edit() {
 			'value' => '|arg1:sequence|'),
 	);
 
+	/* drop the legacy MD5/DES SNMPv3 algorithms from the pickers when disabled */
+	$fields_automation_snmp_item_edit['snmp_auth_protocol']['array'] = snmp_auth_protocol_options(isset($automation_snmp_item['snmp_auth_protocol']) ? $automation_snmp_item['snmp_auth_protocol'] : '');
+	$fields_automation_snmp_item_edit['snmp_priv_protocol']['array'] = snmp_priv_protocol_options(isset($automation_snmp_item['snmp_priv_protocol']) ? $automation_snmp_item['snmp_priv_protocol'] : '');
+
+	/* For a new Automation SNMP item the auth/priv defaults come from the global
+	 * setting, which on an upgraded install may still be a legacy MD5/DES value just
+	 * removed from the picker above; default a new item to the strongest available
+	 * option when the legacy algorithms are disabled so it is not left on [None]. */
+	if (empty($automation_snmp_item['id']) && !snmp_md5_des_enabled()) {
+		if (!isset($fields_automation_snmp_item_edit['snmp_auth_protocol']['array'][read_config_option('snmp_auth_protocol')])) {
+			$fields_automation_snmp_item_edit['snmp_auth_protocol']['value'] = 'SHA';
+		}
+
+		if (!isset($fields_automation_snmp_item_edit['snmp_priv_protocol']['array'][read_config_option('snmp_priv_protocol')])) {
+			$fields_automation_snmp_item_edit['snmp_priv_protocol']['value'] = 'AES';
+		}
+	}
+
 	draw_edit_form(array(
 		'config' => array('no_form_tag' => true),
 		'fields' => inject_form_variables($fields_automation_snmp_item_edit, (isset($automation_snmp_item) ? $automation_snmp_item : array()))
@@ -481,6 +551,11 @@ function automation_snmp_item_edit() {
 	<?php
 }
 
+/**
+ * Handles the automation SNMP edit. Used as part of Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp_edit() {
 	global $config, $fields_automation_snmp_edit;
 
@@ -575,13 +650,13 @@ function automation_snmp_edit() {
 
 				if (read_config_option('drag_and_drop') == '') {
 					if ($i < $total_items && $total_items > 1) {
-						$form_data .= '<a class="pic fa fa-caret-down moveArrow" href="' . html_escape('automation_snmp.php?action=item_movedown&item_id=' . $item['id'] . '&id=' . $item['snmp_id']) . '" title="' . __esc('Move Down') . '"></a>';
+						$form_data .= '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="#" data-url="' . html_escape('automation_snmp.php?action=item_movedown&item_id=' . $item['id'] . '&id=' . $item['snmp_id']) . '" title="' . __esc('Move Down') . '"></a>';
 					} else {
 						$form_data .= '<span class="moveArrowNone"></span>';
 					}
 
 					if ($i > 1 && $i <= $total_items) {
-						$form_data .= '<a class="pic fa fa-caret-up moveArrow" href="' . html_escape('automation_snmp.php?action=item_moveup&item_id=' . $item['id'] .	'&id=' . $item['snmp_id']) . '" title="' . __esc('Move Up') . '"></a>';
+						$form_data .= '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="#" data-url="' . html_escape('automation_snmp.php?action=item_moveup&item_id=' . $item['id'] .	'&id=' . $item['snmp_id']) . '" title="' . __esc('Move Up') . '"></a>';
 					} else {
 						$form_data .= '<span class="moveArrowNone"></span>';
 					}
@@ -649,6 +724,11 @@ function automation_snmp_edit() {
     <?php
 }
 
+/**
+ * Handles the automation SNMP. Used as part of Cacti's automation SNMP functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_snmp() {
 	global $config, $item_rows, $automation_snmp_actions;
 
@@ -719,7 +799,7 @@ function automation_snmp() {
                     </td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -742,10 +822,6 @@ function automation_snmp() {
 	}
 
 	$(function() {
-		$('#refresh').on('click', function() {
-			applyFilter();
-		});
-
 		$('#rows').on('change', function() {
 			applyFilter();
 		});

@@ -64,6 +64,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's user domains functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_save() {
 	global $registered_cacti_names;
@@ -166,6 +172,11 @@ function form_save() {
 	header('Location: user_domains.php?header=false&action=edit&domain_id=' . (empty($domain_id) ? get_nfilter_request_var('domain_id') : $domain_id));
 }
 
+/**
+ * Handles the form actions. Used as part of Cacti's user domains functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_actions() {
 	global $actions;
 
@@ -286,25 +297,59 @@ function form_actions() {
 /* -----------------------
     Domain Functions
    ----------------------- */
+/**
+ * ----------------------- Domain Functions -----------------------. Used as part of Cacti's user
+ * domains functionality.
+ *
+ * @param int $domain_id The domain ID.
+ *
+ * @return void No value is returned.
+ */
 
 function domain_remove($domain_id) {
 	db_execute_prepared('DELETE FROM user_domains WHERE domain_id = ?', array($domain_id));
 	db_execute_prepared('DELETE FROM user_domains_ldap WHERE domain_id = ?', array($domain_id));
 }
 
+/**
+ * Handles the domain disable. Used as part of Cacti's user domains functionality.
+ *
+ * @param int $domain_id The domain ID.
+ *
+ * @return void No value is returned.
+ */
 function domain_disable($domain_id) {
 	db_execute_prepared('UPDATE user_domains SET enabled = "" WHERE domain_id = ?', array($domain_id));
 }
 
+/**
+ * Handles the domain enable. Used as part of Cacti's user domains functionality.
+ *
+ * @param int $domain_id The domain ID.
+ *
+ * @return void No value is returned.
+ */
 function domain_enable($domain_id) {
 	db_execute_prepared('UPDATE user_domains SET enabled = "on" WHERE domain_id = ?', array($domain_id));
 }
 
+/**
+ * Handles the domain default. Used as part of Cacti's user domains functionality.
+ *
+ * @param int $domain_id The domain ID.
+ *
+ * @return void No value is returned.
+ */
 function domain_default($domain_id) {
 	db_execute('UPDATE user_domains SET defdomain = 0');
 	db_execute_prepared('UPDATE user_domains SET defdomain = 1 WHERE domain_id = ?', array($domain_id));
 }
 
+/**
+ * Handles the domain edit. Used as part of Cacti's user domains functionality.
+ *
+ * @return void No value is returned.
+ */
 function domain_edit() {
 	global $ldap_versions, $ldap_encryption, $ldap_modes, $domain_types;
 
@@ -365,7 +410,7 @@ function domain_edit() {
 	$fields_domain_ldap_edit = array(
 		'server' => array(
 			'friendly_name' => __('Server(s)'),
-			'description' => __('A space delimited list of DNS hostnames or IP address of for valid LDAP servers.  Cacti will attempt to use the LDAP servers from left to right to authenticate a user.'),
+			'description' => __('A space delimited list of DNS hostnames or IP addresses for valid LDAP servers.  Cacti will attempt to use the LDAP servers from left to right to authenticate a user.<br><br>For One-Time Password (OTP/MFA) logins, do not use a space delimited multi-server list.  On a failed bind Cacti advances to the next server and re-binds with the same credentials, and the already-consumed one-time code will be rejected.  Instead enter a single, resilient DNS name fronted by a DNS load balancer (VIP) so that server failover is handled below Cacti and only one authentication bind is ever performed.'),
 			'method' => 'textbox',
 			'value' => '|arg1:server|',
 			'default' => read_config_option('ldap_server'),
@@ -413,7 +458,7 @@ function domain_edit() {
 			),
 		'mode' => array(
 			'friendly_name' => __('Mode'),
-			'description' => __('Mode which cacti will attempt to authenticate against the LDAP server.<blockquote><i>No Searching</i> - No Distinguished Name (DN) searching occurs, just attempt to bind with the provided Distinguished Name (DN) format.<br><br><i>Anonymous Searching</i> - Attempts to search for username against LDAP directory via anonymous binding to locate the users Distinguished Name (DN).<br><br><i>Specific Searching</i> - Attempts search for username against LDAP directory via Specific Distinguished Name (DN) and Specific Password for binding to locate the users Distinguished Name (DN).'),
+			'description' => __('Mode which cacti will attempt to authenticate against the LDAP server.<blockquote><i>No Searching</i> - No Distinguished Name (DN) searching occurs, just attempt to bind with the provided Distinguished Name (DN) format.<br><br><i>Anonymous Searching</i> - Attempts to search for username against LDAP directory via anonymous binding to locate the users Distinguished Name (DN).<br><br><i>Specific Searching</i> - Attempts search for username against LDAP directory via Specific Distinguished Name (DN) and Specific Password for binding to locate the users Distinguished Name (DN).<br><br><i>One-Time Passwords (OTP/MFA)</i> - Cacti binds the user\'s password only once, during final authentication.  <i>No Searching</i> performs no directory lookup and binds directly using the Distinguished Name (DN) template, so it is safe for OTP when the DN template alone identifies the user.  When a directory lookup is required to resolve the DN, use <i>Specific Searching</i> with a dedicated service account (or <i>Anonymous Searching</i> where the directory permits it) so the lookup never consumes the user\'s single-use code.  For resilient OTP deployments use a single DNS load balancer name in the Server(s) field rather than a space delimited multi-server list, which would re-attempt the bind with an already-consumed one-time password.'),
 			'method' => 'drop_array',
 			'value' => '|arg1:mode|',
 			'array' => $ldap_modes
@@ -606,6 +651,11 @@ function domain_edit() {
 	form_save_button('user_domains.php', 'return', 'domain_id');
 }
 
+/**
+ * Handles the domains. Used as part of Cacti's user domains functionality.
+ *
+ * @return void No value is returned.
+ */
 function domains() {
 	global $domain_types, $actions, $item_rows;
 
@@ -677,7 +727,7 @@ function domains() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __x('filter: use', 'Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __x('filter: use', 'Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -698,10 +748,6 @@ function domains() {
 		}
 
 		$(function() {
-			$('#refresh').on('click', function() {
-				applyFilter();
-			});
-
 			$('#rows').on('change', function() {
 				applyFilter();
 			});

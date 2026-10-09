@@ -125,6 +125,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_save() {
 	if (isset_request_var('save_component_snmp_query')) {
@@ -354,6 +360,11 @@ function form_save() {
 	}
 }
 
+/**
+ * Handles the form actions. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_actions() {
 	global $dq_actions;
 
@@ -461,6 +472,12 @@ function form_actions() {
 /* ----------------------------
     Data Query Graph Functions
    ---------------------------- */
+/**
+ * ---------------------------- Data Query Graph Functions ----------------------------. Used as
+ * part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function data_query_item_movedown_gsv() {
 	/* ================= input validation ================= */
@@ -471,6 +488,11 @@ function data_query_item_movedown_gsv() {
 	move_item_down('snmp_query_graph_sv', get_request_var('id'), array('snmp_query_graph_id' => get_request_var('snmp_query_graph_id'), 'field_name' => get_nfilter_request_var('field_name')));
 }
 
+/**
+ * Handles the data query item moveup gsv. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_moveup_gsv() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -480,6 +502,11 @@ function data_query_item_moveup_gsv() {
 	move_item_up('snmp_query_graph_sv', get_request_var('id'), array('snmp_query_graph_id' => get_request_var('snmp_query_graph_id'), 'field_name' => get_nfilter_request_var('field_name')));
 }
 
+/**
+ * Handles the data query item remove gsv. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_remove_gsv() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -490,6 +517,11 @@ function data_query_item_remove_gsv() {
 		array(get_request_var('id')));
 }
 
+/**
+ * Handles the data query item movedown dssv. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_movedown_dssv() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -500,6 +532,11 @@ function data_query_item_movedown_dssv() {
 	move_item_down('snmp_query_graph_rrd_sv', get_request_var('id'), array('data_template_id' => get_request_var('data_template_id'), 'snmp_query_graph_id' => get_request_var('snmp_query_graph_id'), 'field_name' => get_nfilter_request_var('field_name')));
 }
 
+/**
+ * Handles the data query item moveup dssv. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_moveup_dssv() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -510,6 +547,15 @@ function data_query_item_moveup_dssv() {
 	move_item_up('snmp_query_graph_rrd_sv', get_request_var('id'), array('data_template_id' => get_request_var('data_template_id'), 'snmp_query_graph_id' => get_request_var('snmp_query_graph_id'), 'field_name' => get_nfilter_request_var('field_name')));
 }
 
+/**
+ * Handles the data query sv check sequences. Used as part of Cacti's data queries functionality.
+ *
+ * @param string $type The type.
+ * @param int $snmp_query_graph_id The SNMP query graph ID.
+ * @param string $field_name The field name.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function data_query_sv_check_sequences($type, $snmp_query_graph_id, $field_name) {
 	if ($type == 'ds' || $type == 'gr') {
 		if ($type == 'ds') {
@@ -561,6 +607,11 @@ function data_query_sv_check_sequences($type, $snmp_query_graph_id, $field_name)
 	}
 }
 
+/**
+ * Handles the data query item remove dssv. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_remove_dssv() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -572,6 +623,11 @@ function data_query_item_remove_dssv() {
 		array(get_request_var('id')));
 }
 
+/**
+ * Handles the data query item remove confirm. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_remove_confirm() {
 	global $vdef_functions, $vdef_item_types, $custom_vdef_data_source_types;
 
@@ -610,6 +666,11 @@ function data_query_item_remove_confirm() {
 	form_end();
 }
 
+/**
+ * Handles the data query item remove. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_remove() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -636,6 +697,11 @@ function data_query_item_remove() {
 		array(get_request_var('id')));
 }
 
+/**
+ * Handles the data query item edit. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_item_edit() {
 	global $fields_data_query_item_edit;
 
@@ -817,12 +883,12 @@ function data_query_item_edit() {
 				</td>
 				<td class='center'>
 					<?php if ($show_down) {?>
-					<a class='remover fa fa-caret-down moveArrow' title='<?php print __('Move Down');?>' href='<?php print html_escape('data_queries.php?action=item_movedown_gsv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&field_name=' . $suggested_value['field_name']);?>'></a>
+					<a class='remover fa fa-caret-down moveArrow' title='<?php print __('Move Down');?>' href='#' data-url='<?php print html_escape('data_queries.php?action=item_movedown_gsv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&field_name=' . $suggested_value['field_name']);?>'></a>
 					<?php } else {?>
 					<span class='moveArrowNone'></span>
 					<?php } ?>
 					<?php if ($show_up) {?>
-					<a class='remover fa fa-caret-up moveArrow' title='<?php print __('Move Up');?>' href='<?php print html_escape('data_queries.php?action=item_moveup_gsv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&field_name=' . $suggested_value['field_name']);?>'></a>
+					<a class='remover fa fa-caret-up moveArrow' title='<?php print __('Move Up');?>' href='#' data-url='<?php print html_escape('data_queries.php?action=item_moveup_gsv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&field_name=' . $suggested_value['field_name']);?>'></a>
 					<?php } else {?>
 					<span class='moveArrowNone'></span>
 					<?php } ?>
@@ -831,7 +897,7 @@ function data_query_item_edit() {
 					<?php print html_escape($suggested_value['text']);?>
 				</td>
 				<td class='right'>
-					<a class='remover deleteMarker fa fa-times' title='<?php print html_escape(__('Delete'));?>' href='<?php print html_escape('data_queries.php?action=item_remove_gsv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id'));?>'></a>
+					<a class='remover deleteMarker fa fa-times' title='<?php print html_escape(__('Delete'));?>' href='#' data-url='<?php print html_escape('data_queries.php?action=item_remove_gsv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id'));?>'></a>
 				</td>
 				<?php
 
@@ -924,12 +990,12 @@ function data_query_item_edit() {
 						</td>
 						<td class='center'>
 							<?php if ($show_down) {?>
-							<a class='remover fa fa-caret-down moveArrow' title='<?php print __('Move Down');?>' href='<?php print html_escape('data_queries.php?action=item_movedown_dssv&snmp_query_graph_id=' . get_request_var('id') . '&id='. $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&data_template_id=' . $data_template['id'] . '&field_name=' . $suggested_value['field_name']);?>'></a>
+							<a class='remover fa fa-caret-down moveArrow' title='<?php print __('Move Down');?>' href='#' data-url='<?php print html_escape('data_queries.php?action=item_movedown_dssv&snmp_query_graph_id=' . get_request_var('id') . '&id='. $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&data_template_id=' . $data_template['id'] . '&field_name=' . $suggested_value['field_name']);?>'></a>
 							<?php } else {?>
 							<span class='moveArrowNone'></span>
 							<?php } ?>
 							<?php if ($show_up) {?>
-							<a class='remover fa fa-caret-up moveArrow' title='<?php print __('Move Up');?>' href='<?php print html_escape('data_queries.php?action=item_moveup_dssv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&data_template_id=' . $data_template['id'] . '&field_name=' . $suggested_value['field_name']);?>'></a>
+							<a class='remover fa fa-caret-up moveArrow' title='<?php print __('Move Up');?>' href='#' data-url='<?php print html_escape('data_queries.php?action=item_moveup_dssv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&data_template_id=' . $data_template['id'] . '&field_name=' . $suggested_value['field_name']);?>'></a>
 							<?php } else {?>
 							<span class='moveArrowNone'></span>
 							<?php } ?>
@@ -938,7 +1004,7 @@ function data_query_item_edit() {
 							<?php print html_escape($suggested_value['text']);?>
 						</td>
 						<td class='right'>
-							<a class='remover deleteMarker fa fa-times' title='<?php print __('Delete');?>' href='<?php print html_escape('data_queries.php?action=item_remove_dssv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&data_template_id=' . $data_template['id']);?>'></a>
+							<a class='remover deleteMarker fa fa-times' title='<?php print __('Delete');?>' href='#' data-url='<?php print html_escape('data_queries.php?action=item_remove_dssv&snmp_query_graph_id=' . get_request_var('id') . '&id=' . $suggested_value['id'] . '&snmp_query_id=' . get_request_var('snmp_query_id') . '&data_template_id=' . $data_template['id']);?>'></a>
 						</td>
 						<?php
 
@@ -994,7 +1060,7 @@ function data_query_item_edit() {
 
 	$('.remover').on('click', function(event) {
 		event.preventDefault();
-		var href = $(this).attr('href');
+		var href = $(this).data('url') || $(this).attr('href');
 		var request = cactiPreparePostRequestFromUrl(href);
 		$.post(request.url, request.data)
 			.done(function(data) {
@@ -1057,6 +1123,14 @@ function data_query_item_edit() {
 /* ---------------------
     Data Query Functions
    --------------------- */
+/**
+ * --------------------- Data Query Functions ---------------------. Used as part of Cacti's data
+ * queries functionality.
+ *
+ * @param int $id The ID.
+ *
+ * @return void No value is returned.
+ */
 
 function data_query_remove($id) {
 	$snmp_query_graph = db_fetch_assoc_prepared('SELECT id
@@ -1101,6 +1175,11 @@ function data_query_remove($id) {
 	update_replication_crc(0, 'poller_replicate_snmp_query_crc');
 }
 
+/**
+ * Handles the data query edit. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query_edit() {
 	global $fields_data_query_edit, $config;
 
@@ -1143,7 +1222,14 @@ function data_query_edit() {
 		$replace      = array($config['base_path'], read_config_option('path_snmpget'), read_config_option('path_php_binary'));
 		$xml_filename = str_replace($search, $replace, $snmp_query['xml_path']);
 
-		if ((file_exists($xml_filename)) && (is_file($xml_filename))) {
+		// Confine the resolved path to the Cacti base path so this located/not-located
+		// check cannot be used as a filesystem existence oracle (GHSA-2x86-jpm8-9vgp).
+		// cacti_path_is_within() normalizes Windows casing/long-path forms and matches
+		// the containment check used by the XML loader in lib/data_query.php.  Reject a
+		// NUL byte first so realpath() cannot throw a ValueError on PHP 8+.
+		if ($xml_filename !== '' && strpos($xml_filename, "\0") === false &&
+			cacti_path_is_within($xml_filename, $config['base_path']) &&
+			is_file($xml_filename)) {
 			$text = "<span class='deviceUp'>" . __('Successfully located XML file') . "</span>";
 			$xml_file_exists = true;
 		} else {
@@ -1268,6 +1354,11 @@ function data_query_edit() {
 	<?php
 }
 
+/**
+ * Handles the data query. Used as part of Cacti's data queries functionality.
+ *
+ * @return void No value is returned.
+ */
 function data_query() {
 	global $dq_actions, $item_rows;
 
@@ -1339,7 +1430,7 @@ function data_query() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' name='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -1360,10 +1451,6 @@ function data_query() {
 		}
 
 		$(function() {
-			$('#refresh').on('click', function() {
-				applyFilter();
-			});
-
 			$('#rows').on('change', function() {
 				applyFilter();
 			});

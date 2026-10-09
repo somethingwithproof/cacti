@@ -44,6 +44,13 @@ process_tree_settings();
 /* setup realtime defaults if they are not set */
 initialize_realtime_step_and_window();
 
+/**
+ * Retrieves a list of tree branches that match a search string and returns them as a JSON object
+ * to the page for filtering the tree list by matching branch object. Used as part of Cacti's
+ * graph view functionality.
+ *
+ * @return void No value is returned.
+ */
 function get_matching_nodes() {
 	$my_matches = array();
 	$match = array();
@@ -467,7 +474,13 @@ case 'preview':
 	/* create filter for sql */
 	$sql_where  = '';
 	if (!isempty_request_var('rfilter')) {
-		$sql_where .= ' gtg.title_cache ' . db_qstr_rlike(get_request_var('rfilter'));
+		$sql_where .= ' (gtg.title_cache ' . db_qstr_rlike(get_request_var('rfilter'));
+
+		if (ctype_digit(get_request_var('rfilter'))) {
+			$sql_where .= ' OR gl.id = ' . (int) get_request_var('rfilter');
+		}
+
+		$sql_where .= ')';
 	}
 
 	$sql_where .= ($sql_or != '' && $sql_where != '' ? ' AND ':'') . $sql_or;
@@ -686,7 +699,12 @@ case 'list':
 						<?php print __('Template');?>
 					</td>
 					<td>
-						<select id='graph_template_id' multiple style='opacity:0.1;overflow:hide;height:0px;'>
+						<select id='graph_template_id' multiple class='select2-multi-count'
+							data-select-all-text='<?php print html_escape(__('All Graphs & Templates'));?>'
+							data-select-count-text='<?php print html_escape(__('Templates Selected'));?>'
+							data-select-all-value='-1'
+							data-select-zero-value='0'
+							data-select-zero-text='<?php print html_escape(__('Not Templated'));?>'>
 							<option value='-1'<?php if (get_request_var('graph_template_id') == '-1') {?> selected<?php }?>><?php print __('All Graphs & Templates');?></option>
 							<option value='0'<?php if (get_request_var('graph_template_id') == '0') {?> selected<?php }?>><?php print __('Not Templated');?></option>
 							<?php
@@ -750,7 +768,13 @@ case 'list':
 	/* create filter for sql */
 	$sql_where  = '';
 	if (!isempty_request_var('rfilter')) {
-		$sql_where .= ' gtg.title_cache ' . db_qstr_rlike(get_request_var('rfilter'));
+		$sql_where .= ' (gtg.title_cache ' . db_qstr_rlike(get_request_var('rfilter'));
+
+		if (ctype_digit(get_request_var('rfilter'))) {
+			$sql_where .= ' OR gl.id = ' . (int) get_request_var('rfilter');
+		}
+
+		$sql_where .= ')';
 	}
 
 	if (!isempty_request_var('site_id') && get_request_var('site_id') > 0) {
@@ -1070,7 +1094,10 @@ case 'list':
 
 		initializeChecks();
 
-		$('#site_id, #rows, #location, #host_id').on('change', function() {
+		// host_id already reloads via its own select2-callback data-callback wiring;
+		// select2 also fires a native change event, so including it here would
+		// apply the filter twice per selection
+		$('#site_id, #rows, #location').on('change', function() {
 			applyFilter();
 		});
 
@@ -1084,6 +1111,11 @@ case 'list':
 
 		$('#view, #viewgr').on('click', function() {
 			viewGraphs();
+		});
+
+		$('#chk').off('submit').on('submit', function(event) {
+			event.preventDefault();
+			applyFilter();
 		});
 
 		<?php html_graph_template_multiselect('list');?>

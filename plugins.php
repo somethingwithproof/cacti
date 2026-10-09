@@ -57,7 +57,8 @@ $modes = array(
 	'remote_enable',
 	'remote_disable',
 	'moveup',
-	'movedown'
+	'movedown',
+	'remove'
 );
 
 if (isset_request_var('mode') && in_array(get_nfilter_request_var('mode'), $modes) && isset_request_var('id')) {
@@ -99,6 +100,58 @@ if (isset_request_var('mode') && in_array(get_nfilter_request_var('mode'), $mode
 			define('IN_PLUGIN_INSTALL', 1);
 
 			api_plugin_uninstall($id);
+
+			header('Location: plugins.php' . ($option != '' ? '?' . $option:''));
+			exit;
+
+			break;
+		case 'remove':
+			/* Force Uninstall of an orphaned plugin (e.g. its directory is missing),
+			   so its entries can be purged even though its own uninstall hook can no
+			   longer run. api_plugin_uninstall() skips the (unavailable) hook and
+			   removes the plugin's hooks, realms, plugin_config row, and - with
+			   $tables = true - the tables/columns it created (via plugin_db_changes).
+
+			   Guard the destructive path: only proceed when the plugin is genuinely
+			   orphaned (its directory is absent) and no other active plugin still
+			   requires it, so a forged POST can not force-remove a healthy or
+			   depended-upon plugin. */
+			if (!in_array($id, $pluginslist)) {
+				break;
+			}
+
+			if (is_dir($config['base_path'] . '/plugins/' . $id)) {
+				raise_message('force_remove_present', __esc('Plugin \'%s\' can not be Force Uninstalled because its directory is still present.  Use the normal Uninstall action instead.', $id), MESSAGE_LEVEL_ERROR);
+
+				header('Location: plugins.php' . ($option != '' ? '?' . $option:''));
+				exit;
+
+				break;
+			}
+
+			$required = db_fetch_cell_prepared('SELECT GROUP_CONCAT(directory)
+				FROM plugin_config
+				WHERE requires LIKE ?
+				AND status IN (1, 4)',
+				array('%' . $id . '%'));
+
+			if ($required != '') {
+				raise_message('force_remove_required', __esc('Plugin \'%s\' can not be Force Uninstalled because it is still required by: \'%s\'', $id, ucfirst($required)), MESSAGE_LEVEL_ERROR);
+
+				header('Location: plugins.php' . ($option != '' ? '?' . $option:''));
+				exit;
+
+				break;
+			}
+
+			define('IN_PLUGIN_INSTALL', 1);
+
+			api_plugin_uninstall($id, true);
+
+			/* The plugin's directory is gone, so api_plugin_uninstall() can not set
+			   $plugin_found and skips its own final replication; replicate here so
+			   remote pollers also drop the now-removed orphan. */
+			api_plugin_replicate_config();
 
 			header('Location: plugins.php' . ($option != '' ? '?' . $option:''));
 			exit;
@@ -207,6 +260,11 @@ if (isset_request_var('mode') && in_array(get_nfilter_request_var('mode'), $mode
 	}
 }
 
+/**
+ * Handles the retrieve plugin list. Used as part of Cacti's plugins functionality.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function retrieve_plugin_list() {
 	$pluginslist = array();
 	$temp = db_fetch_assoc('SELECT directory FROM plugin_config ORDER BY name');
@@ -222,10 +280,22 @@ update_show_current();
 
 bottom_footer();
 
+/**
+ * Handles the plugins temp table exists. Used as part of Cacti's plugins functionality.
+ *
+ * @param string $table The table.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function plugins_temp_table_exists($table) {
 	return cacti_sizeof(db_fetch_row("SHOW TABLES LIKE '$table'"));
 }
 
+/**
+ * Handles the plugins load temp table. Used as part of Cacti's plugins functionality.
+ *
+ * @return string The resulting string.
+ */
 function plugins_load_temp_table() {
 	global $config, $plugins, $plugins_integrated, $local_db_cnn_id;
 
@@ -389,6 +459,11 @@ function plugins_load_temp_table() {
 	return $table;
 }
 
+/**
+ * Updates the show current. Used as part of Cacti's plugins functionality.
+ *
+ * @return void No value is returned.
+ */
 function update_show_current () {
 	global $plugins, $pluginslist, $config, $status_names, $actions, $item_rows;
 
@@ -413,7 +488,7 @@ function update_show_current () {
 			),
 		'sort_column' => array(
 			'filter' => FILTER_CALLBACK,
-			'default' => 'name',
+			'default' => 'directory',
 			'options' => array('options' => 'sanitize_search_string')
 			),
 		'sort_direction' => array(
@@ -449,10 +524,6 @@ function update_show_current () {
 	}
 
 	$(function() {
-		$('#refresh').on('click', function() {
-			applyFilter();
-		});
-
 		$('#rows, #state').on('change', function() {
 			applyFilter();
 		});
@@ -464,6 +535,47 @@ function update_show_current () {
 		$('#form_plugins').on('submit', function(event) {
 			event.preventDefault();
 			applyFilter();
+		});
+
+		$('.piforceremove').off('click').on('click', function(event) {
+			event.preventDefault();
+
+			var url  = $(this).attr('data-url');
+			var name = $(this).attr('data-name');
+
+			$('#pluginForceRemove').remove();
+
+			$('body').append(
+				"<div id='pluginForceRemove' style='display:none'>" +
+				"<p><?php print __esc('Are you sure you want to Force Uninstall the plugin'); ?> <span class='pluginName'></span>?</p>" +
+				"<p><?php print __esc('This permanently removes all of its entries from the Cacti plugin tables (configuration, hooks, permissions, and any tables or columns it created).  This can not be undone.  If you really want to Force Uninstall the Plugin, click \'Force Uninstall\' below.  Otherwise click \'Cancel\'.'); ?></p>" +
+				"</div>"
+			);
+
+			$('#pluginForceRemove .pluginName').text(name);
+
+			$('#pluginForceRemove').dialog({
+				modal: false,
+				resizable: false,
+				draggable: false,
+				width: 520,
+				title: '<?php print __esc('Force Uninstall Plugin'); ?>',
+				buttons: [
+					{
+						text: '<?php print __esc('Cancel'); ?>',
+						click: function() {
+							$(this).dialog('close');
+						}
+					},
+					{
+						text: '<?php print __esc('Force Uninstall'); ?>',
+						click: function() {
+							$(this).dialog('close');
+							submitPageUsingPost(url);
+						}
+					}
+				]
+			});
 		});
 	});
 	</script>
@@ -514,7 +626,7 @@ function update_show_current () {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -721,6 +833,16 @@ function update_show_current () {
 	db_execute("DROP TABLE $table");
 }
 
+/**
+ * Formats the plugin row. Used as part of Cacti's plugins functionality.
+ *
+ * @param array $plugin The plugin.
+ * @param bool $last_plugin The last plugin.
+ * @param bool $include_ordering The include ordering.
+ * @param string $table The table.
+ *
+ * @return string The resulting string.
+ */
 function format_plugin_row($plugin, $last_plugin, $include_ordering, $table) {
 	global $status_names, $config;
 	static $first_plugin = true;
@@ -803,6 +925,14 @@ function format_plugin_row($plugin, $last_plugin, $include_ordering, $table) {
 	return $row;
 }
 
+/**
+ * Handles the plugin required for others. Used as part of Cacti's plugins functionality.
+ *
+ * @param array $plugin The plugin.
+ * @param string $table The table.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function plugin_required_for_others($plugin, $table) {
 	$required_for_others = db_fetch_cell("SELECT GROUP_CONCAT(directory)
 		FROM $table
@@ -821,12 +951,28 @@ function plugin_required_for_others($plugin, $table) {
 	}
 }
 
+/**
+ * Handles the plugin required installed. Used as part of Cacti's plugins functionality.
+ *
+ * @param array $plugin The plugin.
+ * @param string $table The table.
+ *
+ * @return string The resulting string.
+ */
 function plugin_required_installed($plugin, $table) {
 	$not_installed = '';
 	api_plugin_can_install($plugin['infoname'], $not_installed);
 	return $not_installed;
 }
 
+/**
+ * Handles the plugin actions. Used as part of Cacti's plugins functionality.
+ *
+ * @param array $plugin The plugin.
+ * @param string $table The table.
+ *
+ * @return string The resulting string.
+ */
 function plugin_actions($plugin, $table) {
 	global $config, $pluginslist, $plugins_integrated;
 
@@ -835,44 +981,63 @@ function plugin_actions($plugin, $table) {
 		case '0': // Not Installed
 			$not_installed = plugin_required_installed($plugin, $table);
 		 	if ($not_installed != '') {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Install Plugin.  The following Plugins must be installed first: %s', ucfirst($not_installed)) . "' class='linkEditMain'><img src='" . $config['url_path'] . "images/cog_error.png'></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Install Plugin.  The following Plugins must be installed first: %s', ucfirst($not_installed)) . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 			} else {
-				$link .= "<a href='" . html_escape($config['url_path'] . 'plugins.php?mode=install&id=' . $plugin['directory']) . "' title='" . __esc('Install Plugin') . "' class='piinstall linkEditMain cactiPostAction'><img src='" . $config['url_path'] . "images/cog_add.png'></a>";
+				$link .= "<a href='" . html_escape($config['url_path'] . 'plugins.php?mode=install&id=' . $plugin['directory']) . "' title='" . __esc('Install Plugin') . "' class='piinstall linkEditMain cactiPostAction'><i class='fa fa-cog deviceUp'></i></a>";
 			}
 			$link .= "<img src='" . $config['url_path'] . "images/view_none.gif'>";
 			break;
 		case '1':	// Currently Active
 			$required = plugin_required_for_others($plugin, $table);
 			if ($required != '') {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall.  This Plugin is required by: %s', ucfirst($required)) . "'><img src='" . $config['url_path'] . "images/cog_error.png'></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall.  This Plugin is required by: %s', ucfirst($required)) . "'><i class='fa fa-cog deviceUnknown'></i></a>";
 			} else {
-				$link .= "<a class='piuninstall' href='" . html_escape($config['url_path'] . 'plugins.php?mode=uninstall&id=' . $plugin['directory']) . "' title='" . __esc('Uninstall Plugin') . "'><img src='" . $config['url_path'] . "images/cog_delete.png'></a>";
+				$link .= "<a class='piuninstall' href='" . html_escape($config['url_path'] . 'plugins.php?mode=uninstall&id=' . $plugin['directory']) . "' title='" . __esc('Uninstall Plugin') . "'><i class='fa fa-cog deviceDown'></i></a>";
 			}
-			$link .= "<a class='pidisable cactiPostAction' href='" . html_escape($config['url_path'] . 'plugins.php?mode=disable&id=' . $plugin['directory']) . "' title='" . __esc('Disable Plugin') . "'><img src='" . $config['url_path'] . "images/stop.png'></a>";
+			$link .= "<a class='pidisable cactiPostAction' href='" . html_escape($config['url_path'] . 'plugins.php?mode=disable&id=' . $plugin['directory']) . "' title='" . __esc('Disable Plugin') . "'><i class='fa fa-circle deviceRecovering'></i></a>";
 			break;
 		case '2': // Configuration issues
-			$link .= "<a class='piuninstall' href='" . html_escape($config['url_path'] . 'plugins.php?mode=uninstall&id=' . $plugin['directory']) . "' title='" . __esc('Uninstall Plugin') . "'><img src='" . $config['url_path'] . "images/cog_delete.png'></a>";
+			$link .= "<a class='piuninstall' href='" . html_escape($config['url_path'] . 'plugins.php?mode=uninstall&id=' . $plugin['directory']) . "' title='" . __esc('Uninstall Plugin') . "'><i class='fa fa-cog deviceDown'></i></a>";
+			break;
+		case '3': // Awaiting Upgrade
+			$required = plugin_required_for_others($plugin, $table);
+			if ($required != '') {
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall.  This Plugin is required by: %s', ucfirst($required)) . "'><i class='fa fa-cog deviceUnknown'></i></a>";
+			} else {
+				$link .= "<a class='piuninstall' href='" . html_escape($config['url_path'] . 'plugins.php?mode=uninstall&id=' . $plugin['directory']) . "' title='" . __esc('Uninstall Plugin') . "'><i class='fa fa-cog deviceDown'></i></a>";
+			}
+			$link .= "<a class='pidisable cactiPostAction' href='" . html_escape($config['url_path'] . 'plugins.php?mode=disable&id=' . $plugin['directory']) . "' title='" . __esc('Disable Plugin') . "'><i class='fa fa-circle deviceRecovering'></i></a>";
 			break;
 		case '4':	// Installed but not active
 			$required = plugin_required_for_others($plugin, $table);
 			if ($required != '') {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall.  This Plugin is required by: %s', ucfirst($required)) . "'><img src='" . $config['url_path'] . "images/cog_error.png'></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall.  This Plugin is required by: %s', ucfirst($required)) . "'><i class='fa fa-cog deviceUnknown'></i></a>";
 			} else {
-				$link .= "<a class='piuninstall' href='" . html_escape($config['url_path'] . 'plugins.php?mode=uninstall&id=' . $plugin['directory']) . "' title='" . __esc('Uninstall Plugin') . "'><img src='" . $config['url_path'] . "images/cog_delete.png'></a>";
+				$link .= "<a class='piuninstall' href='" . html_escape($config['url_path'] . 'plugins.php?mode=uninstall&id=' . $plugin['directory']) . "' title='" . __esc('Uninstall Plugin') . "'><i class='fa fa-cog deviceDown'></i></a>";
 			}
-			$link .= "<a class='pienable cactiPostAction' href='" . html_escape($config['url_path'] . 'plugins.php?mode=enable&id=' . $plugin['directory']) . "' title='" . __esc('Enable Plugin') . "'><img src='" . $config['url_path'] . "images/accept.png'></a>";
+			$link .= "<a class='pienable cactiPostAction' href='" . html_escape($config['url_path'] . 'plugins.php?mode=enable&id=' . $plugin['directory']) . "' title='" . __esc('Enable Plugin') . "'><i class='fa fa-circle deviceUp'></i></a>";
 			break;
 		case '-5': // Plugin directory missing
-			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory is missing!') . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+			if (is_dir($config['base_path'] . '/plugins/' . $plugin['directory'])) {
+				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php', $plugin['directory']) . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
+			} else {
+				$required = plugin_required_for_others($plugin, $table);
+
+				if ($required != '') {
+					$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Force Uninstall.  This Plugin is required by: %s', ucfirst($required)) . "'><i class='fa fa-cog deviceUnknown'></i></a>";
+				} else {
+					$link .= "<a class='piforceremove' href='#' data-url='" . html_escape($config['url_path'] . 'plugins.php?mode=remove&id=' . $plugin['directory']) . "' data-name='" . html_escape($plugin['infoname']) . "' title='" . __esc('Plugin directory is missing.  Click to Force Uninstall and remove all of its entries from the Cacti plugin tables.') . "'><i class='fa fa-cog deviceUnknown'></i></a>";
+				}
+			}
 			break;
 		case '-4': // Plugins should have INFO file since 1.0.0
-			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is not compatible (Pre-1.x)') . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is not compatible (Pre-1.x)') . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 			break;
 		case '-3': // Plugins can have spaces in their names
-			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directories can not include spaces') . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directories can not include spaces') . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 			break;
 		case '-2': // Naming issues
-			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory is not correct.  Should be \'%s\' but is \'%s\'', strtolower($plugin['infoname']), $plugin['directory']) . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory is not correct.  Should be \'%s\' but is \'%s\'', strtolower($plugin['infoname']), $plugin['directory']) . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 
 			break;
 		default: // Old PIA
@@ -880,13 +1045,13 @@ function plugin_actions($plugin, $table) {
 			$directory  = $plugin['name'];
 
 			if (!file_exists("$path/setup.php")) {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php', $plugin['directory']) . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php', $plugin['directory']) . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 			} elseif (!file_exists("$path/INFO")) {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is lacking an INFO file') . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is lacking an INFO file') . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 			} elseif (in_array($directory, $plugins_integrated)) {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is integrated into Cacti core') . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is integrated into Cacti core') . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 			} else {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is not compatible') . "' class='linkEditMain'><img src='images/cog_error.png'></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is not compatible') . "' class='linkEditMain'><i class='fa fa-cog deviceUnknown'></i></a>";
 			}
 
 			break;
@@ -900,7 +1065,7 @@ function plugin_actions($plugin, $table) {
 				//$link .= "<a class='pidisable' href='" . html_escape($config['url_path'] . 'plugins.php?mode=remote_disable&id=' . $plugin['directory']) . "' title='" . __esc('Disable Plugin Locally') . "'><img src='" . $config['url_path'] . "images/stop.png'></a>";
 			} elseif ($plugin['remote_status'] == 4) { // Installed but inactive
 				if ($plugin['status'] == 1) {
-					$link .= "<a class='pienable cactiPostAction' href='" . html_escape($config['url_path'] . 'plugins.php?mode=remote_enable&id=' . $plugin['directory']) . "' title='" . __esc('Enable Plugin Locally') . "'><img src='" . $config['url_path'] . "images/accept.png'></a>";
+					$link .= "<a class='pienable cactiPostAction' href='" . html_escape($config['url_path'] . 'plugins.php?mode=remote_enable&id=' . $plugin['directory']) . "' title='" . __esc('Enable Plugin Locally') . "'><i class='fa fa-circle deviceUp'></i></a>";
 				}
 			}
 		}

@@ -24,7 +24,11 @@
 
 require_once($config['include_path'] .'/vendor/csrf/csrf-conf.php');
 
-/* cross site request forgery library */
+/**
+ * Cross site request forgery library. Used as part of Cacti's include functionality.
+ *
+ * @return void No value is returned.
+ */
 function csrf_startup() {
 	global $config;
 
@@ -65,6 +69,11 @@ function csrf_startup() {
 	}
 }
 
+/**
+ * Handles the cacti CSRF install pending. Used as part of Cacti's include functionality.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function cacti_csrf_install_pending() {
 	global $config;
 
@@ -73,7 +82,12 @@ function cacti_csrf_install_pending() {
 }
 
 /**
- * Read a packager-managed CSRF secret from outside the Cacti document root.
+ * Read a packager-managed CSRF secret from outside the Cacti document root. Used as part of
+ * Cacti's include functionality.
+ *
+ * @param mixed $path The path.
+ *
+ * @return string The resulting string.
  */
 function cacti_csrf_read_external_secret($path) {
 	$path = cacti_csrf_external_secret_path($path);
@@ -91,13 +105,24 @@ function cacti_csrf_read_external_secret($path) {
 	return cacti_csrf_secret_is_valid($secret) ? $secret : '';
 }
 
+/**
+ * Handles the cacti CSRF secret is valid. Used as part of Cacti's include functionality.
+ *
+ * @param mixed $secret The secret.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function cacti_csrf_secret_is_valid($secret) {
 	return is_string($secret) && strlen($secret) >= 32 && strlen($secret) <= 4096;
 }
 
 /**
- * Decode the wrapper written by older refresh_csrf.php versions while also
- * accepting packager-managed raw secrets.
+ * Decode the wrapper written by older refresh_csrf.php versions while also accepting
+ * packager-managed raw secrets. Used as part of Cacti's include functionality.
+ *
+ * @param mixed $secret The secret.
+ *
+ * @return string The resulting string.
  */
 function cacti_csrf_parse_secret_contents($secret) {
 	if (!is_string($secret)) {
@@ -118,7 +143,12 @@ function cacti_csrf_parse_secret_contents($secret) {
 }
 
 /**
- * Preserve the installer's historical support for a configured directory.
+ * Preserve the installer's historical support for a configured directory. Used as part of Cacti's
+ * include functionality.
+ *
+ * @param mixed $path The path.
+ *
+ * @return mixed The result of the operation, or false on failure.
  */
 function cacti_csrf_external_secret_path($path) {
 	if (!is_string($path) || $path === '') {
@@ -137,8 +167,12 @@ function cacti_csrf_external_secret_path($path) {
 }
 
 /**
- * Ensure an external secret resolves to a pre-existing directory outside the
- * Cacti document root.
+ * Ensure an external secret resolves to a pre-existing directory outside the Cacti document root.
+ * Used as part of Cacti's include functionality.
+ *
+ * @param mixed $path The path.
+ *
+ * @return bool True on success, false otherwise.
  */
 function cacti_csrf_external_path_is_safe($path) {
 	global $config;
@@ -175,9 +209,56 @@ function cacti_csrf_external_path_is_safe($path) {
 	return true;
 }
 
+/**
+ * Handles the cacti session cookie failure. Used as part of Cacti's include functionality.
+ *
+ * @param bool $write_log The write log.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
+function cacti_session_cookie_failure($write_log = true) {
+	global $config;
+
+	if ($write_log) {
+		cacti_log('ERROR: Browser did not return the Cacti session cookie during CSRF validation; verify url_path and cacti_cookie_domain.', false, 'AUTH');
+		csrf_log(__FUNCTION__, 'Session cookie missing; refusing to redirect into a login loop');
+	}
+
+	while (ob_get_level()) {
+		ob_end_clean();
+	}
+
+	http_response_code(403);
+	header('Content-Type: text/plain; charset=UTF-8');
+	print __('The browser did not return the Cacti session cookie. Ensure cookies are enabled and verify the configured URL path and cookie domain.') . PHP_EOL;
+	print __('Return to Cacti: %s', $config['url_path'] . 'index.php') . PHP_EOL;
+	exit;
+}
+
+/**
+ * Handle a request that failed CSRF validation. The installer runs its steps over JSON, so a
+ * plain redirect leaves it stuck on a dead XHR. That branch answers with a scoped payload
+ * carrying a fresh token instead, which install.js retries against once. See issue #7343. Used as
+ * part of Cacti's include functionality.
+ *
+ * @return void No value is returned.
+ */
 function csrf_error_callback() {
-	//Resolve session fixation for PHP 5.4
-	session_regenerate_id();
+	$session_name = session_name();
+
+	// A clean browser may return no cookies when it rejects a mis-scoped session
+	// cookie. Refuse the redirect loop in that case as well, but only write the
+	// diagnostic log when the client returned some other cookie so anonymous
+	// cookie-less requests cannot amplify cacti.log.
+	if ($session_name !== '' && !isset($_COOKIE[$session_name])) {
+		cacti_session_cookie_failure(!empty($_COOKIE));
+	}
+
+	// Resolve session fixation for PHP 5.4
+	if (session_status() === PHP_SESSION_ACTIVE) {
+		session_regenerate_id();
+	}
+
 	raise_message('csrf_timeout');
 	ob_end_clean();
 	header('Location: ' . validate_redirect_url($_SERVER['REQUEST_URI']));
@@ -186,8 +267,11 @@ function csrf_error_callback() {
 }
 
 /**
- * Reject state changes transported through a URL or an unsupported method.
- * csrf-magic validates the token before page dispatch for every POST request.
+ * Reject state changes transported through a URL or an unsupported method. csrf-magic validates
+ * the token before page dispatch for every POST request. Used as part of Cacti's include
+ * functionality.
+ *
+ * @return void No value is returned.
  */
 function csrf_require_post() {
 	if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {

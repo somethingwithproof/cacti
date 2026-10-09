@@ -79,7 +79,9 @@ $url_path = '/cacti/';
 $cacti_session_name = 'Cacti';
 
 /**
- * Default Cookie domain - The cookie domain to be used for Cacti
+ * Optional cookie domain. This must match the browser-visible host or one of
+ * its parent domains. Leave it unset for a host-only cookie. Use $url_path and
+ * $cacti_session_name, not the cookie domain, to isolate Cacti installations.
  */
 
 //$cacti_cookie_domain = 'cacti.net';
@@ -112,6 +114,17 @@ $disable_log_rotation = false;
  */
 
 //$config['purifier_cache_path'] = '/var/cache/cacti/purifier';
+
+/**
+ * Optional parameter to define the directory used by Cacti's shared object
+ * cache (for example the pre-hardened SNMP credential cache). When unset, Cacti
+ * uses cache/ below the installation path and creates it when needed. The
+ * directory must be private and writable by the poller/web server user; if it
+ * cannot be created or written, the shared cache degrades to per-process storage
+ * rather than falling back to a world-writable system temporary directory.
+ */
+
+//$config['cache_dir'] = '/var/www/html/cacti/cache';
 
 /**
  * Optional parameter to define a data input whitelist command string. This

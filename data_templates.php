@@ -80,6 +80,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's data templates functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_save() {
 	if (isset_request_var('save_component_template')) {
@@ -256,7 +262,7 @@ function form_save() {
 				array($data_template_id));
 			if (cacti_sizeof($data_template_fields)) {
 				foreach ($data_template_fields as $data_template_field) {
-					raise_message('data_template_rrd_' . $data_template_field['dtr_id'], __('Field "%s" is missing an Output Field', $data_template_field['data_source_name']), MESSAGE_LEVEL_WARN);
+					raise_message('data_template_rrd_' . $data_template_field['dtr_id'], __esc('Field "%s" is missing an Output Field', $data_template_field['data_source_name']), MESSAGE_LEVEL_WARN);
 				}
 			}
 		}
@@ -352,6 +358,12 @@ function form_save() {
 /* ------------------------
     The "actions" function
    ------------------------ */
+/**
+ * ------------------------ The "actions" function ------------------------. Used as part of
+ * Cacti's data templates functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_actions() {
 	global $ds_actions;
@@ -517,6 +529,12 @@ function form_actions() {
 /* ----------------------------
     template - Data Templates
    ---------------------------- */
+/**
+ * ---------------------------- template - Data Templates ----------------------------. Used as
+ * part of Cacti's data templates functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function template_rrd_remove() {
 	/* ================= input validation ================= */
@@ -541,6 +559,11 @@ function template_rrd_remove() {
 	header('Location: data_templates.php?action=template_edit&id=' . get_request_var('data_template_id'));
 }
 
+/**
+ * Handles the template RRD add. Used as part of Cacti's data templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function template_rrd_add() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -596,6 +619,11 @@ function template_rrd_add() {
 	header('Location: data_templates.php?action=template_edit&id=' . get_request_var('id') . "&view_rrd=$data_template_rrd_id");
 }
 
+/**
+ * Handles the template edit. Used as part of Cacti's data templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function template_edit() {
 	global $struct_data_source, $struct_data_source_item, $data_source_types, $fields_data_template_template_edit, $fields_host_edit, $hash_system_data_inputs;
 
@@ -749,7 +777,7 @@ function template_edit() {
 			print "<div class='tabs' style='float:left;'><nav><ul role='tablist'>\n";
 
 			foreach ($template_data_rrds as $template_data_rrd) {
-				print "<li class='subTab'><a " . (($template_data_rrd['id'] == get_request_var('view_rrd')) ? "class='pic selected'" : "class='pic'") . " href='" . html_escape('data_templates.php?action=template_edit&id=' . get_request_var('id') . '&view_rrd=' . $template_data_rrd['id']) . "'>" . ($i + 1) . ': ' . html_escape($template_data_rrd['data_source_name']) . '</a>' . ($template_data['data_sources'] == 0 ? "<a class='pic deleteMarker fa fa-times' title='" . __esc('Delete') . "' href='" . html_escape('data_templates.php?action=rrd_remove&id=' . $template_data_rrd['id'] . '&data_template_id=' . get_request_var('id')) . "'></a>" : "<a class='deleteMarkerDisabled fa fa-times' href='#' title='" . __esc('Data Templates in use can not be modified') . "'></a>") . "</li>\n";
+				print "<li class='subTab'><a " . (($template_data_rrd['id'] == get_request_var('view_rrd')) ? "class='pic selected'" : "class='pic'") . " href='" . html_escape('data_templates.php?action=template_edit&id=' . get_request_var('id') . '&view_rrd=' . $template_data_rrd['id']) . "'>" . ($i + 1) . ': ' . html_escape($template_data_rrd['data_source_name']) . '</a>' . ($template_data['data_sources'] == 0 ? "<a class='pic deleteMarker fa fa-times cactiPostAction' title='" . __esc('Delete') . "' href='#' data-url='" . html_escape('data_templates.php?action=rrd_remove&id=' . $template_data_rrd['id'] . '&data_template_id=' . get_request_var('id')) . "'></a>" : "<a class='deleteMarkerDisabled fa fa-times' href='#' title='" . __esc('Data Templates in use can not be modified') . "'></a>") . "</li>\n";
 
 				$i++;
 			}
@@ -983,6 +1011,11 @@ function template_edit() {
 	<?php
 }
 
+/**
+ * Handles the template. Used as part of Cacti's data templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function template() {
 	global $ds_actions, $item_rows;
 
@@ -1087,7 +1120,7 @@ function template() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -1111,7 +1144,7 @@ function template() {
 		}
 
 		$(function() {
-			$('#has_data, #refresh').on('click', function() {
+			$('#has_data').on('click', function() {
 				applyFilter();
 			});
 
@@ -1280,4 +1313,3 @@ function template() {
 
 	form_end();
 }
-

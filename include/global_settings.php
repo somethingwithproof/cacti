@@ -295,6 +295,8 @@ $settings = array(
 			'description' => __('Select which files you wish to place in Debug mode regardless of the Generic Log Level setting.  Any files selected will be treated as they are in Debug mode.'),
 			'method' => 'drop_multi',
 			'array' => $logfiles,
+			'select_all_text' => __('Select File(s)'),
+			'select_count_text' => __('Files Selected'),
 			'default' => ''
 		),
 		'selective_plugin_debug' => array(
@@ -302,6 +304,8 @@ $settings = array(
 			'description' => __('Select which Plugins you wish to place in Debug mode regardless of the Generic Log Level setting.  Any files used by this plugin will be treated as they are in Debug mode.'),
 			'method' => 'drop_multi',
 			'array' => $logplugins,
+			'select_all_text' => __('Select Plugin(s)'),
+			'select_count_text' => __('Plugins Selected'),
 			'default' => ''
 		),
 		'selective_device_debug' => array(
@@ -716,7 +720,7 @@ $settings = array(
 			'method' => 'drop_array',
 			'friendly_name' => __('Auth Protocol (v3)'),
 			'description' => __('Default SNMPv3 Authorization Protocol for all new Devices.'),
-			'default' => 'MD5',
+			'default' => 'SHA',
 			'array' => $snmp_auth_protocols,
 		),
 		'snmp_username' => array(
@@ -739,7 +743,7 @@ $settings = array(
 			'method' => 'drop_array',
 			'friendly_name' => __('Privacy Protocol (v3)'),
 			'description' => __('Default SNMPv3 Privacy Protocol for all new Devices.'),
-			'default' => 'DES',
+			'default' => 'AES',
 			'array' => $snmp_priv_protocols,
 		),
 		'snmp_priv_passphrase' => array(
@@ -890,6 +894,20 @@ $settings = array(
 			'array' => array(
 				1 => __('Yes'),
 				0 => __('No')
+			)
+		),
+		'select2_search_rows' => array(
+			'friendly_name' => __('Select Search Minimum Rows'),
+			'description' => __('The minimum number of options a dropdown must have before Cacti shows a search box inside it.  Choose \'Always\' to show the search box regardless of the number of options.'),
+			'method' => 'drop_array',
+			'default' => '10',
+			'array' => array(
+				'0'  => __('Always'),
+				'5'  => '5',
+				'10' => '10',
+				'15' => '15',
+				'20' => '20',
+				'25' => '25'
 			)
 		),
 		'autocomplete_rows' => array(
@@ -1214,12 +1232,6 @@ $settings = array(
 			'default' => 'on',
 			'tab' => 'poller'
 		),
-		'enable_snmp_agent' => array(
-			'friendly_name' => __('SNMP Agent Support Enabled'),
-			'description' => __('If this option is checked, Cacti will populate SNMP Agent tables with Cacti device and system information.  It does not enable the SNMP Agent itself.'),
-			'method' => 'checkbox',
-			'default' => 'on'
-		),
 		'poller_type' => array(
 			'friendly_name' => __('Poller Type'),
 			'description' => __('The poller type to use.  This setting will take affect at next polling interval.'),
@@ -1260,12 +1272,6 @@ $settings = array(
 			'method' => 'checkbox',
 			'default' => ''
 		),
-		'oid_increasing_check_disable' => array(
-			'friendly_name' => __('Disable increasing OID Check'),
-			'description' => __('Controls disabling check for increasing OID while walking OID tree.'),
-			'method' => 'checkbox',
-			'default' => ''
-		),
 		'remote_agent_timeout' => array(
 			'friendly_name' => __('Remote Agent Timeout'),
 			'description' => __('The amount of time, in seconds, that the Central Cacti web server will wait for a response from the Remote Data Collector to obtain various Device information before abandoning the request.  On Devices that are associated with Data Collectors other than the Central Cacti Data Collector, the Remote Agent must be used to gather Device information.'),
@@ -1279,6 +1285,48 @@ $settings = array(
 				30 => __('%d Seconds', 30),
 				60 => __('%d Seconds', 60)
 			)
+		),
+		'poller_refresh_output_table' => array(
+			'friendly_name' => __('Refresh Poller Table Per Cycle'),
+			'description' => __('This setting is for a single poller systems only to rebuild the poller output table on each polling cycle to prevent the memory table from swapping on very large systems with large databases that could use swap.'),
+			'method' => 'checkbox',
+			'default' => '',
+		),
+		'disable_cache_replication' => array(
+			'friendly_name' => __('Disable Resource Cache Replication'),
+			'description' => __('By default, the main Cacti Data Collector will cache the entire web site and plugins into a Resource Cache.  Then, periodically the Remote Data Collectors will update themselves with any updates from the main Cacti Data Collector.  This Resource Cache essentially allows Remote Data Collectors to self upgrade.  If you do not wish to use this option, you can disable it using this setting.'),
+			'method' => 'checkbox',
+			'default' => ''
+		),
+		'snmp_behavior_header' => array(
+			'friendly_name' => __('SNMP Behavior'),
+			'method' => 'spacer',
+		),
+		'enable_snmp_agent' => array(
+			'friendly_name' => __('SNMP Agent Support Enabled'),
+			'description' => __('If this option is checked, Cacti will populate SNMP Agent tables with Cacti device and system information.  It does not enable the SNMP Agent itself.'),
+			'method' => 'checkbox',
+			'default' => 'on'
+		),
+		'snmp_md5_des_enabled' => array(
+			'friendly_name' => __('Enable MD5 and DES for SNMPv3'),
+			'description' => __('The MD5 authentication and DES privacy algorithms are legacy, weak, and unavailable on hardened (FIPS) PHP and Net-SNMP builds.  When disabled, MD5 and DES are removed from the SNMPv3 Authentication and Privacy Protocol dropdowns shown when editing a Device and in the Automation SNMP Options, leaving only the stronger SHA and AES algorithms.'),
+			'method' => 'checkbox',
+			'default' => ''
+		),
+		'snmp_credential_cache' => array(
+			'friendly_name' => __('Enable Credential Cache'),
+			'description' => __('Pre-harden and cache SNMPv3 credential arguments once per credential change so each poller process reuses them instead of rebuilding them on every request.  This yields a marginal savings when collecting with SNMPv3 credentials through the Net-SNMP binaries.  The php-snmp extension handles most SNMPv3 gets in-process and bypasses this cache, but the Net-SNMP binaries (and therefore this cache) are still used for SNMP walks, hex output, requests that set a context or engine id, and protocol combinations that the running PHP version does not support.  Enable this if you collect any of those workloads with SNMPv3 credentials.'),
+			'method' => 'checkbox',
+			'default' => ''
+		),
+		'max_get_size' => array(
+			'friendly_name' => __('SNMP Get OID Limit'),
+			'description' => __('The default maximum number of SNMP Get OIDs to issue per snmpget request.  For Devices, this setting is controlled at the Device level.  You should only use this setting when using Cacti\'s SNMP API natively in your scripts or plugins.'),
+			'method' => 'textbox',
+			'default' => '10',
+			'max_length' => '10',
+			'size' => '5'
 		),
 		'snmp_bulk_walk_size' => array(
 			'friendly_name' => __('SNMP Bulkwalk Fetch Size'),
@@ -1300,23 +1348,9 @@ $settings = array(
 				'200' => '200'
 			)
 		),
-		'max_get_size' => array(
-			'friendly_name' => __('SNMP Get OID Limit'),
-			'description' => __('The default maximum number of SNMP Get OIDs to issue per snmpget request.  For Devices, this setting is controlled at the Device level.  You should only use this setting when using Cacti\'s SNMP API natively in your scripts or plugins.'),
-			'method' => 'textbox',
-			'default' => '10',
-			'max_length' => '10',
-			'size' => '5'
-		),
-		'poller_refresh_output_table' => array(
-			'friendly_name' => __('Refresh Poller Table Per Cycle'),
-			'description' => __('This setting is for a single poller systems only to rebuild the poller output table on each polling cycle to prevent the memory table from swapping on very large systems with large databases that could use swap.'),
-			'method' => 'checkbox',
-			'default' => '',
-		),
-		'disable_cache_replication' => array(
-			'friendly_name' => __('Disable Resource Cache Replication'),
-			'description' => __('By default, the main Cacti Data Collector will cache the entire web site and plugins into a Resource Cache.  Then, periodically the Remote Data Collectors will update themselves with any updates from the main Cacti Data Collector.  This Resource Cache essentially allows Remote Data Collectors to self upgrade.  If you do not wish to use this option, you can disable it using this setting.'),
+		'oid_increasing_check_disable' => array(
+			'friendly_name' => __('Disable increasing OID Check'),
+			'description' => __('Controls disabling check for increasing OID while walking OID tree.'),
 			'method' => 'checkbox',
 			'default' => ''
 		),
@@ -1709,7 +1743,7 @@ $settings = array(
 		),
 		'ldap_server' => array(
 			'friendly_name' => __('Server(s)'),
-			'description' => __('A space delimited list of DNS hostnames or IP address of for valid LDAP servers.  Cacti will attempt to use the LDAP servers from left to right to authenticate a user.'),
+			'description' => __('A space delimited list of DNS hostnames or IP addresses for valid LDAP servers.  Cacti will attempt to use the LDAP servers from left to right to authenticate a user.<br><br>For One-Time Password (OTP/MFA) logins, do not use a space delimited multi-server list.  On a failed bind Cacti advances to the next server and re-binds with the same credentials, and the already-consumed one-time code will be rejected.  Instead enter a single, resilient DNS name fronted by a DNS load balancer (VIP) so that server failover is handled below Cacti and only one authentication bind is ever performed.'),
 			'method' => 'textbox',
 			'size' => '80',
 			'max_length' => '255'
@@ -1770,7 +1804,7 @@ $settings = array(
 			'friendly_name' => __('TLS Certificate Requirements'),
 			'description' => __('Should LDAP verify TLS Certificates when received by the Client.'),
 			'method' => 'drop_array',
-			'default' => LDAP_OPT_X_TLS_NEVER,
+			'default' => LDAP_OPT_X_TLS_DEMAND,
 			'array' => $ldap_tls_cert_req
 		),
 		'ldap_referrals' => array(
@@ -1785,7 +1819,7 @@ $settings = array(
 		),
 		'ldap_mode' => array(
 			'friendly_name' => __('Mode'),
-			'description' => __('Mode which cacti will attempt to authenticate against the LDAP server.<blockquote><i>No Searching</i> - No Distinguished Name (DN) searching occurs, just attempt to bind with the provided Distinguished Name (DN) format.<br><br><i>Anonymous Searching</i> - Attempts to search for username against LDAP directory via anonymous binding to locate the user\'s Distinguished Name (DN).<br><br><i>Specific Searching</i> - Attempts search for username against LDAP directory via Specific Distinguished Name (DN) and Specific Password for binding to locate the user\'s Distinguished Name (DN).'),
+			'description' => __('Mode which cacti will attempt to authenticate against the LDAP server.<blockquote><i>No Searching</i> - No Distinguished Name (DN) searching occurs, just attempt to bind with the provided Distinguished Name (DN) format.<br><br><i>Anonymous Searching</i> - Attempts to search for username against LDAP directory via anonymous binding to locate the user\'s Distinguished Name (DN).<br><br><i>Specific Searching</i> - Attempts search for username against LDAP directory via Specific Distinguished Name (DN) and Specific Password for binding to locate the user\'s Distinguished Name (DN).<br><br><i>One-Time Passwords (OTP/MFA)</i> - Cacti binds the user\'s password only once, during final authentication.  <i>No Searching</i> performs no directory lookup and binds directly using the Distinguished Name (DN) template, so it is safe for OTP when the DN template alone identifies the user.  When a directory lookup is required to resolve the DN, use <i>Specific Searching</i> with a dedicated service account (or <i>Anonymous Searching</i> where the directory permits it) so the lookup never consumes the user\'s single-use code.  For resilient OTP deployments use a single DNS load balancer name in the Server(s) field rather than a space delimited multi-server list, which would re-attempt the bind with an already-consumed one-time password.'),
 			'method' => 'drop_array',
 			'default' => '0',
 			'array' => $ldap_modes
@@ -2562,7 +2596,9 @@ $settings = array(
 			'friendly_name' => __('Graph Templates to Spike Kill'),
 			'method' => 'drop_multi',
 			'description' => __('When performing batch spike removal, only the templates selected below will be acted on.'),
-			'array' => array()
+			'array' => array(),
+			'select_all_text' => __('Select Template(s)'),
+			'select_count_text' => __('Templates Selected')
 		),
 		'spikekill_purge' => array(
 			'friendly_name' => __('Backup Retention'),

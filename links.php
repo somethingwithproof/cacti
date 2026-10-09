@@ -134,6 +134,11 @@ default:
 	break;
 }
 
+/**
+ * Handles the form actions. Used as part of Cacti's links functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_actions() {
 	global $link_actions;
 
@@ -241,6 +246,11 @@ function form_actions() {
 	bottom_footer();
 }
 
+/**
+ * Handles the pages. Used as part of Cacti's links functionality.
+ *
+ * @return void No value is returned.
+ */
 function pages() {
 	global $item_rows, $config, $link_actions;
 
@@ -340,7 +350,7 @@ function pages() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __('Go');?>' title='<?php print __esc('Apply Filter');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __('Go');?>' title='<?php print __esc('Apply Filter');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __('Clear');?>' title='<?php print __esc('Reset filters');?>'>
 						</span>
 					</td>
@@ -404,13 +414,13 @@ function pages() {
 		foreach ($pages as $page) {
 			form_alternate_row('line' . $page['id']);
 
-			$actions = '<a class="pic"  href="' . html_escape('links.php?action=edit&id='.$page['id']) . '" title="' . __esc('Edit Page') . '"><img src="' . $config['url_path'] . 'images/application_edit.png" alt=""></a>';
+			$actions = '<a class="pic"  href="' . html_escape('links.php?action=edit&id='.$page['id']) . '" title="' . __esc('Edit Page') . '"><i class="fa fa-edit editTemplate"></i></a>';
 
 			if ($page['enabled'] == 'on') {
-				$actions .= '<a class="pic" href="' . html_escape('link.php?id=' . $page['id']) . '" title="' . __esc('View Page') . '"><img src="' . $config['url_path'] . 'images/view_page.png" alt=""></a>';
+				$actions .= '<a class="pic" href="' . html_escape('link.php?id=' . $page['id']) . '" title="' . __esc('View Page') . '"><i class="fa fa-eye deviceUp"></i></a>';
 			}
 
-			form_selectable_cell($actions, $page['id'], '50');
+			form_selectable_cell($actions, $page['id'], '1%');
 			form_selectable_ecell($page['contentfile'], $page['id']);
 			form_selectable_ecell($page['title'], $page['id']);
 			form_selectable_ecell($style_translate[$page['style']] . ($page['style'] == 'CONSOLE' ? ' ( ' . ($page['extendedstyle'] == '' ? __('External Links'):$page['extendedstyle']) . ' )':''), $page['id']);
@@ -418,7 +428,7 @@ function pages() {
 
 			if (get_request_var('sort_column') == 'sortorder') {
 				if ($i != 0) {
-					$sort = '<a class="pic fa fa-caret-up moveArrow" href="' . html_escape('links.php?action=move_page_up&order=' . $page['sortorder'] . '&id='.$page['id']) . '"></a>';
+					$sort = '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="#" data-url="' . html_escape('links.php?action=move_page_up&order=' . $page['sortorder'] . '&id='.$page['id']) . '"></a>';
 				} else {
 					$sort = '<span class="moveArrowNone"></span>';
 				}
@@ -426,10 +436,10 @@ function pages() {
 				if ($i == cacti_sizeof($pages)-1) {
 					$sort .= '<span class="moveArrowNone"></span>';
 				} else {
-					$sort .= '<a class="pic fa fa-caret-down moveArrow" href="' . html_escape('links.php?action=move_page_down&order=' . $page['sortorder'] . '&id=' . $page['id']) . '"></a>';
+					$sort .= '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="#" data-url="' . html_escape('links.php?action=move_page_down&order=' . $page['sortorder'] . '&id=' . $page['id']) . '"></a>';
 				}
 
-				form_selectable_cell($sort, $page['id'], '', 'center');
+				form_selectable_cell($sort, $page['id'], '1%', 'center');
 			} else {
 				form_selectable_cell(__('Sort for Ordering'), $page['id']);
 			}
@@ -454,6 +464,13 @@ function pages() {
 	form_end();
 }
 
+/**
+ * Handles the page delete. Used as part of Cacti's links functionality.
+ *
+ * @param int $id The ID.
+ *
+ * @return void No value is returned.
+ */
 function page_delete($id) {
 	db_execute_prepared('DELETE FROM external_links WHERE id = ?', array($id));
 	db_execute_prepared('DELETE FROM user_auth_realm WHERE realm_id = ?', array($id+10000));
@@ -462,6 +479,11 @@ function page_delete($id) {
 	page_resort();
 }
 
+/**
+ * Handles the page resort. Used as part of Cacti's links functionality.
+ *
+ * @return void No value is returned.
+ */
 function page_resort() {
 	$pages = db_fetch_assoc("SELECT * FROM external_links ORDER BY sortorder");
 
@@ -474,6 +496,15 @@ function page_resort() {
 	}
 }
 
+/**
+ * Handles the page move. Used as part of Cacti's links functionality.
+ *
+ * @param int $pageid The pageid.
+ * @param mixed $junk The junk.
+ * @param int $direction The direction.
+ *
+ * @return void No value is returned.
+ */
 function page_move($pageid, $junk, $direction) {
 	$oldorder = db_fetch_cell_prepared('SELECT sortorder FROM external_links WHERE id = ?', array($pageid));
 	$neworder = $oldorder + $direction;
@@ -485,6 +516,11 @@ function page_move($pageid, $junk, $direction) {
 	}
 }
 
+/**
+ * Handles the edit page. Used as part of Cacti's links functionality.
+ *
+ * @return void No value is returned.
+ */
 function edit_page() {
 	global $config, $poller_intervals;
 

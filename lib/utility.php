@@ -22,10 +22,15 @@
  +-------------------------------------------------------------------------+
 */
 
-/* update_replication_crc - update hash stored in settings table to inform
-   remote pollers to replicate tables
-   @arg $poller_id - the id of the poller impacted by hash update
-   @arg $variable  - the variable name to store in the settings table */
+/**
+ * Update hash stored in settings table to inform remote pollers to replicate tables. Used as part
+ * of Cacti's lib functionality.
+ *
+ * @param int $poller_id The id of the poller impacted by hash update.
+ * @param string $variable The variable name to store in the settings table.
+ *
+ * @return void No value is returned.
+ */
 function update_replication_crc($poller_id, $variable) {
 	try {
 		$entropy = bin2hex(random_bytes(16));
@@ -40,6 +45,11 @@ function update_replication_crc($poller_id, $variable) {
 		array($setting_name, $hash));
 }
 
+/**
+ * Handles the repopulate poller cache. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function repopulate_poller_cache() {
 	global $config;
 
@@ -122,6 +132,15 @@ function repopulate_poller_cache() {
 	}
 }
 
+/**
+ * Updates the poller cache from query. Used as part of Cacti's lib functionality.
+ *
+ * @param int $host_id The host ID.
+ * @param int $data_query_id The data query ID.
+ * @param array $local_data_ids The local data IDS.
+ *
+ * @return void No value is returned.
+ */
 function update_poller_cache_from_query($host_id, $data_query_id, $local_data_ids) {
 	global $config;
 
@@ -170,6 +189,15 @@ function update_poller_cache_from_query($host_id, $data_query_id, $local_data_id
 	}
 }
 
+/**
+ * Rebuilds the poller cache entries for a single data source. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param mixed $data_source A data_local row, or the local_data_id to read one with.
+ * @param bool $commit Whether to write the rebuilt entries straight to poller_item.
+ *
+ * @return array The rebuilt poller items, or an empty array when they were committed.
+ */
 function update_poller_cache($data_source, $commit = false) {
 	global $config;
 
@@ -229,7 +257,10 @@ function update_poller_cache($data_source, $commit = false) {
 
 			$params = array();
 			if (cacti_sizeof($field) && $field['output_type'] != '') {
-				$output_type_sql = ' AND sqgr.snmp_query_graph_id = ' . $field['output_type'];
+				/* GHSA-xhpr-w454-cc9w: output_type is a stored snmp_query_graph_id
+				 * interpolated into the query below; cast it so a tampered
+				 * data-query field cannot inject SQL second-hand. */
+				$output_type_sql = ' AND sqgr.snmp_query_graph_id = ' . (int) $field['output_type'];
 			} else {
 				$output_type_sql = '';
 			}
@@ -598,6 +629,13 @@ function update_poller_cache($data_source, $commit = false) {
 	}
 }
 
+/**
+ * Handles the push out data input method. Used as part of Cacti's lib functionality.
+ *
+ * @param int $data_input_id The data input ID.
+ *
+ * @return void No value is returned.
+ */
 function push_out_data_input_method($data_input_id) {
 	$data_sources = db_fetch_assoc_prepared('SELECT ' . SQL_NO_CACHE . ' dl.*, COALESCE(h.poller_id, 1) AS poller_id
 		FROM data_local AS dl
@@ -644,10 +682,15 @@ function push_out_data_input_method($data_input_id) {
 	}
 }
 
-/** mass update of poller cache - can run in parallel to poller
- * @param array/int $local_data_ids - either a scalar (all ids) or an array of data source to act on
- * @param array $poller_items - the new items for poller cache
- * @param int $poller_id - the poller_id of the buffer
+/**
+ * Mass update of poller cache - can run in parallel to poller. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param array/int $local_data_ids Either a scalar (all ids) or an array of data source to act on.
+ * @param mixed &$poller_items The new items for poller cache.
+ * @param int $poller_id The poller_id of the buffer.
+ *
+ * @return void No value is returned.
  */
 function poller_update_poller_cache_from_buffer($local_data_ids, &$poller_items, $poller_id = 1) {
 	global $config;
@@ -677,11 +720,11 @@ function poller_update_poller_cache_from_buffer($local_data_ids, &$poller_items,
 							AND local_data_id IN ($ids)",
 							array($poller_id), true, $rcnn_id);
 					} else {
-						raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+						raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 						$raised = true;
 					}
 				} else {
-					raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+					raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 					$raised = true;
 				}
 			}
@@ -757,11 +800,11 @@ function poller_update_poller_cache_from_buffer($local_data_ids, &$poller_items,
 						if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
 							db_execute($sql_prefix . $buffer . $sql_suffix, true, $rcnn_id);
 						} elseif (!$raised) {
-							raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+							raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 							$raised = true;
 						}
 					} elseif (!$raised) {
-						raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+						raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 						$raised = true;
 					}
 				}
@@ -783,11 +826,11 @@ function poller_update_poller_cache_from_buffer($local_data_ids, &$poller_items,
 				if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
 					db_execute($sql_prefix . $buffer . $sql_suffix, true, $rcnn_id);
 				} else {
-					raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+					raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 					$raised = true;
 				}
 			} elseif (!$raised) {
-				raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+				raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 				$raised = true;
 			}
 		}
@@ -810,10 +853,10 @@ function poller_update_poller_cache_from_buffer($local_data_ids, &$poller_items,
 						AND local_data_id IN ($ids)",
 						array($poller_id), true, $rcnn_id);
 				} elseif (!$raised) {
-					raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+					raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 				}
 			} elseif (!$raised) {
-				raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+				raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 			}
 		}
 	}
@@ -823,13 +866,47 @@ function poller_update_poller_cache_from_buffer($local_data_ids, &$poller_items,
 	 * for Caching.
 	 */
 	set_config_option('time_last_change_poller_item', time());
+
+	/* Only SNMPv3 credentials live in the shared credential cache. Bump the version
+	 * only when this flush touched v3 poller items, so a non-v3 (or non-SNMP) data
+	 * source change does not force a needless credential cache rebuild. */
+	if ($ids != '') {
+		$v3_items = db_fetch_cell_prepared("SELECT COUNT(*) FROM poller_item
+			WHERE poller_id = ?
+			AND local_data_id IN ($ids)
+			AND snmp_version = 3",
+			array($poller_id));
+	} else {
+		$v3_items = db_fetch_cell('SELECT COUNT(*) FROM poller_item WHERE snmp_version = 3');
+	}
+
+	if ($v3_items > 0) {
+		$cred_version = uniqid('', true);
+		set_config_option('snmp_cred_version', $cred_version);
+
+		/* A remote collector builds its host-local credential cache from its own
+		 * database copy and reads this token from its own settings, so the main
+		 * database bump alone never invalidates it. Push the same token to the
+		 * affected remote poller so its next poll rebuilds the cache instead of
+		 * serving stale/rotated credentials until the daily out-of-band rebuild. */
+		if ($poller_id > 1 && remote_poller_up($poller_id)) {
+			if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
+				db_execute_prepared('REPLACE INTO settings (name, value) VALUES (\'snmp_cred_version\', ?)',
+					array($cred_version), true, $rcnn_id);
+			}
+		}
+	}
 }
 
-/** for a given data template, update all input data and the poller cache
- * @param int $host_id - id of host, if any
- * @param int $local_data_id - id of a single data source, if any
- * @param int $data_template_id - id of data template
- * works on table data_input_data and poller cache
+/**
+ * For a given data template, update all input data and the poller cache. Used as part of Cacti's
+ * lib functionality.
+ *
+ * @param int $host_id Id of host, if any.
+ * @param int $local_data_id Id of a single data source, if any.
+ * @param int $data_template_id Id of data template works on table data_input_data and poller cache.
+ *
+ * @return void No value is returned.
  */
 function push_out_host($host_id, $local_data_id = 0, $data_template_id = 0) {
 	global $config;
@@ -1078,6 +1155,13 @@ function push_out_host($host_id, $local_data_id = 0, $data_template_id = 0) {
 	api_data_source_cache_crc_update($poller_id);
 }
 
+/**
+ * Handles the data input whitelist check. Used as part of Cacti's lib functionality.
+ *
+ * @param int $data_input_id The data input ID.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function data_input_whitelist_check($data_input_id) {
 	global $config;
 
@@ -1144,6 +1228,14 @@ function data_input_whitelist_check($data_input_id) {
 	}
 }
 
+/**
+ * Legacy wrapper function for Cacti plugins that may still be using the function under it's old
+ * name. Used as part of Cacti's lib functionality.
+ *
+ * @param int $poller_id The poller to get server info from.
+ *
+ * @return array Information about the database server.
+ */
 function utilities_get_mysql_info($poller_id = 1) {
 	global $local_db_cnn_id;
 
@@ -1153,9 +1245,9 @@ function utilities_get_mysql_info($poller_id = 1) {
 		$variables = array_rekey(db_fetch_assoc('SHOW GLOBAL VARIABLES', false, $local_db_cnn_id), 'Variable_name', 'Value');
 	}
 
-	if (strpos($variables['version'], 'MariaDB') !== false) {
+	if (stripos($variables['version'], 'MariaDB') !== false) {
 		$database = 'MariaDB';
-		$version  = str_replace('-MariaDB', '', $variables['version']);
+		$version  = str_ireplace('-MariaDB', '', $variables['version']);
 
 		if (isset($variables['innodb_version'])) {
 			$link_ver = substr($variables['innodb_version'], 0, 3);
@@ -1176,6 +1268,428 @@ function utilities_get_mysql_info($poller_id = 1) {
 	);
 }
 
+/**
+ * utilities_mysql_variable_capabilities - return the support matrix for every
+ * MySQL/MariaDB system variable that Cacti recommends tuning.  Each entry
+ * carries a human readable description and its available settings (used for the
+ * hover hint), plus the per-engine version boundaries at which the variable was
+ * introduced, deprecated or removed.  A missing engine key means the variable
+ * does not exist for that engine (rendered as N/A); an empty engine array means
+ * the variable is supported for every version of that engine.
+ *
+ * @return array The capability matrix keyed by variable name.
+ */
+function utilities_mysql_variable_capabilities() {
+	static $matrix = null;
+
+	if ($matrix !== null) {
+		return $matrix;
+	}
+
+	$matrix = array(
+		'collation_server' => array(
+			'description' => __('Default collation used by the server when creating databases and tables.'),
+			'settings'    => __('e.g. utf8mb4_unicode_ci, utf8mb4_general_ci.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'character_set_server' => array(
+			'description' => __('Default character set used by the server.'),
+			'settings'    => __('e.g. utf8mb4, utf8, latin1.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'character_set_client' => array(
+			'description' => __('Character set the client uses when sending statements to the server.'),
+			'settings'    => __('e.g. utf8mb4, utf8, latin1.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'max_connections' => array(
+			'description' => __('Maximum number of simultaneous client connections permitted.'),
+			'settings'    => __('Integer; default 151. Allow enough for the pollers plus user logins.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'table_cache' => array(
+			'description' => __('Legacy name for the open-table cache; renamed to table_open_cache.'),
+			'settings'    => __('Integer. Use table_open_cache on modern servers.'),
+			'MariaDB'     => array('removed' => '10.0.0'),
+			'MySQL'       => array('removed' => '5.1.3'),
+		),
+		'max_allowed_packet' => array(
+			'description' => __('Maximum size of one packet or any generated/intermediate string.'),
+			'settings'    => __('Bytes; keep at or above 16M for remote pollers.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'max_heap_table_size' => array(
+			'description' => __('Maximum size to which user-created MEMORY tables may grow.'),
+			'settings'    => __('Bytes; sized relative to total system memory.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'tmp_table_size' => array(
+			'description' => __('Maximum size of internal in-memory temporary tables before they spill to disk.'),
+			'settings'    => __('Bytes; a larger value keeps temporary tables in memory.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'join_buffer_size' => array(
+			'description' => __('Minimum per-join buffer size for joins that do not use indexes.'),
+			'settings'    => __('Bytes; per-connection allocation, default 262144.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'sort_buffer_size' => array(
+			'description' => __('Per-session buffer allocated for sorts (ORDER BY / GROUP BY).'),
+			'settings'    => __('Bytes; per-connection allocation, default 2097152.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_file_per_table' => array(
+			'description' => __('Store each InnoDB table and its indexes in its own .ibd tablespace file.'),
+			'settings'    => __('ON or OFF; ON is recommended.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_file_format' => array(
+			'description' => __('InnoDB on-disk file format (Antelope or Barracuda); Barracuda is now the only format.'),
+			'settings'    => __('Antelope, Barracuda.'),
+			'MariaDB'     => array('deprecated' => '10.2.2', 'removed' => '10.3.1'),
+			'MySQL'       => array('deprecated' => '5.7.7', 'removed' => '8.0.0'),
+		),
+		'innodb_large_prefix' => array(
+			'description' => __('Allow index key prefixes longer than 767 bytes (requires the Barracuda format).'),
+			'settings'    => __('ON/1 or OFF/0; this behaviour is now always enabled.'),
+			'MariaDB'     => array('deprecated' => '10.2.2', 'removed' => '10.3.1'),
+			'MySQL'       => array('deprecated' => '5.7.7', 'removed' => '8.0.0'),
+		),
+		'innodb_buffer_pool_size' => array(
+			'description' => __('Total memory InnoDB uses to cache table and index data.'),
+			'settings'    => __('Bytes; commonly 25%-80% of total system memory.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_doublewrite' => array(
+			'description' => __('Write pages twice (the doublewrite buffer) to protect against partial page writes.'),
+			'settings'    => __('ON or OFF.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_additional_mem_pool_size' => array(
+			'description' => __('Legacy pool for the InnoDB internal data dictionary and structures.'),
+			'settings'    => __('Bytes; obsolete on modern servers.'),
+			'MariaDB'     => array('removed' => '10.0.0'),
+			'MySQL'       => array('removed' => '5.7.4'),
+		),
+		'innodb_lock_wait_timeout' => array(
+			'description' => __('Seconds an InnoDB transaction waits for a row lock before giving up.'),
+			'settings'    => __('Seconds; default 50.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_flush_method' => array(
+			'description' => __('Method used to flush data and log files to disk.'),
+			'settings'    => __('O_DIRECT, fsync, O_DSYNC, and similar.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_flush_log_at_trx_commit' => array(
+			'description' => __('Controls how the redo log is written and flushed at transaction commit.'),
+			'settings'    => __('0, 1, or 2.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_file_io_threads' => array(
+			'description' => __('Legacy single setting for InnoDB file I/O threads, replaced by the read/write I/O thread settings.'),
+			'settings'    => __('Integer; superseded by innodb_read_io_threads and innodb_write_io_threads.'),
+			'MariaDB'     => array('removed' => '5.5.0'),
+			'MySQL'       => array('removed' => '5.5.0'),
+		),
+		'innodb_flush_log_at_timeout' => array(
+			'description' => __('Write and flush the InnoDB redo log every N seconds.'),
+			'settings'    => __('Seconds (1-2700); default 1.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_read_io_threads' => array(
+			'description' => __('Number of I/O threads used for read operations in InnoDB.'),
+			'settings'    => __('1-64; default 4.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_write_io_threads' => array(
+			'description' => __('Number of I/O threads used for write operations in InnoDB.'),
+			'settings'    => __('1-64; default 4.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_buffer_pool_instances' => array(
+			'description' => __('Number of regions the InnoDB buffer pool is divided into.'),
+			'settings'    => __('1-64; MariaDB removed this in 10.6.'),
+			'MariaDB'     => array('deprecated' => '10.5.0', 'removed' => '10.6.0'),
+			'MySQL'       => array(),
+		),
+		'innodb_io_capacity' => array(
+			'description' => __('Estimated I/O operations per second available to InnoDB background tasks.'),
+			'settings'    => __('Integer; use higher values for SSD/NVMe storage.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_io_capacity_max' => array(
+			'description' => __('Maximum IOPS InnoDB may use when flushing falls behind.'),
+			'settings'    => __('Integer; use higher values for SSD/NVMe storage.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array(),
+		),
+		'innodb_flush_neighbors' => array(
+			'description' => __('Flush neighbouring dirty pages in the same extent when flushing a page.'),
+			'settings'    => __('0, 1, or 2; use 0 on SSD storage.'),
+			'MariaDB'     => array(),
+			'MySQL'       => array('deprecated' => '8.0.20', 'removed' => '8.4.0'),
+		),
+		'innodb_use_atomic_writes' => array(
+			'description' => __('Use hardware atomic writes (MariaDB) so the doublewrite buffer can be safely disabled.'),
+			'settings'    => __('ON or OFF; MariaDB only.'),
+			'MariaDB'     => array(),
+		),
+		'innodb_snapshot_isolation' => array(
+			'description' => __('Enforce strict snapshot isolation for InnoDB transactions.'),
+			'settings'    => __('ON or OFF; back-ported to MariaDB 10.6.18+, 10.11.8+ and 11.4.2+. Set OFF for the Cacti poller.'),
+			'MariaDB'     => array('introduced' => array('10.6.18', '10.11.8', '11.4.2')),
+		),
+	);
+
+	return $matrix;
+}
+
+/**
+ * utilities_mysql_normalize_version - reduce a server version string to its
+ * leading numeric dotted component so version_compare() behaves predictably.
+ * Server version() output often carries suffixes such as '-1:10.11.2+maria...'
+ * or '-0ubuntu0.22.04.1' that version_compare() treats as pre-release markers.
+ *
+ * @param string $version The raw version string.
+ *
+ * @return string The numeric major.minor.patch prefix, or the input unchanged.
+ */
+function utilities_mysql_normalize_version($version) {
+	if (preg_match('/^[0-9]+(\.[0-9]+)*/', $version, $matches)) {
+		return $matches[0];
+	}
+
+	return $version;
+}
+
+/**
+ * utilities_mysql_branch - return the major.minor branch of a version string.
+ *
+ * @param string $version The version string, e.g. '10.6.18'.
+ *
+ * @return string The branch, e.g. '10.6'.
+ */
+function utilities_mysql_branch($version) {
+	$parts = explode('.', $version);
+
+	return $parts[0] . '.' . (isset($parts[1]) ? $parts[1] : '0');
+}
+
+/**
+ * utilities_mysql_version_introduced - decide whether a variable that was
+ * introduced (and often back-ported to several stable branches) exists in the
+ * given version.  The variable is present when the version is at or after the
+ * introduction point for its own major.minor branch, or when the version lives
+ * on a branch newer than every branch that received a back-port.
+ *
+ * @param string       $version The detected engine version string.
+ * @param array|string $intro   One version, or a list of per-branch versions.
+ *
+ * @return bool True when the variable exists in the version.
+ */
+function utilities_mysql_version_introduced($version, $intro) {
+	if (!is_array($intro)) {
+		$intro = array($intro);
+	}
+
+	$vbranch = utilities_mysql_branch($version);
+	$newest  = '0';
+
+	foreach ($intro as $floor) {
+		$fbranch = utilities_mysql_branch($floor);
+
+		if (version_compare($fbranch, $newest, '>')) {
+			$newest = $fbranch;
+		}
+
+		if ($vbranch === $fbranch) {
+			return version_compare($version, $floor, '>=');
+		}
+	}
+
+	return version_compare($vbranch, $newest, '>');
+}
+
+/**
+ * utilities_mysql_variable_status - determine the support status of a single
+ * capability-matrix variable for a specific database engine and version.
+ *
+ * @param array  $cap      A single entry from utilities_mysql_variable_capabilities().
+ * @param string $database The detected engine, either 'MariaDB' or 'MySQL'.
+ * @param string $version  The detected engine version string.
+ *
+ * @return string One of 'ok', 'deprecated', 'removed' or 'na'.
+ */
+function utilities_mysql_variable_status($cap, $database, $version) {
+	if (!isset($cap[$database]) || !is_array($cap[$database])) {
+		return 'na';
+	}
+
+	if ($version === null || $version === '') {
+		return 'ok';
+	}
+
+	$version = utilities_mysql_normalize_version($version);
+	$bounds  = $cap[$database];
+
+	if (isset($bounds['introduced']) && !utilities_mysql_version_introduced($version, $bounds['introduced'])) {
+		return 'na';
+	}
+
+	if (isset($bounds['removed']) && version_compare($version, $bounds['removed'], '>=')) {
+		return 'removed';
+	}
+
+	if (isset($bounds['deprecated']) && version_compare($version, $bounds['deprecated'], '>=')) {
+		return 'deprecated';
+	}
+
+	return 'ok';
+}
+
+/**
+ * utilities_mysql_capability_cell - render the glyph for a capability-matrix
+ * cell based on the variable support status.
+ *
+ * @param string $status One of 'ok', 'deprecated', 'removed' or 'na'.
+ *
+ * @return string The HTML glyph for the status.
+ */
+function utilities_mysql_capability_cell($status) {
+	switch ($status) {
+		case 'removed':
+			return "<span class='deviceDown' title='" . __esc('Removed') . "'>R</span>";
+		case 'deprecated':
+			return "<span class='deviceRecovering' title='" . __esc('Deprecated') . "'>D</span>";
+		case 'na':
+			return "<span title='" . __esc('Not applicable to this engine') . "'>" . __('N/A') . '</span>';
+		default:
+			return "<i class='fa fa-check deviceUp' title='" . __esc('Supported') . "'></i>";
+	}
+}
+
+/**
+ * utilities_get_mysql_capabilities - render the MySQL/MariaDB capability matrix
+ * as a separate table in the Database section.  Each recommended variable is
+ * listed with its support status (supported, deprecated, removed or N/A) across
+ * the common MariaDB and MySQL releases.  Hovering a variable name shows a hint
+ * describing the feature and its available settings.
+ *
+ * @return void
+ */
+function utilities_get_mysql_capabilities() {
+	global $config;
+
+	$mysql_info = utilities_get_mysql_info($config['poller_id']);
+	$database   = $mysql_info['database'];
+
+	$capabilities = utilities_mysql_variable_capabilities();
+
+	// Each column maps a short release label to a representative patch release of
+	// that series so version_compare reflects a current, fully patched server
+	// (including back-ported features).
+	$columns = array(
+		'MariaDB' => array(
+			'10.5' => '10.5.27',
+			'10.6' => '10.6.21',
+			'11.4' => '11.4.5',
+			'11.8' => '11.8.2',
+		),
+		'MySQL' => array(
+			'8.0' => '8.0.40',
+			'8.4' => '8.4.4',
+			'9.x' => '9.1.0',
+		),
+	);
+
+	$total_columns = 1;
+
+	foreach ($columns as $versions) {
+		$total_columns += cacti_sizeof($versions);
+	}
+
+	print '<tr class="tableHeader tableFixed">';
+	print '<th colspan="2">' . __('%s Variable Capability Matrix', $database) . ' - ' . __('Support by engine and version for each Cacti-recommended variable') . '</th>';
+	print '</tr>';
+
+	form_alternate_row();
+	print "<td colspan='2' style='text-align:left;padding:0px'>";
+	print "<table id='mysql_capabilities' class='cactiTable' style='width:100%'>";
+	print '<thead>';
+	print "<tr class='tableHeader'>";
+	print "  <th class='tableSubHeaderColumn' rowspan='2'>" . __('Variable') . '</th>';
+
+	foreach ($columns as $engine => $versions) {
+		print "  <th class='tableSubHeaderColumn center' colspan='" . cacti_sizeof($versions) . "'>" . html_escape($engine) . '</th>';
+	}
+
+	print '</tr>';
+	print "<tr class='tableHeader'>";
+
+	foreach ($columns as $engine => $versions) {
+		foreach ($versions as $label => $v) {
+			print "  <th class='tableSubHeaderColumn center'>" . html_escape($label) . '</th>';
+		}
+	}
+
+	print '</tr>';
+	print '</thead>';
+
+	foreach ($capabilities as $name => $cap) {
+		form_alternate_row();
+
+		$title = html_escape($cap['description']) . '<br><br><strong>' . __esc('Available settings:') . '</strong> ' . html_escape($cap['settings']);
+
+		print "<td><span class='cactiTooltipHint' tabindex='0' title='" . $title . "'>" . html_escape($name) . '</span></td>';
+
+		foreach ($columns as $engine => $versions) {
+			foreach ($versions as $v) {
+				$status = utilities_mysql_variable_status($cap, $engine, $v);
+				print "<td class='center'>" . utilities_mysql_capability_cell($status) . '</td>';
+			}
+		}
+
+		form_end_row();
+	}
+
+	form_alternate_row();
+	$legend  = "<i class='fa fa-check deviceUp'></i> " . __('Supported') . ' &nbsp; ';
+	$legend .= "<span class='deviceRecovering'>D</span> " . __('Deprecated') . ' &nbsp; ';
+	$legend .= "<span class='deviceDown'>R</span> " . __('Removed') . ' &nbsp; ';
+	$legend .= __('N/A - Not applicable to this engine');
+	print "<td colspan='" . $total_columns . "' class='left'>" . $legend . '</td>';
+	form_end_row();
+
+	print '</table>';
+	print '</td>';
+	form_end_row();
+}
+
+/**
+ * Handles the utilities get mysql recommendations. Used as part of Cacti's lib functionality.
+ *
+ * @return int The resulting integer value.
+ */
 function utilities_get_mysql_recommendations() {
 	global $config, $local_db_cnn_id;
 
@@ -1194,10 +1708,10 @@ function utilities_get_mysql_recommendations() {
 
 	$recommendations = array(
 		'version' => array(
-			'value' => '5.6',
+			'value' => ($database == 'MariaDB' ? '10.5' : '8.0'),
 			'class' => 'warning',
 			'measure' => 'ge',
-			'comment' => __('MySQL 5.6+ and MariaDB 10.0+ are great releases, and are very good versions to choose. Make sure you run the very latest release though which fixes a long standing low level networking issue that was causing spine many issues with reliability.')
+			'comment' => __('MariaDB 10.5+ and MySQL 8.0+ are the recommended, supported releases (for example, the default database streams on Rocky Linux 9). Make sure you run the very latest release though which fixes a long standing low level networking issue that was causing spine many issues with reliability.')
 		)
 	);
 
@@ -1412,11 +1926,11 @@ function utilities_get_mysql_recommendations() {
 					'class' => 'warning',
 					'comment' => __('If you have SSD disks, use this suggestion.  If you have physical hard drives, use 2000 * the number of active drives in the array.  If using NVMe or PCIe Flash, much larger numbers as high as 200000 can be used.')
 					),
-				'innodb_flush_neighbor_pages' => array(
-					'value' => 'none',
-					'measure' => 'eq',
+				'innodb_flush_neighbors' => array(
+					'value' => '0',
+					'measure' => 'equalint',
 					'class' => 'warning',
-					'comment' => __('If you have SSD disks, use this suggestion. Otherwise, do not set this setting.')
+					'comment' => __('If you have SSD disks, set this to 0. Otherwise, do not set this setting.')
 					)
 			);
 		} else {
@@ -1448,11 +1962,11 @@ function utilities_get_mysql_recommendations() {
 					'class' => 'warning',
 					'comment' => __('If you have SSD disks, use this suggestion.  If you have physical hard drives, use 2000 * the number of active drives in the array.  If using NVMe or PCIe Flash, much larger numbers as high as 200000 can be used.')
 					),
-				'innodb_flush_neighbor_pages' => array(
-					'value' => 'none',
-					'measure' => 'eq',
+				'innodb_flush_neighbors' => array(
+					'value' => '0',
+					'measure' => 'equalint',
 					'class' => 'warning',
-					'comment' => __('If you have SSD disks, use this suggestion. Otherwise, do not set this setting.')
+					'comment' => __('If you have SSD disks, set this to 0. Otherwise, do not set this setting.')
 					)
 			);
 
@@ -1474,6 +1988,23 @@ function utilities_get_mysql_recommendations() {
 			'class' => 'error',
 			'comment' => __('When using MariaDB 10.2.4 and above, you can use atomic writes over the doublewrite buffer to increase performance.')
 		);
+	}
+
+	// Drop any recommendation for a variable that is deprecated, removed or does
+	// not exist in the detected engine and version so we only suggest tunables
+	// that are actually present on this server.
+	$capabilities = utilities_mysql_variable_capabilities();
+
+	foreach (array_keys($recommendations) as $rec_name) {
+		if (!isset($capabilities[$rec_name])) {
+			continue;
+		}
+
+		$status = utilities_mysql_variable_status($capabilities[$rec_name], $database, $version);
+
+		if ($status == 'deprecated' || $status == 'removed' || $status == 'na') {
+			unset($recommendations[$rec_name]);
+		}
 	}
 
 	if (file_exists('/etc/my.cnf.d/server.cnf')) {
@@ -1582,7 +2113,7 @@ function utilities_get_mysql_recommendations() {
 
 				if ($name == 'sort_buffer_size') {
 					if ($config['poller_id'] == 1) {
-						if (($database == 'MySQL' && version_compare($version, '8.0', '<')) || $database == 'MariaDB') {
+						if ($database == 'MariaDB') {
 							$totalMemorySans = db_fetch_cell('SELECT @@GLOBAL.key_buffer_size +
 								@@GLOBAL.query_cache_size +
 								@@GLOBAL.tmp_table_size +
@@ -1607,7 +2138,7 @@ function utilities_get_mysql_recommendations() {
 									@@GLOBAL.binlog_cache_size)');
 						}
 					} else {
-						if (($database == 'MySQL' && version_compare($version, '8.0', '<')) || $database == 'MariaDB') {
+						if ($database == 'MariaDB') {
 							$totalMemorySans = db_fetch_cell('SELECT @@GLOBAL.key_buffer_size +
 								@@GLOBAL.query_cache_size +
 								@@GLOBAL.tmp_table_size +
@@ -1634,7 +2165,7 @@ function utilities_get_mysql_recommendations() {
 					}
 				} else {
 					if ($config['poller_id'] == 1) {
-						if (($database == 'MySQL' && version_compare($version, '8.0', '<')) || $database == 'MariaDB') {
+						if ($database == 'MariaDB') {
 							$totalMemorySans = db_fetch_cell('SELECT @@GLOBAL.key_buffer_size +
 								@@GLOBAL.query_cache_size +
 								@@GLOBAL.tmp_table_size +
@@ -1659,7 +2190,7 @@ function utilities_get_mysql_recommendations() {
 									@@GLOBAL.binlog_cache_size)');
 						}
 					} else {
-						if (($database == 'MySQL' && version_compare($version, '8.0', '<')) || $database == 'MariaDB') {
+						if ($database == 'MariaDB') {
 							$totalMemorySans = db_fetch_cell('SELECT @@GLOBAL.key_buffer_size +
 								@@GLOBAL.query_cache_size +
 								@@GLOBAL.tmp_table_size +
@@ -1763,6 +2294,11 @@ function utilities_get_mysql_recommendations() {
 	return $result;
 }
 
+/**
+ * Handles the utilities PHP modules. Used as part of Cacti's lib functionality.
+ *
+ * @return string The resulting string.
+ */
 function utilities_php_modules() {
 	/*
 	   Gather phpinfo into a string variable - This has to be done before
@@ -1787,6 +2323,13 @@ function utilities_php_modules() {
 	return $php_info;
 }
 
+/**
+ * Handles the memory bytes. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $val The val.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function memory_bytes($val) {
 	$val  = trim($val);
 	$last = strtolower($val[strlen($val)-1]);
@@ -1803,6 +2346,13 @@ function memory_bytes($val) {
 	return $val;
 }
 
+/**
+ * Handles the memory readable. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $val The val.
+ *
+ * @return string The resulting string.
+ */
 function memory_readable($val) {
 	if ($val < 1024) {
 		$val_label = 'bytes';
@@ -1820,6 +2370,11 @@ function memory_readable($val) {
 	return $val . $val_label;
 }
 
+/**
+ * Handles the utilities get system memory. Used as part of Cacti's lib functionality.
+ *
+ * @return array An array of results.
+ */
 function utilities_get_system_memory() {
 	global $config;
 
@@ -1893,6 +2448,14 @@ function utilities_get_system_memory() {
 	return $memInfo;
 }
 
+/**
+ * Handles the utility PHP sort extensions. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $a The a.
+ * @param mixed $b The b.
+ *
+ * @return int The resulting integer value.
+ */
 function utility_php_sort_extensions($a, $b) {
 	$name_a = isset($a['name']) ? $a['name'] : '';
 	$name_b = isset($b['name']) ? $b['name'] : '';
@@ -1900,6 +2463,11 @@ function utility_php_sort_extensions($a, $b) {
 }
 
 
+/**
+ * Handles the utility PHP extensions. Used as part of Cacti's lib functionality.
+ *
+ * @return array An array of results.
+ */
 function utility_php_extensions() {
 	global $config;
 
@@ -1923,6 +2491,14 @@ function utility_php_extensions() {
 	return $ext;
 }
 
+/**
+ * Handles the utility PHP verify extensions. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$extensions The extensions.
+ * @param string $source The source.
+ *
+ * @return void No value is returned.
+ */
 function utility_php_verify_extensions(&$extensions, $source) {
 	global $config;
 
@@ -1968,6 +2544,11 @@ function utility_php_verify_extensions(&$extensions, $source) {
 	}
 }
 
+/**
+ * Handles the utility PHP recommends. Used as part of Cacti's lib functionality.
+ *
+ * @return array An array of results.
+ */
 function utility_php_recommends() {
 	global $config;
 
@@ -1992,6 +2573,16 @@ function utility_php_recommends() {
 	return $ext;
 }
 
+/**
+ * Handles the utility get formatted bytes. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $input_value The input value.
+ * @param string $wanted_type The wanted type.
+ * @param mixed &$output_value The output value.
+ * @param string $default_type The default type.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function utility_get_formatted_bytes($input_value, $wanted_type, &$output_value, $default_type = 'B') {
 
 	$default_type = strtoupper($default_type);
@@ -2025,6 +2616,14 @@ function utility_get_formatted_bytes($input_value, $wanted_type, &$output_value,
 	return $input_value;
 }
 
+/**
+ * Handles the utility PHP verify recommends. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$recommends The recommends.
+ * @param string $source The source.
+ *
+ * @return void No value is returned.
+ */
 function utility_php_verify_recommends(&$recommends, $source) {
 	global $original_memory_limit;
 
@@ -2080,6 +2679,13 @@ function utility_php_verify_recommends(&$recommends, $source) {
 	);
 }
 
+/**
+ * Handles the utility PHP set recommends text. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$recs The recs.
+ *
+ * @return void No value is returned.
+ */
 function utility_php_set_recommends_text(&$recs) {
 	if (is_array($recs) && cacti_sizeof($recs)) {
 		foreach ($recs as $name => $recommends) {
@@ -2100,6 +2706,11 @@ function utility_php_set_recommends_text(&$recs) {
 	}
 }
 
+/**
+ * Handles the utility PHP optionals. Used as part of Cacti's lib functionality.
+ *
+ * @return array An array of results.
+ */
 function utility_php_optionals() {
 	global $config;
 
@@ -2123,6 +2734,14 @@ function utility_php_optionals() {
 	return $opt;
 }
 
+/**
+ * Handles the utility PHP verify optionals. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$optionals The optionals.
+ * @param string $source The source.
+ *
+ * @return void No value is returned.
+ */
 function utility_php_verify_optionals(&$optionals, $source) {
 	if (empty($optionals)) {
 		$optionals = array(
@@ -2143,6 +2762,13 @@ function utility_php_verify_optionals(&$optionals, $source) {
 	$optionals['TrueType Text'][$source] = function_exists('imagettftext');
 }
 
+/**
+ * Handles the utility PHP set installed. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$extensions The extensions.
+ *
+ * @return void No value is returned.
+ */
 function utility_php_set_installed(&$extensions) {
 	foreach ($extensions as $name=>$extension) {
 		$extensions[$name]['installed'] = $extension['web'] && $extension['cli'];

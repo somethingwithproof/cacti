@@ -73,6 +73,12 @@ switch (get_request_var('action')) {
 		break;
 }
 
+/**
+ * Handles the add tree names to actions array. Used as part of Cacti's aggregate graphs
+ * functionality.
+ *
+ * @return void No value is returned.
+ */
 function add_tree_names_to_actions_array() {
 	global $graph_actions;
 
@@ -86,6 +92,11 @@ function add_tree_names_to_actions_array() {
 	}
 }
 
+/**
+ * Handles the form save. Used as part of Cacti's aggregate graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_save() {
 	if (!isset_request_var('save_component_graph')) {
 		header('Location: aggregate_graphs.php?header=false&action=edit&id=' . get_nfilter_request_var('id'));
@@ -251,6 +262,12 @@ function form_save() {
 /* ------------------------
     The "actions" function
    ------------------------ */
+/**
+ * ------------------------ The "actions" function ------------------------. Used as part of
+ * Cacti's aggregate graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_actions() {
 	global $graph_actions, $agg_item_actions;
@@ -534,7 +551,7 @@ function form_actions() {
 	print "	<tr>
 		<td class='saveRow'>
 			<input type='hidden' name='action' value='actions'>
-			<input type='hidden' name='local_graph_id' value='" . (isset_request_var('local_graph_id') ? get_nfilter_request_var('local_graph_id'):0) . "'>
+			<input type='hidden' name='local_graph_id' value='" . (isset_request_var('local_graph_id') ? get_filter_request_var('local_graph_id') : 0) . "'>
 			<input type='hidden' name='selected_items' value='" . (isset($graph_array) ? serialize($graph_array) : '') . "'>
 			<input type='hidden' name='drp_action' value='" . html_escape(get_request_var('drp_action')) . "'>
 			$save_html
@@ -548,6 +565,11 @@ function form_actions() {
 	bottom_footer();
 }
 
+/**
+ * Handles the graph edit. Used as part of Cacti's aggregate graphs functionality.
+ *
+ * @return bool|null False when the requested aggregate graph preview does not exist; no value is returned otherwise.
+ */
 function graph_edit() {
 	global $config, $struct_graph, $struct_aggregate_graph, $image_types, $consolidation_functions, $graph_item_types, $struct_graph_item;
 
@@ -1054,6 +1076,11 @@ function graph_edit() {
 	}
 }
 
+/**
+ * Handles the aggregate items. Used as part of Cacti's aggregate graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function aggregate_items() {
 	global $agg_item_actions, $item_rows;
 
@@ -1118,7 +1145,7 @@ function aggregate_items() {
 	/* form the 'where' clause for our main sql query */
 	if (get_request_var('rfilter') == '') {
 		$sql_where = '';
-	} elseif (validate_is_regex(get_request_var('rfilter'))) {
+	} elseif (validate_is_regex(get_request_var('rfilter')) === true) {
 		$sql_where = 'WHERE gtg.title_cache ' . db_qstr_rlike(get_request_var('rfilter'));
 	} else {
 		$filters = explode(' ', get_request_var('rfilter'));
@@ -1302,7 +1329,7 @@ function aggregate_items() {
 			/* we're escaping strings here, so no need to escape them on form_selectable_cell */
 			form_alternate_row('line' . $graph['local_graph_id'], true);
 
-			if (validate_is_regex(get_request_var('rfilter'))) {
+			if (validate_is_regex(get_request_var('rfilter')) === true) {
 				form_selectable_cell(filter_value($graph['title_cache'], get_request_var('rfilter')), $graph['local_graph_id']);
 			} else {
 				form_selectable_ecell(get_request_var('rfilter') != '' ? aggregate_format_text($graph['title_cache'], get_request_var('rfilter')) : $graph['title_cache'], $graph['local_graph_id']);
@@ -1334,6 +1361,15 @@ function aggregate_items() {
 	form_end();
 }
 
+/**
+ * Handles the aggregate make SQL where. Used as part of Cacti's aggregate graphs functionality.
+ *
+ * @param string $sql_where The SQL where.
+ * @param array $items The items.
+ * @param string $field The field.
+ *
+ * @return string The resulting string.
+ */
 function aggregate_make_sql_where($sql_where, $items, $field) {
 	if ($sql_where != '') {
 		$sql_where .= ' AND (';
@@ -1368,7 +1404,7 @@ function aggregate_make_sql_where($sql_where, $items, $field) {
 				} elseif (strtolower($i) == 'or') {
 					$sql_where .= ' OR ';
 				} else {
-					$sql_where .= ($termcount > 0 ? ' OR ':'') . $field . " LIKE '%" . trim($i) . "%'";
+					$sql_where .= ($termcount > 0 ? ' OR ':'') . $field . ' LIKE ' . db_qstr('%' . trim($i) . '%');
 					$termcount++;
 				}
 			}
@@ -1389,6 +1425,14 @@ function aggregate_make_sql_where($sql_where, $items, $field) {
 	return trim($sql_where);
 }
 
+/**
+ * Handles the aggregate format text. Used as part of Cacti's aggregate graphs functionality.
+ *
+ * @param string $text The text.
+ * @param string $filter The filter.
+ *
+ * @return string The resulting string.
+ */
 function aggregate_format_text($text, $filter) {
 	$items = explode(' ', $filter);
 	$tags  = array();
@@ -1416,6 +1460,11 @@ function aggregate_format_text($text, $filter) {
 	return $text;
 }
 
+/**
+ * Handles the aggregate graph. Used as part of Cacti's aggregate graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function aggregate_graph() {
 	global $graph_actions, $item_rows;
 
@@ -1575,7 +1624,13 @@ function aggregate_graph() {
 	/* form the 'where' clause for our main sql query */
 	if (get_request_var('filter') != '') {
 		$sql_where .= " AND (gtg.title_cache LIKE " . db_qstr('%' . get_request_var('filter') . '%') .
-			" OR ag.title_format LIKE " . db_qstr('%' . get_request_var('filter') . '%') . ")";
+			" OR ag.title_format LIKE " . db_qstr('%' . get_request_var('filter') . '%');
+
+		if (ctype_digit(get_request_var('filter'))) {
+			$sql_where .= ' OR gl.id = ' . (int) get_request_var('filter');
+		}
+
+		$sql_where .= ')';
 	}
 
 	if (get_request_var('template_id') == '-1') {
@@ -1666,6 +1721,11 @@ function aggregate_graph() {
 	form_end();
 }
 
+/**
+ * Handles the purge old graphs. Used as part of Cacti's aggregate graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function purge_old_graphs() {
 	/* workaround to handle purged graphs */
 	$old_graphs = array_rekey(db_fetch_assoc('SELECT DISTINCT local_graph_id
@@ -1706,4 +1766,3 @@ function purge_old_graphs() {
 			WHERE aggregate_graph_id IN (' . implode(',', $old_agg_ids) . ')');
 	}
 }
-

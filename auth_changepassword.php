@@ -96,6 +96,8 @@ if ($user['password_change'] != 'on') {
 	/* destroy session information */
 	kill_session_var('sess_user_id');
 
+	// GHSA-cg45-2mww-g98p: revoke the server-side remember-me row too, not just the browser cookie.
+	clear_auth_cookie();
 	cacti_cookie_logout();
 
 	cacti_header('index.php');
@@ -287,7 +289,7 @@ if (isset_request_var('ref')) {
 		$server_addr = $_SERVER['SERVER_ADDR'];
 		if (!filter_var($_SERVER['SERVER_NAME'], FILTER_VALIDATE_IP)) {
 			$server_info = dns_get_record($_SERVER['SERVER_NAME'], DNS_ANY);
-			$server_ref  = cacti_resolve_first_address($ref_parts['host']);
+			$server_ref  = gethostbyname($ref_parts['host']);
 
 			if ($server_ref != $server_addr) {
 				$valid = false;
@@ -308,8 +310,8 @@ if (isset_request_var('ref')) {
 				}
 			}
 		} else {
-			$server_ip   = cacti_resolve_first_address($_SERVER['SERVER_NAME']);
-			$server_ref  = cacti_resolve_first_address($ref_parts['host']);
+			$server_ip   = gethostbyname($_SERVER['SERVER_NAME']);
+			$server_ref  = gethostbyname($ref_parts['host']);
 			if ($server_ip == $server_ref) {
 				$valid = true;
 			}
@@ -325,21 +327,6 @@ if (isset_request_var('ref')) {
 		header('Location:index.php');
 		exit;
 	}
-}
-
-function cacti_resolve_first_address($hostname) {
-	if (filter_var($hostname, FILTER_VALIDATE_IP) !== false) {
-		return $hostname;
-	}
-
-	foreach (@dns_get_record($hostname, DNS_A | DNS_AAAA) ?: array() as $record) {
-		$address = isset($record['ip']) ? $record['ip'] : (isset($record['ipv6']) ? $record['ipv6'] : '');
-		if (is_string($address) && filter_var($address, FILTER_VALIDATE_IP) !== false) {
-			return $address;
-		}
-	}
-
-	return '';
 }
 
 ?>

@@ -114,35 +114,89 @@ switch (get_request_var('action')) {
 		display_graphs();
 		break;
 	case 'tree_up':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		tree_up();
 		break;
 	case 'tree_down':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		tree_down();
 		break;
 	case 'ajax_dnd':
 		tree_dnd();
 		break;
 	case 'lock':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		api_tree_lock(get_request_var('id'), $_SESSION['sess_user_id']);
 		tree_edit(true);
 		break;
 	case 'unlock':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		api_tree_unlock(get_request_var('id'), $_SESSION['sess_user_id']);
 		tree_edit(true);
 		break;
 	case 'copy_node':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('tree_id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		api_tree_copy_node(get_request_var('tree_id'), get_request_var('id'), get_request_var('parent'), get_request_var('position'));
 		break;
 	case 'create_node':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('tree_id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		api_tree_create_node(get_request_var('tree_id'), get_request_var('id'), get_request_var('position'), get_nfilter_request_var('text'));
 		break;
 	case 'delete_node':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('tree_id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		api_tree_delete_node(get_request_var('tree_id'), get_request_var('id'));
 		break;
 	case 'move_node':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('tree_id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		api_tree_move_node(get_request_var('tree_id'), get_request_var('id'), get_request_var('parent'), get_request_var('position'));
 		break;
 	case 'rename_node':
+		if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) get_request_var('tree_id'), 'graph_tree')) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+			exit;
+		}
+
 		api_tree_rename_node(get_request_var('tree_id'), get_request_var('id'), get_nfilter_request_var('text'));
 		break;
 	case 'get_node':
@@ -167,6 +221,11 @@ switch (get_request_var('action')) {
 		break;
 }
 
+/**
+ * Handles the tree get max sequence. Used as part of Cacti's tree functionality.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function tree_get_max_sequence() {
 	$max_seq = db_fetch_cell('SELECT MAX(sequence) FROM graph_tree');
 
@@ -177,6 +236,11 @@ function tree_get_max_sequence() {
 	return $max_seq;
 }
 
+/**
+ * Handles the tree check sequences. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function tree_check_sequences() {
 	$bad_seq = db_fetch_cell('SELECT COUNT(sequence)
 		FROM graph_tree
@@ -206,16 +270,31 @@ function tree_check_sequences() {
 	}
 }
 
+/**
+ * Handles the tree sort name asc. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function tree_sort_name_asc() {
 	// resequence the list so it has no gaps, alphabetically ascending
 	db_execute('SET @seq = 0; UPDATE graph_tree SET sequence = (@seq:=@seq+1) ORDER BY name;');
 }
 
+/**
+ * Handles the tree sort name desc. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function tree_sort_name_desc() {
 	// resequence the list so it has no gaps, alphabetically ascending
 	db_execute('SET @seq = 0; UPDATE graph_tree SET sequence = (@seq:=@seq+1) ORDER BY name DESC;');
 }
 
+/**
+ * Handles the tree down. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function tree_down() {
 	tree_check_sequences();
 
@@ -244,6 +323,11 @@ function tree_down() {
 	exit;
 }
 
+/**
+ * Handles the tree up. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function tree_up() {
 	tree_check_sequences();
 
@@ -272,6 +356,11 @@ function tree_up() {
 	exit;
 }
 
+/**
+ * Handles the tree dnd. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function tree_dnd() {
 	if (isset_request_var('tree_ids') && is_array(get_nfilter_request_var('tree_ids'))) {
 		$tids     = get_nfilter_request_var('tree_ids');
@@ -280,6 +369,12 @@ function tree_dnd() {
 		foreach($tids as $id) {
 			$id = str_replace('line', '', $id);
 			input_validate_input_number($id);
+
+			if (!cacti_authorize_resource($_SESSION['sess_user_id'], (int) $id, 'graph_tree')) {
+				raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+				header('Location: tree.php');
+				exit;
+			}
 
 			db_execute_prepared('UPDATE graph_tree
 				SET sequence = ?
@@ -300,6 +395,11 @@ function tree_dnd() {
 	exit;
 }
 
+/**
+ * Retrieves the host sort type. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function get_host_sort_type() {
 	if (isset_request_var('nodeid')) {
 		$ndata = explode('_', get_request_var('nodeid'));
@@ -333,6 +433,11 @@ function get_host_sort_type() {
 	}
 }
 
+/**
+ * Sets the host sort type. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function set_host_sort_type() {
 	$type   = '';
 	$branch = '';
@@ -351,6 +456,17 @@ function set_host_sort_type() {
 				if (isset($parts[0]) && $parts[0] == 'tbranch') {
 					$branch = $parts[1];
 					input_validate_input_number($branch);
+
+					$branch_tree_id = db_fetch_cell_prepared('SELECT graph_tree_id
+						FROM graph_tree_items
+						WHERE id = ?',
+						array($branch));
+
+					if ($branch_tree_id === false || !cacti_authorize_resource($_SESSION['sess_user_id'], (int) $branch_tree_id, 'graph_tree')) {
+						raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+						header('Location: tree.php');
+						exit;
+					}
 
 					if (get_request_var('type') == 'hsgt') {
 						$type = HOST_GROUPING_GRAPH_TEMPLATE;
@@ -372,6 +488,11 @@ function set_host_sort_type() {
 	return;
 }
 
+/**
+ * Retrieves the branch sort type. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function get_branch_sort_type() {
 	if (isset_request_var('nodeid')) {
 		$ndata = explode('_', get_request_var('nodeid'));
@@ -423,6 +544,11 @@ function get_branch_sort_type() {
 	}
 }
 
+/**
+ * Sets the branch sort type. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function set_branch_sort_type() {
 	$type   = '';
 	$branch = '';
@@ -441,6 +567,17 @@ function set_branch_sort_type() {
 				if (isset($parts[0]) && $parts[0] == 'tbranch') {
 					$branch = $parts[1];
 					input_validate_input_number($branch);
+
+					$branch_tree_id = db_fetch_cell_prepared('SELECT graph_tree_id
+						FROM graph_tree_items
+						WHERE id = ?',
+						array($branch));
+
+					if ($branch_tree_id === false || !cacti_authorize_resource($_SESSION['sess_user_id'], (int) $branch_tree_id, 'graph_tree')) {
+						raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+						header('Location: tree.php');
+						exit;
+					}
 
 					switch(get_request_var('type')) {
 					case 'inherit':
@@ -490,6 +627,12 @@ function set_branch_sort_type() {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_save() {
 	/* clear graph tree cache on save - affects current user only, other users should see changes in <5 minutes */
 	if (isset($_SESSION['dhtml_tree'])) {
@@ -566,6 +709,14 @@ function form_save() {
 	}
 }
 
+/**
+ * Handles the sort recursive. Used as part of Cacti's tree functionality.
+ *
+ * @param int $branch The branch.
+ * @param int $tree_id The tree ID.
+ *
+ * @return void No value is returned.
+ */
 function sort_recursive($branch, $tree_id) {
 	$leaves = db_fetch_assoc_prepared('SELECT *
 		FROM graph_tree_items
@@ -595,6 +746,14 @@ function sort_recursive($branch, $tree_id) {
 	}
 }
 
+/**
+ * Handles the leaves exist. Used as part of Cacti's tree functionality.
+ *
+ * @param int $parent The parent.
+ * @param int $tree_id The tree ID.
+ *
+ * @return int The resulting integer value.
+ */
 function leaves_exist($parent, $tree_id) {
 	return db_fetch_assoc_prepared('SELECT COUNT(*)
 		FROM graph_tree_items
@@ -608,6 +767,12 @@ function leaves_exist($parent, $tree_id) {
 /* -----------------------
     Tree Item Functions
    ----------------------- */
+/**
+ * ----------------------- Tree Item Functions -----------------------. Used as part of Cacti's
+ * tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_actions() {
 	global $tree_actions;
 
@@ -771,6 +936,14 @@ function form_actions() {
 /* ---------------------
     Tree Functions
    --------------------- */
+/**
+ * --------------------- Tree Functions ---------------------. Used as part of Cacti's tree
+ * functionality.
+ *
+ * @param bool $partial The partial.
+ *
+ * @return void No value is returned.
+ */
 
 function tree_edit($partial = false) {
 	global $fields_tree_edit;
@@ -1215,16 +1388,19 @@ function tree_edit($partial = false) {
 
 			$("#ctree").jstree({
 				'types' : {
+					'default' : {
+						icon : 'fa fa-folder'
+					},
 					'site' : {
-						icon : 'images/site.png',
+						icon : 'fa fa-building',
 						max_children : 0
 					},
 					'device' : {
-						icon : 'images/server.png',
+						icon : 'fa fa-server',
 						max_children : 0
 					},
 					'graph' : {
-						icon : 'images/server_chart_curve.png',
+						icon : 'fa fa-chart-line',
 						max_children : 0
 					}
 				},
@@ -1397,6 +1573,8 @@ function tree_edit($partial = false) {
 					$('#element').prop('selectedIndex', 1);
 					if ($('#element').selectmenu('instance')) {
 						$('#element').selectmenu('refresh');
+					} else if ($('#element').hasClass('select2-hidden-accessible')) {
+						$('#element').trigger('change.select2');
 					}
 					selected = $('#element').prop('selectedIndex');
 				}
@@ -1525,17 +1703,17 @@ function tree_edit($partial = false) {
 			.jstree({
 				'types' : {
 					'site' : {
-						icon : 'images/site.png',
+						icon : 'fa fa-building',
 						valid_children: 'none',
 						max_children : 0
 					},
 					'device' : {
-						icon : 'images/server.png',
+						icon : 'fa fa-server',
 						valid_children: 'none',
 						max_children : 0
 					},
 					'graph' : {
-						icon : 'images/server_chart_curve.png',
+						icon : 'fa fa-chart-line',
 						valid_children: 'none',
 						max_children : 0
 					}
@@ -1550,7 +1728,7 @@ function tree_edit($partial = false) {
 					'always_copy' : true,
 					'check_while_dragging': true
 				},
-				'themes' : { 'stripes' : true },
+				'themes' : { 'stripes' : true, 'dots' : false },
 				'plugins' : plugins
 			})
 			.on('ready.jstree', function(e, data) {
@@ -1957,6 +2135,11 @@ function tree_edit($partial = false) {
 	}
 }
 
+/**
+ * Displays the sites. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_sites() {
 	if (get_nfilter_request_var('filter') != '') {
 		$sql_where = 'WHERE
@@ -1977,6 +2160,11 @@ function display_sites() {
 	}
 }
 
+/**
+ * Displays the hosts. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_hosts() {
 	$sql_where = '';
 
@@ -2000,6 +2188,11 @@ function display_hosts() {
 	}
 }
 
+/**
+ * Displays the graphs. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_graphs() {
 	$sql_where = '';
 
@@ -2047,6 +2240,11 @@ function display_graphs() {
 	}
 }
 
+/**
+ * Handles the tree. Used as part of Cacti's tree functionality.
+ *
+ * @return void No value is returned.
+ */
 function tree() {
 	global $tree_actions, $item_rows;
 
@@ -2103,10 +2301,6 @@ function tree() {
 	}
 
 	$(function() {
-		$('#refresh').on('click', function() {
-			applyFilter();
-		});
-
 		$('#rows').on('change', function() {
 			applyFilter();
 		});
@@ -2184,7 +2378,7 @@ function tree() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 							<button type='button' class='ui-button ui-corner-all ui-widget' id='sorta' title='<?php print __esc('Sort Trees Ascending');?>'><i class='fa fa-sort-alpha-down'></i></button>
 							<button type='button' class='ui-button ui-corner-all ui-widget' id='sortd' title='<?php print __esc('Sort Trees Descending');?>'><i class='fa fa-sort-alpha-up'></i></button>
@@ -2326,15 +2520,15 @@ function tree() {
 					$sequence .= '<span class="moveArrowNone"></span>';
 					$sequence .= '<span class="moveArrowNone"></span>';
 				} elseif ($i == 1) {
-					$sequence .= '<a class="pic fa fa-caret-down moveArrow" href="' . htmlspecialchars('tree.php?action=tree_down&id=' . $tree['id']) . '" title="' . __esc('Move Down') . '"></a>';
+					$sequence .= '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="#" data-url="' . html_escape('tree.php?action=tree_down&id=' . $tree['id']) . '" title="' . __esc('Move Down') . '"></a>';
 					$sequence .= '<span class="moveArrowNone"></span>';
 				} elseif ($i == cacti_sizeof($trees)) {
 					$sequence .= '<span class="moveArrowNone"></span>';
-					$sequence .= '<a class="pic fa fa-caret-up moveArrow" href="' . html_escape('tree.php?action=tree_up&id=' . $tree['id']) . '" title="' . __esc('Move Up') . '"></a>';
+					$sequence .= '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="#" data-url="' . html_escape('tree.php?action=tree_up&id=' . $tree['id']) . '" title="' . __esc('Move Up') . '"></a>';
 
 				} else {
-					$sequence .= '<a class="pic fa fa-caret-down moveArrow" href="' . html_escape('tree.php?action=tree_down&id=' . $tree['id']) . '" title="' . __esc('Move Down') . '"></a>';
-					$sequence .= '<a class="pic fa fa-caret-up moveArrow" href="' . html_escape('tree.php?action=tree_up&id=' . $tree['id']) . '" title="' . __esc('Move Up') . '"></a>';
+					$sequence .= '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="#" data-url="' . html_escape('tree.php?action=tree_down&id=' . $tree['id']) . '" title="' . __esc('Move Down') . '"></a>';
+					$sequence .= '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="#" data-url="' . html_escape('tree.php?action=tree_up&id=' . $tree['id']) . '" title="' . __esc('Move Up') . '"></a>';
 				}
 			}
 
@@ -2390,4 +2584,3 @@ function tree() {
 		<?php
 	}
 }
-

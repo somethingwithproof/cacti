@@ -131,6 +131,11 @@ if ($total_errors == 0 && $total_repairs == 0) {
 	printf('WARNING: Found %s and repaired %s Cacti database issues.' . PHP_EOL . PHP_EOL, $total_errors, $total_repairs);
 }
 
+/**
+ * Handles the table structural repair. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function table_structural_repair() {
 	global $config, $local, $total_errors, $total_repairs;
 	global $debug, $force, $rtables, $form, $dynamic, $base_tables, $database_default;
@@ -169,6 +174,11 @@ function table_structural_repair() {
 	}
 }
 
+/**
+ * Handles the simple checks. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function simple_checks() {
 	global $total_errors, $total_repairs;
 
@@ -357,6 +367,11 @@ function simple_checks() {
 	}
 }
 
+/**
+ * Handles the detailed checks. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function detailed_checks() {
 	global $force, $total_errors, $total_repairs;
 
@@ -419,6 +434,43 @@ function detailed_checks() {
 		printf('NOTE: Found ' . ($force ? 'and repaired ':'') . "$fixes of $rows invalid CDEFs in Graph Templates." . PHP_EOL);
 	} else {
 		printf('NOTE: Found 0 invalid Cacti CDEFs.' . PHP_EOL);
+	}
+
+	printf('NOTE: Searching for graph items that reference missing CDEFs.' . PHP_EOL);
+
+	$cdef_references = [
+		'graph_templates_item'           => false,
+		'aggregate_graph_templates_item' => true,
+		'aggregate_graphs_graph_item'    => true,
+	];
+	$invalid_references = 0;
+	$fixed_references   = 0;
+
+	foreach ($cdef_references as $table => $has_template_flag) {
+		$rows = db_fetch_cell("SELECT COUNT(*)
+			FROM $table AS source
+			LEFT JOIN cdef ON source.cdef_id = cdef.id
+			WHERE source.cdef_id > 0
+			AND cdef.id IS NULL");
+
+		$invalid_references += (int) $rows;
+
+		if ($force && $rows > 0) {
+			$set = $has_template_flag ? "cdef_id = 0, t_cdef_id = ''" : 'cdef_id = 0';
+			db_execute("UPDATE $table SET $set
+				WHERE cdef_id > 0
+				AND cdef_id NOT IN (SELECT id FROM cdef)");
+			$fixed_references += db_affected_rows();
+		}
+	}
+
+	$total_errors  += $invalid_references;
+	$total_repairs += $fixed_references;
+
+	if ($force) {
+		printf("NOTE: Found and repaired $fixed_references of $invalid_references graph item references to missing CDEFs." . PHP_EOL);
+	} else {
+		printf("NOTE: Found $invalid_references graph item references to missing CDEFs." . PHP_EOL);
 	}
 
 	printf('NOTE: Searching for invalid Cacti Data Inputs.' . PHP_EOL);
@@ -575,12 +627,12 @@ function detailed_checks() {
 }
 
 /**
- * There have been reports of data_input_data not including the correct information for
- * snmp columns.  This is likely caused by a legacy bug in Cacti where snmp information
- * was not properly copied to the data_input_data table upon change.
+ * There have been reports of data_input_data not including the correct information for snmp
+ * columns. This is likely caused by a legacy bug in Cacti where snmp information was not properly
+ * copied to the data_input_data table upon change. Therefore, let's detect that bogus information
+ * for the snmp Data Input types only for now. Used as part of Cacti's CLI functionality.
  *
- * Therefore, let's detect that bogus information for the snmp Data Input types only
- * for now.
+ * @return void No value is returned.
  */
 function snmp_repairs() {
 	global $force, $total_errors, $total_repairs, $repaired_hosts;
@@ -681,10 +733,22 @@ function snmp_repairs() {
 	}
 }
 
+/**
+ * Outputs the separator. Used as part of Cacti's CLI functionality.
+ *
+ * @param bool $nl The nl.
+ *
+ * @return void No value is returned.
+ */
 function print_separator($nl = false) {
 	print ($nl ? PHP_EOL:'') . str_repeat('-', 90) . PHP_EOL;
 }
 
+/**
+ * Handles the SNMP index repairs. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function snmp_index_repairs() {
 	global $config, $force, $total_errors, $total_repairs, $repaired_hosts;
 
@@ -1179,7 +1243,9 @@ function snmp_index_repairs() {
 }
 
 /**
- * display_version - displays version information
+ * Displays version information. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
  */
 function display_version() {
 	$version = get_cacti_cli_version();
@@ -1187,7 +1253,9 @@ function display_version() {
 }
 
 /**
- * display_help - displays the usage of the function
+ * Displays the usage of the function. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
  */
 function display_help () {
 	display_version();

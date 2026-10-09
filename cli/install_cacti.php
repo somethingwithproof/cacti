@@ -203,41 +203,56 @@ $message = '';
 $install_failed = false;
 if ($installer->getStep() == Installer::STEP_INSTALL_CONFIRM && $should_install) {
 	$time = '';
+
 	if ($force_install) {
 		$time = '-b';
 	}
-	log_install_always('cli', 'Starting installation...');
-	$install_failed = !Installer::beginInstall($time, $installer);
-	log_install_always('cli', 'Finished installation...');
-}
 
-$step = $installer->getStep();
-log_install_high('cli','getStep(): ' . $step);
-switch ($installer->getStep()) {
-	case Installer::STEP_INSTALL:
-		log_install_always('cli', 'An Installation was already in progress');
-		break;
-	case Installer::STEP_INSTALL_CONFIRM:
-		log_install_always('cli', 'No errors were detected.  Install not performed as --install not specified');
-		break;
-	case Installer::STEP_ERROR:
-		log_install_always('cli', 'One or more errors occurred during install, please refer to log files');
-		process_install_errors(array('Errors'=>$installer->getErrors()));
-		break;
-	case Installer::STEP_COMPLETE:
-		log_install_always('cli', 'Installation has now completed, you may launch the web console');
-		break;
-	default:
-		log_install_always('cli', 'Unexpected step (' . $installer->getStep() . ')');
-		break;
+	log_install_always('cli', 'Starting installation...');
+
+	$install_failed = !Installer::beginInstall($time, $installer);
+
+	log_install_always('cli', 'Finished installation...');
+} else {
+	$step = $installer->getStep();
+
+	log_install_high('cli','getStep(): ' . $step);
+
+	switch ($installer->getStep()) {
+		case Installer::STEP_INSTALL:
+			log_install_always('cli', 'An Installation was already in progress');
+			break;
+		case Installer::STEP_INSTALL_CONFIRM:
+			log_install_always('cli', 'No errors were detected.  Install not performed as --install not specified');
+			break;
+		case Installer::STEP_ERROR:
+			log_install_always('cli', 'One or more errors occurred during install, please refer to log files');
+			process_install_errors(array('Errors'=>$installer->getErrors()));
+			break;
+		case Installer::STEP_COMPLETE:
+			log_install_always('cli', 'Installation has now completed, you may launch the web console');
+			break;
+		default:
+			log_install_always('cli', 'Unexpected step (' . $installer->getStep() . ')');
+			break;
+	}
+
+	print PHP_EOL;
 }
-print PHP_EOL;
 
 if ($install_failed || $installer->getStep() === Installer::STEP_ERROR) {
 	exit(1);
 }
 
-/*  get_install_option - gets the install options from a json file */
+/**
+ * Gets the install options from a json file. Used as part of Cacti's CLI functionality.
+ *
+ * @param array &$options The options.
+ * @param string $file The file.
+ * @param bool $json The JSON.
+ *
+ * @return void No value is returned.
+ */
 function get_install_option(&$options, $file, $json = true) {
 	if (empty($file)) {
 		print 'ERROR: Invalid file specified, unable to import options';
@@ -265,7 +280,16 @@ function get_install_option(&$options, $file, $json = true) {
 	}
 }
 
-/*  set_install_option - sets and optional displays debug line of action */
+/**
+ * Sets and optional displays debug line of action. Used as part of Cacti's CLI functionality.
+ *
+ * @param mixed &$options The options.
+ * @param string $key The key.
+ * @param string $display_name The display name.
+ * @param mixed $value The value.
+ *
+ * @return void No value is returned.
+ */
 function set_install_option(&$options, $key, $display_name, $value) {
 	global $debug;
 
@@ -273,7 +297,19 @@ function set_install_option(&$options, $key, $display_name, $value) {
 	log_install_high('cli',sprintf('Setting %s to \'%s\'', $display_name, $value));
 }
 
-/*  set_install_multioption - sets sub-options that have multiple key/value combinations with optional prefix */
+/**
+ * Sets sub-options that have multiple key/value combinations with optional prefix. Used as part
+ * of Cacti's CLI functionality.
+ *
+ * @param mixed &$options The options.
+ * @param string $key The key.
+ * @param string $display_name The display name.
+ * @param mixed $value The value.
+ * @param string $prefix The prefix.
+ * @param bool $replace_dots The replace dots.
+ *
+ * @return void No value is returned.
+ */
 function set_install_multioption(&$options, $key, $display_name, $value, $prefix, $replace_dots = false) {
 	$option_pos = strpos($value, ':');
 	if ($option_pos !== false) {
@@ -296,6 +332,15 @@ function set_install_multioption(&$options, $key, $display_name, $value, $prefix
 	}
 }
 
+/**
+ * Handles the debug install array. Used as part of Cacti's CLI functionality.
+ *
+ * @param string $parent The parent.
+ * @param array $contents The contents.
+ * @param int $indent The indent.
+ *
+ * @return void No value is returned.
+ */
 function debug_install_array($parent, $contents, $indent = 0) {
 	$hasContents = false;
 	foreach ($contents as $key => $value) {
@@ -312,6 +357,13 @@ function debug_install_array($parent, $contents, $indent = 0) {
 	}
 }
 
+/**
+ * Processes the install errors. Used as part of Cacti's CLI functionality.
+ *
+ * @param array $results The results.
+ *
+ * @return void No value is returned.
+ */
 function process_install_errors($results) {
 	if (isset($results['Errors']) && cacti_sizeof($results['Errors']) > 0) {
 		$errors = $results['Errors'];
@@ -333,13 +385,21 @@ function process_install_errors($results) {
 	}
 }
 
-/*  display_version - displays version information */
+/**
+ * Displays version information. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_version() {
 	$version = get_cacti_cli_version();
 	print "Cacti Install Utility, Version $version, " . COPYRIGHT_YEARS . PHP_EOL;
 }
 
-/*	display_help - displays the usage of the function */
+/**
+ * Displays the usage of the function. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_help () {
 	print PHP_EOL . 'usage: install_cacti.php [--debug] --accept-eula ' . PHP_EOL;
 	print '                         [--automationmode=] [--automationrange=] [--cron=]' . PHP_EOL;

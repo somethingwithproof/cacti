@@ -27,13 +27,12 @@
  */
 
 /**
- * draw_edit_form - draws an html edit form
+ * Draws an html edit form. Used as part of Cacti's lib functionality.
  *
- * @param array $array - an array that contains all of the information needed to draw
- *   the html form. see the arrays contained in include/global_settings.php
- *   for the extract syntax of this array
+ * @param array $array An array that contains all of the information needed to draw the html form.
+ *   see the arrays contained in include/global_settings.php for the extract syntax of this array.
  *
- * @return void
+ * @return void No value is returned.
  */
 function draw_edit_form($array) {
 	if (cacti_sizeof($array)) {
@@ -194,13 +193,13 @@ function draw_edit_form($array) {
 }
 
 /**
- * draw_edit_control - draws a single control to be used on an html edit form
+ * Draws a single control to be used on an html edit form.
  *
- * @param string $field_name - the name of the control
- * @param array  $field_array - an array containing data for this control. see include/global_form.php
- *   for more specific syntax
+ * @param string $field_name The name of the control.
+ * @param mixed &$field_array An array containing data for this control. see include/global_form.php
+ *   for more specific syntax.
  *
- * @return void
+ * @return void No value is returned.
  */
 function draw_edit_control($field_name, &$field_array) {
 	switch ($field_array['method']) {
@@ -373,7 +372,9 @@ function draw_edit_control($field_name, &$field_array) {
 			((isset($field_array['none_value'])) ? $field_array['none_value'] : ''),
 			((isset($field_array['default'])) ? $field_array['default'] : ''),
 			((isset($field_array['class'])) ? $field_array['class'] : ''),
-			((isset($field_array['on_change'])) ? $field_array['on_change'] : '')
+			((isset($field_array['on_change'])) ? $field_array['on_change'] : ''),
+			((isset($field_array['friendly_name'])) ? $field_array['friendly_name'] : ''),
+			((isset($field_array['request_vars'])) ? $field_array['request_vars'] : '')
 		);
 
 		break;
@@ -384,7 +385,10 @@ function draw_edit_control($field_name, &$field_array) {
 			(isset($field_array['sql']) ? db_fetch_assoc($field_array['sql']):$field_array['value']),
 			'id',
 			((isset($field_array['class'])) ? $field_array['class'] : ''),
-			((isset($field_array['on_change'])) ? $field_array['on_change'] : '')
+			((isset($field_array['on_change'])) ? $field_array['on_change'] : ''),
+			((isset($field_array['select_all_text'])) ? $field_array['select_all_text'] : ''),
+			((isset($field_array['select_count_text'])) ? $field_array['select_count_text'] : ''),
+			((isset($field_array['select_all_value'])) ? $field_array['select_all_value'] : '')
 		);
 
 		break;
@@ -545,14 +549,14 @@ function draw_edit_control($field_name, &$field_array) {
 }
 
 /**
- * form_button - draws a standard button form element
+ * Draws a standard button form element. Used as part of Cacti's lib functionality.
  *
- * @param string $form_name - the name of this form element
- * @param string $value - the display value for the button
- * @param string $title - the hover title for the button
- * @param string $action - the onClick action for the button
+ * @param string $form_name The name of this form element.
+ * @param string $value The display value for the button.
+ * @param string $title The hover title for the button.
+ * @param string $action The onClick action for the button.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_button($form_name, $value, $title = '', $action = '') {
 	if ($action != '') {
@@ -567,14 +571,14 @@ function form_button($form_name, $value, $title = '', $action = '') {
 }
 
 /**
- * form_submit - draws a standard button form element
+ * Draws a standard button form element. Used as part of Cacti's lib functionality.
  *
- * @param string $form_name - the name of this form element
- * @param string $value - the display value for the button
- * @param string $title - the hover title for the button
- * @param string $action - the onClick action for the button
+ * @param string $form_name The name of this form element.
+ * @param string $value The display value for the button.
+ * @param string $title The hover title for the button.
+ * @param string $action The onClick action for the button.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_submit($form_name, $value, $title = '', $action = '') {
 	if ($action != '') {
@@ -589,13 +593,13 @@ function form_submit($form_name, $value, $title = '', $action = '') {
 }
 
 /**
- * form_file - draws a standard html file input element
+ * Draws a standard html file input element. Used as part of Cacti's lib functionality.
  *
- * @param string $form_name - the name of this form element
- * @param mixed  $form_size - the size (width) of the textbox
- * @param string $form_accept - the file types permitted
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_size The size (width) of the textbox.
+ * @param string $form_accept The file types permitted.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_file($form_name, $form_size = 30, $form_accept = '') {
 	print "<div>";
@@ -615,22 +619,24 @@ function form_file($form_name, $form_size = 30, $form_accept = '') {
 }
 
 /**
- * form_filepath_box - draws a standard html textbox and provides status of a files existence
+ * Draws a standard html textbox and provides status of a files existence. Used as part of Cacti's
+ * lib functionality.
  *
- * @param string $form_name - the name of this form element
- * @param mixed  $form_previous_value - the current value of this form element
- * @param string $form_default_value - the value of this form element to use if there is
- *   no current value available
- * @param mixed  $form_max_length - the maximum number of characters that can be entered
- *   into this textbox
- * @param mixed  $form_size - the size (width) of the textbox
- * @param string $type - the type of textbox, either 'text' or 'password'
- * @param mixed  $current_id - used to determine if a current value for this form element
- *   exists or not. An empty $current_id indicates that no current value exists,
- *   a non-zero value indicates that a current value does exist
- * @param mixed  $data - array containing 'text' element for display and if 'error' element present, shows failure
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element.
+ * @param string $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param mixed $form_max_length The maximum number of characters that can be entered into this
+ *   textbox.
+ * @param mixed $form_size The size (width) of the textbox.
+ * @param string $type The type of textbox, either 'text' or 'password'.
+ * @param mixed $current_id Used to determine if a current value for this form element exists or
+ *   not. An empty $current_id indicates that no current value exists, a non-zero value indicates
+ *   that a current value does exist.
+ * @param mixed $data Array containing 'text' element for display and if 'error' element present,
+ *   shows failure.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_filepath_box($form_name, $form_previous_value, $form_default_value, $form_max_length, $form_size = 30, $type = 'text', $current_id = 0, $data = false) {
 	if (empty($current_id) && empty($form_previous_value)) {
@@ -690,21 +696,22 @@ function form_filepath_box($form_name, $form_previous_value, $form_default_value
 }
 
 /**
- * form_dirpath_box - draws a standard html textbox and provides status of a directories existence
+ * Draws a standard html textbox and provides status of a directories existence. Used as part of
+ * Cacti's lib functionality.
  *
- * @param string $form_name - the name of this form element
- * @param mixed  $form_previous_value - the current value of this form element
- * @param string $form_default_value - the value of this form element to use if there is
- *   no current value available
- * @param int    $form_max_length - the maximum number of characters that can be entered
- *   into this textbox
- * @param int    $form_size - the size (width) of the textbox
- * @param string $type - the type of textbox, either 'text' or 'password'
- * @param mixed  $current_id - used to determine if a current value for this form element
- *   exists or not. An empty $current_id indicates that no current value exists,
- *   a non-zero value indicates that a current value does exist
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element.
+ * @param string $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param int $form_max_length The maximum number of characters that can be entered into this
+ *   textbox.
+ * @param int $form_size The size (width) of the textbox.
+ * @param string $type The type of textbox, either 'text' or 'password'.
+ * @param mixed $current_id Used to determine if a current value for this form element exists or
+ *   not. An empty $current_id indicates that no current value exists, a non-zero value indicates
+ *   that a current value does exist.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_dirpath_box($form_name, $form_previous_value, $form_default_value, $form_max_length, $form_size = 30, $type = 'text', $current_id = 0) {
 	if (empty($current_id) && empty($form_previous_value)) {
@@ -742,23 +749,23 @@ function form_dirpath_box($form_name, $form_previous_value, $form_default_value,
 }
 
 /**
- * form_text_box - draws a standard html textbox
+ * Draws a standard html textbox. Used as part of Cacti's lib functionality.
  *
- * @param string $form_name - the name of this form element
- * @param mixed  $form_previous_value - the current value of this form element
- * @param string $form_default_value - the value of this form element to use if there is
- *   no current value available
- * @param int    $form_max_length - the maximum number of characters that can be entered
- *   into this textbox
- * @param int    $form_size - the size (width) of the textbox
- * @param string $type - the type of textbox, either 'text' or 'password'
- * @param mixed  $current_id - used to determine if a current value for this form element
- *   exists or not. An empty $current_id indicates that no current value exists,
- *   a non-zero value indicates that a current value does exist
- * @param string $placeholder - place a placeholder over an empty field
- * @param string $title - use a title attribute when hovering over the textbox
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element.
+ * @param string $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param int $form_max_length The maximum number of characters that can be entered into this
+ *   textbox.
+ * @param int $form_size The size (width) of the textbox.
+ * @param string $type The type of textbox, either 'text' or 'password'.
+ * @param mixed $current_id Used to determine if a current value for this form element exists or
+ *   not. An empty $current_id indicates that no current value exists, a non-zero value indicates
+ *   that a current value does exist.
+ * @param string $placeholder Place a placeholder over an empty field.
+ * @param string $title Use a title attribute when hovering over the textbox.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_text_box($form_name, $form_previous_value, $form_default_value, $form_max_length, $form_size = 30, $type = 'text', $current_id = 0, $placeholder = '', $title = '') {
 	if (empty($current_id) && empty($form_previous_value)) {
@@ -792,14 +799,15 @@ function form_text_box($form_name, $form_previous_value, $form_default_value, $f
 }
 
 /**
- * form_hidden_box - draws a standard html hidden element
+ * Draws a standard html hidden element. Used as part of Cacti's lib functionality.
  *
- * @param string $form_name - the name of this form element
- * @param mixed  $form_previous_value - the current value of this form element
- * @param string $form_default_value - the value of this form element to use if there is
- *   no current value available
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element.
+ * @param string $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param mixed $in_form The in form.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_hidden_box($form_name, $form_previous_value, $form_default_value, $in_form = false) {
 	if ($form_previous_value == '') {
@@ -809,24 +817,25 @@ function form_hidden_box($form_name, $form_previous_value, $form_default_value, 
 	print "<div style='display:none;'><input style='height:0px;' type='hidden' id='$form_name' name='$form_name' value='" . html_escape($form_previous_value) . "'></div>";
 }
 
-/* form_dropdown - draws a standard html dropdown box
-   @arg $form_name - the name of this form element
-   @arg $form_data - an array containing data for this dropdown. it can be formatted
-     in one of two ways:
-     $array["id"] = "value";
-     -- or --
-     $array[0]["id"] = 43;
-     $array[0]["name"] = "Red";
-   @arg $column_display - used to identify the key to be used for display data. this
-     is only applicable if the array is formatted using the second method above
-   @arg $column_id - used to identify the key to be used for id data. this
-     is only applicable if the array is formatted using the second method above
-   @arg $form_previous_value - the current value of this form element
-   @arg $form_none_entry - the name to use for a default 'none' element in the dropdown
-   @arg $form_default_value - the value of this form element to use if there is
-     no current value available
-   @arg $css_class - any css that needs to be applied to this form element
-   @arg $on_change - onChange modifier */
+/**
+ * Draws a standard html dropdown box. Used as part of Cacti's lib functionality.
+ *
+ * @param string $form_name The name of this form element.
+ * @param array $form_data An array containing data for this dropdown. it can be formatted in one
+ *   of two ways: $array["id"] = "value"; -- or -- $array[0]["id"] = 43; $array[0]["name"] = "Red";.
+ * @param string $column_display Used to identify the key to be used for display data. this is
+ *   only applicable if the array is formatted using the second method above.
+ * @param mixed $column_id Used to identify the key to be used for id data. this is only
+ *   applicable if the array is formatted using the second method above.
+ * @param mixed $form_previous_value The current value of this form element.
+ * @param mixed $form_none_entry The name to use for a default 'none' element in the dropdown.
+ * @param mixed $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param string $class Any css that needs to be applied to this form element.
+ * @param string $on_change onChange modifier.
+ *
+ * @return void No value is returned.
+ */
 function form_dropdown($form_name, $form_data, $column_display, $column_id, $form_previous_value, $form_none_entry, $form_default_value, $class = '', $on_change = '') {
 	if ($form_previous_value == '') {
 		$form_previous_value = $form_default_value;
@@ -864,6 +873,21 @@ function form_dropdown($form_name, $form_data, $column_display, $column_id, $for
 	print "</select>";
 }
 
+/**
+ * Generates a dropdown selection form element for languages. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param string $form_name The name attribute for the select element.
+ * @param string $column_display Not used in the function.
+ * @param string $column_id Not used in the function.
+ * @param mixed $form_previous_value The form previous value.
+ * @param mixed $form_none_entry The form none entry.
+ * @param mixed $form_default_value The form default value.
+ * @param string $class Optional. Additional CSS classes for the select element.
+ * @param string $on_change Optional. JavaScript code to execute on change event.
+ *
+ * @return void No value is returned.
+ */
 function form_droplanguage($form_name, $column_display, $column_id, $form_previous_value, $form_none_entry, $form_default_value, $class = '', $on_change = '') {
 	if ($form_previous_value == '') {
 		$form_previous_value = $form_default_value;
@@ -914,7 +938,27 @@ function form_droplanguage($form_name, $column_display, $column_id, $form_previo
 	print '</select>';
 }
 
-function form_callback($form_name, $classic_sql, $column_display, $column_id, $callback, $previous_id, $previous_value, $none_entry, $default_value, $class = '', $on_change = '') {
+/**
+ * Generates a form element based on the provided parameters and configuration. Used as part of
+ * Cacti's lib functionality.
+ *
+ * @param string $form_name The name of the form element.
+ * @param string $classic_sql The SQL query to fetch data for the form element.
+ * @param string $column_display The column name to be displayed in the form element.
+ * @param string $column_id The column name to be used as the value in the form element.
+ * @param mixed $callback The callback.
+ * @param string $previous_id The previous ID value of the form element.
+ * @param mixed $previous_value The previous value.
+ * @param string $none_entry The text to display for a "none" entry.
+ * @param mixed $default_value The default value.
+ * @param string $class Optional. Additional CSS classes for the form element.
+ * @param string $on_change Optional. JavaScript function to call on form element change.
+ * @param string $display_name Optional. The display name for the column.
+ * @param string $request_vars Optional. The the request variables to include in the action.
+ *
+ * @return void No value is returned.
+ */
+function form_callback($form_name, $classic_sql, $column_display, $column_id, $callback, $previous_id, $previous_value, $none_entry, $default_value, $class = '', $on_change = '', $display_name = '', $request_vars = '') {
 	if ($previous_value == '') {
 		$previous_value = $default_value;
 	}
@@ -924,6 +968,28 @@ function form_callback($form_name, $classic_sql, $column_display, $column_id, $c
 			$class .= ($class != '' ? ' ':'') . 'txtErrorTextBox';
 			unset($_SESSION['sess_error_fields'][$form_name]);
 		}
+	}
+
+	/* opt-in via $class: preserves the legacy inline jQuery UI autocomplete widget below
+	 * for every existing caller that does not explicitly request the newer ajax-backed
+	 * select2-callback rendering. */
+	if (preg_match('/(^|\s)select2-callback(\s|$)/', $class)) {
+		if (empty($previous_id) && $previous_value == '') {
+			$previous_value = $none_entry;
+		}
+
+		print "<select id='" . html_escape($form_name) . "' name='" . html_escape($form_name) . "' class='" . html_escape($class) . "'"
+			. " data-action='" . html_escape($callback) . "' data-variables='" . html_escape($request_vars) . "' data-callback='" . html_escape($on_change) . "'>";
+
+		if ($previous_id != '' && $previous_value != '') {
+			print "<option value='" . html_escape($previous_id) . "' selected>" . html_escape($previous_value) . '</option>';
+		} elseif (!empty($none_entry)) {
+			print "<option value='' selected>" . html_escape($none_entry) . '</option>';
+		}
+
+		print '</select>';
+
+		return;
 	}
 
 	if ($class != '') {
@@ -1037,20 +1103,24 @@ function form_callback($form_name, $classic_sql, $column_display, $column_id, $c
 	}
 }
 
-/* form_checkbox - draws a standard html checkbox
-   @param string $form_name - the name of this form element
-   @param string $form_previous_value - the current value of this form element
-   @param string $form_caption - the text to display to the right of the checkbox
-   @param string $form_default_value - the value of this form element to use if there is
-     no current value available
-   @param int $current_id - used to determine if a current value for this form element
-     exists or not. An empty $current_id indicates that no current value exists,
-     a non-zero value indicates that a current value does exist
-   @param string $class - specify a css class
-   @param string $on_change - specify a javascript onchange action
-   @param string $title - specify a title for the checkbox on hover
-   @param boolean $show_label - show the form caption in the checkbox
-*/
+/**
+ * Draws a standard html checkbox. Used as part of Cacti's lib functionality.
+ *
+ * @param string $form_name The name of this form element.
+ * @param string $form_previous_value The current value of this form element.
+ * @param string $form_caption The text to display to the right of the checkbox.
+ * @param string $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param int $current_id Used to determine if a current value for this form element exists or
+ *   not. An empty $current_id indicates that no current value exists, a non-zero value indicates
+ *   that a current value does exist.
+ * @param string $class Specify a css class.
+ * @param string $on_change Specify a javascript onchange action.
+ * @param string $title Specify a title for the checkbox on hover.
+ * @param boolean $show_label Show the form caption in the checkbox.
+ *
+ * @return void No value is returned.
+ */
 function form_checkbox($form_name, $form_previous_value, $form_caption, $form_default_value, $current_id = 0, $class = '', $on_change = '', $title = '', $show_label = false) {
 	if (empty($current_id) && empty($form_previous_value)) {
 		$form_previous_value = $form_default_value;
@@ -1087,13 +1157,21 @@ function form_checkbox($form_name, $form_previous_value, $form_caption, $form_de
 	print '</span>';
 }
 
-/* form_radio_button - draws a standard html radio button
-   @arg $form_name - the name of this form element
-   @arg $form_previous_value - the current value of this form element (selected or not)
-   @arg $form_current_value - the current value of this form element (element id)
-   @arg $form_caption - the text to display to the right of the checkbox
-   @arg $form_default_value - the value of this form element to use if there is
-     no current value available */
+/**
+ * Draws a standard html radio button. Used as part of Cacti's lib functionality.
+ *
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element (selected or not).
+ * @param mixed $form_current_value The current value of this form element (element id).
+ * @param string $form_caption The text to display to the right of the checkbox.
+ * @param mixed $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param string $class The object class for customization.
+ * @param string $on_change An onChange event to attach to the form object no current value
+ *   available.
+ *
+ * @return void No value is returned.
+ */
 function form_radio_button($form_name, $form_previous_value, $form_current_value, $form_caption, $form_default_value, $class = '', $on_change = '') {
 	if ($form_previous_value == '') {
 		$form_previous_value = $form_default_value;
@@ -1129,13 +1207,23 @@ function form_radio_button($form_name, $form_previous_value, $form_current_value
 	print "</span>";
 }
 
-/* form_text_area - draws a standard html text area box
-   @arg $form_name - the name of this form element
-   @arg $form_previous_value - the current value of this form element (selected or not)
-   @arg $form_rows - the number of rows in the text area box
-   @arg $form_columns - the number of columns in the text area box
-   @arg $form_default_value - the value of this form element to use if there is
-     no current value available */
+/**
+ * Draws a standard html text area box. Used as part of Cacti's lib functionality.
+ *
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element (selected or not).
+ * @param int $form_rows The number of rows in the text area box.
+ * @param int $form_columns The number of columns in the text area box.
+ * @param mixed $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param string $class Additional CSS classes to apply to the textarea element. Default is an
+ *   empty string.
+ * @param string $on_change JavaScript code to execute when the textarea value changes. Default is
+ *   an empty string.
+ * @param string $placeholder Placeholder text for the textarea element. Default is an empty string.
+ *
+ * @return void No value is returned.
+ */
 function form_text_area($form_name, $form_previous_value, $form_rows, $form_columns, $form_default_value, $class = '', $on_change = '', $placeholder = '') {
 	if ($form_previous_value == '') {
 		$form_previous_value = $form_default_value;
@@ -1165,16 +1253,25 @@ function form_text_area($form_name, $form_previous_value, $form_rows, $form_colu
 	print "<textarea class='$class ui-state-default ui-corner-all' aria-multiline='true' cols='$form_columns' rows='$form_rows' id='$form_name' name='$form_name'" . $placeholder . '>' . html_escape($form_previous_value) . "</textarea>";
 }
 
-/* form_multi_dropdown - draws a standard html multiple select dropdown
-   @arg $form_name - the name of this form element
-   @arg $array_display - an array containing display values for this dropdown. it must
-     be formatted like:
-     $array[id] = display;
-   @arg $sql_previous_values - an array containing keys that should be marked as selected.
-     it must be formatted like:
-     $array[0][$column_id] = key
-   @arg $column_id - the name of the key used to reference the keys above */
-function form_multi_dropdown($form_name, $array_display, $sql_previous_values, $column_id, $class = '', $on_change = '') {
+/**
+ * Draws a standard html multiple select dropdown. Used as part of Cacti's lib functionality.
+ *
+ * @param string $form_name The name of this form element.
+ * @param array $array_display An array containing display values for this dropdown. it must be
+ *   formatted like: $array[id] = display;.
+ * @param mixed $sql_previous_values An array containing keys that should be marked as selected.
+ *   it must be formatted like: $array[0][$column_id] = key.
+ * @param string $column_id The name of the key used to reference the keys above.
+ * @param string $class Optional. Additional CSS classes to apply to the select element.
+ * @param string $on_change Optional. JavaScript code to execute when the selection changes.
+ * @param string $select_all_text The select all text.
+ * @param string $select_count_text The select count text.
+ * @param string $select_all_value The select all value.
+ *
+ * @return void No value is returned.
+ */
+function form_multi_dropdown($form_name, $array_display, $sql_previous_values, $column_id, $class = '', $on_change = '',
+	$select_all_text = '', $select_count_text = '', $select_all_value = '') {
 	if (!is_array($sql_previous_values) && $sql_previous_values != '') {
 		$values = explode(',', $sql_previous_values);
 		$sql_previous_values = array();
@@ -1198,16 +1295,37 @@ function form_multi_dropdown($form_name, $array_display, $sql_previous_values, $
 		}
 	}
 
-	$class = 'multiselect';
-	if ($class != '') {
-		$class .= " $class";
+	/* The drop_multi form method renders a select2 'N Selected' multi dropdown by default.
+	 * A caller keeps the legacy jquery-multiselect widget (e.g. the Scheduler used by
+	 * Automation Networks, and the Data Source Profiles Consolidation Functions) by
+	 * including 'multiselect' in $class; those pages supply their own .multiselect() init
+	 * and must not also be decorated by select2. */
+	$class = trim($class);
+
+	if (!preg_match('/(^|\s)multiselect(\s|$)/', $class) &&
+		!preg_match('/(^|\s)select2-multi-count(\s|$)/', $class)) {
+		$class = trim('select2-multi-count ' . $class);
 	}
 
 	if ($on_change != '') {
 		$_SESSION['form_change_actions'][$form_name] = $on_change;
 	}
 
-	print "<select style='height:20px;' size='1' class='$class' id='$form_name' name='$form_name" . "[]' multiple>";
+	$select2Attrs = '';
+
+	if ($select_all_text != '') {
+		$select2Attrs .= " data-select-all-text='" . html_escape($select_all_text) . "'";
+	}
+
+	if ($select_count_text != '') {
+		$select2Attrs .= " data-select-count-text='" . html_escape($select_count_text) . "'";
+	}
+
+	if ($select_all_value != '') {
+		$select2Attrs .= " data-select-all-value='" . html_escape($select_all_value) . "'";
+	}
+
+	print "<select style='height:20px;' size='1' class='$class'$select2Attrs id='$form_name' name='$form_name" . "[]' multiple>";
 
 	foreach (array_keys($array_display) as $id) {
 		print "<option value='" . $id . "'";
@@ -1231,14 +1349,21 @@ function form_multi_dropdown($form_name, $array_display, $sql_previous_values, $
  * Second level form elements
  */
 
-/* form_color_dropdown - draws a dropdown containing a list of colors that uses a bit
-     of css magic to make the dropdown item background color represent each color in
-     the list
-   @arg $form_name - the name of this form element
-   @arg $form_previous_value - the current value of this form element
-   @arg $form_none_entry - the name to use for a default 'none' element in the dropdown
-   @arg $form_default_value - the value of this form element to use if there is
-     no current value available */
+/**
+ * Draws a dropdown containing a list of colors that uses a bit of css magic to make the dropdown
+ * item background color represent each color in the list. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element.
+ * @param mixed $form_none_entry The name to use for a default 'none' element in the dropdown.
+ * @param mixed $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param string $class Additional CSS classes for the dropdown.
+ * @param string $on_change JavaScript code to execute on change event.
+ *
+ * @return void No value is returned.
+ */
 function form_color_dropdown($form_name, $form_previous_value, $form_none_entry, $form_default_value, $class = '', $on_change = '') {
 	if ($form_previous_value == '') {
 		$form_previous_value = $form_default_value;
@@ -1298,21 +1423,24 @@ function form_color_dropdown($form_name, $form_previous_value, $form_none_entry,
 }
 
 /**
- * form_font_box - draws a standard html textbox and provides status of a fonts existence
+ * Draws a standard html textbox and provides status of a fonts existence. Used as part of Cacti's
+ * lib functionality.
  *
- *  @param string $form_name - the name of this form element
- *  @param mixed  $form_previous_value - the current value of this form element
- *  @param string $form_default_value - the value of this form element to use if there is
- *    no current value available
- *  @param int    $form_max_length - the maximum number of characters that can be entered
- *    into this textbox
- *  @param int    $form_size - the size (width) of the textbox
- *  @param string $type - the type of textbox, either 'text' or 'password'
- *  @param mixed  $current_id - used to determine if a current value for this form element
- *    exists or not. An empty $current_id indicates that no current value exists,
- *    a non-zero value indicates that a current value does exist
+ * @param string $form_name The name of this form element.
+ * @param mixed $form_previous_value The current value of this form element.
+ * @param string $form_default_value The value of this form element to use if there is no current
+ *   value available.
+ * @param int $form_max_length The maximum number of characters that can be entered into this
+ *   textbox.
+ * @param int $form_size The size (width) of the textbox.
+ * @param string $type The type of textbox, either 'text' or 'password'.
+ * @param mixed $current_id Used to determine if a current value for this form element exists or
+ *   not. An empty $current_id indicates that no current value exists, a non-zero value indicates
+ *   that a current value does exist.
+ * @param string $placeholder The placeholder text for the input element. Default is an empty
+ *   string.
  *
- *  @return void
+ * @return void No value is returned.
  */
 function form_font_box($form_name, $form_previous_value, $form_default_value, $form_max_length, $form_size = 30, $type = 'text', $current_id = 0, $placeholder = '') {
 	global $config;
@@ -1351,15 +1479,15 @@ function form_font_box($form_name, $form_previous_value, $form_default_value, $f
 }
 
 /**
- * form_confirm - draws a table presenting the user with some choice and allowing
- * them to either proceed (delete) or cancel
+ * Draws a table presenting the user with some choice and allowing them to either proceed (delete)
+ * or cancel. Used as part of Cacti's lib functionality.
  *
- * @param string $title_text - the title text for this form
- * @param string $body_text - the text to prompt the user with on this form
- * @param string $cancel_url - the url to go to when the user clicks 'cancel'
- * @param string $action_url - the url to go to when the user clicks 'delete'
+ * @param string $title_text The title text for this form.
+ * @param string $body_text The text to prompt the user with on this form.
+ * @param string $cancel_url The url to go to when the user clicks 'cancel'.
+ * @param string $action_url The url to go to when the user clicks 'delete'.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_confirm($title_text, $body_text, $cancel_url, $action_url) { ?>
 	<br>
@@ -1381,13 +1509,13 @@ function form_confirm($title_text, $body_text, $cancel_url, $action_url) { ?>
 <?php }
 
 /**
- * form_confirm_buttons - draws a cancel and delete button suitable for display
- * on a confirmation form
+ * Draws a cancel and delete button suitable for display on a confirmation form. Used as part of
+ * Cacti's lib functionality.
  *
- * @param string $action_url - the url to go to when the user clicks 'delete'
- * @param string $cancel_url - the url to go to when the user clicks 'cancel'
+ * @param string $action_url The url to go to when the user clicks 'delete'.
+ * @param string $cancel_url The url to go to when the user clicks 'cancel'.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_confirm_buttons($action_url, $cancel_url) {
 	global $config;
@@ -1401,13 +1529,16 @@ function form_confirm_buttons($action_url, $cancel_url) {
 <?php }
 
 /**
- * form_save_button - draws a (save|create) and cancel button at the bottom of
- * an html edit form
- * @param string $cancel_url - the url to go to when the user clicks 'cancel'
- * @param string $force_type - if specified, will force the 'action' button to be either
- *   'save' or 'create'. otherwise this field should be properly auto-detected
+ * Draws a (save|create) and cancel button at the bottom of an html edit form. Used as part of
+ * Cacti's lib functionality.
  *
- * @return void
+ * @param string $cancel_url The url to go to when the user clicks 'cancel'.
+ * @param string $force_type If specified, will force the 'action' button to be either 'save' or
+ *   'create'. otherwise this field should be properly auto-detected.
+ * @param string $key_field The name of the key field in the form.
+ * @param boolean $ajax Whether or not to use ajax for the return.
+ *
+ * @return void No value is returned.
  */
 function form_save_button($cancel_url, $force_type = '', $key_field = 'id', $ajax = true) {
 	$calt = __('Cancel');
@@ -1458,12 +1589,12 @@ function form_save_button($cancel_url, $force_type = '', $key_field = 'id', $aja
 }
 
 /**
- * form_save_buttons - draws a set of buttons at the end of a form
- * an html edit form.
+ * Draws a set of buttons at the end of a form an html edit form. Used as part of Cacti's lib
+ * functionality.
  *
- * @param array $buttons - an array of 'id', 'name' buttons
+ * @param array $buttons An array of 'id', 'name' buttons.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_save_buttons($buttons) {
 	?>
@@ -1481,13 +1612,14 @@ function form_save_buttons($buttons) {
 }
 
 /**
- * form_start - draws post form start. To be combined with form_end()
+ * Draws post form start. To be combined with form_end(). Used as part of Cacti's lib
+ * functionality.
  *
- * @param string $action - a mandatory php file URI
- * @param mixed  $id     - an optional id, if empty, one will be generated
- * @param bool $multipart - Is this a multipart form object
+ * @param string $action A mandatory php file URI.
+ * @param mixed $id An optional id, if empty, one will be generated.
+ * @param bool $multipart Is this a multipart form object.
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_start($action, $id = '', $multipart = false) {
 	global $form_id, $form_action;
@@ -1506,11 +1638,12 @@ function form_start($action, $id = '', $multipart = false) {
 }
 
 /**
- * form_end - draws post form end. To be combined with form_start()
+ * Draws post form end. To be combined with form_start(). Used as part of Cacti's lib
+ * functionality.
  *
- * @param  bool $ajax Is this an ajax form end?
+ * @param bool $ajax Is this an ajax form end?
  *
- * @return void
+ * @return void No value is returned.
  */
 function form_end($ajax = true) {
 	global $form_id, $form_action;
@@ -1526,7 +1659,7 @@ function form_end($ajax = true) {
 			title='<?php print __esc('Warning Unsaved Form Data');?>';
 			returnStr = '<div id="messageContainer" style="display:none">' +
 				'<h4><?php print __('Unsaved Changes Detected');?></h4>' +
-				'<p style="display:table-cell;overflow:auto"><?php print __esc("You have unsaved changes on this form.  If you press 'Continue' these changes will be discarded.  Press 'Cancel' to continue editing the form.");?></p>' +
+				'<p><?php print __esc("You have unsaved changes on this form.  If you press 'Continue' these changes will be discarded.  Press 'Cancel' to continue editing the form.");?></p>' +
 				'</div>';
 
 			$('#messageContainer').remove();

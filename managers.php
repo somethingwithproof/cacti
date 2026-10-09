@@ -65,6 +65,11 @@ switch (get_request_var('action')) {
 	break;
 }
 
+/**
+ * Handles the manager. Used as part of Cacti's managers functionality.
+ *
+ * @return void No value is returned.
+ */
 function manager() {
 	global $config, $manager_actions, $item_rows;
 
@@ -121,10 +126,6 @@ function manager() {
 	}
 
 	$(function() {
-		$('#refresh').on('click', function() {
-			applyFilter();
-		});
-
 		$('#rows').on('change', function() {
 			applyFilter();
 		});
@@ -172,7 +173,7 @@ function manager() {
 						</td>
 						<td>
 							<span>
-								<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+								<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 								<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 							</span>
 						</td>
@@ -268,6 +269,11 @@ function manager() {
 	form_end();
 }
 
+/**
+ * Handles the manager edit. Used as part of Cacti's managers functionality.
+ *
+ * @return void No value is returned.
+ */
 function manager_edit() {
 	global $config, $snmp_auth_protocols, $snmp_priv_protocols, $snmp_versions,
 		$tabs_manager_edit, $fields_manager_edit, $manager_notification_actions;
@@ -377,6 +383,14 @@ function manager_edit() {
 	<?php
 }
 
+/**
+ * Handles the manager notifications. Used as part of Cacti's managers functionality.
+ *
+ * @param int $id The ID.
+ * @param string $header_label The header label.
+ *
+ * @return void No value is returned.
+ */
 function manager_notifications($id, $header_label) {
 	global $item_rows, $manager_notification_actions;
 
@@ -460,10 +474,6 @@ function manager_notifications($id, $header_label) {
 	}
 
 	$(function() {
-		$('#refresh').on('click', function() {
-			applyFilter();
-		});
-
 		$('#mib, #rows').on('change', function() {
 			applyFilter();
 		});
@@ -522,7 +532,7 @@ function manager_notifications($id, $header_label) {
 						</td>
 						<td>
 							<span>
-								<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+								<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 								<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 							</span>
 						</td>
@@ -628,6 +638,14 @@ function manager_notifications($id, $header_label) {
     form_end();
 }
 
+/**
+ * Handles the manager logs. Used as part of Cacti's managers functionality.
+ *
+ * @param int $id The ID.
+ * @param string $header_label The header label.
+ *
+ * @return void No value is returned.
+ */
 function manager_logs($id, $header_label) {
 	$severity_levels = array(
 		SNMPAGENT_EVENT_SEVERITY_LOW      => 'LOW',
@@ -866,6 +884,11 @@ function manager_logs($id, $header_label) {
 	<?php
 }
 
+/**
+ * Handles the form save. Used as part of Cacti's managers functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_save() {
 	if (!isset_request_var('tab')) {
 		set_request_var('tab', 'general');
@@ -897,9 +920,9 @@ function form_save() {
 			if ($save['snmp_version'] == 3) {
 				$save['snmp_username']        = form_input_validate(get_nfilter_request_var('snmp_username'), 'snmp_username', '', true, 3);
 				$save['snmp_password']        = form_input_validate(get_nfilter_request_var('snmp_password'), 'snmp_password', '', true, 3);
-				$save['snmp_auth_protocol']   = form_input_validate(get_nfilter_request_var('snmp_auth_protocol'), 'snmp_auth_protocol', "^\[None\]|MD5|SHA|SHA224|SHA256|SHA392|SHA512$", true, 3);
+				$save['snmp_auth_protocol']   = form_input_validate(get_nfilter_request_var('snmp_auth_protocol'), 'snmp_auth_protocol', "^(?:\[None\]|MD5|SHA|SHA224|SHA256|SHA384|SHA512)$", true, 3);
 				$save['snmp_priv_passphrase'] = form_input_validate(get_nfilter_request_var('snmp_priv_passphrase'), 'snmp_priv_passphrase', '', true, 3);
-				$save['snmp_priv_protocol']   = form_input_validate(get_nfilter_request_var('snmp_priv_protocol'), 'snmp_priv_protocol', "^\[None\]|DES|AES|AES128|AES192|AES192C|AES256|AES256C$", true, 3);
+				$save['snmp_priv_protocol']   = form_input_validate(get_nfilter_request_var('snmp_priv_protocol'), 'snmp_priv_protocol', "^(?:\[None\]|DES|AES|AES128|AES192|AES192C|AES256|AES256C)$", true, 3);
 				$save['snmp_engine_id']       = form_input_validate(get_request_var_post('snmp_engine_id'), 'snmp_engine_id', '', false, 3);
 			} else {
 				$save['snmp_username']        = '';
@@ -934,6 +957,11 @@ function form_save() {
 	header('Location: managers.php?action=edit&header=false&id=' . (empty($manager_id) ? get_nfilter_request_var('id') : $manager_id) );
 }
 
+/**
+ * Handles the form actions. Used as part of Cacti's managers functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_actions() {
 	global $manager_actions, $manager_notification_actions;
 

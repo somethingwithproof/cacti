@@ -76,6 +76,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's graphs new functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function save_default_query_option() {
 	$data_query = get_filter_request_var('query');
@@ -86,6 +92,11 @@ function save_default_query_option() {
 	print __('Default Settings Saved') . "\n";
 }
 
+/**
+ * Saves the user filter. Used as part of Cacti's graphs new functionality.
+ *
+ * @return void No value is returned.
+ */
 function save_user_filter() {
 	$rows = get_filter_request_var('rows');
 
@@ -99,6 +110,13 @@ function save_user_filter() {
 	set_user_setting('graph_type', $graph_type);
 }
 
+/**
+ * Handles the store get selected dq index. Used as part of Cacti's graphs new functionality.
+ *
+ * @param int $snmp_query_id The SNMP query ID.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function store_get_selected_dq_index($snmp_query_id) {
 	// Always restore the last used filter, otherwise, use the default
 	if (!is_numeric($snmp_query_id)) {
@@ -116,6 +134,11 @@ function store_get_selected_dq_index($snmp_query_id) {
 	return $selected;
 }
 
+/**
+ * Handles the form save. Used as part of Cacti's graphs new functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_save() {
 	if (isset_request_var('save_component_graph')) {
 		$form_data = array();
@@ -180,6 +203,12 @@ function form_save() {
 /* -------------------
     Data Query Functions
    ------------------- */
+/**
+ * ------------------- Data Query Functions -------------------. Used as part of Cacti's graphs
+ * new functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function host_reload_query() {
 	/* ================= input validation ================= */
@@ -193,6 +222,14 @@ function host_reload_query() {
 /* -------------------
     New Graph Functions
    ------------------- */
+/**
+ * ------------------- New Graph Functions -------------------. Used as part of Cacti's graphs new
+ * functionality.
+ *
+ * @param int $host_id The host ID.
+ *
+ * @return void No value is returned.
+ */
 
 function host_new_graphs_save($host_id) {
 	$selected_graphs_array = cacti_unserialize(stripslashes(get_nfilter_request_var('selected_graphs_array')));
@@ -297,6 +334,12 @@ function host_new_graphs_save($host_id) {
 /* -------------------
     Graph Functions
    ------------------- */
+/**
+ * ------------------- Graph Functions -------------------. Used as part of Cacti's graphs new
+ * functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function graphs() {
 	global $config, $item_rows;
@@ -679,7 +722,7 @@ function graphs() {
 						foreach ($xml_array['fields'] as $field_name => $field_array) {
 							if (!is_array($field_array)) {
 								if (!$message_raised) {
-									raise_message('xmlerror', __('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id of \'%s\'', $snmp_query['id']), MESSAGE_LEVEL_ERROR);
+									raise_message('xmlerror', __esc('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id of \'%s\'', $snmp_query['id']), MESSAGE_LEVEL_ERROR);
 									$message_raised = true;
 								}
 							} elseif (isset($field_array['direction'])) {
@@ -696,11 +739,11 @@ function graphs() {
 									}
 								}
 							} else {
-								raise_message('xmlfielderr' . $field_name, __('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'.  Field Name \'%s\' missing a \'direction\' attribute', $snmp_query['name'], $snmp_query['id'], $field_name), MESSAGE_LEVEL_ERROR);
+								raise_message('xmlfielderr' . $field_name, __esc('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'.  Field Name \'%s\' missing a \'direction\' attribute', $snmp_query['name'], $snmp_query['id'], $field_name), MESSAGE_LEVEL_ERROR);
 							}
 						}
 					} elseif (!$message_raised) {
-						raise_message('xmlerror', __('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'', $snmp_query['name'], $snmp_query['id']), MESSAGE_LEVEL_ERROR);
+						raise_message('xmlerror', __esc('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'', $snmp_query['name'], $snmp_query['id']), MESSAGE_LEVEL_ERROR);
 						$message_raised = true;
 					}
 				}
@@ -764,10 +807,13 @@ function graphs() {
 
 						if (cacti_sizeof($indexes)) {
 							foreach($indexes as $index) {
+								/* GHSA-j3px-vw6r-g25x: snmp_index is stored host_snmp_cache
+								 * data; quote and escape it so a crafted index cannot break
+								 * out of this IN() list. */
 								if ($sql_where != '') {
-									$sql_where .= ", '" . $index['snmp_index'] . "'";
+									$sql_where .= ', ' . db_qstr($index['snmp_index']);
 								} else {
-									$sql_where .= " AND snmp_index IN('" . $index['snmp_index'] . "'";
+									$sql_where .= ' AND snmp_index IN(' . db_qstr($index['snmp_index']);
 								}
 							}
 

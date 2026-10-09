@@ -183,10 +183,7 @@ if ($prev_heartbeat !== false && (!is_numeric($prev_heartbeat) || $prev_heartbea
 	$sql_params[] = $prev_heartbeat;
 }
 
-$sql_params1 = array_merge(array($config['rra_path']), $sql_params);
-
 $rrdfiles = db_fetch_assoc_prepared("SELECT dtr.local_data_id, dtd.name_cache, dt.name,
-	REPLACE(dtd.data_source_path, '<path_rra>', ?) AS rrd,
 	dtr.rrd_heartbeat, GROUP_CONCAT(DISTINCT dtr.data_source_name) AS data_sources
 	FROM data_template_data AS dtd
 	INNER JOIN data_template AS dt
@@ -196,7 +193,16 @@ $rrdfiles = db_fetch_assoc_prepared("SELECT dtr.local_data_id, dtd.name_cache, d
 	WHERE dtd.local_data_id > 0
 	$sql_where
 	GROUP BY dtd.local_data_id",
-	$sql_params1);
+	$sql_params);
+
+/* resolve through get_data_source_path() so the RRA containment check applies to this consumer too */
+if (cacti_sizeof($rrdfiles)) {
+	foreach ($rrdfiles as &$rrdfile_row) {
+		$rrdfile_row['rrd'] = get_data_source_path($rrdfile_row['local_data_id'], true);
+	}
+
+	unset($rrdfile_row);
+}
 
 $total_heartbeats = array_rekey($rrdfiles, 'rrd_heartbeat', 'rrd_heartbeat');
 
@@ -242,15 +248,22 @@ if (!$force) {
 }
 
 $i = 0;
+
+$rrdtool_bin = read_config_option('path_rrdtool');
+
+if ($rrdtool_bin == '') {
+	$rrdtool_bin = 'rrdtool';
+}
+
 if (cacti_sizeof($rrdfiles)) {
 	foreach($rrdfiles as $f) {
 		if (file_exists($f['rrd'])) {
-			$command = sprintf("rrdtool tune %s ", $f['rrd']);
+			$command = cacti_escapeshellarg($rrdtool_bin) . ' tune ' . cacti_escapeshellarg($f['rrd']);
 
 			$data_sources = explode(',', $f['data_sources']);
 
 			foreach($data_sources as $ds) {
-				$command .= " --heartbeat $ds:$new_heartbeat";
+				$command .= ' --heartbeat ' . cacti_escapeshellarg($ds . ':' . $new_heartbeat);
 			}
 
 			$output      = array();
@@ -316,9 +329,9 @@ if (cacti_sizeof($rrdfiles)) {
 }
 
 /**
- * display_version - displays version information
+ * Displays version information. Used as part of Cacti's CLI functionality.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function display_version() {
 	$version = get_cacti_cli_version();
@@ -326,9 +339,9 @@ function display_version() {
 }
 
 /**
- * display_help - displays the usage of the function
+ * Displays the usage of the function. Used as part of Cacti's CLI functionality.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function display_help () {
 	display_version();
@@ -351,6 +364,13 @@ function display_help () {
 	print "    --list-profiles       - List all Data Source Profiles and their Heartbeats\n\n";
 }
 
+/**
+ * Debug. Used as part of Cacti's CLI functionality.
+ *
+ * @param mixed $message The message.
+ *
+ * @return void No value is returned.
+ */
 function debug($message) {
 	global $debug;
 
@@ -358,4 +378,3 @@ function debug($message) {
 		print "DEBUG: " . trim($message) . "\n";
 	}
 }
-

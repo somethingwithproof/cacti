@@ -250,6 +250,7 @@ $fields_profile_edit = array(
 		'description' => __('How data is to be entered in RRAs.'),
 		'array' => $consolidation_functions,
 		'sql' => 'SELECT consolidation_function_id AS id, data_source_profile_id FROM data_source_profiles_cf WHERE data_source_profile_id="|arg1:id|"',
+		'class' => 'multiselect',
 		),
 	'default' => array(
 		'method' => 'checkbox',
@@ -1205,6 +1206,7 @@ $fields_host_edit = array(
 		'friendly_name' => __('Location'),
 		'description' => __('The physical location of the Device.  This free form text can be a room, rack location, etc.'),
 		'none_value' => __('None'),
+		'class' => 'select2-callback',
 		'sql' => 'SELECT DISTINCT location AS id, location AS name FROM host ORDER BY location',
 		'action' => 'ajax_locations',
 		'id' => '|arg1:location|',

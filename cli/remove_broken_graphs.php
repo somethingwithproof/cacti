@@ -43,7 +43,7 @@ $report  = false;
 $remove  = false;
 $columns = 80;
 
-if (empty($github_actions) && $config['cacti_server_os'] == 'unix') {
+if ($config['cacti_server_os'] == 'unix' && stream_isatty(STDIN)) {
 	$stty = shell_exec('stty size');
 	$sizes = explode(' ', $stty);
 
@@ -162,13 +162,21 @@ if (cacti_sizeof($entries)) {
 	}
 }
 
-/*  display_version - displays version information */
+/**
+ * Displays version information. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_version() {
     $version = get_cacti_cli_version();
     print "Cacti Remove Broken Graphs Utility, Version $version, " . COPYRIGHT_YEARS . "\n";
 }
 
-/*  display_help - displays the usage of the function */
+/**
+ * Displays the usage of the function. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_help () {
 	display_version();
 
@@ -182,6 +190,13 @@ function display_help () {
 	print '--debug   - Display verbose output during execution' . PHP_EOL . PHP_EOL;
 }
 
+/**
+ * Debug. Used as part of Cacti's CLI functionality.
+ *
+ * @param mixed $message The message.
+ *
+ * @return void No value is returned.
+ */
 function debug($message) {
 	global $debug;
 

@@ -58,7 +58,11 @@ $method     = 'fill';
 $avgnan     = 'last';
 $start_time = false;
 $end_time   = false;
-$php_bin    = read_config_option('path_php_binary');
+$php_bin    = (string) read_config_option('path_php_binary');
+
+if ($php_bin === '') {
+	$php_bin = PHP_BINARY;
+}
 
 /* install signal handlers for UNIX types only */
 if (function_exists('pcntl_signal')) {
@@ -193,25 +197,25 @@ if ($child == 0) {
 	if ($force) {
 		printf("NOTE: Looking for and killing running processes." . PHP_EOL);
 
-		$running = db_fetch_assoc('SELECT *
+		$running = db_fetch_assoc_prepared('SELECT *
 			FROM processes
-			WHERE tasktype = "batchgapfix"');
+			WHERE tasktype = \'batchgapfix\'', array());
 
 		if (cacti_sizeof($running)) {
-			printf("NOTE: Found %s running processes found." . PHP_EOL);
+			printf("NOTE: Found %s running processes." . PHP_EOL, cacti_sizeof($running));
 
 			foreach($running as $r) {
-				$running = posix_kill($r['pid'], 0);
-				if (posix_get_last_error() == 1) {
-					printf("NOTE: Process with PID: %s being killed." . PHP_EOL, $r['pid']);
+				$logged_pid = cacti_process_pid_for_log($r['pid']);
+				if (cacti_process_still_running($r['pid'])) {
+					printf("NOTE: Process with PID: %s being killed." . PHP_EOL, $logged_pid);
 
-					posix_kill($r['pid'], SIGTERM);
+					cacti_process_kill($r['pid'], SIGTERM, 'POLLER');
 				} else {
-					printf("NOTE: Process with PID: %s, not found likely crashed." . PHP_EOL, $r['pid']);
+					printf("NOTE: Process with PID: %s is no longer running or does not match the registered command." . PHP_EOL, $logged_pid);
 				}
-			}
 
-			db_execute('DELETE FROM processes WHERE tasktype = "batchgapfix"');
+				unregister_process($r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']);
+			}
 		} else {
 			printf("NOTE: No running processes found." . PHP_EOL);
 		}
@@ -286,20 +290,28 @@ if ($child == 0) {
 
 	// Fork Child Binaries
 	for($i = 1; $i <= $threads; $i++) {
-		$command = sprintf("%s/cli/batchgapfix.php --start='%s' --end='%s' --method=%s --avgnan=%s --child=%s" . ($force ? ' --force':'') . ($debug ? ' --debug':''),
-			$config['base_path'],
-			$start_date,
-			$end_date,
-			$method,
-			$avgnan,
-			$i
+		$args = array(
+			$config['base_path'] . '/cli/batchgapfix.php',
+			'--start=' . $start_date,
+			'--end=' . $end_date,
+			'--method=' . $method,
+			'--avgnan=' . $avgnan,
+			'--child=' . $i
 		);
+
+		if ($force) {
+			$args[] = '--force';
+		}
+
+		if ($debug) {
+			$args[] = '--debug';
+		}
 
 		$now = date('H:i:s');
 
-		printf("NOTE: %s, Exec in Background: %s %s" . PHP_EOL, $now, $php_bin, $command);
+		printf("NOTE: %s, Exec in Background: %s %s" . PHP_EOL, $now, $php_bin, implode(' ', $args));
 
-		exec_background($php_bin, $command);
+		exec_background($php_bin, $args);
 	}
 
 	$start = microtime(true);
@@ -367,14 +379,14 @@ if ($child == 0) {
 		$return_var = 0;
 
 		// Format the command
-		$command = sprintf("%s -q %s/cli/removespikes.php --rrdfile='%s' --outlier-start='%s' --outlier-end='%s' --method=%s --avgnan=%s",
-			$php_bin,
-			$config['base_path'],
-			$rrdfile['data_source_path'],
-			$start_date,
-			$end_date,
-			$method,
-			$avgnan
+		$command = sprintf('%s -q %s --rrdfile=%s --outlier-start=%s --outlier-end=%s --method=%s --avgnan=%s',
+			cacti_escapeshellarg($php_bin),
+			cacti_escapeshellarg($config['base_path'] . '/cli/removespikes.php'),
+			cacti_escapeshellarg($rrdfile['data_source_path']),
+			cacti_escapeshellarg($start_date),
+			cacti_escapeshellarg($end_date),
+			cacti_escapeshellarg($method),
+			cacti_escapeshellarg($avgnan)
 		);
 
 		db_execute_prepared('UPDATE graph_local_spikekill
@@ -412,9 +424,14 @@ if ($child == 0) {
 
 exit(0);
 
-/** sig_handler - provides a generic means to catch exceptions to the Cacti log.
- * @arg $signo  - (int) the signal that was thrown by the interface.
- * @return      - null */
+/**
+ * Provides a generic means to catch exceptions to the Cacti log. Used as part of Cacti's CLI
+ * functionality.
+ *
+ * @param int $signo (int) the signal that was thrown by the interface.
+ *
+ * @return void Null.
+ */
 function sig_handler($signo) {
 	global $child, $type;
 
@@ -434,6 +451,13 @@ function sig_handler($signo) {
 	}
 }
 
+/**
+ * Debug. Used as part of Cacti's CLI functionality.
+ *
+ * @param string $string The string.
+ *
+ * @return void No value is returned.
+ */
 function debug($string) {
 	global $debug;
 
@@ -442,11 +466,21 @@ function debug($string) {
 	}
 }
 
+/**
+ * Display_version. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_version() {
     $version = get_cacti_cli_version();
     print "Cacti Batch Graph Gap Fill Utility, Version $version, " . COPYRIGHT_YEARS . PHP_EOL;
 }
 
+/**
+ * Displays the usage of the function. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_help() {
 	display_version();
 
@@ -467,4 +501,3 @@ function display_help() {
 	print '   --force                         - Kill the current running batch gap fill and start over.' . PHP_EOL;
 	print '   --debug                         - Higher tracing level for select utilities.' . PHP_EOL . PHP_EOL;
 }
-

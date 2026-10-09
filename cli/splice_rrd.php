@@ -32,12 +32,24 @@ if ($config['poller_id'] > 1) {
 }
 
 if (!function_exists('get_cacti_cli_version')) {
+	/**
+	 * Retrieves the cacti CLI version. Used as part of Cacti's CLI functionality.
+	 *
+	 * @return string The resulting string.
+	 */
 	function get_cacti_cli_version() {
 		return db_fetch_cell('SELECT cacti FROM version');
 	}
 }
 
 if (!function_exists('is_resource_writable')) {
+	/**
+	 * Determines whether resource writable. Used as part of Cacti's CLI functionality.
+	 *
+	 * @param string $path The path.
+	 *
+	 * @return bool True on success, false otherwise.
+	 */
 	function is_resource_writable($path) {
 		if ($path[strlen($path) - 1] == '/') {
 			return is_resource_writable($path . uniqid(mt_rand()) . '.tmp');
@@ -101,13 +113,13 @@ if (cacti_sizeof($parms)) {
 				if (!file_exists($oldrrd)) {
 					print 'FATAL: File \'' . $oldrrd . '\' does not exist.' . PHP_EOL;
 
-					exit(-9);
+					exit(1);
 				}
 
 				if (!is_resource_writable($oldrrd)) {
 					print 'FATAL: File \'' . $oldrrd . '\' is not writable by this account.' . PHP_EOL;
 
-					exit(-8);
+					exit(1);
 				}
 
 				break;
@@ -117,13 +129,13 @@ if (cacti_sizeof($parms)) {
 				if (!file_exists($newrrd)) {
 					print 'FATAL: File \'' . $newrrd . '\' does not exist.' . PHP_EOL;
 
-					exit(-9);
+					exit(1);
 				}
 
 				if (!is_resource_writable($newrrd)) {
 					print 'FATAL: File \'' . $newrrd . '\' is not writable by this account.' . PHP_EOL;
 
-					exit(-8);
+					exit(1);
 				}
 
 				break;
@@ -133,7 +145,7 @@ if (cacti_sizeof($parms)) {
 				if (!is_resource_writable(dirname($finrrd) . '/') || (file_exists($finrrd) && !is_resource_writable($finrrd))) {
 					print 'FATAL: File \'' . $finrrd . '\' is not writable by this account.' . PHP_EOL;
 
-					exit(-8);
+					exit(1);
 				}
 
 				break;
@@ -178,7 +190,7 @@ if (cacti_sizeof($parms)) {
 				print 'ERROR: Invalid Parameter ' . $parameter . PHP_EOL . PHP_EOL;
 				display_help();
 
-				exit(-3);
+				exit(1);
 		}
 	}
 }
@@ -188,14 +200,14 @@ if ($oldrrd == '') {
 	print 'FATAL: You must specify a old RRDfile!' . PHP_EOL . PHP_EOL;
 	display_help();
 
-	exit(-2);
+	exit(1);
 }
 
 if ($newrrd == '') {
 	print 'FATAL: You must specify a New RRDfile!' . PHP_EOL . PHP_EOL;
 	display_help();
 
-	exit(-2);
+	exit(1);
 }
 
 if ($overwrite && $finrrd == '') {
@@ -206,7 +218,7 @@ if ($finrrd == '') {
 	print 'FATAL: You must specify a New RRDfile or use the overwrite option!' . PHP_EOL . PHP_EOL;
 	display_help();
 
-	exit(-2);
+	exit(1);
 }
 
 debug('Entering Mainline');
@@ -234,31 +246,31 @@ if (!file_exists($rrdtool)) {
 	}
 }
 
-$response = shell_exec($rrdtool);
+$response = shell_exec(cacti_escapeshellcmd($rrdtool));
 
 if (strlen($response)) {
 	$response_array = explode(' ', $response);
 	print 'NOTE: Using ' . $response_array[0] . ' Version ' . $response_array[1] . PHP_EOL;
 } else {
-	print 'FATAL: RRDTool not found in configuration or path.' . PHP_EOL . 'Please insure RRDTool can be found using one of these methods!' . PHP_EOL;
+	print 'FATAL: RRDTool not found in configuration or path.' . PHP_EOL . 'Please ensure RRDTool can be found using one of these methods!' . PHP_EOL;
 
-	exit(-1);
+	exit(1);
 }
 
-/* determine the temporary file name */
-$seed = mt_rand();
+/* The dump files and the backups were previously named from the RRD basename
+ * and mt_rand() directly in a world writable directory, and were created by
+ * shell redirection and copy(), both of which follow symlinks. Everything now
+ * goes in one private directory created for this run, so the names cannot be
+ * claimed in advance. */
+$tempdir = tempnam(sys_get_temp_dir(), 'cacti_splice_');
 
-if (substr_count(PHP_OS, 'WIN')) {
-	$tempdir    = getenv('TEMP');
-	$oldxmlfile = $tempdir . '/' . str_replace('.rrd', '', basename($oldrrd)) . '.dump.' . $seed;
-	$seed++;
-	$newxmlfile = $tempdir . '/' . str_replace('.rrd', '', basename($newrrd)) . '.dump.' . $seed;
-} else {
-	$tempdir    = '/tmp';
-	$oldxmlfile = '/tmp/' . str_replace('.rrd', '', basename($oldrrd)) . '.dump.' . $seed;
-	$seed++;
-	$newxmlfile = '/tmp/' . str_replace('.rrd', '', basename($newrrd)) . '.dump.' . $seed;
+if ($tempdir === false || !unlink($tempdir) || !mkdir($tempdir, 0700)) {
+	print 'FATAL: Unable to create a private working directory' . PHP_EOL;
+	exit(1);
 }
+
+$oldxmlfile = $tempdir . '/' . str_replace('.rrd', '', basename($oldrrd)) . '.dump';
+$newxmlfile = $tempdir . '/' . str_replace('.rrd', '', basename($newrrd)) . '.dump';
 
 if ($finrrd == '') {
 	$finrrd = dirname($newrrd) . '/' . basename($newrrd) . '.new';
@@ -280,7 +292,7 @@ if (file_exists($oldxmlfile)) {
 } else {
 	print 'FATAL: RRDtool Command Failed on \'' . $oldrrd . '\'.  Please insure your RRDtool install is valid!' . PHP_EOL;
 
-	exit(-12);
+	exit(1);
 }
 
 if (file_exists($newxmlfile)) {
@@ -291,7 +303,7 @@ if (file_exists($newxmlfile)) {
 } else {
 	print 'FATAL: RRDtool Command Failed on \'' . $newrrd . '\'.  Please insure your RRDtool install is valid!' . PHP_EOL;
 
-	exit(-12);
+	exit(1);
 }
 
 print 'NOTE: RRDfile will be written to \'' . $finrrd . '\'' . PHP_EOL;
@@ -346,14 +358,17 @@ if ($ownerset) {
 
 memoryUsage();
 
-/** spliceRRDs - This function walks through the structure of the newrrd
- *  XML file array and for each value, if it's either '0' or 'NaN' the
- *  script will search the flattenedXML or SQLite table for the closest
- *  match and save that into the final array, that will then be written
- *  back out to an XML file and re-loaded into an RRDfile.
- * @param mixed $new_rrd
- * @param mixed $old_flat
- * @param mixed $old_dsnames
+/**
+ * This function walks through the structure of the newrrd XML file array and for each value, if
+ * it's either '0' or 'NaN' the script will search the flattenedXML or SQLite table for the
+ * closest match and save that into the final array, that will then be written back out to an XML
+ * file and re-loaded into an RRDfile. Used as part of Cacti's CLI functionality.
+ *
+ * @param mixed &$new_rrd The new RRD.
+ * @param mixed &$old_flat The old flat.
+ * @param mixed &$old_dsnames The old dsnames.
+ *
+ * @return void No value is returned.
  */
 function spliceRRDs(&$new_rrd, &$old_flat, &$old_dsnames) {
 	if (cacti_sizeof($new_rrd) && cacti_sizeof($old_flat)) {
@@ -406,16 +421,18 @@ function spliceRRDs(&$new_rrd, &$old_flat, &$old_dsnames) {
 	}
 }
 
-/** getOldRRDValue - scan the flattened array for a good timestamp
- *  and return the nearest value for that timestamp.
+/**
+ * Scan the flattened array for a good timestamp and return the nearest value for that timestamp.
+ * The flattened array is sorted by timestamp in reverse order. If the SQLite table is available,
+ * this function will prefer that table over traversing the array. Used as part of Cacti's CLI
+ * functionality.
  *
- *  The flattened array is sorted by timestamp in reverse order.
- *  If the SQLite table is available, this function will prefer
- *  that table over traversing the array.
- * @param mixed $old_flat
- * @param mixed $dsnum
- * @param mixed $cf
- * @param mixed $time
+ * @param mixed &$old_flat The old flat.
+ * @param mixed $dsnum The dsnum.
+ * @param mixed $cf The cf.
+ * @param mixed $time The time.
+ *
+ * @return string The value from the old RRDfile.
  */
 function getOldRRDValue(&$old_flat, $dsnum, $cf, $time) {
 	global $use_db, $db;
@@ -468,31 +485,24 @@ function getOldRRDValue(&$old_flat, $dsnum, $cf, $time) {
 	}
 }
 
-/** recreateXML - Take the data from the modified XML and re-create the XML file that
- *  will then be turned back into an RRDfile.
+/**
+ * Take the data from the modified XML and re-create the XML file that will then be turned back
+ * into an RRDfile. The array structure is documented below. $rrd['version']; $rrd['step'];
+ * $rrd['lastupdate']; $rrd['ds'][$ds_num]['name']; $rrd['ds'][$ds_num]['type'];
+ * $rrd['ds'][$ds_num]['minimal_heartbeat']; $rrd['ds'][$ds_num]['min'];
+ * $rrd['ds'][$ds_num]['max']; $rrd['ds'][$ds_num]['last_ds']; $rrd['ds'][$ds_num]['value'];
+ * $rrd['ds'][$ds_num]['unknown_sec']; $rrd['rra'][$rra_num]['cf'];
+ * $rrd['rra'][$rra_num]['pdp_per_row']; $rrd['rra'][$rra_num]['params']['xff'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['primary_value'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['secondary_value'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['value'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['unknown_datapoints'];
+ * $rrd['rra'][$rra_num]['database'][$cdp_ds_num]['time'];. Used as part of Cacti's CLI
+ * functionality.
  *
- *  The array structure is documented below.
+ * @param mixed $new_rrd The Array structure of the new RRDfile.
  *
- *  $rrd['version'];
- *  $rrd['step'];
- *  $rrd['lastupdate'];
- *  $rrd['ds'][$ds_num]['name'];
- *  $rrd['ds'][$ds_num]['type'];
- *  $rrd['ds'][$ds_num]['minimal_heartbeat'];
- *  $rrd['ds'][$ds_num]['min'];
- *  $rrd['ds'][$ds_num]['max'];
- *  $rrd['ds'][$ds_num]['last_ds'];
- *  $rrd['ds'][$ds_num]['value'];
- *  $rrd['ds'][$ds_num]['unknown_sec'];
- *  $rrd['rra'][$rra_num]['cf'];
- *  $rrd['rra'][$rra_num]['pdp_per_row'];
- *  $rrd['rra'][$rra_num]['params']['xff'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['primary_value'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['secondary_value'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['value'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['unknown_datapoints'];
- *  $rrd['rra'][$rra_num]['database'][$cdp_ds_num]['time'];
- * @param mixed $new_rrd
+ * @return string The new RRDfile output.
  */
 function recreateXML($new_rrd) {
 	$rrd = "<rrd>\n";
@@ -560,7 +570,11 @@ function recreateXML($new_rrd) {
 	return $rrd;
 }
 
-/* memoryUsage - Report the peak memory usage of the php script */
+/**
+ * Report the peak memory usage of the php script. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function memoryUsage() {
 	global $time;
 
@@ -577,22 +591,17 @@ function memoryUsage() {
 	print 'NOTE: Time:' . round(microtime(true) - $time, 2) . ', RUsage:' . $memstr . PHP_EOL;
 }
 
-/** flattenXML - Take all the data from the various data sources and
- *  by Consolidation Function, sort the values by timestamp so that
- *  the new RRDfile can pull values that make sense to fill in the
- *  time where there may be no data.
+/**
+ * Take all the data from the various data sources and by Consolidation Function, sort the values
+ * by timestamp so that the new RRDfile can pull values that make sense to fill in the time where
+ * there may be no data. Additionally, remove any NaN values and replace with the last good known
+ * value to fill gaps in the graphs. The form of the output array will be as follows:
+ * $newxml[$datasourceid][$cf][$timestamp] = value $newxml['mintime'] = value The data will only
+ * go back as far as the source RRDfile. Used as part of Cacti's CLI functionality.
  *
- *  Additionally, remove any NaN values and replace with the last
- *  good known value to fill gaps in the graphs.
+ * @param mixed &$xml The xml data to be flattened.
  *
- *  The form of the output array will be as follows:
- *
- *  $newxml[$datasourceid][$cf][$timestamp] = value
- *  $newxml['mintime'] = value
- *
- *  The data will only go back as far as the source RRDfile.
- *
- * @param mixed $xml
+ * @return array The flattened XML file.
  */
 function flattenXML(&$xml) {
 	global $debug;
@@ -675,9 +684,13 @@ function flattenXML(&$xml) {
 	return $newxml;
 }
 
-/** getMaxValue - Obtains the max value from the timestamp array
- *  for use in debug output.
- * @param mixed $data
+/**
+ * Obtains the max value from the timestamp array for use in debug output. Used as part of Cacti's
+ * CLI functionality.
+ *
+ * @param mixed &$data An array of objects to get the max from.
+ *
+ * @return float The maximum value.
  */
 function getMaxValue(&$data) {
 	$max = 0;
@@ -691,9 +704,13 @@ function getMaxValue(&$data) {
 	return $max;
 }
 
-/** getAvgValue - Obtains the average value from the timestamp array
- *  for use in debug output.
- * @param mixed $data
+/**
+ * Obtains the average value from the timestamp array for use in debug output. Used as part of
+ * Cacti's CLI functionality.
+ *
+ * @param mixed &$data An array of objects to get the average from.
+ *
+ * @return float The average value.
  */
 function getAvgValue(&$data) {
 	$entries = cacti_sizeof($data);
@@ -706,30 +723,24 @@ function getAvgValue(&$data) {
 	}
 }
 
-/** processXML - Read all the XML into an array. The format of the array
- *  will be as show below.  This way it can be processed reverted back
- *  to array format at the end of the merge process.
+/**
+ * Read all the XML into an array. The format of the array will be as show below. This way it can
+ * be processed reverted back to array format at the end of the merge process. $rrd['version'];
+ * $rrd['step']; $rrd['lastupdate']; $rrd['ds'][$ds_num]['name']; $rrd['ds'][$ds_num]['type'];
+ * $rrd['ds'][$ds_num]['minimal_heartbeat']; $rrd['ds'][$ds_num]['min'];
+ * $rrd['ds'][$ds_num]['max']; $rrd['ds'][$ds_num]['last_ds']; $rrd['ds'][$ds_num]['value'];
+ * $rrd['ds'][$ds_num]['unknown_sec']; $rrd['rra'][$rra_num]['cf'];
+ * $rrd['rra'][$rra_num]['pdp_per_row']; $rrd['rra'][$rra_num]['params']['xff'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['primary_value'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['secondary_value'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['value'];
+ * $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['unknown_datapoints'];
+ * $rrd['rra'][$rra_num]['database'][$cdp_ds_num]['time'];. Used as part of Cacti's CLI
+ * functionality.
  *
- *  $rrd['version'];
- *  $rrd['step'];
- *  $rrd['lastupdate'];
- *  $rrd['ds'][$ds_num]['name'];
- *  $rrd['ds'][$ds_num]['type'];
- *  $rrd['ds'][$ds_num]['minimal_heartbeat'];
- *  $rrd['ds'][$ds_num]['min'];
- *  $rrd['ds'][$ds_num]['max'];
- *  $rrd['ds'][$ds_num]['last_ds'];
- *  $rrd['ds'][$ds_num]['value'];
- *  $rrd['ds'][$ds_num]['unknown_sec'];
- *  $rrd['rra'][$rra_num]['cf'];
- *  $rrd['rra'][$rra_num]['pdp_per_row'];
- *  $rrd['rra'][$rra_num]['params']['xff'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['primary_value'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['secondary_value'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['value'];
- *  $rrd['rra'][$rra_num]['cdp_prep'][$cdp_ds_num]['unknown_datapoints'];
- *  $rrd['rra'][$rra_num]['database'][$cdp_ds_num]['time'];
- * @param mixed $output
+ * @param mixed &$output The output.
+ *
+ * @return array The processed XML data.
  */
 function processXML(&$output) {
 	$rrd        = array();
@@ -842,7 +853,14 @@ function processXML(&$output) {
 	return $rrd;
 }
 
-/* All Functions */
+/**
+ * All Functions. Used as part of Cacti's CLI functionality.
+ *
+ * @param string $xmlfile The xmlfile.
+ * @param string $rrdfile The rrdfile.
+ *
+ * @return void No value is returned.
+ */
 function createRRDFileFromXML($xmlfile, $rrdfile) {
 	global $rrdtool;
 
@@ -864,23 +882,48 @@ function createRRDFileFromXML($xmlfile, $rrdfile) {
 	}
 }
 
+/**
+ * Handles the xmlrip. Used as part of Cacti's CLI functionality.
+ *
+ * @param string $tag The tag.
+ * @param string $line The line.
+ *
+ * @return string The resulting string.
+ */
 function XMLrip($tag, $line) {
 	return trim(str_replace("<$tag>", '', str_replace("</$tag>", '', $line)));
 }
 
+/**
+ * Handles the writexmlfile. Used as part of Cacti's CLI functionality.
+ *
+ * @param string $output The output.
+ * @param string $xmlfile The xmlfile.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function writeXMLFile($output, $xmlfile) {
 	return file_put_contents($xmlfile, $output);
 }
 
+/**
+ * Handles the backuprrdfile. Used as part of Cacti's CLI functionality.
+ *
+ * @param string $rrdfile The rrdfile.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function backupRRDFile($rrdfile) {
-	global $tempdir, $seed, $html;
+	global $tempdir, $html;
 
 	$backupdir = $tempdir;
 
-	if (file_exists($backupdir . '/' . basename($rrdfile))) {
-		$newfile = basename($rrdfile) . '.' . $seed;
-	} else {
-		$newfile = basename($rrdfile);
+	/* the working directory is private to this run, so a name only has to be
+	 * unique within it rather than unguessable */
+	$newfile = basename($rrdfile);
+
+	for ($i = 1; file_exists($backupdir . '/' . $newfile); $i++) {
+		$newfile = basename($rrdfile) . '.' . $i;
 	}
 
 	print 'NOTE: Backing Up \'' . $rrdfile . '\' to \'' . $backupdir . '/' .  $newfile . '\'' . PHP_EOL;
@@ -888,10 +931,14 @@ function backupRRDFile($rrdfile) {
 	return copy($rrdfile, $backupdir . '/' . $newfile);
 }
 
-/** preProcessXML - This function strips the timestamps off the XML dump
- *  and loads that data into an array along with the remainder of the
- *  XML data for future processing.
- * @param mixed $output
+/**
+ * This function strips the timestamps off the XML dump and loads that data into an array along
+ * with the remainder of the XML data for future processing. Used as part of Cacti's CLI
+ * functionality.
+ *
+ * @param mixed &$output The output from the RRDtool command.
+ *
+ * @return array The updated XML object.
  */
 function preProcessXML(&$output) {
 	if (cacti_sizeof($output)) {
@@ -938,6 +985,13 @@ function preProcessXML(&$output) {
 	}
 }
 
+/**
+ * Debug. Used as part of Cacti's CLI functionality.
+ *
+ * @param string $string The string.
+ *
+ * @return void No value is returned.
+ */
 function debug($string) {
 	global $debug;
 
@@ -946,8 +1000,11 @@ function debug($string) {
 	}
 }
 
-/** createTable - This function creates a SQLite memory table
- *  to hold the flattened XML file in for replay.
+/**
+ * This function creates a SQLite memory table to hold the flattened XML file in for replay. Used
+ * as part of Cacti's CLI functionality.
+ *
+ * @return object The SQLite memory database object.
  */
 function createTable() {
 	/* table in memory */
@@ -967,11 +1024,14 @@ function createTable() {
 	return $db;
 }
 
-/** loadTable - This function loads the flattened XML file into
- *  the SQLite database for replaying the RRDfile dump data
- *  into the new XML file.
- * @param mixed $db
- * @param mixed $records
+/**
+ * This function loads the flattened XML file into the SQLite database for replaying the RRDfile
+ * dump data into the new XML file. Used as part of Cacti's CLI functionality.
+ *
+ * @param mixed $db The DB.
+ * @param mixed &$records The records.
+ *
+ * @return void No value is returned.
  */
 function loadTable($db, &$records) {
 	$db->exec('BEGIN TRANSACTION');
@@ -1013,6 +1073,11 @@ function loadTable($db, &$records) {
 	$db->exec('COMMIT TRANSACTION');
 }
 
+/**
+ * Display_version. Used as part of Cacti's CLI functionality.
+ *
+ * @return void No value is returned.
+ */
 function display_version() {
 	if (!defined('COPYRIGHT_YEARS')) {
 		define('COPYRIGHT_YEARS', '2004-2026');
@@ -1023,8 +1088,11 @@ function display_version() {
 	print 'Cacti RRDfile Splicer Utility, Version ' . $version . ', ' . COPYRIGHT_YEARS . PHP_EOL;
 }
 
-/** display_help - Displays usage information about how to utilize
- *  this program.
+/**
+ * Displays usage information about how to utilize this program. Used as part of Cacti's CLI
+ * functionality.
+ *
+ * @return void No value is returned.
  */
 function display_help() {
 	display_version();

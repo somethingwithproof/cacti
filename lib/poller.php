@@ -23,11 +23,11 @@
 */
 
 /**
- * exec_poll - executes a command and returns its output
+ * Executes a command and returns its output. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $command - the command to execute
+ * @param string $command The command to execute.
  *
- * @return (string) the output of $command after execution
+ * @return string The output of $command after execution.
  */
 function exec_poll($command) {
 	global $config;
@@ -56,16 +56,16 @@ function exec_poll($command) {
 }
 
 /**
- * exec_poll_php - sends a command to the php script server and returns the output
+ * Sends a command to the php script server and returns the output. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string)   $command - the command to send to the php script server
- * @param  (bool)     $using_proc_function - whether or not this version of php is making use
- *                    of the proc_open() and proc_close() functions (php 4.3+)
- * @param  (array)    $pipes - the array of r/w pipes returned from proc_open()
- * @param  (resource) $proc_fd - the file descriptor returned from proc_open()
+ * @param string $command The command to send to the php script server.
+ * @param bool $using_proc_function Whether or not this version of php is making use of the
+ *   proc_open() and proc_close() functions (php 4.3+).
+ * @param array $pipes The array of r/w pipes returned from proc_open().
+ * @param resource $proc_fd The file descriptor returned from proc_open().
  *
- * @return (string) - the output of $command after execution against the php script
- *   server
+ * @return string The output of $command after execution against the php script server.
  */
 function exec_poll_php($command, $using_proc_function, $pipes, $proc_fd) {
 	global $config;
@@ -120,14 +120,15 @@ function exec_poll_php($command, $using_proc_function, $pipes, $proc_fd) {
 }
 
 /**
- * exec_background - executes a program in the background so that php can continue
- *   to execute code in the foreground.
+ * Executes a program in the background so that php can continue to execute code in the
+ * foreground. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $filename      - the full pathname to the script to execute
- * @param  (string) $args          - any additional arguments that must be passed onto the executable
- * @param  (string) $redirect_args - any additional arguments for file re-direction.  Otherwise output goes to /dev/null
+ * @param string $filename The full pathname to the script to execute.
+ * @param string $args Any additional arguments that must be passed onto the executable.
+ * @param string $redirect_args Any additional arguments for file re-direction. Otherwise output
+ *   goes to /dev/null.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function exec_background($filename, $args = '', $redirect_args = '') {
 	global $config, $debug;
@@ -176,10 +177,11 @@ function exec_background($filename, $args = '', $redirect_args = '') {
 }
 
 /**
- * Starts a background process without invoking an operating-system shell.
+ * Starts a background process without invoking an operating-system shell. Used as part of Cacti's
+ * lib functionality.
  *
  * @param string $filename Absolute path to an executable file.
- * @param array  $args     Individual command arguments passed directly to the executable.
+ * @param array $args Individual command arguments passed directly to the executable.
  *
  * @return bool True when the child process was started, otherwise false.
  */
@@ -225,9 +227,10 @@ function exec_background_process($filename, $args = array()) {
 }
 
 /**
- * Configures a long-running Unix parent to let the kernel reap child exits.
+ * Configures a long-running Unix parent to let the kernel reap child exits. Used as part of
+ * Cacti's lib functionality.
  *
- * @param string|null   $server_os     Server operating system, or null to use the Cacti runtime value.
+ * @param string|null $server_os Server operating system, or null to use the Cacti runtime value.
  * @param callable|null $signal_handler Optional signal handler used by tests.
  *
  * @return bool True when automatic child reaping was enabled, otherwise false.
@@ -255,7 +258,8 @@ function poller_enable_child_reaping($server_os = null, $signal_handler = null) 
 }
 
 /**
- * Selects the configured PHP executable or the currently running PHP binary.
+ * Selects the configured PHP executable or the currently running PHP binary. Used as part of
+ * Cacti's lib functionality.
  *
  * @param string $configured_binary Configured PHP executable path.
  *
@@ -269,7 +273,7 @@ function poller_php_binary($configured_binary) {
  * Builds the discrete arguments used to start the main poller from cactid.
  *
  * @param string $base_path Cacti installation path.
- * @param bool   $debug     Whether debug output is enabled.
+ * @param bool $debug Whether debug output is enabled.
  *
  * @return array Poller command arguments.
  */
@@ -284,15 +288,15 @@ function poller_cactid_arguments($base_path, $debug) {
 }
 
 /**
- * exec_with_timeout - Execute a command and return it's output. Either wait until the
- * command exits or the timeout has expired.
+ * Execute a command and return it's output. Either wait until the command exits or the timeout
+ * has expired. Used as part of Cacti's lib functionality.
  *
- * @param  (string)      $cmd          Command to execute.
- * @param  (string)      $output       A return array of output.
- * @param  (int)         $return_code  The return code from the script
- * @param  (int)         $timeout      Timeout in seconds.
+ * @param string $cmd Command to execute.
+ * @param mixed &$output A return array of output.
+ * @param mixed &$return_code The return code from the script.
+ * @param int $timeout Timeout in seconds.
  *
- * @return (string|bool) Either the last line of output or false on error
+ * @return string|bool Either the last line of output or false on error.
  */
 function exec_with_timeout($cmd, &$output, &$return_code, $timeout = 5) {
 	// File descriptors passed to the process.
@@ -390,6 +394,13 @@ function exec_with_timeout($cmd, &$output, &$return_code, $timeout = 5) {
 	}
 }
 
+/**
+ * Handles the file escaped. Used as part of Cacti's lib functionality.
+ *
+ * @param string $file The file.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function file_escaped($file) {
 	if (substr($file, 0, 1) == '"' && substr($file, -1, 1) == '"') {
 		return true;
@@ -399,25 +410,25 @@ function file_escaped($file) {
 }
 
 /**
- * file_exists_2gb - fail safe version of the file exists function to correct
- *   for errors in certain versions of php.
+ * Fail safe version of the file exists function to correct for errors in certain versions of php.
+ * Used as part of Cacti's lib functionality.
  *
- * @param  (string) $filename - the name of the file to be tested.
+ * @param string $filename The name of the file to be tested.
  *
- * @return (int) 1 if the file exists otherwise 0
+ * @return int 1 if the file exists otherwise 0.
  */
 function file_exists_2gb($filename) {
 	return @file_exists($filename);
 }
 
 /**
- * update_reindex_cache - builds a cache that is used by the poller to determine if the
- *   indexes for a particular data query/host have changed
+ * Builds a cache that is used by the poller to determine if the indexes for a particular data
+ * query/host have changed.
  *
- * @param  (int) $host_id - the id of the host to which the data query belongs
- * @param  (int) $data_query_id - the id of the data query to rebuild the reindex cache for
+ * @param int $host_id The id of the host to which the data query belongs.
+ * @param int $data_query_id The id of the data query to rebuild the reindex cache for.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function update_reindex_cache($host_id, $data_query_id) {
 	global $config;
@@ -464,39 +475,37 @@ function update_reindex_cache($host_id, $data_query_id) {
 					$oid_uptime = '.1.3.6.1.2.1.1.3.0';
 				}
 
-				$session = cacti_snmp_session($host['hostname'], $host['snmp_community'], $host['snmp_version'],
+				$assert_value = '';
+				$session      = cacti_snmp_session($host['hostname'], $host['snmp_community'], $host['snmp_version'],
 					$host['snmp_username'], $host['snmp_password'], $host['snmp_auth_protocol'], $host['snmp_priv_passphrase'],
 					$host['snmp_priv_protocol'], $host['snmp_context'], $host['snmp_engine_id'], $host['snmp_port'],
 					$host['snmp_timeout'], $host['ping_retries'], $host['max_oids']);
 
 				if ($session !== false) {
 					if ($oid_uptime == '.1.3.6.1.2.1.1.3.0') {
-						$checks = [
-							'.1.3.6.1.6.3.10.2.1.3.0',
-							'.1.3.6.1.2.1.1.3.0'
-						];
+						$engine_time   = cacti_snmp_session_get($session, '.1.3.6.1.6.3.10.2.1.3.0');
+						$system_uptime = cacti_snmp_session_get($session, $oid_uptime);
 
-						foreach ($checks as $oid_uptime) {
-							$assert_value = cacti_snmp_session_get($session, $oid_uptime);
+						// spine always prefers a numeric, non-wall-clock engine time when
+						// re-checking this assert; match that here so the stored baseline
+						// can't permanently disagree with spine's own live comparison
+						$assert_value = cacti_snmp_select_uptime($system_uptime, $engine_time, null, true);
 
-							if (is_numeric($assert_value)) {
-								if ($oid_uptime == '.1.3.6.1.6.3.10.2.1.3.0') {
-									$assert_value *= 100;
-								}
-
-								break;
-							}
+						if ($assert_value === false) {
+							$assert_value = '';
 						}
-
-						$oid_uptime = '.1.3.6.1.2.1.1.3.0';
 					} else {
 						$assert_value = cacti_snmp_session_get($session, $oid_uptime);
+
+						if ($assert_value === false) {
+							$assert_value = '';
+						}
 					}
+
+					$session->close();
 				}
 
-				$session->close();
-
-				$recache_stack[] = "('$host_id', '$data_query_id'," .  POLLER_ACTION_SNMP . ", '<', '$assert_value', '$oid_uptime', 1)";
+				$recache_stack[] = "($host_id, $data_query_id," . POLLER_ACTION_SNMP . ", '<', " . db_qstr($assert_value) . ', ' . db_qstr($oid_uptime) . ', 1)';
 			}
 
 			break;
@@ -586,6 +595,16 @@ function update_reindex_cache($host_id, $data_query_id) {
 	}
 }
 
+/**
+ * Handles the poller update poller reindex from buffer. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param int $host_id The host ID.
+ * @param int $data_query_id The data query ID.
+ * @param mixed &$recache_stack The recache stack.
+ *
+ * @return void No value is returned.
+ */
 function poller_update_poller_reindex_from_buffer($host_id, $data_query_id, &$recache_stack) {
 	/* set all fields present value to 0, to mark the outliers when we are all done */
 	db_execute_prepared('UPDATE poller_reindex
@@ -643,19 +662,43 @@ function poller_update_poller_reindex_from_buffer($host_id, $data_query_id, &$re
 }
 
 /**
- * process_poller_output - grabs data from the 'poller_output' table and feeds the *completed*
- *   results to RRDtool for processing
+ * WARNING - BULK POLLER HOT PATH. READ BEFORE MODIFYING.
  *
- * @param  (resource) $rrdtool_pipe - the array of pipes containing the file descriptor for rrdtool
- * @param  (int)      $remainder - don't use LIMIT if true
+ * This function runs every poll cycle over the entire poller_output set. Large
+ * installations exceed 2.5M poller_items and several million data sources, so any
+ * inefficiency here scales directly into poller slowdowns and database thrash.
+ * Future maintainers and AI assistants MUST, when changing this function:
+ *   - Perform the minimum number of database queries in this pass, and NEVER add
+ *     a query inside the per-row loop over the result set.
+ *   - Be cognizant of query shape: avoid large IN() lists (they have crashed some
+ *     MariaDB/MySQL releases) and full-table scans in this path.
+ *   - Avoid adding further loops over the poller_output result set; a single pass
+ *     is the goal.
+ *   - Cache field-name mappings statically, assuming the Data Template dictates
+ *     the field names for every instance (data_template_id > 0). Non-templated
+ *     (data_template_id == 0) manually created data sources are a rare exception,
+ *     resolved per data source and cached.
  *
- * @return (int) - The number of rrdfiles processed
+ * Grabs data from the 'poller_output' table and feeds the *completed* results to RRDtool for
+ * processing. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$rrdtool_pipe The array of pipes containing the file descriptor for rrdtool.
+ * @param int $remainder Don't use LIMIT if true.
+ *
+ * @return int The number of rrdfiles processed.
  */
 function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 	global $config, $debug;
 
 	static $rrd_field_names = array();
 	static $checked_bad     = false;
+
+	/* per-data-source metadata caches, keyed by local_data_id and held static so each data
+	 * source is queried at most once per poller process (not once per completion-wait re-entry):
+	 *   $unused_cache - local_data_id => orphaned (not-on-graph) data source names (templated only)
+	 *   $nt_cache     - local_data_id => data_name => data_source_name (non-templated, dt == 0) */
+	static $unused_cache = array();
+	static $nt_cache     = array();
 
 	include_once($config['library_path'] . '/rrd.php');
 
@@ -704,7 +747,8 @@ function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 			$data_template_id = $item['data_template_id'];
 			$rrd_tmpl         = '';
 
-			$rrd_update_array[$rrd_path]['local_data_id'] = $local_data_id;
+			$rrd_update_array[$rrd_path]['local_data_id']    = $local_data_id;
+			$rrd_update_array[$rrd_path]['data_template_id'] = $data_template_id;
 
 			if ((is_numeric($value)) || ($value == 'U' && $rrd_name != '')) {
 				/* single one value output */
@@ -734,133 +778,127 @@ function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 				/* multiple value output */
 				$values = preg_split('/\s+/', $value);
 
+				/* the orphan filter only applies to templated sources; query it once per data
+				 * source (matching 1.2.30's per-instance form, no IN() list) and cache the result */
 				if ($data_template_id > 0) {
-					$unused_data_source_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
-							FROM data_template_rrd AS dtr
-							LEFT JOIN graph_templates_item AS gti
-							ON dtr.id = gti.task_item_id
-							WHERE dtr.local_data_id = ?
-							AND gti.task_item_id IS NULL',
-							array($local_data_id)),
-						'data_source_name', 'data_source_name'
-					);
+					if (!array_key_exists($local_data_id, $unused_cache)) {
+						$unused_cache[$local_data_id] = array_rekey(
+							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
+								FROM data_template_rrd AS dtr
+								LEFT JOIN graph_templates_item AS gti
+								ON dtr.id = gti.task_item_id
+								WHERE dtr.local_data_id = ?
+								AND gti.task_item_id IS NULL',
+								array($local_data_id)),
+							'data_source_name', 'data_source_name'
+						);
+					}
+
+					$unused_data_source_names = $unused_cache[$local_data_id];
 				} else {
 					$unused_data_source_names = array();
+				}
+
+				/* the data template dictates field names; only a manual (data_template_id == 0)
+				 * data source needs a per-instance data_name => data_source_name lookup, cached */
+				if ($data_template_id == 0) {
+					if (!array_key_exists($local_data_id, $nt_cache)) {
+						$nt_cache[$local_data_id] = array_rekey(
+							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
+								FROM data_template_rrd AS dtr
+								INNER JOIN data_input_fields AS dif
+								ON dtr.data_input_field_id = dif.id
+								WHERE dtr.local_data_id = ?',
+								array($local_data_id)),
+							'data_name', 'data_source_name'
+						);
+					}
+
+					$nt_rrd_field_names = $nt_cache[$local_data_id];
+				} else {
+					$nt_rrd_field_names = array();
 				}
 
 				foreach($values as $value) {
 					$matches = explode(':', $value);
 
 					if (cacti_sizeof($matches) == 2) {
-						if (isset($rrd_field_names[$item['data_template_id'] . '_' . $matches[0]])) {
-							$field = $rrd_field_names[$item['data_template_id'] . '_' . $matches[0]]['data_source_name'];
+						$field = '';
 
-							if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
-								continue;
+						if ($data_template_id > 0) {
+							if (isset($rrd_field_names[$data_template_id . '_' . $matches[0]])) {
+								$field = $rrd_field_names[$data_template_id . '_' . $matches[0]]['data_source_name'];
 							}
-
-							cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_HIGH));
-
-							if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
-								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
-							} elseif ((function_exists('is_hexadecimal')) && (is_hexadecimal($matches[1]))) {
-								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = hexdec($matches[1]);
-							} else {
-								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
-							}
-
-							$rrd_tmpl .= ($rrd_tmpl != '' ? ':':'') . $field;
-
-							$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
-						} else {
-							// Handle data source without a data template
-							if ($data_template_id > 0) {
-								$nt_rrd_field_names = array_rekey(
-									db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-										FROM graph_templates_item AS gti
-										INNER JOIN data_template_rrd AS dtr
-										ON gti.task_item_id = dtr.id
-										INNER JOIN data_input_fields AS dif
-										ON dtr.data_input_field_id = dif.id
-										WHERE dtr.local_data_id = ?',
-										array($local_data_id)),
-									'data_name', 'data_source_name'
-								);
-							} else {
-								$nt_rrd_field_names = array_rekey(
-									db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-										FROM data_template_rrd AS dtr
-										INNER JOIN data_input_fields AS dif
-										ON dtr.data_input_field_id = dif.id
-										WHERE dtr.local_data_id = ?',
-										array($local_data_id)),
-									'data_name', 'data_source_name'
-								);
-							}
-
-							if (cacti_sizeof($nt_rrd_field_names)) {
-								if (isset($nt_rrd_field_names[$matches[0]])) {
-									$field = $nt_rrd_field_names[$matches[0]];
-
-									if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
-										continue;
-									}
-
-									cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_HIGH));
-
-									if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
-									} elseif ((function_exists('is_hexadecimal')) && (is_hexadecimal($matches[1]))) {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = hexdec($matches[1]);
-									} else {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
-									}
-
-									$rrd_tmpl .= ($rrd_tmpl != '' ? ':':'') . $field;
-								}
-							}
-
-							$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
+						} elseif (isset($nt_rrd_field_names[$matches[0]])) {
+							$field = $nt_rrd_field_names[$matches[0]];
 						}
+
+						if ($field === '') {
+							continue;
+						}
+
+						if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
+							continue;
+						}
+
+						cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE:POLLER_VERBOSITY_HIGH));
+
+						if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
+							$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
+						} elseif ((function_exists('is_hexadecimal')) && (is_hexadecimal($matches[1]))) {
+							$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = hexdec($matches[1]);
+						} else {
+							$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
+						}
+
+						$rrd_tmpl .= ($rrd_tmpl != '' ? ':':'') . $field;
+
+						$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
 					}
 				}
 			} else {
+				/* invalid output: query once per data source (cached) the same way as above */
 				if ($data_template_id > 0) {
-					$unused_data_source_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
-							FROM data_template_rrd AS dtr
-							LEFT JOIN graph_templates_item AS gti
-							ON dtr.id = gti.task_item_id
-							WHERE dtr.local_data_id = ?
-							AND gti.task_item_id IS NULL',
-							array($local_data_id)),
-						'data_source_name', 'data_source_name'
-					);
+					if (!array_key_exists($local_data_id, $unused_cache)) {
+						$unused_cache[$local_data_id] = array_rekey(
+							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
+								FROM data_template_rrd AS dtr
+								LEFT JOIN graph_templates_item AS gti
+								ON dtr.id = gti.task_item_id
+								WHERE dtr.local_data_id = ?
+								AND gti.task_item_id IS NULL',
+								array($local_data_id)),
+							'data_source_name', 'data_source_name'
+						);
+					}
 
-					$nt_rrd_field_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-							FROM graph_templates_item AS gti
-							INNER JOIN data_template_rrd AS dtr
-							ON gti.task_item_id = dtr.id
-							INNER JOIN data_input_fields AS dif
-							ON dtr.data_input_field_id = dif.id
-							WHERE dtr.local_data_id = ?',
-							array($local_data_id)),
-						'data_name', 'data_source_name'
-					);
+					$unused_data_source_names = $unused_cache[$local_data_id];
+
+					/* expected field names for this template come from the static template cache */
+					$nt_rrd_field_names = array();
+					$prefix             = $data_template_id . '_';
+
+					foreach ($rrd_field_names as $keyname => $mapping) {
+						if (strpos($keyname, $prefix) === 0) {
+							$nt_rrd_field_names[$mapping['data_source_name']] = $mapping['data_source_name'];
+						}
+					}
 				} else {
 					$unused_data_source_names = array();
 
-					$nt_rrd_field_names = array_rekey(
-						db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-							FROM data_template_rrd AS dtr
-							INNER JOIN data_input_fields AS dif
-							ON dtr.data_input_field_id = dif.id
-							WHERE dtr.local_data_id = ?',
-							array($local_data_id)),
-						'data_name', 'data_source_name'
-					);
+					if (!array_key_exists($local_data_id, $nt_cache)) {
+						$nt_cache[$local_data_id] = array_rekey(
+							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
+								FROM data_template_rrd AS dtr
+								INNER JOIN data_input_fields AS dif
+								ON dtr.data_input_field_id = dif.id
+								WHERE dtr.local_data_id = ?',
+								array($local_data_id)),
+							'data_name', 'data_source_name'
+						);
+					}
+
+					$nt_rrd_field_names = $nt_cache[$local_data_id];
 				}
 
 				$expected = '';
@@ -931,7 +969,7 @@ function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 		api_plugin_hook_function('poller_output', $rrd_update_array);
 
 		if (boost_poller_on_demand($results)) {
-			$rrds_processed = rrdtool_function_update($rrd_update_array, $rrdtool_pipe);
+			$rrds_processed = rrdtool_function_update($rrd_update_array, $rrdtool_pipe, $unused_cache);
 		}
 
 		$results = NULL;
@@ -990,12 +1028,12 @@ function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 }
 
 /**
- * update_resource_cache - place the cacti website in the poller_resource_cache
- *   for remote pollers to consume
+ * Place the cacti website in the poller_resource_cache for remote pollers to consume. Used as
+ * part of Cacti's lib functionality.
  *
- * @param  (int) $poller_id    - The id of the poller.  1 is the main system
+ * @param int $poller_id The id of the poller. 1 is the main system.
  *
- * @return (void)
+ * @return void Bool.
  */
 function update_resource_cache($poller_id = 1) {
 	global $config, $remote_db_cnn_id;
@@ -1069,7 +1107,7 @@ function update_resource_cache($poller_id = 1) {
 				if (is_dir($mpath . '/plugins/' . $path)) {
 					if (file_exists($mpath . '/plugins/' . $path . '/INFO')) {
 						$info = parse_ini_file($mpath . '/plugins/' . $path . '/INFO', true);
-						$dir_exclusions  = array('..', '.', '.git', '.github', '.gitattributes');
+						$dir_exclusions  = array('..', '.', '.git', '.github', '.gitattributes', 'tests');
 						$file_exclusions = $excluded_extensions;
 
 						if (isset($info['info']['nosync'])) {
@@ -1121,11 +1159,13 @@ function update_resource_cache($poller_id = 1) {
 			}
 		}
 
-		/* purge old entries */
+		/* purge old entries, including any that predate an exclusion rule (for
+		 * example a plugin's tests/ tree cached before it was excluded) whose
+		 * source files still exist on disk and would otherwise never be dropped */
 		$cache = db_fetch_assoc('SELECT path FROM poller_resource_cache');
 		if (cacti_sizeof($cache)) {
 			foreach($cache as $item) {
-				if (!file_exists($item['path'])) {
+				if (!file_exists($item['path']) || should_ignore_from_replication($item['path'])) {
 					db_execute_prepared('DELETE FROM poller_resource_cache
 						WHERE `path` = ?',
 						array($item['path']));
@@ -1145,6 +1185,13 @@ function update_resource_cache($poller_id = 1) {
 
 		if (cacti_sizeof($plugin_paths)) {
 			foreach ($plugin_paths as $path) {
+				// Skip excluded rows (e.g. plugins/foo/tests/Bar.php) so the
+				// collector never materializes their parent directories before
+				// resource_cache_out() declines to write the files themselves.
+				if (should_ignore_from_replication($path['path'])) {
+					continue;
+				}
+
 				$paths[$path['resource_type']] = array('recursive' => false, 'path' => dirname($mpath . '/' . $path['path']));
 			}
 		}
@@ -1165,17 +1212,25 @@ function update_resource_cache($poller_id = 1) {
 }
 
 /**
- * cache_in_path - check to see if the directory in question has changed.
- *   If so, send its data into the resource cache table
+ * Check to see if the directory in question has changed. If so, send its data into the resource
+ * cache table. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $path      - The path to look for changes
- * @param  (string) $type      - The patch types being cached
- * @param  (bool)   $recursive - Should the path be scanned recursively
+ * @param string $path The path to look for changes.
+ * @param string $type The patch types being cached.
+ * @param bool $recursive Should the path be scanned recursively.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function cache_in_path($path, $type, $recursive = true) {
 	global $config;
+
+	// Skip tooling/dev artifacts (.gitignore, .mdlrc, tests/, ...) up front.
+	// update_db_from_path() never caches them, so without this a poll would
+	// re-log and re-process each one every cycle (its md5 is never stored, so
+	// it is always re-detected as "changed").
+	if (should_ignore_from_replication($path)) {
+		return;
+	}
 
 	if (is_dir($path)) {
 		$curr_md5      = md5sum_path($path, $recursive);
@@ -1240,14 +1295,14 @@ function cache_in_path($path, $type, $recursive = true) {
 }
 
 /**
- * update_db_from_path - store the actual file in the databases resource cache.
- *   Skip the include/config.php if it exists
+ * Store the actual file in the databases resource cache. Skip the include/config.php if it
+ * exists. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $path      - The path to look for changes
- * @param  (string) $type      - The patch types being cached
- * @param  (bool)   $recursive - Should the path be scanned recursively
+ * @param string $path The path to look for changes.
+ * @param string $type The patch types being cached.
+ * @param bool $recursive Should the path be scanned recursively.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function update_db_from_path($path, $type, $recursive = true) {
 	global $config;
@@ -1343,14 +1398,14 @@ function update_db_from_path($path, $type, $recursive = true) {
 }
 
 /**
- * resource_cache_out - push the cache from the cacti database to the
- *   remote database.  Check PHP files for errors before placing
- *   them on the remote pollers file system.
+ * Push the cache from the cacti database to the remote database. Check PHP files for errors
+ * before placing them on the remote pollers file system. Used as part of Cacti's lib
+ * functionality.
  *
- * @param (string) $type      - The path type being cached
- * @param (string) $path      - The path to store the contents
+ * @param string $type The path type being cached.
+ * @param string $path The path to store the contents.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function resource_cache_out($type, $path) {
 	global $config, $remote_db_cnn_id;
@@ -1414,7 +1469,12 @@ function resource_cache_out($type, $path) {
 
 							if ((is_writeable($tmpdir) && !file_exists($tmpfile)) || (file_exists($tmpfile) && is_writable($tmpfile))) {
 								if (file_put_contents($tmpfile, $contents) !== false) {
-									$output = system($php_path . ' -l ' . $tmpfile, $exit);
+									// GHSA-4p7f-qcc2-vmx7: run the admin-set path_php_binary shell-free with discrete
+									// args so a value like "php -r ..." or a path containing spaces cannot inject
+									// extra PHP options at this sink.
+									$syntax_output = array();
+									$exit          = cacti_exec($php_path, array('-l', $tmpfile), $syntax_output);
+									$output        = implode("\n", $syntax_output);
 
 									if ($exit == 0) {
 										cacti_log("INFO: Updating '$mypath' from Cache!", false, 'REPLICATE');
@@ -1471,12 +1531,12 @@ function resource_cache_out($type, $path) {
 }
 
 /**
- * md5sum_path - get a recursive md5sum on an entire directory.
+ * Get a recursive md5sum on an entire directory. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $path      - The path to check for the md5sum
- * @param  (bool)   $recursive - The path should be verified recursively
+ * @param string $path The path to check for the md5sum.
+ * @param bool $recursive The path should be verified recursively.
  *
- * @return (void)
+ * @return void Mixed.
  */
 function md5sum_path($path, $recursive = true) {
     if (!is_dir($path)) {
@@ -1520,13 +1580,13 @@ function md5sum_path($path, $recursive = true) {
 }
 
 /**
- * poller_push_to_remote_db_connect - given the device or poller_id connect
- *   to the data collector.
+ * Given the device or poller_id connect to the data collector. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (int)    device_or_poller - the id of the object
- * @param  (bool)   is_poller - don't let cacti guess, the id is a poller
+ * @param int $device_or_poller Device_or_poller - the id of the object.
+ * @param bool $is_poller Is_poller - don't let cacti guess, the id is a poller.
  *
- * @return (bool|resource) The connection or false when the connection fails
+ * @return bool|resource The connection or false when the connection fails.
  */
 function poller_push_to_remote_db_connect($device_or_poller, $is_poller = false) {
 	global $config;
@@ -1560,13 +1620,12 @@ function poller_push_to_remote_db_connect($device_or_poller, $is_poller = false)
 }
 
 /**
- * poller_connect_to_remote - this function connects to the remote
- *   data collector and returns either false or the connection
- *   resource.
+ * This function connects to the remote data collector and returns either false or the connection
+ * resource. Used as part of Cacti's lib functionality.
  *
- * @param  (int)    poller_id - the remote poller id
+ * @param int $poller_id Poller_id - the remote poller id.
  *
- * @return (bool|resource) The connection or false when the connection fails
+ * @return bool|resource The connection or false when the connection fails.
  */
 function poller_connect_to_remote($poller_id) {
 	global $config, $local_db_cnn_id;
@@ -1623,14 +1682,13 @@ function poller_connect_to_remote($poller_id) {
 }
 
 /**
- * replicate_out - this function sends table changes from the resource
- *   cache to the remote database.  This happens as a result of a full
- *   sync within Cacti.
+ * This function sends table changes from the resource cache to the remote database. This happens
+ * as a result of a full sync within Cacti. Used as part of Cacti's lib functionality.
  *
- * @param  (int)    remote_poller_id - the poller to send data to
- * @param  (string) class - the class of data to push to the poller
+ * @param int $remote_poller_id Remote_poller_id - the poller to send data to.
+ * @param string $class Class - the class of data to push to the poller.
  *
- * @return (bool)
+ * @return bool Bool.
  */
 function replicate_out($remote_poller_id = 1, $class = 'all') {
 	global $config;
@@ -1924,20 +1982,20 @@ function replicate_out($remote_poller_id = 1, $class = 'all') {
 }
 
 /**
- * replicate_out_table - replicate out an entire table to
- *   remote database.  Optionally, performs update rather
- *   than a truncate and excluding columns from the on duplicate
- *   clause. By default, the remote table will be recreated
- *   if it's table structure does not match the main table.
+ * Replicate out an entire table to remote database. Optionally, performs update rather than a
+ * truncate and excluding columns from the on duplicate clause. By default, the remote table will
+ * be recreated if it's table structure does not match the main table. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (object) $conn             - Connection to remote database
- * @param  (array)  $data             - Associative array of the table data
- * @param  (string) $table            - The remote table to replicate to
- * @param  (int)    $remote_poller_id - The remote data collector's id
- * @param  (bool)   $truncate         - A flag that if true, truncates, otherwise updates
- * @param  (array)  $exclude          - An array of column names to not update on replication
+ * @param object $conn Connection to remote database.
+ * @param mixed &$data Associative array of the table data.
+ * @param string $table The remote table to replicate to.
+ * @param int $remote_poller_id The remote data collector's id.
+ * @param bool $truncate A flag that if true, truncates, otherwise updates.
+ * @param array $exclude An array of column names to not update on replication.
+ * @param int $level The logging level.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function replicate_out_table($conn, &$data, $table, $remote_poller_id, $truncate = true, $exclude = false, $level = POLLER_VERBOSITY_NONE) {
 	// Get the create table syntax just in case
@@ -2085,6 +2143,14 @@ function replicate_out_table($conn, &$data, $table, $remote_poller_id, $truncate
 	}
 }
 
+/**
+ * Handles the replicate log. Used as part of Cacti's lib functionality.
+ *
+ * @param string $text The text.
+ * @param int $level The level.
+ *
+ * @return void No value is returned.
+ */
 function replicate_log($text, $level = POLLER_VERBOSITY_NONE) {
 	if (defined('IN_CACTI_INSTALL') && !defined('IN_PLUGIN_INSTALL')) {
 		log_install_and_file($level, $text, 'REPLICATE', true);
@@ -2093,6 +2159,14 @@ function replicate_log($text, $level = POLLER_VERBOSITY_NONE) {
 	}
 }
 
+/**
+ * Handles the poller push reindex only data to main. Used as part of Cacti's lib functionality.
+ *
+ * @param int $device_id The device ID.
+ * @param int $data_query_id The data query ID.
+ *
+ * @return void No value is returned.
+ */
 function poller_push_reindex_only_data_to_main($device_id, $data_query_id) {
 	global $remote_db_cnn_id;
 
@@ -2112,6 +2186,16 @@ function poller_push_reindex_only_data_to_main($device_id, $data_query_id) {
 	}
 }
 
+/**
+ * Handles the poller push reindex data to poller. Used as part of Cacti's lib functionality.
+ *
+ * @param int $device_id The device ID.
+ * @param int $data_query_id The data query ID.
+ * @param bool $force The force.
+ * @param bool $db_cnn_id The DB cnn ID.
+ *
+ * @return void No value is returned.
+ */
 function poller_push_reindex_data_to_poller($device_id = 0, $data_query_id = 0, $force = false, $db_cnn_id = false) {
 	global $config, $remote_db_cnn_id, $local_db_cnn_id, $database_hostname, $rdatabase_hostname;
 
@@ -2210,6 +2294,16 @@ function poller_push_reindex_data_to_poller($device_id = 0, $data_query_id = 0, 
 	}
 }
 
+/**
+ * Handles the replicate table to poller. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $conn The conn.
+ * @param mixed &$data The data.
+ * @param string $table The table.
+ * @param mixed $exclude The exclude.
+ *
+ * @return void No value is returned.
+ */
 function replicate_table_to_poller($conn, &$data, $table, $exclude = false) {
 	$max_packet  = db_fetch_row("SHOW GLOBAL VARIABLES LIKE 'max_allowed_packet'", true, $conn);
 
@@ -2289,6 +2383,13 @@ function replicate_table_to_poller($conn, &$data, $table, $exclude = false) {
 	}
 }
 
+/**
+ * Handles the poller recovery flush boost. Used as part of Cacti's lib functionality.
+ *
+ * @param int $poller_id The poller ID.
+ *
+ * @return void No value is returned.
+ */
 function poller_recovery_flush_boost($poller_id) {
 	global $config;
 
@@ -2301,6 +2402,11 @@ function poller_recovery_flush_boost($poller_id) {
 	}
 }
 
+/**
+ * Handles the poller push data to main. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function poller_push_data_to_main() {
 	global $config, $remote_db_cnn_id;
 
@@ -2352,6 +2458,17 @@ function poller_push_data_to_main() {
 	}
 }
 
+/**
+ * Handles the poller push table. Used as part of Cacti's lib functionality.
+ *
+ * @param object $db_cnn The DB cnn.
+ * @param array $records The records.
+ * @param string $table The table.
+ * @param bool $ignore The ignore.
+ * @param array $dupes The dupes.
+ *
+ * @return int The resulting integer value.
+ */
 function poller_push_table($db_cnn, $records, $table, $ignore = false, $dupes = array()) {
 	$prefix = 'INSERT ' . ($ignore ? 'IGNORE':'') . ' INTO ' . $table . ' ';
 	$first  = true;
@@ -2394,12 +2511,12 @@ function poller_push_table($db_cnn, $records, $table, $ignore = false, $dupes = 
 }
 
 /**
- * remote_poller_up - Given a remote poller id, check if it has responded
- *   recently, and if so, return true else return false.
+ * Given a remote poller id, check if it has responded recently, and if so, return true else
+ * return false. Used as part of Cacti's lib functionality.
  *
- * @param   (int) The remote poller id
+ * @param int $poller_id The remote poller id.
  *
- * @returns (bool) True if up else false
+ * @return bool True if up else false.
  */
 function remote_poller_up($poller_id) {
 	$gone_time = read_config_option('poller_interval') * 2;
@@ -2422,11 +2539,67 @@ function remote_poller_up($poller_id) {
 	}
 }
 
+/**
+ * Handles the should ignore from replication. Used as part of Cacti's lib functionality.
+ *
+ * @param string $path The path.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function should_ignore_from_replication($path) {
+	global $config;
+
 	$entry = basename($path);
-	return ($entry == '.' || $entry == '..' || $entry == '.git' || $entry == '');
+
+	if ($entry == '.' || $entry == '..' || $entry == '.git' || $entry == '') {
+		return true;
+	}
+
+	// Never replicate repository and tooling metadata files that may live in
+	// Cacti's base directory or any other cached directory (scripts, resource,
+	// plugins, etc.). These are development artifacts with no runtime purpose
+	// on a remote data collector.
+	if (in_array($entry, array('.gitignore', '.htaccess.dist', '.mdl_style.rb', '.mdlrc'), true)) {
+		return true;
+	}
+
+	$normalized = str_replace('\\', '/', $path);
+
+	// update_db_from_path() consults this helper with absolute file paths, so
+	// strip the installation root first. Otherwise an ancestor directory that
+	// merely happens to be named 'tests' (e.g. Cacti installed under
+	// /srv/tests/cacti) would reject every ordinary file. Cache-relative
+	// paths (plugins/foo/tests/Bar.php) do not start with the root and are
+	// left unchanged.
+	if (isset($config['base_path']) && $config['base_path'] != '') {
+		$base = rtrim(str_replace('\\', '/', $config['base_path']), '/');
+
+		if ($base != '' && strpos($normalized, $base . '/') === 0) {
+			$normalized = substr($normalized, strlen($base) + 1);
+		}
+	}
+
+	// Never replicate 'tests' directories - Cacti's own tests/ or any
+	// plugin's tests/ - or anything beneath them, in either direction. The
+	// argument may be a bare entry name (change detection / cache-in) or a
+	// cache-relative path such as plugins/foo/tests/Bar.php (cache-out), so
+	// match a 'tests' segment anywhere in the path.
+	$segments = explode('/', $normalized);
+
+	if (in_array('tests', $segments, true)) {
+		return true;
+	}
+
+	return false;
 }
 
+/**
+ * Retrieves the remote poller IDS from graphs. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$graphs The graphs.
+ *
+ * @return array An array of results.
+ */
 function get_remote_poller_ids_from_graphs(&$graphs) {
 	if (cacti_sizeof($graphs)) {
 		$graphs = implode(', ', $graphs);
@@ -2447,6 +2620,13 @@ function get_remote_poller_ids_from_graphs(&$graphs) {
 	}
 }
 
+/**
+ * Retrieves the remote poller IDS from data sources. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$data_sources The data sources.
+ *
+ * @return array An array of results.
+ */
 function get_remote_poller_ids_from_data_sources(&$data_sources) {
 	if (cacti_sizeof($data_sources)) {
 		$data_sources = implode(', ', $data_sources);
@@ -2467,6 +2647,13 @@ function get_remote_poller_ids_from_data_sources(&$data_sources) {
 	}
 }
 
+/**
+ * Retrieves the remote poller IDS from devices. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$devices The devices.
+ *
+ * @return array An array of results.
+ */
 function get_remote_poller_ids_from_devices(&$devices) {
 	if (cacti_sizeof($devices)) {
 		$devices = implode(', ', $devices);
@@ -2486,38 +2673,90 @@ function get_remote_poller_ids_from_devices(&$devices) {
 }
 
 /**
- * cacti_process_still_running - determine whether a registered pid is still
- *   alive and still belongs to the process that registered it.
+ * Validate a database value before narrowing it to the signed pid_t range used by posix_kill().
  *
- *   A bare posix_kill($pid, 0) only proves that *some* process owns the pid.
- *   After a registered process dies without unregistering, the OS can recycle
- *   its pid for an unrelated program; trusting the bare pid then blocks a
- *   legitimate task from starting or sends SIGTERM to the wrong process.  On
- *   Linux we compare /proc/<pid>/comm against our own command name as a
- *   no-schema identity check (the processes table stores no start-time).  When
- *   /proc is unavailable (non-Linux or restricted) we fall back to the bare
- *   existence test, preserving prior behaviour.
+ * @param mixed $pid The process table value.
  *
- * @param  (int)  $pid - the pid recorded in the processes table
- *
- * @return (bool) true if the pid is running and cannot be shown to be a reused
- *                pid belonging to a different program
+ * @return bool True only for a positive process id representable by the platform signal adapter.
  */
-function cacti_process_still_running($pid) {
-	$pid = intval($pid);
-
-	if ($pid <= 0 || !function_exists('posix_kill') || !posix_kill($pid, 0)) {
+function cacti_process_pid_is_valid($pid) {
+	if (!is_int($pid) && !is_float($pid) && !is_string($pid)) {
 		return false;
 	}
 
-	$self  = @file_get_contents('/proc/' . getmypid() . '/comm');
-	$other = @file_get_contents('/proc/' . $pid . '/comm');
+	$value = (string) $pid;
 
-	if ($self !== false && $other !== false) {
-		return trim($self) === trim($other);
+	if (!preg_match('/\A[0-9]+\z/', $value)) {
+		return false;
 	}
 
-	/* /proc is unavailable (non-Linux or restricted): fall back to the bare
+	$value = ltrim($value, '0');
+	$value = $value === '' ? '0' : $value;
+	$max   = PHP_OS_FAMILY === 'Windows' && PHP_INT_SIZE >= 8 ? '4294967295' : '2147483647';
+
+	if (strlen($value) > strlen($max) || (strlen($value) == strlen($max) && strcmp($value, $max) > 0)) {
+		return false;
+	}
+
+	/* PID 0 addresses the caller's process group. PID 1 is a real process, but
+	 * is_system_pid() prevents it from receiving a non-zero signal. */
+	return (int) $value > 0;
+}
+
+/**
+ * Render an untrusted process-table PID without allowing control characters or non-scalar
+ * conversion warnings into logs. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $pid The process table value.
+ *
+ * @return string A single-line diagnostic value.
+ */
+function cacti_process_pid_for_log($pid) {
+	if (is_int($pid) || is_float($pid) || is_string($pid)) {
+		$value = (string) $pid;
+	} elseif (is_bool($pid)) {
+		$value = $pid ? 'true' : 'false';
+	} elseif ($pid === null) {
+		$value = 'null';
+	} else {
+		$value = gettype($pid);
+	}
+
+	return preg_replace('/[\x00-\x1f\x7f]/', '?', $value);
+}
+
+/**
+ * Determine whether a registered pid is alive and has the same command identity as the caller.
+ * The procfs cmdline comparison distinguishes unrelated PHP scripts that share one interpreter.
+ * Executable identity is used only for non-PHP programs when cmdline is unavailable. This is a
+ * best-effort PID-reuse guard, not an anti-impersonation boundary. Without procfs, preserve the
+ * historical bare liveness behavior. The same fallback applies when procfs exists but its
+ * identity files are hidden from this process.
+ *
+ * @param int $pid The pid recorded in the processes table.
+ *
+ * @return bool True if the pid is live and cannot be shown to be unrelated.
+ */
+function cacti_process_still_running($pid) {
+	if (!cacti_process_pid_is_valid($pid)) {
+		return false;
+	}
+
+	$pid = intval($pid);
+
+	if (!function_exists('posix_kill') || !posix_kill($pid, 0)) {
+		return false;
+	}
+
+	if (is_dir('/proc/' . getmypid()) && is_dir('/proc/' . $pid)) {
+		$identity_matches = cacti_process_identity_matches($pid);
+
+		if ($identity_matches !== null) {
+			return $identity_matches;
+		}
+	}
+
+	/* /proc is unavailable or identity is unreadable: fall back to the bare
 	 * existence test, but re-check it here rather than trusting the result
 	 * from the top of the function, which can now be stale if the pid exited
 	 * in the window between that check and these file reads. */
@@ -2525,16 +2764,16 @@ function cacti_process_still_running($pid) {
 }
 
 /**
- * register_process_start - public function to register a process
- *   in Cacti's process table
+ * Public function to register a process in Cacti's process table. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string) $tasktype - Mandatory task type
- * @param  (string) $taskname - Mandatory task name
- * @param  (int)    $taskid   - Optional task id
- * @param  (int)    $timeout  - Optional timeout
+ * @param string $tasktype Mandatory task type.
+ * @param string $taskname Mandatory task name.
+ * @param int $taskid Optional task id.
+ * @param int $timeout Optional timeout.
  *
- * @return (bool)   success   - true if you can start running, else false if
- *                              another version is running and has not ended.
+ * @return bool Success - true if you can start running, else false if another version is running
+ *   and has not ended.
  */
 function register_process_start($tasktype, $taskname, $taskid = 0, $timeout = 300) {
 	$pid = getmypid();
@@ -2558,20 +2797,21 @@ function register_process_start($tasktype, $taskname, $taskid = 0, $timeout = 30
 
 			register_process($tasktype, $taskname, $taskid, $pid, $timeout);
 		} elseif ($r['timeout_exceeded']) {
-			$timeout_pid = (int) $r['pid'];
+			$timeout_pid = $r['pid'];
+			$logged_timeout_pid = cacti_process_pid_for_log($timeout_pid);
 
 			if (is_system_pid($timeout_pid)) {
-				// mirror timeout_kill_registered_processes(): never signal a reserved
-				// system PID from the registry, but still clear and re-register
-				cacti_log(sprintf('WARNING: Refusing to kill registered process with a reserved system PID! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $r['pid']), false, 'POLLER');
+				// Never signal a reserved PID. The row has exceeded its own timeout,
+				// so retire it and register this invocation to keep the task recoverable.
+				cacti_log(sprintf('WARNING: Refusing to kill registered process with a reserved system PID! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $logged_timeout_pid), false, 'POLLER');
 
 				unregister_process($tasktype, $taskname, $taskid);
 				register_process($tasktype, $taskname, $taskid, $pid, $timeout);
 			} elseif ($timeout_pid > 0) {
 				if (cacti_process_still_running($timeout_pid)) {
-					cacti_log(sprintf('ERROR: Process being killed due to timeout! (%s, %s, %s, Process %s, Time %s, Timeout %s, Timestamp %s)', $tasktype, $taskname, $taskid, $r['pid'], $r['timeout_exceeded'], $r['timeout'], $r['current_timestamp']), false, 'POLLER');
+					cacti_log(sprintf('ERROR: Process being killed due to timeout! (%s, %s, %s, Process %s, Time %s, Timeout %s, Timestamp %s)', $tasktype, $taskname, $taskid, $logged_timeout_pid, $r['timeout_exceeded'], $r['timeout'], $r['current_timestamp']), false, 'POLLER');
 
-					posix_kill($timeout_pid, SIGTERM);
+					cacti_process_kill($timeout_pid, SIGTERM);
 				}
 
 				unregister_process($tasktype, $taskname, $taskid);
@@ -2597,15 +2837,15 @@ function register_process_start($tasktype, $taskname, $taskid = 0, $timeout = 30
 }
 
 /**
- * register_process - register a process in Cacti's process table
+ * Register a process in Cacti's process table. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $tasktype  - Mandatory task type
- * @param  (string) $taskname  - Mandatory task name
- * @param  (int)    $taskid    - Mandatory task id
- * @param  (int)    $pid       - Mandatory pid
- * @param  (int)    $timeout   - Mandatory timeout
+ * @param string $tasktype Mandatory task type.
+ * @param string $taskname Mandatory task name.
+ * @param int $taskid Mandatory task id.
+ * @param int $pid Mandatory pid.
+ * @param int $timeout Mandatory timeout.
  *
- * @return (void)
+ * @return void Bool.
  */
 function register_process($tasktype, $taskname, $taskid, $pid, $timeout) {
 	if (!db_table_exists('processes')) {
@@ -2618,14 +2858,14 @@ function register_process($tasktype, $taskname, $taskid, $pid, $timeout) {
 }
 
 /**
- * unregister_process - remove a process from Cacti's process table
+ * Remove a process from Cacti's process table. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $tasktype  - Mandatory task type
- * @param  (string) $taskname  - Mandatory task name
- * @param  (int)    $taskid       - Optional task id
- * @param  (int)    $pid          - Optional task pid
+ * @param string $tasktype Mandatory task type.
+ * @param string $taskname Mandatory task name.
+ * @param int $taskid Optional task id.
+ * @param int $pid Optional task pid.
  *
- * @return (void)
+ * @return void Bool.
  */
 function unregister_process($tasktype, $taskname, $taskid = 0, $pid = -1) {
 	if (!db_table_exists('processes')) {
@@ -2649,13 +2889,13 @@ function unregister_process($tasktype, $taskname, $taskid = 0, $pid = -1) {
 }
 
 /**
- * heartbeat_process - update the process table last_update timestamp
+ * Update the process table last_update timestamp. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $tasktype  - Mandatory task type
- * @param  (string) $taskname  - Mandatory task name
- * @param  (int)    $taskid       - Optional task id
+ * @param string $tasktype Mandatory task type.
+ * @param string $taskname Mandatory task name.
+ * @param int $taskid Optional task id.
  *
- * @return (void)
+ * @return void Bool.
  */
 function heartbeat_process($tasktype, $taskname, $taskid = 0) {
 	if (!db_table_exists('processes')) {
@@ -2671,28 +2911,196 @@ function heartbeat_process($tasktype, $taskname, $taskid = 0) {
 }
 
 /**
- * is_system_pid - test whether a PID falls in the reserved low range that Cacti
- *   must never signal. init (1), systemd, and kernel threads live here, so a
- *   tampered or reused pid column could otherwise take down a host service.
+ * Determine whether an executable path names a supported PHP interpreter. Used as part of Cacti's
+ * lib functionality.
  *
- * @param  (int) $pid  - The process id to test
+ * @param string $path Executable path obtained from procfs.
  *
- * @return (bool) true when the PID is a low/system PID that must be skipped
+ * @return bool True for PHP CLI, CGI, FPM, and phpdbg variants.
  */
-function is_system_pid($pid) {
-	return (int) $pid <= 100;
+function cacti_process_executable_is_php_interpreter($path) {
+	return preg_match('/^php(?:(?:-fpm|-cgi|dbg)?[0-9.]*)$/i', basename($path)) === 1;
 }
 
 /**
- * timeout_kill_registered_processes - allow a Cacti plugin or scheduled task to
- *   be bulk cleaned.
+ * Whether $pid runs the same program we do PHP commands are compared by script path while native
+ * commands are compared by their kernel-resolved executable. A visible caller script and native
+ * target are a mismatch. If only the target exposes a PHP script, wrappers such as
+ * PHP-FPM/mod_php make the result inconclusive. An unreadable identity is reported separately
+ * from a positive mismatch. Liveness callers may then preserve the process row. Used as part of
+ * Cacti's lib functionality.
  *
- * @param  (string) $tasktype  - Optional task type
- * @param  (string) $taskname  - Optional task name
- * @param  (string) $taskid    - Optional task id
- * @param  (string) $pid       - Optional pid
+ * @param int $pid The process id to compare against this one.
  *
- * @return (void)
+ * @return bool|null True for the same command, false for a positive mismatch, or null when procfs
+ *   cannot establish identity.
+ */
+function cacti_process_identity_matches($pid) {
+	$pid           = (int) $pid;
+
+	if ($pid === getmypid()) {
+		return true;
+	}
+
+	$self_cmdline  = @file_get_contents('/proc/' . getmypid() . '/cmdline');
+	$other_cmdline = @file_get_contents('/proc/' . $pid . '/cmdline');
+
+	/* PHP's executable path alone cannot distinguish two unrelated scripts.
+	 * Compare script paths while ignoring flags that legitimately differ
+	 * between master and worker instances of the same Cacti command. */
+	if ($self_cmdline !== false && $self_cmdline !== '' && $other_cmdline !== false && $other_cmdline !== '') {
+		$script = static function ($cmdline) {
+			foreach (explode("\0", $cmdline) as $argument) {
+				if (preg_match('/\.php\z/i', $argument)) {
+					$resolved = realpath($argument);
+
+					return $resolved !== false ? $resolved : $argument;
+				}
+			}
+
+			return false;
+		};
+		$mine_script   = $script($self_cmdline);
+		$theirs_script = $script($other_cmdline);
+
+		if ($mine_script !== false && $theirs_script !== false) {
+			return hash_equals($mine_script, $theirs_script);
+		}
+
+		if (($mine_script === false) !== ($theirs_script === false)) {
+			$hidden_pid = $mine_script === false ? getmypid() : $pid;
+			$hidden_exe = @readlink('/proc/' . $hidden_pid . '/exe');
+
+			/* A PHP wrapper may omit its script from argv, which is inconclusive.
+			 * A readable native executable, however, is a positive mismatch. */
+			if ($hidden_exe === false || cacti_process_executable_is_php_interpreter($hidden_exe)) {
+				return null;
+			}
+
+			return false;
+		}
+	}
+
+	$self_exe  = '/proc/' . getmypid() . '/exe';
+	$other_exe = '/proc/' . $pid . '/exe';
+
+	if (!is_link($self_exe) || !is_link($other_exe)) {
+		return null;
+	}
+
+	$mine   = @readlink($self_exe);
+	$theirs = @readlink($other_exe);
+
+	if ($mine === false || $theirs === false) {
+		return null;
+	}
+
+	if ($mine !== $theirs) {
+		return false;
+	}
+
+	/* If argv is unavailable, matching PHP interpreters do not establish that
+	 * the registered process runs the same Cacti script. */
+	return cacti_process_executable_is_php_interpreter($mine) ? null : true;
+}
+
+/**
+ * Whether this process could deliver a signal to $pid This deliberately skips /proc identity,
+ * because its callers read false as "stale, clear the row and run". An identity check that
+ * answered no for a live process could clear a row out from under a running collector and let a
+ * second one start. EPERM therefore counts as proof that the PID exists. Bounded first, so a
+ * value pid_t cannot hold never reaches the kernel as -1. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param int $pid The pid recorded in a table.
+ * @param bool $permission_denied_is_alive Treat EPERM as proof of life.
+ *
+ * @return bool True when the pid exists, including an EPERM refusal.
+ */
+function cacti_process_signalable($pid, $permission_denied_is_alive = true) {
+	if (!cacti_process_pid_is_valid($pid) || !function_exists('posix_kill')) {
+		return false;
+	}
+
+	$pid = (int) $pid;
+
+	if (posix_kill($pid, 0)) {
+		return true;
+	}
+
+	/* EPERM proves the process exists even though this account cannot signal
+	 * it. Callers must preserve that process's registry row. */
+	return $permission_denied_is_alive && function_exists('posix_get_last_error') && posix_get_last_error() === 1;
+}
+
+/**
+ * Signal a pid that was read from a process table A stored pid can hold a value the kernel will
+ * not read as the caller means it. processes.pid is int(10) unsigned, so a corrupted row can
+ * carry 4294967295, and posix_kill() narrows that to a 32 bit pid_t of -1, which kill(2) reads as
+ * every process the caller is permitted to signal. Refusing it here logs the row so an operator
+ * can find it. is_system_pid() decides what is out of range: PID 1, anything that cannot name a
+ * process, and anything wider than pid_t. The wrapper deliberately does not inspect /proc
+ * ownership. Spine is commonly setuid, so its executable link may be unreadable even though it is
+ * the task registered in the row. The registry is the ownership record; PID 1 and the pid_t
+ * bounds are the platform-independent signal guards. Used as part of Cacti's lib functionality.
+ *
+ * @param int $pid The pid read from a process table.
+ * @param int $signal The signal to send.
+ * @param string $environ Log environment to record a refusal under.
+ *
+ * @return bool True when the signal was sent.
+ */
+function cacti_process_kill($pid, $signal = SIGTERM, $environ = 'POLLER') {
+	if (!cacti_process_pid_is_valid($pid) || is_system_pid($pid)) {
+		$logged_pid = cacti_process_pid_for_log($pid);
+		cacti_log(sprintf('WARNING: Refusing to signal PID %s from a process table, which does not name a process a Cacti task can own!', $logged_pid), false, $environ);
+
+		return false;
+	}
+
+	if (!function_exists('posix_kill')) {
+		return false;
+	}
+
+	$pid = (int) $pid;
+
+	return posix_kill($pid, $signal);
+}
+
+/**
+ * Test whether a PID is one Cacti must never signal from the registry. init owns pid 1 on every
+ * platform, so a tampered or reused pid column could otherwise take down the host's own service
+ * manager. PID 1 remains reserved on every platform. Other low process IDs are valid in PID
+ * namespaces and must not be treated as system processes merely due to their number. A pid wider
+ * than the platform process-id type is refused for a different reason. posix_kill() narrows its
+ * argument to a 32 bit pid_t, so 4294967295, the largest value the pid column holds, reaches the
+ * kernel as -1, which signals every process the poller is permitted to signal. Used as part of
+ * Cacti's lib functionality.
+ *
+ * @param int $pid The process id to test.
+ *
+ * @return bool True when the PID must be skipped.
+ */
+function is_system_pid($pid) {
+	if (!cacti_process_pid_is_valid($pid)) {
+		return true;
+	}
+
+	$pid = (int) $pid;
+
+	return $pid === 1;
+}
+
+/**
+ * Allow a Cacti plugin or scheduled task to be bulk cleaned. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param string $tasktype Optional task type.
+ * @param string $taskname Optional task name.
+ * @param string $taskid Optional task id.
+ * @param string $pid Optional pid.
+ *
+ * @return void Bool.
  */
 function timeout_kill_registered_processes($tasktype = '', $taskname = '', $taskid = 0, $pid = -1) {
 	if (!db_table_exists('processes')) {
@@ -2729,15 +3137,17 @@ function timeout_kill_registered_processes($tasktype = '', $taskname = '', $task
 
 	if (cacti_sizeof($processes)) {
 		foreach($processes as $r) {
-			$pid = (int) $r['pid'];
+			$pid = $r['pid'];
+			$logged_pid = cacti_process_pid_for_log($pid);
 
 			if (is_system_pid($pid)) {
-				cacti_log(sprintf('WARNING: Refusing to kill registered process with a reserved system PID! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
+				cacti_log(sprintf('WARNING: Refusing to kill registered process with a reserved system PID! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $logged_pid), false, 'POLLER');
+
 			} elseif (cacti_process_still_running($pid)) {
-				cacti_log(sprintf('ERROR: Process killed due to timeout! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
-				posix_kill($pid, SIGTERM);
+				cacti_log(sprintf('ERROR: Process killed due to timeout! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $logged_pid), false, 'POLLER');
+				cacti_process_kill($pid, SIGTERM);
 			} else {
-				cacti_log(sprintf('ERROR: Detected process that is gone and did not unregister first! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
+				cacti_log(sprintf('ERROR: Detected process that is gone and did not unregister first! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $logged_pid), false, 'POLLER');
 			}
 
 			unregister_process($r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']);

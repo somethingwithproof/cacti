@@ -253,6 +253,19 @@ if (!isset($resource_path)) {
 	$config['resource_path'] = $resource_path;
 }
 
+/* Shared object cache directory (see $config['cache_dir'] in config.php).
+ * Default to a private cache/ under the install. If it cannot be created or is
+ * not writable the shared cache simply degrades to a process-local tier; never
+ * fall back to a world-writable shared temp directory, which would let a local
+ * user plant predictable cache files for the poller to read. */
+if (empty($config['cache_dir'])) {
+	$config['cache_dir'] = $config['base_path'] . '/cache';
+}
+
+if (!is_dir($config['cache_dir'])) {
+	@mkdir($config['cache_dir'], 0770, true);
+}
+
 if (isset($input_whitelist)) {
 	$config['input_whitelist'] = $input_whitelist;
 }
@@ -420,11 +433,24 @@ if ($config['is_web']) {
 		$is_https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off');
 
 		if (!$is_https) {
-			$location = cacti_build_https_redirect_url(
-				$_SERVER['SERVER_NAME'] ?? '',
+			/* SERVER_NAME mirrors the client Host header under the common Apache
+			 * default UseCanonicalName Off, so validating its format alone still
+			 * lets an attacker redirect to another valid-looking hostname (open
+			 * redirect / cache poisoning). Prefer the admin-configured base_url,
+			 * the trusted source Cacti already uses for absolute URLs, and only
+			 * fall back to the validated request host when it is not set. */
+			$https_host = cacti_force_https_host();
+
+			/* without a trusted, admin-configured base_url there is no host we
+			 * can redirect to safely: SERVER_NAME mirrors the client Host header
+			 * under the common Apache default UseCanonicalName Off, so falling
+			 * back to it would reopen the same open-redirect/cache-poisoning
+			 * issue this check exists to close. Fail closed instead. */
+			$location = ($https_host !== '') ? cacti_build_https_redirect_url(
+				$https_host,
 				$_SERVER['REQUEST_URI'] ?? '',
 				$config['url_path']
-			);
+			) : '';
 
 			if ($location === '') {
 				http_response_code(400);
@@ -462,7 +488,21 @@ if ($config['is_web']) {
 		$options['cookie_samesite'] = 'Strict';
 	}
 
-	if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off') {
+	/* Direct TLS, or TLS terminated at a proxy we are configured to trust
+	 * ($config['proxy_headers']). Only honour a forwarded-proto header when
+	 * proxy trust is enabled, so a client cannot force the Secure flag. */
+	$https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off');
+
+	if (!$https && !empty($config['proxy_headers'])) {
+		$fwd_proto = isset($_SERVER['HTTP_X_FORWARDED_PROTO']) ? strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) : '';
+		$fwd_ssl   = isset($_SERVER['HTTP_X_FORWARDED_SSL'])   ? strtolower($_SERVER['HTTP_X_FORWARDED_SSL'])   : '';
+
+		if ($fwd_proto == 'https' || $fwd_ssl == 'on') {
+			$https = true;
+		}
+	}
+
+	if ($https) {
 		ini_set('session.cookie_secure', true);
 		$options['cookie_secure'] = true;
 	}
@@ -573,11 +613,52 @@ if ($config['is_web']) {
 	if (isset_request_var('action')) {
 		$action = get_nfilter_request_var('action');
 
-		$bad_actions = array('save', 'update_data', 'changepassword');
+		/* GHSA-w3qw-762w-6g9v: an array-form action[] value makes every scalar
+		 * $action == $bad comparison below false, silently slipping a
+		 * state-changing action past this GET guard. A real action is never an
+		 * array here, so fail closed before the denylist is consulted. */
+		if (is_array($action)) {
+			header('Allow: POST');
+			http_response_code(405);
+			exit;
+		}
+
+		/* State changing actions must arrive by POST with a CSRF token. The
+		   actions below were reachable by GET, so a cross origin <img> or link
+		   could delete or reorder a template item, a tree branch or a link page
+		   using only the victim's session cookie. Under AUTH_METHOD_BASIC the
+		   browser re-sends credentials on that request, so no session cookie is
+		   needed at all.
+
+		   Every anchor that carried one of these now takes the cactiPostAction
+		   class and goes out through submitPageUsingPost(), which is the
+		   mechanism this branch already used for the plugin actions.
+
+		   Read-only actions stay out by intent: item_edit, edit, tree and the
+		   *_confirm dialogs render a page and change nothing. */
+		$bad_actions = array(
+			'save', 'update_data', 'changepassword',
+			'delete_node', 'gt_remove', 'query_remove', 'remove', 'change_leaf',
+			'item_remove', 'item_moveup', 'item_movedown',
+			'item_remove_gsv', 'item_remove_dssv',
+			'item_moveup_gsv', 'item_moveup_dssv',
+			'item_movedown_gsv', 'item_movedown_dssv',
+			'moveup', 'movedown',
+			'tree_up', 'tree_down', 'move_page_up', 'move_page_down',
+			'rrd_add', 'rrd_remove'
+		);
 
 		foreach($bad_actions as $bad) {
 			if ($action == $bad && !isset($_POST['__csrf_magic'])) {
-				cacti_log('WARNING: Attempt to use GET method for POST operations from IP ' . get_client_addr(), false, 'WEBUI');
+				/* Preserve the legacy warning for form actions. Item-action links
+				 * can also come from plugins outside this repository; crawlers may
+				 * discover those URLs, but they must still fail closed. */
+				if (in_array($bad, array('save', 'update_data', 'changepassword'), true)) {
+					cacti_log('WARNING: Attempt to use GET method for POST operations from IP ' . get_client_addr(), false, 'WEBUI');
+				}
+
+				header('Allow: POST');
+				http_response_code(405);
 				exit;
 			}
 		}

@@ -118,6 +118,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_save() {
 	if ((isset_request_var('save_component_data_source_new')) && (!isempty_request_var('data_template_id'))) {
@@ -365,6 +371,12 @@ function form_save() {
 /* ------------------------
     The "actions" function
    ------------------------ */
+/**
+ * ------------------------ The "actions" function ------------------------. Used as part of
+ * Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_actions() {
 	global $ds_actions;
@@ -442,11 +454,15 @@ function form_actions() {
 				api_data_source_change_host($selected_items, get_request_var('host_id'));
 			} elseif (get_nfilter_request_var('drp_action') == '6') { // data source enable
 				for ($i=0;($i<cacti_count($selected_items));$i++) {
-					api_data_source_enable($selected_items[$i]);
+					if (data_source_authorized($selected_items[$i])) {
+						api_data_source_enable($selected_items[$i]);
+					}
 				}
 			} elseif (get_nfilter_request_var('drp_action') == '7') { // data source disable
 				for ($i=0;($i<cacti_count($selected_items));$i++) {
-					api_data_source_disable($selected_items[$i]);
+					if (data_source_authorized($selected_items[$i])) {
+						api_data_source_disable($selected_items[$i]);
+					}
 				}
 			} elseif (get_nfilter_request_var('drp_action') == '8') { // reapply suggested data source naming
 				for ($i=0;($i<cacti_count($selected_items));$i++) {
@@ -604,6 +620,14 @@ function form_actions() {
 /* ----------------------------
     data - Custom Data
    ---------------------------- */
+/**
+ * ---------------------------- data - Custom Data ----------------------------. Used as part of
+ * Cacti's data sources functionality.
+ *
+ * @param bool $incform The incform.
+ *
+ * @return void No value is returned.
+ */
 
 function data_edit($incform = true) {
 	/* ================= input validation ================= */
@@ -718,6 +742,12 @@ function data_edit($incform = true) {
 /* ------------------------
     Data Source Functions
    ------------------------ */
+/**
+ * ------------------------ Data Source Functions ------------------------. Used as part of
+ * Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function ds_rrd_remove() {
 	/* ================= input validation ================= */
@@ -736,6 +766,11 @@ function ds_rrd_remove() {
 	header('Location: data_sources.php?header=false&action=ds_edit&id=' . get_request_var('local_data_id'));
 }
 
+/**
+ * Handles the DS RRD add. Used as part of Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 function ds_rrd_add() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -751,24 +786,73 @@ function ds_rrd_add() {
 	header('Location: data_sources.php?header=false&action=ds_edit&id=' . get_request_var('id') . "&view_rrd=$data_template_rrd_id");
 }
 
+/**
+ * Determines whether the current user is authorized to modify the given data source. Data sources
+ * tied to a device (host_id > 0) require the caller to be authorized for that device;
+ * host-independent data sources (host_id = 0) are not device-scoped. Used as part of Cacti's data
+ * sources functionality.
+ *
+ * @param int $local_data_id The data source to check.
+ *
+ * @return bool True if the caller may modify this data source.
+ */
+function data_source_authorized($local_data_id) {
+	$host_id = db_fetch_cell_prepared('SELECT host_id FROM data_local WHERE id = ?', array($local_data_id));
+
+	if (empty($host_id)) {
+		return true;
+	}
+
+	return is_device_allowed($host_id);
+}
+
+/**
+ * Handles the DS disable. Used as part of Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 function ds_disable() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
 	/* ==================================================== */
 
+	if (!data_source_authorized(get_request_var('id'))) {
+		raise_message('permission_denied');
+		header('Location: data_sources.php');
+
+		return;
+	}
+
 	api_data_source_disable(get_request_var('id'));
 	header('Location: data_sources.php?header=false&action=ds_edit&id=' . get_request_var('id'));
 }
 
+/**
+ * Handles the DS enable. Used as part of Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 function ds_enable() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
 	/* ==================================================== */
 
+	if (!data_source_authorized(get_request_var('id'))) {
+		raise_message('permission_denied');
+		header('Location: data_sources.php');
+
+		return;
+	}
+
 	api_data_source_enable(get_request_var('id'));
 	header('Location: data_sources.php?header=false&action=ds_edit&id=' . get_request_var('id'));
 }
 
+/**
+ * Handles the DS edit. Used as part of Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 function ds_edit() {
 	global $struct_data_source, $struct_data_source_item;
 
@@ -1087,7 +1171,7 @@ function ds_edit() {
 				foreach ($template_data_rrds as $template_data_rrd) {
 					$i++;
 					print '	<td ' . (($template_data_rrd['id'] == get_request_var('view_rrd')) ? "class='even'" : "class='odd'") . " style='width:" . ((strlen($template_data_rrd['data_source_name']) * 9) + 50) . ";text-align:center;' class='tab'>
-						<span class='textHeader'><a href='" . html_escape('data_sources.php?action=ds_edit&id=' . get_request_var('id') . '&view_rrd=' . $template_data_rrd['id']) . "'>$i: " . html_escape($template_data_rrd['data_source_name']) . '</a>' . (($use_data_template == false) ? " <a class='pic deleteMarker fa fa-times' href='" . html_escape('data_sources.php?action=rrd_remove&id=' . $template_data_rrd['id'] . '&local_data_id=' . get_request_var('id')) . "' title='" . __esc('Delete') . "'></a>" : '') . '</span>
+						<span class='textHeader'><a href='" . html_escape('data_sources.php?action=ds_edit&id=' . get_request_var('id') . '&view_rrd=' . $template_data_rrd['id']) . "'>$i: " . html_escape($template_data_rrd['data_source_name']) . '</a>' . (($use_data_template == false) ? " <a class='pic deleteMarker fa fa-times cactiPostAction' href='#' data-url='" . html_escape('data_sources.php?action=rrd_remove&id=' . $template_data_rrd['id'] . '&local_data_id=' . get_request_var('id')) . "' title='" . __esc('Delete') . "'></a>" : '') . '</span>
 						</td>';
 					print "<td style='width:1px;'></td>";
 				}
@@ -1105,7 +1189,7 @@ function ds_edit() {
 				" . __esc('Data Source Item %s', $header_label) . "
 			</div>
 			<div class='tableSubHeaderColumn right'>
-				" . ((!isempty_request_var('id') && (empty($data_template['id']))) ? "<a class='linkOverDark' href='" . html_escape('data_sources.php?action=rrd_add&id=' . get_request_var('id')) . "'>" . __('New') . '</a>&nbsp;' : '') . '
+				" . ((!isempty_request_var('id') && (empty($data_template['id']))) ? "<a class='linkOverDark cactiPostAction' href='#' data-url='" . html_escape('data_sources.php?action=rrd_add&id=' . get_request_var('id')) . "'>" . __('New') . '</a>&nbsp;' : '') . '
 			</div>
 		</div>';
 
@@ -1212,6 +1296,14 @@ function ds_edit() {
 	bottom_footer();
 }
 
+/**
+ * Retrieves the poller interval. Used as part of Cacti's data sources functionality.
+ *
+ * @param int $seconds The seconds.
+ * @param int $data_source_profile_id The data source profile ID.
+ *
+ * @return string The resulting string.
+ */
 function get_poller_interval($seconds, $data_source_profile_id) {
 	if ($seconds == 0 || $data_source_profile_id == 0) {
 		return '<em>' . __('External') . '</em>';
@@ -1224,6 +1316,11 @@ function get_poller_interval($seconds, $data_source_profile_id) {
 	}
 }
 
+/**
+ * Validates the data source vars. Used as part of Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 function validate_data_source_vars() {
 	/* ================= input validation and session storage ================= */
 	$filters = array(
@@ -1289,6 +1386,11 @@ function validate_data_source_vars() {
 	/* ================= input validation ================= */
 }
 
+/**
+ * Handles the DS. Used as part of Cacti's data sources functionality.
+ *
+ * @return void No value is returned.
+ */
 function ds() {
 	global $ds_actions, $item_rows, $sampling_intervals;
 
@@ -1329,11 +1431,10 @@ function ds() {
 	}
 
 	$(function() {
-		$('#refresh').on('click', function() {
-			applyFilter()
-		});
-
-		$('#host_id, #site_id, #rows, #status, #profile, #orphans, #template_id').on('change', function() {
+		// host_id already reloads via its own select2-callback data-callback wiring;
+		// select2 also fires a native change event, so including it here would
+		// apply the filter twice per selection
+		$('#site_id, #rows, #status, #profile, #orphans, #template_id').on('change', function() {
 			applyFilter();
 		});
 
@@ -1413,7 +1514,7 @@ function ds() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -1744,6 +1845,13 @@ function ds() {
 	form_end();
 }
 
+/**
+ * Retrieves the graphs aggregates URL. Used as part of Cacti's data sources functionality.
+ *
+ * @param int $local_data_id The local data ID.
+ *
+ * @return string The resulting string.
+ */
 function get_graphs_aggregates_url($local_data_id) {
 	$graphs = db_fetch_row_prepared('SELECT GROUP_CONCAT(DISTINCT gl.id) AS graphs, COUNT(DISTINCT gl.id) AS total
 		FROM data_local AS dl

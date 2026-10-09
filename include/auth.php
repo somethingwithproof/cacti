@@ -99,6 +99,12 @@ if ($auth_method != 0) {
 				AND username = ?',
 				array($username));
 
+			if (cacti_sizeof($current_user) && $current_user['enabled'] != 'on') {
+				cacti_log("LOGIN FAILED: User '" . $current_user['username'] . "' is disabled and was refused Basic Authentication", false, 'AUTH');
+
+				$current_user = array();
+			}
+
 			if (cacti_sizeof($current_user)) {
 				/* GHSA-273r-qr93-wgcp: regenerate session id on auth transition */
 				if (!cacti_auth_transition((int)$current_user['id'], 'basic_auth')) {
@@ -116,7 +122,9 @@ if ($auth_method != 0) {
 					VALUES (?, ?, 1, ?, NOW())',
 					array($username, $current_user['id'], $client_addr));
 
-				return true;
+				/* GHSA-4rmr-wvjq-qxc2: fall through to the per-page realm check
+				 * below instead of returning, so a Basic Auth login still has its
+				 * authorization verified for the requested page. */
 			} else {
 				require_once($config['base_path'] . '/auth_login.php');
 			}
@@ -144,7 +152,9 @@ if ($auth_method != 0) {
 				WHERE id = ?',
 				array($_SESSION['sess_user_id']));
 
-			return true;
+			/* GHSA-4rmr-wvjq-qxc2: fall through to the per-page realm check below
+			 * instead of returning, so the guest account's access to this page is
+			 * authorized rather than assumed. */
 		}
 	}
 

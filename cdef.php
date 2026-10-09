@@ -95,12 +95,20 @@ switch (get_request_var('action')) {
 /* --------------------------
     Global Form Functions
    -------------------------- */
+/**
+ * -------------------------- Global Form Functions --------------------------. Used as part of
+ * Cacti's CDEF functionality.
+ *
+ * @param int $cdef_id The CDEF ID.
+ *
+ * @return void No value is returned.
+ */
 
 function draw_cdef_preview($cdef_id) {
 	?>
 	<tr class='even'>
 		<td style='padding:4px'>
-			<pre>cdef=<?php print html_escape(get_cdef($cdef_id, true));?></pre>
+			<pre>cdef=<?php print html_escape(get_cdef($cdef_id) ?? __('Invalid CDEF'));?></pre>
 		</td>
 	</tr>
 	<?php
@@ -110,6 +118,12 @@ function draw_cdef_preview($cdef_id) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_save() {
 
@@ -173,6 +187,14 @@ function form_save() {
 	}
 }
 
+/**
+ * Handles the duplicate CDEF. Used as part of Cacti's CDEF functionality.
+ *
+ * @param int $_cdef_id The CDEF ID.
+ * @param string $cdef_title The CDEF title.
+ *
+ * @return void No value is returned.
+ */
 function duplicate_cdef($_cdef_id, $cdef_title) {
 	global $fields_cdef_edit;
 
@@ -214,6 +236,12 @@ function duplicate_cdef($_cdef_id, $cdef_title) {
 /* ------------------------
     The 'actions' function
    ------------------------ */
+/**
+ * ------------------------ The 'actions' function ------------------------. Used as part of
+ * Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_actions() {
 	global $cdef_actions;
@@ -228,8 +256,24 @@ function form_actions() {
 
 		if ($selected_items != false) {
 			if (get_nfilter_request_var('drp_action') == '1') { /* delete */
-				db_execute('DELETE FROM cdef WHERE ' . array_to_sql_or($selected_items, 'id'));
-				db_execute('DELETE FROM cdef_items WHERE ' . array_to_sql_or($selected_items, 'cdef_id'));
+				$selected_items = array_map('intval', $selected_items);
+				$in_use         = false;
+
+				foreach ($selected_items as $cdef_id) {
+					if (cdef_is_in_use($cdef_id, $selected_items)) {
+						$in_use = true;
+
+						break;
+					}
+				}
+
+				if ($in_use) {
+					raise_message('cdef_in_use', __('One or more CDEFs are in use and cannot be deleted.'), MESSAGE_LEVEL_ERROR);
+				} else {
+					$placeholders = implode(', ', array_fill(0, cacti_count($selected_items), '?'));
+					db_execute_prepared('DELETE FROM cdef WHERE id IN (' . $placeholders . ')', $selected_items);
+					db_execute_prepared('DELETE FROM cdef_items WHERE cdef_id IN (' . $placeholders . ')', $selected_items);
+				}
 			} elseif (get_nfilter_request_var('drp_action') == '2') { /* duplicate */
 				for ($i=0;($i<cacti_count($selected_items));$i++) {
 					duplicate_cdef($selected_items[$i], get_nfilter_request_var('title_format'));
@@ -311,6 +355,12 @@ function form_actions() {
 /* --------------------------
     CDEF Item Functions
    -------------------------- */
+/**
+ * -------------------------- CDEF Item Functions --------------------------. Used as part of
+ * Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function cdef_item_remove_confirm() {
 	global $cdef_functions, $cdef_item_types, $custom_cdef_data_source_types;
@@ -335,7 +385,7 @@ function cdef_item_remove_confirm() {
 		<td class='topBoxAlt'>
 			<p><?php print __('Click \'Continue\' to delete the following CDEF Item.');?></p>
 			<p><?php print __esc('CDEF Name: %s', $cdef['name']);?><br>
-			<em><?php $cdef_item_type = $cdef_item['type']; print $cdef_item_types[$cdef_item_type];?></em>: <strong><?php print html_escape(get_cdef_item_name($cdef_item['id']));?></strong></p>
+				<em><?php $cdef_item_type = $cdef_item['type']; print html_escape($cdef_item_types[$cdef_item_type] ?? __('Unknown'));?></em>: <strong><?php print html_escape(get_cdef_item_name($cdef_item['id']) ?? __('Invalid'));?></strong></p>
 		</td>
 	</tr>
 	<tr>
@@ -353,6 +403,11 @@ function cdef_item_remove_confirm() {
 	form_end();
 }
 
+/**
+ * Handles the item movedown. Used as part of Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 function item_movedown() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -362,6 +417,11 @@ function item_movedown() {
 	move_item_down('cdef_items', get_request_var('id'), 'cdef_id=' . get_request_var('cdef_id'));
 }
 
+/**
+ * Handles the item moveup. Used as part of Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 function item_moveup() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -371,6 +431,11 @@ function item_moveup() {
 	move_item_up('cdef_items', get_request_var('id'), 'cdef_id=' . get_request_var('cdef_id'));
 }
 
+/**
+ * Handles the CDEF item remove. Used as part of Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 function cdef_item_remove() {
 	/* ================= input validation ================= */
 	get_filter_request_var('id');
@@ -383,6 +448,11 @@ function cdef_item_remove() {
 		array(get_request_var('cdef_id'), get_request_var('id')));
 }
 
+/**
+ * Handles the item edit. Used as part of Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 function item_edit() {
 	global $cdef_item_types, $cdef_functions, $cdef_operators, $custom_data_source_types;
 
@@ -517,6 +587,12 @@ function item_edit() {
 /* ---------------------
     CDEF Functions
    --------------------- */
+/**
+ * --------------------- CDEF Functions ---------------------. Used as part of Cacti's CDEF
+ * functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function cdef_item_dnd() {
 	/* ================= Input validation ================= */
@@ -547,6 +623,11 @@ function cdef_item_dnd() {
 	header('Location: cdef.php?action=edit&header=false&id=' . get_request_var('id'));
 }
 
+/**
+ * Handles the CDEF edit. Used as part of Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 function cdef_edit() {
 	global $cdef_item_types, $fields_cdef_edit;
 
@@ -603,19 +684,19 @@ function cdef_edit() {
 						<a class='linkEditMain' href='<?php print html_escape('cdef.php?action=item_edit&id=' . $cdef_item['id'] . '&cdef_id=' . $cdef['id']);?>'><?php print __('Item #%d', $i);?></a>
 					</td>
 					<td>
-						<em><?php $cdef_item_type = $cdef_item['type']; print $cdef_item_types[$cdef_item_type];?></em>: <?php print html_escape(get_cdef_item_name($cdef_item['id']));?>
+						<em><?php $cdef_item_type = $cdef_item['type']; print html_escape($cdef_item_types[$cdef_item_type] ?? __('Unknown'));?></em>: <?php print html_escape(get_cdef_item_name($cdef_item['id']) ?? __('Invalid'));?>
 					</td>
 					<td class='right'>
 						<?php
 						if (read_config_option('drag_and_drop') == '') {
 							if ($i < $total_items && $total_items > 0) {
-								echo '<a class="pic fa fa-caret-down moveArrow" href="' . html_escape('cdef.php?action=item_movedown&id=' . $cdef_item['id'] . '&cdef_id=' . $cdef_item['cdef_id']) . '" title="' . __esc('Move Down') . '"></a>';
+								echo '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="#" data-url="' . html_escape('cdef.php?action=item_movedown&id=' . $cdef_item['id'] . '&cdef_id=' . $cdef_item['cdef_id']) . '" title="' . __esc('Move Down') . '"></a>';
 							} else {
 								echo '<span class="moveArrowNone"></span>';
 							}
 
 							if ($i > 1 && $i <= $total_items) {
-								echo '<a class="pic fa fa-caret-up moveArrow" href="' . html_escape('cdef.php?action=item_moveup&id=' . $cdef_item['id'] .	'&cdef_id=' . $cdef_item['cdef_id']) . '" title="' . __esc('Move Up') . '"></a>';
+								echo '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="#" data-url="' . html_escape('cdef.php?action=item_moveup&id=' . $cdef_item['id'] .	'&cdef_id=' . $cdef_item['cdef_id']) . '" title="' . __esc('Move Up') . '"></a>';
 							} else {
 								echo '<span class="moveArrowNone"></span>';
 							}
@@ -689,6 +770,11 @@ function cdef_edit() {
 	<?php
 }
 
+/**
+ * Handles the CDEF. Used as part of Cacti's CDEF functionality.
+ *
+ * @return void No value is returned.
+ */
 function cdef() {
 	global $cdef_actions, $item_rows;
 
@@ -772,7 +858,7 @@ function cdef() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -795,7 +881,7 @@ function cdef() {
 			}
 
 			$(function() {
-				$('#refresh, #has_graphs').on('click', function() {
+				$('#has_graphs').on('click', function() {
 					applyFilter();
 				});
 
@@ -920,4 +1006,3 @@ function cdef() {
 
 	form_end();
 }
-

@@ -129,6 +129,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     Global Form Functions
    -------------------------- */
+/**
+ * -------------------------- Global Form Functions --------------------------. Used as part of
+ * Cacti's graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function get_ajax_graph_items() {
 	$rrd_id  = get_filter_request_var('rrd_id');
@@ -185,6 +191,11 @@ function get_ajax_graph_items() {
 	print json_encode($items);
 }
 
+/**
+ * Handles the add tree names to actions array. Used as part of Cacti's graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function add_tree_names_to_actions_array() {
 	global $graph_actions;
 
@@ -203,6 +214,14 @@ function add_tree_names_to_actions_array() {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's graphs functionality.
+ *
+ * @param string $variable The variable.
+ *
+ * @return string The resulting string.
+ */
 
 function parse_validate_graph_template_id($variable) {
 	$output_type_id = 0;
@@ -222,6 +241,11 @@ function parse_validate_graph_template_id($variable) {
 	return $output_type_id;
 }
 
+/**
+ * Handles the form save. Used as part of Cacti's graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_save() {
 	/* ================= input validation ================= */
 	get_filter_request_var('local_graph_id');
@@ -481,6 +505,14 @@ function form_save() {
 /* ------------------------
     The "actions" function
    ------------------------ */
+/**
+ * ------------------------ The "actions" function ------------------------. Used as part of
+ * Cacti's graphs functionality.
+ *
+ * @param int $local_graph_id The local graph ID.
+ *
+ * @return string The resulting string.
+ */
 
 function get_current_graph_template($local_graph_id) {
 	$graph_local = db_fetch_row_prepared('SELECT *
@@ -532,6 +564,13 @@ function get_current_graph_template($local_graph_id) {
 	}
 }
 
+/**
+ * Retrieves the common graph templates. Used as part of Cacti's graphs functionality.
+ *
+ * @param mixed &$graph The graph.
+ *
+ * @return string The resulting string.
+ */
 function get_common_graph_templates(&$graph) {
 	$dqid = 0;
 
@@ -596,6 +635,11 @@ function get_common_graph_templates(&$graph) {
 	return $gtsql;
 }
 
+/**
+ * Handles the form actions. Used as part of Cacti's graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_actions() {
 	global $graph_actions, $struct_aggregate;
 
@@ -650,10 +694,10 @@ function form_actions() {
 						array($local_graph_id));
 
 					if (api_graph_change_device($local_graph_id, $host_id)) {
-						raise_message('moved_' . $local_graph_id, __('Graph %s Moved to new Device', $title), MESSAGE_LEVEL_INFO);
+						raise_message('moved_' . $local_graph_id, __esc('Graph %s Moved to new Device', $title), MESSAGE_LEVEL_INFO);
 						$success++;
 					} else {
-						raise_message('notmoved_' . $local_graph_id, __('Graph %s not Moved.  Device missing Data Query', $title), MESSAGE_LEVEL_WARN);
+						raise_message('notmoved_' . $local_graph_id, __esc('Graph %s not Moved.  Device missing Data Query', $title), MESSAGE_LEVEL_WARN);
 						$failures++;
 					}
 				}
@@ -711,6 +755,15 @@ function form_actions() {
 					$ag_data['total_type']            = $template_data['total_type'];
 					$ag_data['total_prefix']          = $template_data['total_prefix'];
 					$ag_data['order_type']            = $template_data['order_type'];
+				}
+
+				$original_local_graph_id = $local_graph_id;
+
+				if (!db_begin_transaction()) {
+					raise_message('aggregate_transaction_failed', __('Unable to start the aggregate graph update.'), MESSAGE_LEVEL_ERROR);
+					header('Location: aggregate_graphs.php');
+
+					exit;
 				}
 
 				/* create graph in cacti tables */
@@ -806,7 +859,22 @@ function form_actions() {
 				}
 
 				/* create actual graph items */
-				aggregate_create_update($local_graph_id, $member_graphs, $attribs);
+				if (!aggregate_create_update($local_graph_id, $member_graphs, $attribs, false)) {
+					db_rollback_transaction();
+					$local_graph_id = $original_local_graph_id;
+					header('Location: aggregate_graphs.php');
+
+					exit;
+				}
+
+				if (!db_commit_transaction()) {
+					db_rollback_transaction();
+					$local_graph_id = $original_local_graph_id;
+					raise_message('aggregate_commit_failed', __('Unable to commit the aggregate graph update.'), MESSAGE_LEVEL_ERROR);
+					header('Location: aggregate_graphs.php');
+
+					exit;
+				}
 
 				header("Location: aggregate_graphs.php?header=false&action=edit&tab=details&id=$local_graph_id");
 				exit;
@@ -1380,6 +1448,12 @@ function form_actions() {
 /* -----------------------
     item - Graph Items
    ----------------------- */
+/**
+ * ----------------------- item - Graph Items -----------------------. Used as part of Cacti's
+ * graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function item() {
 	global $consolidation_functions, $graph_item_types, $struct_graph_item;
@@ -1457,6 +1531,14 @@ function item() {
 /* ------------------------------------
     graph - Graphs
    ------------------------------------ */
+/**
+ * ------------------------------------ graph - Graphs ------------------------------------. Used
+ * as part of Cacti's graphs functionality.
+ *
+ * @param int $local_graph_id The local graph ID.
+ *
+ * @return bool True on success, false otherwise.
+ */
 
 function is_multi_device_graph($local_graph_id) {
 	$devices = db_fetch_cell_prepared('SELECT COUNT(DISTINCT host_id)
@@ -1471,6 +1553,11 @@ function is_multi_device_graph($local_graph_id) {
 	return $devices > 1 ? true : false;
 }
 
+/**
+ * Handles the graph edit. Used as part of Cacti's graphs functionality.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function graph_edit() {
 	global $config, $struct_graph, $image_types, $consolidation_functions, $graph_item_types, $struct_graph_item;
 
@@ -1905,6 +1992,11 @@ function graph_edit() {
 	}
 }
 
+/**
+ * Validates the graph request vars. Used as part of Cacti's graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function validate_graph_request_vars() {
 	/* ================= input validation and session storage ================= */
 	$filters = array(
@@ -1954,7 +2046,7 @@ function validate_graph_request_vars() {
 		),
 		'template_id' => array(
 			'filter' => FILTER_VALIDATE_REGEXP,
-			'options' => array('options' => array('regexp' => '(cg_[0-9]|dq_[0-9]|[\-0-9])')),
+			'options' => array('options' => array('regexp' => '/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)$/')),
 			'pageset' => true,
 			'default' => '-1'
 		),
@@ -1975,6 +2067,11 @@ function validate_graph_request_vars() {
 	/* ================= input validation ================= */
 }
 
+/**
+ * Handles the graph management. Used as part of Cacti's graphs functionality.
+ *
+ * @return void No value is returned.
+ */
 function graph_management() {
 	global $graph_actions, $graph_sources, $item_rows, $config;
 
@@ -2010,7 +2107,10 @@ function graph_management() {
 			clearFilter();
 		});
 
-		$('#host_id, #site_id, #rows, #source, #orphans, #rfilter, #template_id').on('change', function() {
+		// host_id already reloads via its own select2-callback data-callback wiring;
+		// select2 also fires a native change event, so including it here would
+		// apply the filter twice per selection
+		$('#site_id, #rows, #source, #orphans, #rfilter, #template_id').on('change', function() {
 			applyFilter();
 		});
 

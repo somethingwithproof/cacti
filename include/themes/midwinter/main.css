@@ -27,10 +27,10 @@
 @import url('./css/pre/keyframes.css?6d1d6a79b3c3bf783d25ff4a0cb83d59');
 
 /* Cacti core */
-@import url('./css/media/core.css?ad4ed321bb6b1a387743e4af1388207f') all;
+@import url('./css/media/core.css?4866290090432c6765d9dc1e88990887') all;
 @import url('./css/media/core-portrait.css?1b6db673b2a1f9c4ec954843f2e76ca5') screen and (max-width: 600px);
 @import url('./css/media/core-landscape.css?e0d3497d8324f1695738d1ad40328d39') screen and (min-width: 601px);
-@import url('./css/media/print.css?f8c80271650344f45629199331592924') print;
+@import url('./css/media/print.css?128a573aaa8b4140be2a13afc092db2a') print;
 
 /* standard mode */
 @import url('./css/media/standard.css?2458dd4d97dd94d3891b48e239ff6dd8') screen;
@@ -47,3 +47,338 @@
 @import url('jquery-ui.midwinter.css?7c0c69ff83d0a0d9fc7d54b737c7f9d3');
 
 /* End of file */
+
+/* Select2 - adapt to look like a native Cacti/jQuery UI control.
+   Select2 4.x ships no jQuery UI theme, so these overrides reuse this
+   theme's own jquery-ui.css/main.css colors (see .ui-widget-content /
+   .ui-state-hover / .ui-state-active) to match its look and feel. */
+/* Select2 - adapt to look like a native Cacti/jQuery UI control.
+   Midwinter's look is driven by CSS custom properties (css/pre/colors.css)
+   which flip with the data-theme-color switch, so these overrides reuse
+   those variables instead of fixed colors (see .ui-widget-content /
+   .ui-menu .ui-state-focus, .ui-state-active in jquery-ui.midwinter.css). */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+	border: 1px solid var(--border-color-superlowlight);
+	border-radius: 6px;
+	background: var(--background-content);
+	color: var(--text-color-lighter);
+}
+
+/* match jQuery UI's shorter button height */
+.select2-container--default .select2-selection--single {
+	height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	line-height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+	height: 22px;
+}
+
+/* match the multi-select (e.g. Templates) control to the single-select height;
+   flexbox centers content vertically regardless of font metrics */
+.select2-container--default .select2-selection--multiple {
+	min-height: 24px;
+	padding: 0 20px 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+	display: block;
+	flex: 1;
+	margin: 0;
+	padding-left: 8px;
+	overflow: hidden;
+	line-height: 24px;
+}
+
+/* select2-multi-count always replaces the rendered area with "N Selected" text;
+   only hide the inline search-while-typing box while closed (it doesn't fit
+   that display and was inflating the control's height) - let it reappear once
+   the dropdown opens, since that's the only place multi-selects can search from */
+select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.select2-container--open) .select2-search--inline {
+	display: none;
+}
+
+.select2-selection--multiple .select2-count-label {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* once open, let the search box sit on its own row below the current
+   selection instead of overlapping it */
+.select2-container--default .select2-selection--multiple .select2-search--inline {
+	display: block;
+	width: 100%;
+	margin: 4px 0 0;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+	width: 100% !important;
+	box-sizing: border-box;
+	margin: 0 !important;
+}
+
+/* select2 doesn't draw a dropdown arrow for multi-selects by default; add one to match */
+.select2-container--default .select2-selection--multiple::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	margin-top: -2px;
+	border-color: currentColor transparent transparent transparent;
+	border-style: solid;
+	border-width: 5px 4px 0 4px;
+	height: 0;
+	width: 0;
+	pointer-events: none;
+}
+
+.select2-container--default.select2-container--open .select2-selection--multiple::after {
+	border-color: transparent transparent currentColor transparent;
+	border-width: 0 4px 5px 4px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.select2-results__option {
+	white-space: nowrap;
+	min-height: 24px;
+	box-sizing: border-box;
+}
+
+/* keep the first 15 results visible before the list needs to scroll */
+.select2-container--default .select2-results > .select2-results__options {
+	max-height: 360px;
+}
+
+/* checkbox-style indicator for select2-multi-count option rows */
+.select2-results__option .select2-checkbox-option {
+	position: relative;
+	display: block;
+	padding-left: 20px;
+}
+
+.select2-results__option .select2-checkbox-option::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 13px;
+	height: 13px;
+	margin-top: -7px;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+	box-sizing: border-box;
+}
+
+/* select2 also (re)uses aria-selected for mouse-hover/keyboard highlight
+ * tracking, unrelated to actual selection - key off the --selected class
+ * instead, which setClasses() only ever sets from the real selected data */
+.select2-results__option.select2-results__option--selected .select2-checkbox-option::after {
+	content: '\2713';
+	position: absolute;
+	left: 2px;
+	top: 50%;
+	margin-top: -7px;
+	font-size: 11px;
+	line-height: 13px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered,
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+	color: var(--text-color-lighter);
+}
+
+/* select2 keeps --focus set after the dropdown closes; only --open should get the active look */
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+	border-color: var(--border-color);
+	background: var(--background-lowlight);
+	color: var(--text-color-lighter);
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+	border-top-color: var(--text-color-lighter);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+	background: var(--background-lowlight);
+	border: 1px solid var(--border-color-superlowlight);
+	color: var(--text-color-lighter);
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+	color: var(--text-color-lighter);
+}
+
+.select2-dropdown {
+	border: 1px solid var(--border-color-superlowlight);
+	background: var(--background-content);
+	color: var(--text-color-lighter);
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field,
+.select2-container--default .select2-search--inline .select2-search__field {
+	border: 1px solid var(--border-color-superlowlight);
+	background: var(--background-content);
+	color: var(--text-color-lighter);
+}
+
+.select2-container--default .select2-results__option--selected {
+	background: var(--background-lowlight);
+	color: var(--text-color-lighter);
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+	background: var(--background-lowlight);
+	color: var(--text-color-lighter);
+}
+
+/* stock jquery-ui.css sets overflow:auto on .ui-dialog-content, which shrink-
+   wraps the content (BFC) and mis-aligns dialog text; keep it visible */
+.ui-dialog .ui-dialog-content {
+	overflow: visible;
+}
+/* ======================================================================== */
+/* jsTree glyph icons - node type colors, sizing, and open/close carets     */
+/* Dark theme palette (lighter, higher-contrast on dark backgrounds)        */
+/* ======================================================================== */
+
+/* remove the indent/connector dotted lines (also disabled via dots:false)  */
+.jstree-default .jstree-node { background: transparent !important; }
+
+/* node type glyphs, centered in the 20px node row */
+.jstree-default .jstree-anchor > .jstree-themeicon {
+	background-image: none !important;
+	font-size: 14px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-sitemap { color: #B0BEC5; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-folder { color: #FFCA28; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-building { color: #4DB6AC; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-map-marker-alt { color: #EF5350; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-server { color: #64B5F6; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-cubes { color: #CE93D8; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-database { color: #4DD0E1; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-chart-line { color: #81C784; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-chart-bar { color: #FFB74D; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-chart-pie { color: #F06292; }
+
+/* open/close carets as glyphs, centered to match the node glyphs */
+.jstree-default .jstree-ocl {
+	background: none !important;
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+	font-size: 14px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: middle;
+	color: #90A4AE;
+}
+.jstree-default .jstree-open > .jstree-ocl,
+.jstree-default .jstree-closed > .jstree-ocl { padding-top: 4px; }
+.jstree-default .jstree-closed > .jstree-ocl::before { content: "\f105"; }
+.jstree-default .jstree-open > .jstree-ocl::before { content: "\f107"; }
+.jstree-default .jstree-leaf > .jstree-ocl::before { content: ""; }
+
+/* ======================================================================== */
+/* Billboard charts - billboard.css is not loaded on the AJAX overload path, */
+/* so the required .bb rules are carried here (moved out of the plugins).    */
+/* ======================================================================== */
+
+.bb-axis-x text, .bb-axis-y text, .bb-axis-y2 text, .bb-legend-item text {
+	fill: #7e818f;
+}
+
+.bb .bb-axis path, .bb .bb-axis line {
+	stroke: #7e818f;
+}
+
+.bb-chart-arc text {
+	fill: white;
+}
+
+.bb-chart-arc path {
+	stroke: #7e818f;
+}
+
+/*
+ * Filter-table toggle switches (1.2.x). Render the raw filter checkboxes
+ * (<input type='checkbox'> directly inside a .filterTable wrapper) as on/off
+ * toggle switches styled to match this theme's form checkboxSlider, with the
+ * label text first and the switch second. form_checkbox() sliders (class
+ * 'formCheckbox') already render this way and are left untouched.
+ */
+.filterTable span:has(> input[type='checkbox']:not(.formCheckbox)),
+.filterTable div:has(> input[type='checkbox']:not(.formCheckbox)) {
+	display: inline-flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 6px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) {
+	-webkit-appearance: none;
+	appearance: none;
+	box-sizing: border-box;
+	position: relative;
+	flex: 0 0 auto;
+	width: 45px;
+	height: 24px;
+	margin: 0;
+	padding: 0;
+	border-radius: 24px !important;
+	background: #555555;
+	cursor: pointer;
+	vertical-align: middle;
+	transition: background 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox)::before {
+	content: '';
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #cbccd2;
+	transition: transform 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked {
+	background: rgb(50, 116, 217);
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked::before {
+	transform: translateX(20px);
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):focus-visible {
+	outline: 2px solid rgb(50, 116, 217);
+	outline-offset: 1px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) + label {
+	cursor: pointer;
+}

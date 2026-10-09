@@ -23,8 +23,112 @@
 */
 
 /**
- * boost_array_orderby - performs a multicolumn sort of an
- *   array
+ * Ensure poller_output_boost_processes has the run_id/child_id shape. Git-following 1.2.x
+ * installs can already be stamped 1.2.32 without ever running an upgrade file that adds those
+ * columns. Used as part of Cacti's lib functionality.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
+function boost_process_table_exists_uncached() {
+	return (bool) db_fetch_cell_prepared('SELECT COUNT(*)
+		FROM information_schema.TABLES
+		WHERE TABLE_SCHEMA = SCHEMA()
+		AND TABLE_NAME = ?', array('poller_output_boost_processes'));
+}
+
+/**
+ * Handles the boost process column exists uncached. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $column The column.
+ *
+ * @return bool True on success, false otherwise.
+ */
+function boost_process_column_exists_uncached($column) {
+	if (!in_array($column, array('run_id', 'child_id'), true)) {
+		return false;
+	}
+
+	return (bool) db_fetch_cell_prepared('SELECT COUNT(*)
+		FROM information_schema.COLUMNS
+		WHERE TABLE_SCHEMA = SCHEMA()
+		AND TABLE_NAME = ?
+		AND COLUMN_NAME = ?', array('poller_output_boost_processes', $column));
+}
+
+/**
+ * Ensure Boost children can record one completion row per run and shard. Used as part of Cacti's
+ * lib functionality.
+ *
+ * @param bool $repair_key The repair key.
+ *
+ * @return bool True on success, false otherwise.
+ */
+function boost_ensure_process_table($repair_key = false) {
+	if (!db_table_exists('poller_output_boost_processes')) {
+		if (db_execute("CREATE TABLE IF NOT EXISTS `poller_output_boost_processes` (
+			`sock_int_value` bigint(20) unsigned NOT NULL auto_increment,
+			`run_id` char(32) NOT NULL default '',
+			`child_id` int(10) unsigned NOT NULL default '0',
+			`status` varchar(255) default NULL,
+			PRIMARY KEY (`sock_int_value`),
+			UNIQUE KEY `run_child` (`run_id`, `child_id`))
+			ENGINE=MEMORY") === false && !boost_process_table_exists_uncached()) {
+			cacti_log('ERROR: Unable to create poller_output_boost_processes', true, 'BOOST');
+
+			return false;
+		}
+
+		return true;
+	}
+
+	$needs_run_id   = !db_column_exists('poller_output_boost_processes', 'run_id');
+	$needs_child_id = !db_column_exists('poller_output_boost_processes', 'child_id');
+	$needs_key      = $repair_key && !db_index_exists('poller_output_boost_processes', 'run_child');
+
+	if (!$needs_run_id && !$needs_child_id && !$needs_key) {
+		return true;
+	}
+
+	if ($needs_run_id) {
+		if (db_execute("ALTER TABLE poller_output_boost_processes ADD `run_id` char(32) NOT NULL default '' AFTER `sock_int_value`") === false &&
+			!boost_process_column_exists_uncached('run_id')) {
+			cacti_log('ERROR: Unable to add run_id to poller_output_boost_processes', true, 'BOOST');
+
+			return false;
+		}
+	}
+
+	if ($needs_child_id) {
+		if (db_execute("ALTER TABLE poller_output_boost_processes ADD `child_id` int(10) unsigned NOT NULL default '0' AFTER `run_id`") === false &&
+			!boost_process_column_exists_uncached('child_id')) {
+			cacti_log('ERROR: Unable to add child_id to poller_output_boost_processes', true, 'BOOST');
+
+			return false;
+		}
+	}
+
+	if ($needs_key) {
+		if (db_execute('TRUNCATE TABLE poller_output_boost_processes') === false) {
+			cacti_log('ERROR: Unable to truncate poller_output_boost_processes before adding run_child', true, 'BOOST');
+
+			return false;
+		}
+
+		if (db_execute('ALTER TABLE poller_output_boost_processes ADD UNIQUE KEY `run_child` (`run_id`, `child_id`)') === false &&
+			!db_index_exists('poller_output_boost_processes', 'run_child')) {
+			cacti_log('ERROR: Unable to add run_child key to poller_output_boost_processes', true, 'BOOST');
+
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Performs a multicolumn sort of an array. Used as part of Cacti's lib functionality.
+ *
+ * @return array The sorted array.
  */
 function boost_array_orderby() {
 	$args = func_get_args();
@@ -49,6 +153,17 @@ function boost_array_orderby() {
 	return array_pop($args);
 }
 
+/**
+ * Converts a file size in bytes to a human-readable format. This function takes a file size in
+ * bytes and converts it to a more readable format, such as Bytes, KBytes, MBytes, or GBytes,
+ * depending on the size. The output is localized using the `__` and `number_format_i18n`
+ * functions for internationalization support. Used as part of Cacti's lib functionality.
+ *
+ * @param float|int $file_size The file size in bytes.
+ * @param int $digits The number of decimal places to include in the formatted output.
+ *
+ * @return string A human-readable string representing the file size in the appropriate unit.
+ */
 function boost_file_size_display($file_size, $digits = 2) {
 	if ($file_size > 1024) {
 		$file_size = $file_size / 1024;
@@ -70,14 +185,107 @@ function boost_file_size_display($file_size, $digits = 2) {
 	}
 }
 
-function boost_get_total_rows() {
-	return db_fetch_cell("SELECT SUM(TABLE_ROWS)
+/**
+ * Return a bounded page without splitting the fields belonging to one RRD timestamp. The caller
+ * must fetch max_rows + 1 ordered rows so this function can prove whether the final timestamp is
+ * complete. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $rows The rows.
+ * @param mixed $max_rows The max rows.
+ *
+ * @return array|false A safe page, or false when one timestamp alone exceeds the configured bound.
+ */
+function boost_limit_complete_timestamp_page($rows, $max_rows) {
+	$max_rows = max(1, (int) $max_rows);
+
+	if (!is_array($rows) || count($rows) <= $max_rows) {
+		return $rows;
+	}
+
+	$overflow = $rows[$max_rows];
+	$rows     = array_slice($rows, 0, $max_rows);
+	$last     = end($rows);
+
+	if ($last['local_data_id'] == $overflow['local_data_id'] && $last['timestamp'] == $overflow['timestamp']) {
+		$split_id   = $last['local_data_id'];
+		$split_time = $last['timestamp'];
+
+		while (count($rows)) {
+			$last = end($rows);
+
+			if ($last['local_data_id'] != $split_id || $last['timestamp'] != $split_time) {
+				break;
+			}
+
+			array_pop($rows);
+		}
+
+		if (!count($rows)) {
+			return false;
+		}
+	}
+
+	return $rows;
+}
+
+/**
+ * Retrieves the total number of rows from the database tables that match specific naming
+ * patterns. This function calculates the sum of rows from tables in the current database schema
+ * where the table names match either 'poller_output_boost_arch_%' or 'poller_output_boost'. Used
+ * as part of Cacti's lib functionality.
+ *
+ * @param int $stop_after The stop after.
+ *
+ * @return int The total number of rows from the matching tables.
+ */
+function boost_get_total_rows($stop_after = 0) {
+	$tables = db_fetch_assoc("SELECT TABLE_NAME
 		FROM information_schema.tables
 		WHERE table_schema = SCHEMA()
 		AND (table_name LIKE 'poller_output_boost_arch_%'
-		OR table_name LIKE 'poller_output_boost')");
+		OR table_name = 'poller_output_boost')");
+	$rows = 0;
+	$stop_after = max(0, (int) $stop_after);
+
+	if (!is_array($tables)) {
+		return 0;
+	}
+
+	foreach($tables as $table) {
+		$table_name = $table['TABLE_NAME'];
+
+		if ($table_name === 'poller_output_boost' || boost_is_valid_archive_table($table_name)) {
+			if ($stop_after > 0) {
+				$remaining = max(1, $stop_after - $rows + 1);
+				$rows += (int) db_fetch_cell("SELECT COUNT(*)
+					FROM (SELECT 1 FROM `$table_name` LIMIT $remaining) AS boost_rows");
+			} else {
+				$rows += (int) db_fetch_cell("SELECT COUNT(*) FROM `$table_name`");
+			}
+
+			if ($stop_after > 0 && $rows > $stop_after) {
+				break;
+			}
+		}
+	}
+
+	return $rows;
 }
 
+/**
+ * Custom error handler for the application. This function handles errors based on the
+ * application's logging verbosity level. It logs detailed error information to the Cacti log if
+ * the verbosity level is set to debug. Certain non-critical errors are ignored to reduce noise in
+ * the logs. Used as part of Cacti's lib functionality.
+ *
+ * @param int $errno The level of the error raised.
+ * @param string $errmsg The error message.
+ * @param string $filename The filename where the error was raised.
+ * @param int $linenum The line number where the error was raised.
+ * @param array $vars An array of variables that existed in the scope the error was triggered in.
+ *
+ * @return bool Bool.
+ */
 function boost_error_handler($errno, $errmsg, $filename, $linenum, $vars = []) {
 	if (read_config_option('log_verbosity') >= POLLER_VERBOSITY_DEBUG) {
 		/* define all error types */
@@ -105,7 +313,7 @@ function boost_error_handler($errno, $errmsg, $filename, $linenum, $vars = []) {
 		}
 
 		/* create an error string for the log */
-		$err = "ERRNO:'"  . $errno   . "' TYPE:'"    . $errortype[$errno] .
+		$err = "ERRNO:'"  . $errno   . "' TYPE:'"    . ($errortype[$errno] ?? 'Unknown Error') .
 			"' MESSAGE:'" . $errmsg  . "' IN FILE:'" . $filename .
 			"' LINE NO:'" . $linenum . "'";
 
@@ -125,6 +333,17 @@ function boost_error_handler($errno, $errmsg, $filename, $linenum, $vars = []) {
 	return;
 }
 
+/**
+ * Checks and ensures that the Boost RRD update system is correctly enabled. This function
+ * verifies if either the `boost_rrd_update_enable` or `boost_rrd_update_system_enable`
+ * configuration options are set to 'on'. If `boost_rrd_update_enable` is enabled but
+ * `boost_rrd_update_system_enable` is not, it updates the database to enable the system-level
+ * updates. If neither option is enabled, the function returns false. Error-handler ownership
+ * remains with the caller that installed it. Used as part of Cacti's lib functionality.
+ *
+ * @return bool Returns true if the Boost RRD update system is correctly enabled, otherwise
+ *   returns false.
+ */
 function boost_check_correct_enabled() {
 	if ((read_config_option('boost_rrd_update_enable') == 'on') ||
 		(read_config_option('boost_rrd_update_system_enable') == 'on')) {
@@ -140,6 +359,23 @@ function boost_check_correct_enabled() {
 	return true;
 }
 
+/**
+ * Writes a batch of pre-built poller_output_boost VALUE tuples, chunking on max_allowed_packet so
+ * a single INSERT statement never exceeds it. Shared by cmd.php's boost_redirect writes and
+ * boost_poller_on_demand() so the batched-insert logic and the duplicate-key handling live in
+ * exactly one place. Duplicate (local_data_id, rrd_name, time) keys are ignored (first write
+ * wins) rather than updated. In practice a collision here means the same already-collected sample
+ * is being (re)written -- e.g. a batch retried after a partial failure, or two writers racing on
+ * the same rounded second -- not two independently meaningful readings, since RRD only keeps one
+ * value per timestamp regardless. This also matches the sibling poller_output insert, which this
+ * table shadows and which has always used INSERT IGNORE.
+ *
+ * @param array $value_tuples Pre-built "(local_data_id,rrd_name,time,output)" VALUES tuples, e.g.
+ *   "(1,'ds',NOW(),'1.23')".
+ * @param mixed $conn DB connection to use, or false for the default.
+ *
+ * @return bool True only when every chunk was accepted by the database.
+ */
 function boost_flush_output_batch($value_tuples, $conn = false) {
 	if (!cacti_sizeof($value_tuples)) {
 		return true;
@@ -157,7 +393,6 @@ function boost_flush_output_batch($value_tuples, $conn = false) {
 	$overhead   = strlen($sql_prefix) + 1;
 	$out_buffer = '';
 	$out_length = 0;
-	$success    = true;
 	$rows       = 0;
 
 	foreach ($value_tuples as $tuple) {
@@ -171,7 +406,7 @@ function boost_flush_output_batch($value_tuples, $conn = false) {
 			}
 
 			if (!$acknowledged) {
-				$success = false;
+				return false;
 			} elseif (db_affected_rows($conn) < $rows) {
 				cacti_log('WARNING: Boost staging ignored one or more duplicate sample keys.', false, 'BOOST');
 			}
@@ -194,15 +429,24 @@ function boost_flush_output_batch($value_tuples, $conn = false) {
 		}
 
 		if (!$acknowledged) {
-			$success = false;
+			return false;
 		} elseif (db_affected_rows($conn) < $rows) {
 			cacti_log('WARNING: Boost staging ignored one or more duplicate sample keys.', false, 'BOOST');
 		}
 	}
 
-	return $success;
+	return true;
 }
 
+/**
+ * Handles the boost validate poller ownership. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed $results The results.
+ * @param mixed $poller_id The poller ID.
+ * @param bool $conn The conn.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function boost_validate_poller_ownership($results, $poller_id, $conn = false) {
 	$result_ids = array_map(function($result) {
 		return (int) (isset($result['local_data_id']) ? $result['local_data_id'] : 0);
@@ -236,6 +480,20 @@ function boost_validate_poller_ownership($results, $poller_id, $conn = false) {
 	return $assigned_ids === $local_data_ids;
 }
 
+/**
+ * Handles the on-demand poller boost functionality for Cacti. This function processes the results
+ * of a poller run and inserts the data into the `poller_output_boost` table. It ensures that the
+ * data is inserted in a way that avoids exceeding the maximum allowed packet size for SQL
+ * queries. Additionally, it manages error handling and configuration options related to the boost
+ * functionality. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$results An array of poller results, where each result contains: - 'local_data_id':
+ *   The ID of the local data source. - 'rrd_name': The name of the RRD file. - 'time': The
+ *   timestamp of the data. - 'output': The output value to be stored.
+ *
+ * @return bool Returns `false` if the boost functionality is enabled and processed, or `true` if
+ *   the boost functionality is disabled or bypassed.
+ */
 function boost_poller_on_demand(&$results) {
 	global $config, $remote_db_cnn_id;
 
@@ -260,7 +518,12 @@ function boost_poller_on_demand(&$results) {
 		set_error_handler('boost_error_handler');
 
 		if (boost_check_correct_enabled()) {
-			if (cacti_sizeof($results)) {
+			/* cmd.php already staged these rows into poller_output_boost when direct
+			 * redirection is active; once boost owns the pipeline, results reaching
+			 * here must never fall through to an inline RRD update instead. */
+			if (read_config_option('boost_redirect') == 'on') {
+				$return_value = false;
+			} elseif (cacti_sizeof($results)) {
 				if ($config['poller_id'] > 1 && !boost_validate_poller_ownership($results, $config['poller_id'], $conn)) {
 					cacti_log('ERROR: Boost rejected a handoff containing data sources not assigned to this poller.', false, 'BOOST');
 					restore_error_handler();
@@ -281,7 +544,13 @@ function boost_poller_on_demand(&$results) {
 						db_qstr($result['output'], $conn) . ')';
 				}
 
-				$return_value = !boost_flush_output_batch($value_tuples, $conn);
+				/* a staging failure must not fall through to an inline RRD update; that
+				 * would silently defeat Boost every time the insert fails */
+				if (!boost_flush_output_batch($value_tuples, $conn)) {
+					cacti_log('ERROR: Boost failed to stage poller output into poller_output_boost. Data will be retried, not written inline.', false, 'BOOST');
+				}
+
+				$return_value = false;
 			} else {
 				$return_value = false;
 			}
@@ -299,6 +568,15 @@ function boost_poller_on_demand(&$results) {
 	}
 }
 
+/**
+ * Checks the validity of the poller ID based on the storage location and connection type. This
+ * function ensures that the poller ID is valid, particularly when running from a remote poller.
+ * If the storage location is not set to RRDproxy and the connection type is 'online', the
+ * function will return false for remote pollers (poller ID > 1). Used as part of Cacti's lib
+ * functionality.
+ *
+ * @return bool Returns true if the poller ID is valid, otherwise false.
+ */
 function boost_poller_id_check() {
 	global $config;
 
@@ -321,6 +599,18 @@ function boost_poller_id_check() {
 	return true;
 }
 
+/**
+ * Fetches and processes cache data for a given local data ID using the Boost plugin. This
+ * function checks if the Boost plugin is enabled and properly configured. If so, it processes the
+ * poller output for the specified local data ID and updates the RRD files. It also handles error
+ * reporting and manages the RRDTool pipe resource. Used as part of Cacti's lib functionality.
+ *
+ * @param int $local_data_id The ID of the local data to process.
+ * @param mixed $rrdtool_pipe An existing RRDTool pipe resource. If not provided, a new pipe will
+ *   be initialized and closed within the function.
+ *
+ * @return bool Returns false if Boost is not enabled or not properly configured.
+ */
 function boost_fetch_cache_check($local_data_id, $rrdtool_pipe = false) {
 	global $config;
 
@@ -369,6 +659,20 @@ function boost_fetch_cache_check($local_data_id, $rrdtool_pipe = false) {
 	}
 }
 
+/**
+ * Determines whether a cached image should be returned based on the provided graph data array and
+ * system configuration options. This function evaluates several conditions to decide if caching
+ * is enabled and applicable: - If the graph data array contains 'export_csv' or
+ * 'export_realtime', caching is disabled. - If the graph data array explicitly sets
+ * 'disable_cache' to true, caching is disabled. - If the system configuration option
+ * 'boost_png_cache_enable' is set to 'on' and the caching state is determined to be valid,
+ * caching is enabled. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$graph_data_array Reference to the graph data array containing parameters that
+ *   influence caching behavior.
+ *
+ * @return bool Returns true if a cached image should be returned, false otherwise.
+ */
 function boost_return_cached_image(&$graph_data_array) {
 	if (isset($graph_data_array['export_csv'])) {
 		return false;
@@ -383,6 +687,18 @@ function boost_return_cached_image(&$graph_data_array) {
 	}
 }
 
+/**
+ * Build an opaque cache name so graph identifiers and dimensions are not enumerable when an
+ * administrator places the cache below a web root. Used as part of Cacti's lib functionality.
+ *
+ * @param string $cache_directory The cache directory.
+ * @param int $local_graph_id The local graph ID.
+ * @param mixed $rra_id The RRA ID.
+ * @param int $timespan The timespan.
+ * @param array $graph_data_array The graph data array.
+ *
+ * @return string The resulting string.
+ */
 function boost_graph_cache_filename($cache_directory, $local_graph_id, $rra_id, $timespan, $graph_data_array) {
 	static $secret = null;
 
@@ -392,7 +708,7 @@ function boost_graph_cache_filename($cache_directory, $local_graph_id, $rra_id, 
 		if (!is_string($secret) || !preg_match('/^[a-f0-9]{64}$/D', $secret)) {
 			$candidate = bin2hex(random_bytes(32));
 			db_execute_prepared('INSERT IGNORE INTO settings (name, value) VALUES (?, ?)', array('boost_png_cache_secret', $candidate));
-			$secret = read_config_option('boost_png_cache_secret');
+			$secret = read_config_option('boost_png_cache_secret', true);
 
 			if (!is_string($secret) || !preg_match('/^[a-f0-9]{64}$/D', $secret)) {
 				$secret = $candidate;
@@ -411,13 +727,24 @@ function boost_graph_cache_filename($cache_directory, $local_graph_id, $rra_id, 
 		'nolegend'       => isset($graph_data_array['graph_nolegend'])
 	));
 
-	return rtrim($cache_directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . hash_hmac('sha256', $cache_key, $secret) . '.png';
+	return rtrim($cache_directory, '/\\') . DIRECTORY_SEPARATOR . hash_hmac('sha256', $cache_key, $secret) . '.png';
 }
 
+/**
+ * Write a complete cache object and publish it with a same-directory rename. Used as part of
+ * Cacti's lib functionality.
+ *
+ * @param string $cache_file The cache file.
+ * @param string $output The output.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function boost_atomic_write_cache($cache_file, $output) {
 	$temp_file = tempnam(dirname($cache_file), '.boost-');
 
 	if ($temp_file === false) {
+		cacti_log('ERROR: Boost could not create a temporary graph cache file.', false, 'BOOST');
+
 		return false;
 	}
 
@@ -425,32 +752,59 @@ function boost_atomic_write_cache($cache_file, $output) {
 
 	if ($fileptr === false) {
 		@unlink($temp_file);
+		cacti_log('ERROR: Boost could not open its temporary graph cache file.', false, 'BOOST');
 
 		return false;
 	}
 
-	$length  = strlen($output);
-	$written = 0;
+	$length     = strlen($output);
+	$written    = 0;
+	$chunk_size = 1024 * 1024;
 
 	while ($written < $length) {
-		$result = fwrite($fileptr, substr($output, $written));
+		$chunk         = substr($output, $written, $chunk_size);
+		$chunk_length  = strlen($chunk);
+		$chunk_written = 0;
 
-		if ($result === false || $result === 0) {
-			fclose($fileptr);
-			@unlink($temp_file);
+		while ($chunk_written < $chunk_length) {
+			$result = fwrite($fileptr, substr($chunk, $chunk_written));
 
-			return false;
+			if ($result === false || $result === 0) {
+				fclose($fileptr);
+				@unlink($temp_file);
+				cacti_log('ERROR: Boost could not finish writing its graph cache file.', false, 'BOOST');
+
+				return false;
+			}
+
+			$chunk_written += $result;
+			$written       += $result;
 		}
-
-		$written += $result;
 	}
 
 	$flushed = fflush($fileptr);
 	fclose($fileptr);
-	chmod($temp_file, 0640);
-
-	if (!$flushed || !rename($temp_file, $cache_file)) {
+	if (!$flushed) {
 		@unlink($temp_file);
+		cacti_log('ERROR: Boost could not flush its graph cache file.', false, 'BOOST');
+
+		return false;
+	}
+
+	if (!chmod($temp_file, 0640)) {
+		/* tempnam() creates a stricter 0600 file, so publication remains safe. */
+		cacti_log('WARNING: Boost could not set shared graph cache permissions; publishing with the existing stricter mode.', false, 'BOOST');
+	}
+
+	$published = @rename($temp_file, $cache_file);
+
+	if (!$published && PHP_OS_FAMILY === 'Windows') {
+		$published = boost_replace_cache_file_on_windows($temp_file, $cache_file);
+	}
+
+	if (!$published) {
+		@unlink($temp_file);
+		cacti_log('ERROR: Boost could not publish its graph cache file.', false, 'BOOST');
 
 		return false;
 	}
@@ -458,6 +812,52 @@ function boost_atomic_write_cache($cache_file, $output) {
 	return true;
 }
 
+/**
+ * Replace an existing cache object after Windows rejects rename-over-existing. Used as part of
+ * Cacti's lib functionality.
+ *
+ * @param string $temp_file The temp file.
+ * @param string $cache_file The cache file.
+ *
+ * @return bool True on success, false otherwise.
+ */
+function boost_replace_cache_file_on_windows($temp_file, $cache_file) {
+	if (!is_file($temp_file) || !is_file($cache_file)) {
+		return false;
+	}
+
+	$backup_file = tempnam(dirname($cache_file), '.boost-old-');
+
+	if ($backup_file === false || !@unlink($backup_file) || !@rename($cache_file, $backup_file)) {
+		return false;
+	}
+
+	if (@rename($temp_file, $cache_file)) {
+		@unlink($backup_file);
+
+		return true;
+	}
+
+	@rename($backup_file, $cache_file);
+
+	return false;
+}
+
+/**
+ * Checks the graph cache for a given graph and returns the cached image if valid. If the cache is
+ * invalid or unavailable, it falls back to Cacti's graphing functions. Used as part of Cacti's
+ * lib functionality.
+ *
+ * @param int $local_graph_id The ID of the local graph to check.
+ * @param mixed $rra_id The RRA ID associated with the graph.
+ * @param mixed $rrdtool_pipe Optional RRDTool pipe for processing (default: null).
+ * @param mixed &$graph_data_array Reference to an array containing graph data (default: empty array).
+ * @param bool $return Whether to return the result (default: true).
+ *
+ * @return string|false Returns the cached image data if available and valid, or false otherwise.
+ *
+ * @throws Exception If there are issues with the cache directory or file operations.
+ */
 function boost_graph_cache_check($local_graph_id, $rra_id, $rrdtool_pipe, &$graph_data_array, $return = true) {
 	global $config;
 
@@ -612,6 +1012,17 @@ function boost_graph_cache_check($local_graph_id, $rra_id, $rrdtool_pipe, &$grap
 	return false;
 }
 
+/**
+ * Prepares the graph data array for processing by configuring error handling and determining the
+ * caching state. This function temporarily suppresses warnings and installs a custom error
+ * handler to manage errors during the preparation process. It also determines the caching state
+ * and sets the default output flag for the graph data array if not already defined. Used as part
+ * of Cacti's lib functionality.
+ *
+ * @param array $graph_data_array The graph data array to be prepared.
+ *
+ * @return array The prepared graph data array with any necessary modifications.
+ */
 function boost_prep_graph_array($graph_data_array) {
 	$previous_error_reporting = error_reporting();
 
@@ -640,6 +1051,21 @@ function boost_prep_graph_array($graph_data_array) {
 	return $graph_data_array;
 }
 
+/**
+ * Handles the caching of graph images for the Cacti Boost plugin. This function checks if caching
+ * is enabled and determines the caching state. If caching is valid, it generates a cache file
+ * path based on various parameters such as graph ID, RRA ID, theme, timespan, and graph
+ * dimensions. It then writes the graph image data to the cache file if the cache directory is
+ * writable. Used as part of Cacti's lib functionality.
+ *
+ * @param mixed &$output The graph image data to be cached.
+ * @param int $local_graph_id The ID of the local graph.
+ * @param int $rra_id The RRA (Round Robin Archive) ID.
+ *
+ * @return void No value is returned.
+ *
+ * @throws Exception If the cache directory is not writable, does not exist, or is not set.
+ */
 function boost_graph_set_file(&$output, $local_graph_id, $rra_id) {
 	global $config, $boost_sock, $graph_data_array;
 
@@ -703,9 +1129,15 @@ function boost_graph_set_file(&$output, $local_graph_id, $rra_id) {
 	error_reporting($previous_error_reporting);
 }
 
-/* boost_timer - allows you to time events in boost and provide stats
-   @arg $area - a text string that determines what area is being measured
-   @arg $type - either 'start' or 'end' to start or end the timing */
+/**
+ * Allows you to time events in boost and provide stats. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param string $area A text string that determines what area is being measured.
+ * @param int $type Either 'start' or 'end' to start or end the timing.
+ *
+ * @return void No value is returned.
+ */
 function boost_timer($area, $type) {
 	global $boost_stats_log;
 
@@ -727,6 +1159,15 @@ function boost_timer($area, $type) {
 	}
 }
 
+/**
+ * Measures the overhead introduced by the `boost_timer` function. This function calculates the
+ * time taken to execute a series of `boost_timer` start and end calls for a specified number of
+ * iterations, defined by the `BOOST_TIMER_OVERHEAD_MULTIPLIER` constant. The measured overhead is
+ * then returned as a floating-point value representing the elapsed time in seconds. Used as part
+ * of Cacti's lib functionality.
+ *
+ * @return float The calculated overhead time in seconds.
+ */
 function boost_timer_get_overhead() {
 	global $boost_stats_log;
 
@@ -740,11 +1181,29 @@ function boost_timer_get_overhead() {
 	return (microtime(true) - $start);
 }
 
-/* boost_get_arch_table_names - returns current archive boost tables or false if no arch table is present currently */
+/**
+ * Returns current archive boost tables or false if no arch table is present currently. Used as
+ * part of Cacti's lib functionality.
+ *
+ * @param mixed $table Candidate table name.
+ *
+ * @return bool True when the name is a well-formed boost archive table.
+ */
 function boost_is_valid_archive_table($table) {
 	return is_string($table) && preg_match('/^poller_output_boost_arch_\d+$/D', $table) === 1;
 }
 
+/**
+ * Retrieves the names of the archive tables related to poller output boost. Used as part of
+ * Cacti's lib functionality.
+ *
+ * @param mixed $latest_table Optional. The name of the latest table to check if no other tables
+ *   are found.
+ *
+ * @return mixed Returns an associative array of table names if found, where the keys and values
+ *   are the table names. Returns false if no tables are found and the latest table is not provided
+ *   or does not exist.
+ */
 function boost_get_arch_table_names($latest_table = '') {
 	$tableData = db_fetch_assoc("SHOW tables LIKE 'poller_output_boost_arch%'");
 	$tableNames = array();
@@ -790,26 +1249,117 @@ function boost_get_arch_table_names($latest_table = '') {
 }
 
 /**
- * boost_process_poller_output - grabs data from the 'poller_output' and 'poller_output_boost*'
- *   table and feeds to RRDtool for processing.  This function has been repurposed for a
- *   single local_data_id.  In the past, it was designed to handle one to many local_data_ids.
+ * Cache metadata reused when a hot data source spans multiple bounded pages. Used as part of
+ * Cacti's lib functionality.
  *
- * The process works as follows:
+ * @param mixed $local_data_id The local data ID.
  *
- * 1) Gather all the rows for the local_data_id from the archive tables on archive table
- *    at a time.
- * 2) Gather all the rows from the main boost table
- * 3) Delete those entries from all the aforementioned tables
- * 4) Merge the results together
- * 5) Process the entire result set
+ * @return array An array of results.
+ */
+function boost_get_unused_data_source_names($local_data_id) {
+	static $cache = array();
+
+	$local_data_id = (int) $local_data_id;
+
+	if ($local_data_id <= 0) {
+		return array();
+	}
+
+	if (!isset($cache[$local_data_id])) {
+		$cache[$local_data_id] = array_rekey(
+			db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
+				FROM data_template_rrd AS dtr
+				LEFT JOIN graph_templates_item AS gti
+				ON dtr.id = gti.task_item_id
+				WHERE dtr.local_data_id = ?
+				AND gti.task_item_id IS NULL', array($local_data_id)),
+			'data_source_name', 'data_source_name'
+		);
+	}
+
+	return $cache[$local_data_id];
+}
+
+/**
+ * Handles the boost get input field names. Used as part of Cacti's lib functionality.
  *
- * @param  (int)      local_data_id - the local data id to update
- * @param  (resource) rrdtool_pipe - a pointer to the rrdtool process
+ * @param mixed $local_data_id The local data ID.
+ * @param mixed $templated The templated.
  *
- * @return (void)
+ * @return array An array of results.
+ */
+function boost_get_input_field_names($local_data_id, $templated) {
+	static $cache = array();
+
+	$local_data_id = (int) $local_data_id;
+	$key           = $local_data_id . ':' . ($templated ? '1' : '0');
+
+	if ($local_data_id <= 0) {
+		return array();
+	}
+
+	if (!isset($cache[$key])) {
+		if ($templated) {
+			$rows = db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
+				FROM graph_templates_item AS gti
+				INNER JOIN data_template_rrd AS dtr
+				ON gti.task_item_id = dtr.id
+				INNER JOIN data_input_fields AS dif
+				ON dtr.data_input_field_id = dif.id
+				WHERE dtr.local_data_id = ?', array($local_data_id));
+		} else {
+			$rows = db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
+				FROM data_template_rrd AS dtr
+				INNER JOIN data_input_fields AS dif
+				ON dtr.data_input_field_id = dif.id
+				WHERE dtr.local_data_id = ?', array($local_data_id));
+		}
+
+		$cache[$key] = array_rekey($rows, 'data_name', 'data_source_name');
+	}
+
+	return $cache[$key];
+}
+
+/**
+ * WARNING - BULK BOOST HOT PATH. READ BEFORE MODIFYING.
+ *
+ * This is the Boost-side counterpart to process_poller_output() and processes
+ * bulk poller output for RRD updates. Large installations exceed 2.5M poller_items
+ * and several million data sources, so any inefficiency here scales directly into
+ * poller slowdowns and database thrash. Future maintainers and AI assistants MUST,
+ * when changing this function:
+ *   - Perform the minimum number of database queries in this pass, and NEVER add
+ *     a query inside the per-row loop over the result set.
+ *   - Be cognizant of query shape: avoid large IN() lists (they have crashed some
+ *     MariaDB/MySQL releases) and full-table scans in this path.
+ *   - Avoid adding further loops over the result set; a single pass is the goal.
+ *   - Cache field-name mappings statically, assuming the Data Template dictates
+ *     the field names for every instance (data_template_id > 0). Non-templated
+ *     (data_template_id == 0) manually created data sources are a rare exception,
+ *     resolved per data source and cached.
+ *
+ * Grabs data from the 'poller_output' and 'poller_output_boost*' table and feeds to RRDtool for
+ * processing. This function has been repurposed for a single local_data_id. In the past, it was
+ * designed to handle one to many local_data_ids. The process works as follows: 1) Gather all the
+ * rows for the local_data_id from the archive tables on archive table at a time. 2) Gather all
+ * the rows from the main boost table 3) Delete those entries from all the aforementioned tables
+ * 4) Merge the results together 5) Process the entire result set. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param int $local_data_id Local_data_id - the local data id to update.
+ * @param resource $rrdtool_pipe Rrdtool_pipe - a pointer to the rrdtool process.
+ *
+ * @return void Int.
  */
 function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 	global $config, $database_default, $boost_sock, $boost_timeout, $debug, $get_memory, $memory_used;
+
+	$local_data_id = (int) $local_data_id;
+
+	if ($local_data_id <= 0) {
+		return -1;
+	}
 
 	static $archive_table = false;
 	static $warning_issued;
@@ -830,7 +1380,11 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 	set_error_handler('boost_error_handler');
 
 
-	$data_ids_to_get = read_config_option('boost_rrd_update_max_records_per_select');
+	$max_rows = (int) read_config_option('boost_rrd_update_max_records_per_select');
+
+	if ($max_rows < 1) {
+		$max_rows = 50000;
+	}
 
 	$archive_tables = boost_get_arch_table_names($archive_table);
 
@@ -839,7 +1393,7 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 	/* avoid getting rows in the middle of poller run */
 	$timestamp = db_fetch_cell('SELECT MIN(UNIX_TIMESTAMP(start_time))
 		FROM poller_time
-		WHERE end_time="0000-00-00"');
+		WHERE end_time=\'0000-00-00\'');
 
 	if (empty($timestamp)) {
 		$timestamp = time() - 10;
@@ -879,7 +1433,8 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 			ON po.local_data_id = dl.id
 			WHERE po.local_data_id = ?
 			AND po.time < FROM_UNIXTIME(?)
-			ORDER BY time ASC, rrd_name ASC";
+			ORDER BY time ASC, rrd_name ASC
+			LIMIT " . ($max_rows + 1);
 	} else {
 		$query_string = 'SELECT po.local_data_id, dl.data_template_id,
 			UNIX_TIMESTAMP(po.time) AS timestamp, po.rrd_name, po.output
@@ -888,7 +1443,8 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 			ON po.local_data_id = dl.id
 			WHERE po.local_data_id = ?
 			AND po.time < FROM_UNIXTIME(?)
-			ORDER BY time ASC, rrd_name ASC';
+			ORDER BY time ASC, rrd_name ASC
+			LIMIT ' . ($max_rows + 1);
 	}
 
 	$sql_params[] = $local_data_id;
@@ -902,6 +1458,14 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 
 	if ($temp_table !== false) {
 		db_execute("DROP TEMPORARY TABLE $temp_table");
+	}
+
+	if (cacti_sizeof($results) > $max_rows) {
+		cacti_log("WARNING: On-demand Boost processing for Local Data ID '$local_data_id' exceeded the $max_rows row request limit; rows were retained for scheduled processing.", false, 'BOOST');
+		restore_error_handler();
+		error_reporting($previous_error_reporting);
+
+		return -1;
 	}
 
 	cacti_log('Local Data ID: ' . $local_data_id . ', Boost Results: ' . $boost_results, false, 'BOOST', POLLER_VERBOSITY_MEDIUM);
@@ -961,16 +1525,7 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 		cacti_log('The RRDpath is ' . $rrd_path, false, 'BOOST', POLLER_VERBOSITY_MEDIUM);
 		cacti_log('The RRDpath template is ' . $rrd_tmpl, false, 'BOOST', POLLER_VERBOSITY_MEDIUM);
 
-		$unused_data_source_names = array_rekey(
-			db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
-				FROM data_template_rrd AS dtr
-				LEFT JOIN graph_templates_item AS gti
-				ON dtr.id = gti.task_item_id
-				WHERE dtr.local_data_id = ?
-				AND gti.task_item_id IS NULL',
-				array($local_data_id)),
-			'data_source_name', 'data_source_name'
-		);
+		$unused_data_source_names = boost_get_unused_data_source_names($local_data_id);
 
 		boost_timer('results_cycle', BOOST_TIMER_START);
 
@@ -1009,7 +1564,7 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 					$vals_in_buffer = 0;
 
 					/* check return status for delete operation */
-					if (strpos(trim($return_value), 'OK') === false && $return_value != '') {
+					if (trim((string) $return_value) !== 'OK') {
 						cacti_log("WARNING: RRD Update Warning '" . $return_value . "' for Local Data ID '$local_data_id'", false, 'BOOST');
 						$updates_ok = false;
 					}
@@ -1042,39 +1597,10 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 
 				if (!$multi_vals_set) {
 					if ($item['data_template_id'] > 0) {
-						$rrd_field_names = array_rekey(
-							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-								FROM graph_templates_item AS gti
-								INNER JOIN data_template_rrd AS dtr
-								ON gti.task_item_id = dtr.id
-								INNER JOIN data_input_fields AS dif
-								ON dtr.data_input_field_id = dif.id
-								WHERE dtr.local_data_id = ?',
-								array($item['local_data_id'])),
-							'data_name', 'data_source_name'
-						);
-
-						$unused_data_source_names = array_rekey(
-							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
-								FROM data_template_rrd AS dtr
-								LEFT JOIN graph_templates_item AS gti
-								ON dtr.id = gti.task_item_id
-								WHERE dtr.local_data_id = ?
-								AND gti.task_item_id IS NULL',
-								array($item['local_data_id'])),
-							'data_source_name', 'data_source_name'
-						);
+						$rrd_field_names          = boost_get_input_field_names($item['local_data_id'], true);
+						$unused_data_source_names = boost_get_unused_data_source_names($item['local_data_id']);
 					} else {
-						$rrd_field_names = array_rekey(
-							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-								FROM data_template_rrd AS dtr
-								INNER JOIN data_input_fields AS dif
-								ON dtr.data_input_field_id = dif.id
-								WHERE dtr.local_data_id = ?',
-								array($item['local_data_id'])),
-							'data_name', 'data_source_name'
-						);
-
+						$rrd_field_names = boost_get_input_field_names($item['local_data_id'], false);
 						$unused_data_source_names = array();
 					}
 
@@ -1134,39 +1660,10 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 			} else {
 				if (!$multi_vals_set) {
 					if ($item['data_template_id'] > 0) {
-						$rrd_field_names = array_rekey(
-							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-								FROM graph_templates_item AS gti
-								INNER JOIN data_template_rrd AS dtr
-								ON gti.task_item_id = dtr.id
-								INNER JOIN data_input_fields AS dif
-								ON dtr.data_input_field_id = dif.id
-								WHERE dtr.local_data_id = ?',
-								array($item['local_data_id'])),
-							'data_name', 'data_source_name'
-						);
-
-						$unused_data_source_names = array_rekey(
-							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dtr.data_source_name
-								FROM data_template_rrd AS dtr
-								LEFT JOIN graph_templates_item AS gti
-								ON dtr.id = gti.task_item_id
-								WHERE dtr.local_data_id = ?
-								AND gti.task_item_id IS NULL',
-								array($item['local_data_id'])),
-							'data_source_name', 'data_source_name'
-						);
+						$rrd_field_names          = boost_get_input_field_names($item['local_data_id'], true);
+						$unused_data_source_names = boost_get_unused_data_source_names($item['local_data_id']);
 					} else {
-						$rrd_field_names = array_rekey(
-							db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
-								FROM data_template_rrd AS dtr
-								INNER JOIN data_input_fields AS dif
-								ON dtr.data_input_field_id = dif.id
-								WHERE dtr.local_data_id = ?',
-								array($item['local_data_id'])),
-							'data_name', 'data_source_name'
-						);
-
+						$rrd_field_names = boost_get_input_field_names($item['local_data_id'], false);
 						$unused_data_source_names = array();
 					}
 
@@ -1175,8 +1672,8 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 
 				$expected = '';
 
-				if (cacti_sizeof($nt_rrd_field_names)) {
-					foreach($nt_rrd_field_names as $field) {
+				if (cacti_sizeof($rrd_field_names)) {
+					foreach($rrd_field_names as $field) {
 						if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
 							continue;
 						}
@@ -1206,7 +1703,7 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 			boost_timer('rrdupdate', BOOST_TIMER_END);
 
 			/* check return status for delete operation */
-			if (strpos(trim($return_value), 'OK') === false && $return_value != '') {
+			if (trim((string) $return_value) !== 'OK') {
 				cacti_log("WARNING: RRD Update Warning '" . $return_value . "' for Local Data ID '$local_data_id'", false, 'BOOST');
 				$updates_ok = false;
 			}
@@ -1281,6 +1778,18 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 	return $updates_ok ? cacti_sizeof($results) : -1;
 }
 
+/**
+ * Retrieves the last update time of an RRD file using rrdtool. This function checks if the
+ * provided RRD file path is valid and exists. If the file exists, it uses rrdtool to fetch the
+ * last update time. If the file path is empty, it returns the current system time. Used as part
+ * of Cacti's lib functionality.
+ *
+ * @param string $rrd_path The path to the RRD file.
+ * @param mixed &$rrdtool_pipe The rrdtool pipe resource for executing commands.
+ *
+ * @return int|string The last update time of the RRD file as a timestamp, or the current time if
+ *   the path is empty.
+ */
 function boost_rrdtool_get_last_update_time($rrd_path, &$rrdtool_pipe) {
 	$return_value = 0;
 
@@ -1313,6 +1822,14 @@ function boost_rrdtool_get_last_update_time($rrd_path, &$rrdtool_pipe) {
 	return trim($return_value);
 }
 
+/**
+ * Determines the caching state for the application based on various conditions. This function
+ * evaluates several factors to decide whether caching should be enabled or disabled. It considers
+ * session variables, request parameters, and custom settings. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @return bool Returns `true` if caching is enabled, `false` otherwise.
+ */
 function boost_determine_caching_state() {
 	set_default_action();
 
@@ -1346,11 +1863,15 @@ function boost_determine_caching_state() {
 	}
 }
 
-/* boost_get_rrd_filename_and_template - pulls
-   1) the rrd_update template from the database in form of
-      update decisions for multi-output RRDs
-   2) rrd filename
-   @arg $local_data_id - the data source to obtain information from */
+/**
+ * Pulls 1) the rrd_update template from the database in form of update decisions for multi-output
+ * RRDs 2) rrd filename. Used as part of Cacti's lib functionality.
+ *
+ * @param int $local_data_id The data source to obtain information from.
+ *
+ * @return array An associative array containing: - 'rrd_path' (string): The path to the RRD file.
+ *   - 'rrd_template' (string): The RRD template constructed from the data source names.
+ */
 function boost_get_rrd_filename_and_template($local_data_id) {
 	$rrd_path     = '';
 	$all_nulls    = true;
@@ -1408,6 +1929,22 @@ function boost_get_rrd_filename_and_template($local_data_id) {
 	return array('rrd_path' => $rrd_path, 'rrd_template' => trim($rrd_template));
 }
 
+/**
+ * Creates an RRDTool data source file for a given local data ID. This function generates the
+ * necessary RRDTool commands to create a data source file based on the provided local data ID. It
+ * ensures that the file does not already exist, validates the associated RRA (Round Robin
+ * Archives), and constructs the data source and RRA definitions. It also handles directory
+ * creation and permission settings for structured paths. Used as part of Cacti's lib
+ * functionality.
+ *
+ * @param int $local_data_id The ID of the local data source to create.
+ * @param bool $show_source If true, returns the RRDTool command instead of executing it.
+ * @param mixed &$rrdtool_pipe The RRDTool pipe resource for executing commands.
+ *
+ * @return mixed Returns the RRDTool command string if $show_source is true, -1 if the file
+ *   already exists, false if no RRA is associated with the data source, or the result of the
+ *   RRDTool execution.
+ */
 function boost_rrdtool_function_create($local_data_id, $show_source, &$rrdtool_pipe) {
 	global $config;
 
@@ -1632,12 +2169,18 @@ function boost_rrdtool_function_create($local_data_id, $show_source, &$rrdtool_p
 	}
 }
 
-/* boost_rrdtool_function_update - a re-write of the Cacti rrdtool update command
-   specifically designed for bulk updates.
-   @arg $local_data_id - the data source to obtain information from
-   @arg $rrd_path      - the path to the RRD file
-   @arg $rrd_update_template  - the order in which values need to be added
-   @arg $rrd_update_values    - values to include in the database */
+/**
+ * A re-write of the Cacti rrdtool update command specifically designed for bulk updates. Used as
+ * part of Cacti's lib functionality.
+ *
+ * @param int $local_data_id The data source to obtain information from.
+ * @param string $rrd_path The path to the RRD file.
+ * @param string $rrd_update_template The order in which values need to be added.
+ * @param mixed &$rrd_update_values Values to include in the database.
+ * @param mixed &$rrdtool_pipe Optional. The RRDTool pipe resource for communication.
+ *
+ * @return string Returns 'OK' on successful update or if the RRD file is invalid or missing.
+ */
 function boost_rrdtool_function_update($local_data_id, $rrd_path, $rrd_update_template, &$rrd_update_values, &$rrdtool_pipe) {
 	global $debug;
 
@@ -1673,9 +2216,19 @@ function boost_rrdtool_function_update($local_data_id, $rrd_path, $rrd_update_te
 
 		// Check for a Data Source that has been removed
 		if ($ds_exists) {
-			$valid_entry = boost_rrdtool_function_create($local_data_id, false, $rrdtool_pipe);
+			boost_rrdtool_function_create($local_data_id, false, $rrdtool_pipe);
+
+			if (read_config_option('storage_location')) {
+				$valid_entry = rrdtool_execute_path_command('file_exists', $rrd_path, '', true, RRDTOOL_OUTPUT_BOOLEAN, $rrdtool_pipe, 'BOOST');
+			} else {
+				$valid_entry = file_exists($rrd_path);
+			}
 		} else {
 			return 'OK';
+		}
+
+		if (!$valid_entry) {
+			return 'ERROR: Unable to create RRD file';
 		}
 	}
 
@@ -1716,6 +2269,12 @@ function boost_rrdtool_function_update($local_data_id, $rrd_path, $rrd_update_te
 	}
 }
 
+/**
+ * Adjusts the PHP memory limit based on the configuration option 'boost_poller_mem_limit'. Used
+ * as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function boost_memory_limit() {
 	$memory_limit = read_config_option('boost_poller_mem_limit');
 
@@ -1726,6 +2285,21 @@ function boost_memory_limit() {
 	}
 }
 
+/**
+ * Executes the Boost poller bottom process. This function is responsible for initiating the Boost
+ * poller process if the Boost RRD update feature is enabled in the configuration. It performs the
+ * following tasks: - Reads configuration options to determine if Boost is enabled and to fetch
+ * necessary paths and settings. - Updates SNMP statistics using the
+ * `boost_update_snmp_statistics` function. - Validates the Boost log file and directory for
+ * writability if debugging is enabled. - Constructs the command string to execute the Boost
+ * poller script (`poller_boost.php`), including debug options and log redirection if applicable.
+ * - Executes the Boost poller script in the background. Configuration options used: -
+ * `boost_rrd_update_enable`: Determines if Boost RRD updates are enabled. - `path_boost_log`:
+ * Path to the Boost log file. - `boost_debug_enabled`: Enables or disables Boost debugging. -
+ * `path_php_binary`: Path to the PHP binary.
+ *
+ * @return void No value is returned.
+ */
 function boost_poller_bottom() {
 	global $config;
 
@@ -1771,6 +2345,15 @@ function boost_poller_bottom() {
 	}
 }
 
+/**
+ * Updates SNMP statistics for the Cacti Boost system. This function gathers information about the
+ * Boost table status, including the number of pending and archived records, table size, and
+ * storage engine. It calculates various statistics such as the total number of records, average
+ * row length, and maximum record length. The gathered data is then stored in the MIB cache for
+ * SNMP monitoring. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function boost_update_snmp_statistics() {
 	global $config;
 	$mc = new MibCache('CACTI-BOOST-MIB');
@@ -1833,6 +2416,14 @@ function boost_update_snmp_statistics() {
 	$mc->object('boostStatsLastUpdate')->set( time() );
 }
 
+/**
+ * Logs debug messages to the output or a log file based on the debug settings. Used as part of
+ * Cacti's lib functionality.
+ *
+ * @param string $string The message to be logged as a debug message.
+ *
+ * @return void No value is returned.
+ */
 function boost_debug($string) {
 	global $debug, $child;
 

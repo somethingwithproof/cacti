@@ -115,6 +115,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's auth profile functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function api_auth_logout_everywhere() {
 	$user = $_SESSION['sess_user_id'];
@@ -126,6 +132,12 @@ function api_auth_logout_everywhere() {
 	}
 }
 
+/**
+ * API helper that handles auth clear user settings. Used as part of Cacti's auth profile
+ * functionality.
+ *
+ * @return void No value is returned.
+ */
 function api_auth_clear_user_settings() {
 	$user = $_SESSION['sess_user_id'];
 
@@ -144,6 +156,14 @@ function api_auth_clear_user_settings() {
 	}
 }
 
+/**
+ * API helper that handles auth clear user setting. Used as part of Cacti's auth profile
+ * functionality.
+ *
+ * @param string $name The name.
+ *
+ * @return void No value is returned.
+ */
 function api_auth_clear_user_setting($name) {
 	global $settings_user;
 
@@ -182,6 +202,15 @@ function api_auth_clear_user_setting($name) {
 	}
 }
 
+/**
+ * API helper that handles auth update user setting. Used as part of Cacti's auth profile
+ * functionality.
+ *
+ * @param string $name The name.
+ * @param string $value The value.
+ *
+ * @return void No value is returned.
+ */
 function api_auth_update_user_setting($name, $value) {
 	global $settings_user;
 
@@ -212,6 +241,11 @@ function api_auth_update_user_setting($name, $value) {
 	}
 }
 
+/**
+ * Handles the form save. Used as part of Cacti's auth profile functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_save() {
 	global $settings_user;
 
@@ -256,6 +290,12 @@ function form_save() {
 /* --------------------------
     User Settings Functions
    -------------------------- */
+/**
+ * -------------------------- User Settings Functions --------------------------. Used as part of
+ * Cacti's auth profile functionality.
+ *
+ * @return void
+ */
 
 function settings() {
 	global $tabs_graphs, $settings_user, $current_user, $graph_views, $current_user;
@@ -445,6 +485,11 @@ function settings() {
 	form_end();
 }
 
+/**
+ * Handles the settings javascript. Used as part of Cacti's auth profile functionality.
+ *
+ * @return void No value is returned.
+ */
 function settings_javascript() {
 	global $config;
 
@@ -593,6 +638,8 @@ function settings_javascript() {
 											$('#'+id).val(data);
 											if ($('#'+id).selectmenu('instance')) {
 												$('#'+id).selectmenu('refresh');
+											} else if ($('#'+id).hasClass('select2-hidden-accessible')) {
+												$('#'+id).trigger('change.select2');
 											}
 										}
 									} else {

@@ -22,27 +22,37 @@
  +-------------------------------------------------------------------------+
 */
 
-use phpseclib3\Crypt\RSA;
+use phpseclib4\Crypt\RSA;
 
 /**
- * clear_auth_cookie - clears a users security token
+ * Clears a users security token. Used as part of Cacti's lib functionality.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function clear_auth_cookie() {
 	global $config;
 
 	if (isset($_COOKIE['cacti_remembers']) && read_config_option('auth_cache_enabled') == 'on') {
+		if (!is_string($_COOKIE['cacti_remembers'])) {
+			cacti_cookie_session_logout();
+
+			return;
+		}
+
 		$parts = explode(',', $_COOKIE['cacti_remembers']);
 
 		if (cacti_sizeof($parts) == 2) {
 			$user_id  = $parts[0];
 			$realm_id = -1;
 			$token    = $parts[1];
-		} else {
+		} elseif (cacti_sizeof($parts) == 3) {
 			$user_id  = $parts[0];
 			$realm_id = $parts[1];
 			$token    = $parts[2];
+		} else {
+			cacti_cookie_session_logout();
+
+			return;
 		}
 
 		// Legacy support which leaked usernames
@@ -66,22 +76,23 @@ function clear_auth_cookie() {
 		if ($user_id > 0) {
 			$secret = hash('sha512', $token, false);
 
-			cacti_cookie_session_logout();
-
 			db_execute_prepared('DELETE FROM user_auth_cache
 				WHERE user_id = ?
 				AND token = ?',
 				array($user_id, $secret));
 		}
+
+		/* Revoke the server-side credential before clearing browser state. */
+		cacti_cookie_session_logout();
 	}
 }
 
 /**
- * set_auth_cookie - sets a users security token
+ * Sets a users security token. Used as part of Cacti's lib functionality.
  *
- * @param  (array) user is the user_auth row for the user
+ * @param array $user User is the user_auth row for the user.
  *
- * @return (bool) True if token set worked, otherwise false
+ * @return bool True if token set worked, otherwise false.
  */
 function set_auth_cookie($user) {
 	global $config;
@@ -110,12 +121,13 @@ function set_auth_cookie($user) {
 }
 
 /**
- * check_auth_cookie - clears a users security token
+ * Clears a users security token. Used as part of Cacti's lib functionality.
  *
- * @return (int) The user of the session cookie, otherwise false
+ * @return int The user of the session cookie, otherwise false.
  */
 function check_auth_cookie() {
 	if (isset($_COOKIE['cacti_remembers']) &&
+		is_string($_COOKIE['cacti_remembers']) &&
 		read_config_option('auth_cache_enabled') == 'on' &&
 		db_table_exists('user_auth_cache')) {
 
@@ -125,10 +137,12 @@ function check_auth_cookie() {
 			$user_id  = $parts[0];
 			$realm_id = -1;
 			$token    = $parts[1];
-		} else {
+		} elseif (cacti_sizeof($parts) == 3) {
 			$user_id  = $parts[0];
 			$realm_id = $parts[1];
 			$token    = $parts[2];
+		} else {
+			return false;
 		}
 
 		// Legacy support which leaked usernames
@@ -151,27 +165,39 @@ function check_auth_cookie() {
 
 		if ($user_id > 0 && $user_id != get_guest_account()) {
 			if ($realm_id == -1) {
-				$user_info = db_fetch_row_prepared('SELECT id, realm, username
+				$user_info = db_fetch_row_prepared('SELECT id, realm, username, enabled
 					FROM user_auth
 					WHERE id = ?
 					AND realm = 0',
 					array($user_id));
 			} else {
-				$user_info = db_fetch_row_prepared('SELECT id, realm, username
+				$user_info = db_fetch_row_prepared('SELECT id, realm, username, enabled
 					FROM user_auth
 					WHERE id = ?
 					AND realm = ?',
 					array($user_id, $realm_id));
 			}
 
+			/* a disabled account must not be able to authenticate from a cookie
+			   it was issued before it was disabled */
+			if (cacti_sizeof($user_info) && $user_info['enabled'] != 'on') {
+				db_execute_prepared('DELETE FROM user_auth_cache
+					WHERE user_id = ?',
+					array($user_info['id']));
+
+				return false;
+			}
+
 			if (cacti_sizeof($user_info)) {
 				$secret = hash('sha512', $token, false);
 
+				// GHSA-xq26-f282-f998: reject remember-me tokens past the 90-day retention window instead of trusting the cron purge alone.
 				$found  = db_fetch_cell_prepared('SELECT user_id
 					FROM user_auth_cache
 					WHERE user_id = ?
 					AND token = ?
-					AND hostname = ?',
+					AND hostname = ?
+					AND last_update >= DATE_SUB(NOW(), INTERVAL 90 DAY)',
 					array($user_info['id'], $secret, get_client_addr())
 				);
 
@@ -204,14 +230,13 @@ function check_auth_cookie() {
 }
 
 /**
- * is_template_account - given a username or user_id test if this is a template account
- *   Template accounts could be accounts used for the administrative email, for both
- *   the guest and template accounts, or a user that is specified by a plugin as a
- *   template account.
+ * Given a username or user_id test if this is a template account Template accounts could be
+ * accounts used for the administrative email, for both the guest and template accounts, or a user
+ * that is specified by a plugin as a template account.
  *
- * @param  (int|string) user_id is either the user_id or a username
+ * @param int|string $user_id User_id is either the user_id or a username.
  *
- * @return (bool) true if template account, false otherwise
+ * @return bool True if template account, false otherwise.
  */
 function is_template_account($user_id) {
 	if (!is_numeric($user_id)) {
@@ -249,9 +274,9 @@ function is_template_account($user_id) {
 }
 
 /**
- * get_basic_auth_username - If basic auth is used, return the valid username
+ * If basic auth is used, return the valid username.
  *
- * @return (string) the new username, or false if one was not passed
+ * @return string The new username, or false if one was not passed.
  */
 function get_basic_auth_username() {
 	/* Only trust Remote-User / PHP_AUTH_USER headers when Basic Auth is the
@@ -268,12 +293,10 @@ function get_basic_auth_username() {
 		$username = str_replace("\\", "\\\\", $_SERVER['REMOTE_USER']);
 	} elseif (isset($_SERVER['REDIRECT_REMOTE_USER'])) {
 		$username = str_replace("\\", "\\\\", $_SERVER['REDIRECT_REMOTE_USER']);
-	} elseif (isset($_SERVER['HTTP_PHP_AUTH_USER'])) {
-		$username = str_replace("\\", "\\\\", $_SERVER['HTTP_PHP_AUTH_USER']);
-	} elseif (isset($_SERVER['HTTP_REMOTE_USER'])) {
-		$username = str_replace("\\", "\\\\", $_SERVER['HTTP_REMOTE_USER']);
-	} elseif (isset($_SERVER['HTTP_REDIRECT_REMOTE_USER'])) {
-		$username = str_replace("\\", "\\\\", $_SERVER['HTTP_REDIRECT_REMOTE_USER']);
+	/* The HTTP_-prefixed variants are populated from client request headers
+	 * (Remote-User:, PHP-Auth-User:, Redirect-Remote-User:) and are forgeable.
+	 * Trust only the server-set PHP_AUTH_USER / REMOTE_USER / REDIRECT_REMOTE_USER
+	 * that the web server provides after enforcing Basic Auth. GHSA-qrm4-7q3w-qc3v */
 	} else {
 		$username = false;
 	}
@@ -314,16 +337,18 @@ function get_basic_auth_username() {
 }
 
 /**
- * user_copy - copies user account
+ * Copies user account. Used as part of Cacti's lib functionality.
  *
- * @param  (string)  $template_user - username of the user account that should be used as the template
- * @param  (string)  $new_user - new username of the account to be created/overwritten
- * @param  (int)     $template_realm - new realm of the account
- * @param  (int)     $new_realm - new realm of the account to be created, overwrite not affected, but is used for lookup
- * @param  (bool)    $overwrite - Allow overwrite of existing user, preserves username, fullname, password and realm
- * @param  (array)   $data_override - Array of user_auth field and values to override on the new user
+ * @param string $template_user Username of the user account that should be used as the template.
+ * @param string $new_user New username of the account to be created/overwritten.
+ * @param int $template_realm New realm of the account.
+ * @param int $new_realm New realm of the account to be created, overwrite not affected, but is
+ *   used for lookup.
+ * @param bool $overwrite Allow overwrite of existing user, preserves username, fullname, password
+ *   and realm.
+ * @param array $data_override Array of user_auth field and values to override on the new user.
  *
- * @return (int|bool) the new users id, or false on no copy
+ * @return int|bool The new users id, or false on no copy.
  */
 function user_copy($template_user, $new_user, $template_realm = 0, $new_realm = 0, $overwrite = false, $data_override = array()) {
 	/* ================= input validation ================= */
@@ -478,11 +503,11 @@ function user_copy($template_user, $new_user, $template_realm = 0, $new_realm = 
 
 
 /**
- * user_remove - remove a user account
+ * Remove a user account. Used as part of Cacti's lib functionality.
  *
- * @param  (int) $user_id - Id os the user account to remove
+ * @param int $user_id Id os the user account to remove.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function user_remove($user_id) {
 	/* ================= input validation ================= */
@@ -521,11 +546,11 @@ function user_remove($user_id) {
 }
 
 /**
- * user_disable - disable a user account
+ * Disable a user account. Used as part of Cacti's lib functionality.
  *
- * @param  (int) $user_id - Id of the user account to disable
+ * @param int $user_id Id of the user account to disable.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function user_disable($user_id) {
 	/* ================= input validation ================= */
@@ -541,11 +566,11 @@ function user_disable($user_id) {
 }
 
 /**
- * user_enable - enable a user account
+ * Enable a user account. Used as part of Cacti's lib functionality.
  *
- * @param  (int) $user_id - Id of the user account to enable
+ * @param int $user_id Id of the user account to enable.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function user_enable($user_id) {
 	/* ================= input validation ================= */
@@ -558,11 +583,11 @@ function user_enable($user_id) {
 }
 
 /**
- * get_auth_realms - return a list of system user authentication realms
+ * Return a list of system user authentication realms. Used as part of Cacti's lib functionality.
  *
- * @param  (bool) $login - If true, we also set the local login realm
+ * @param bool $login If true, we also set the local login realm.
  *
- * @return (array) Array of login realms
+ * @return array Of login realms.
  */
 function get_auth_realms($login = false) {
 	if (read_config_option('auth_method') == 4) {
@@ -619,11 +644,13 @@ function get_auth_realms($login = false) {
 }
 
 /**
- * is_graph_allowed - determines whether the current user is allowed to view a certain graph
+ * Determines whether the current user is allowed to view a certain graph. Used as part of Cacti's
+ * lib functionality.
  *
- * @param  (int) $local_graph_id - the ID of the graph to check permissions for
+ * @param int $local_graph_id The ID of the graph to check permissions for.
+ * @param int $user_id The ID of the user to check permissions for.
  *
- * @return (bool) whether the current user is allowed the view the specified graph or not
+ * @return bool Whether the current user is allowed the view the specified graph or not.
  */
 function is_graph_allowed($local_graph_id, $user_id = 0) {
 	$rows  = 0;
@@ -634,12 +661,12 @@ function is_graph_allowed($local_graph_id, $user_id = 0) {
 }
 
 /**
- * auth_check_perms - A helper function to checking Tree permissions
+ * A helper function to checking Tree permissions. Used as part of Cacti's lib functionality.
  *
- * @param  (array) A set of tree objects
- * @param  (int)   $policy - The policy to check
+ * @param array $objects A set of tree objects.
+ * @param int $policy The policy to check.
  *
- * @return (bool) true if there is access else false
+ * @return bool True if there is access else false.
  */
 function auth_check_perms($objects, $policy) {
 	$objectSize = cacti_sizeof($objects);
@@ -660,13 +687,13 @@ function auth_check_perms($objects, $policy) {
 }
 
 /**
- * auth_augment_roles - A helper function to extend Cacti roles with additional realms
- *   or to add a new role.
+ * A helper function to extend Cacti roles with additional realms or to add a new role. Used as
+ * part of Cacti's lib functionality.
  *
- * @param  (string) $role_name - The role to extend or add
- * @param  (array)  $files - The filenames to add to the role
+ * @param string $role_name The role to extend or add.
+ * @param array $files The filenames to add to the role.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function auth_augment_roles($role_name, $files) {
 	global $user_auth_roles, $user_auth_realm_filenames;
@@ -711,13 +738,13 @@ function auth_augment_roles($role_name, $files) {
 }
 
 /**
- * auth_augment_roles_byname - A helper function to extend Cacti roles with additional realms
- *   or to add a new role.
+ * A helper function to extend Cacti roles with additional realms or to add a new role. Used as
+ * part of Cacti's lib functionality.
  *
- * @param  (string)  $role_name - The role to extend or add
- * @param  (string)  $auth_name - The name that must be mapped
+ * @param string $role_name The role to extend or add.
+ * @param string $auth_name The name that must be mapped.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function auth_augment_roles_byname($role_name, $auth_name) {
 	global $user_auth_roles, $user_auth_realm_filenames;
@@ -745,12 +772,14 @@ function auth_augment_roles_byname($role_name, $auth_name) {
 }
 
 /**
- * is_tree_allowed - determines whether the current user is allowed to view a certain graph tree
+ * Determines whether the current user is allowed to view a certain graph tree. Used as part of
+ * Cacti's lib functionality.
  *
- * @param  (int)  $tree_id the ID of the graph tree to check permissions for
- * @param  (int)  If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param int $tree_id The ID of the graph tree to check permissions for.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
  *
- * @return (bool) whether the current user is allowed the view the specified graph tree or not
+ * @return bool Whether the current user is allowed the view the specified graph tree or not.
  */
 function is_tree_allowed($tree_id, $user_id = 0) {
 	if ($user_id === -1) {
@@ -843,12 +872,14 @@ function is_tree_allowed($tree_id, $user_id = 0) {
 }
 
 /**
- * is_device_allowed - determines whether the current user is allowed to view a certain device
+ * Determines whether the current user is allowed to view a certain device. Used as part of
+ * Cacti's lib functionality.
  *
- * @param  (int)  $device_id - the ID of the device to check permissions for
- * @param  (int)  If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param int $device_id The ID of the device to check permissions for.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
  *
- * @return (bool) whether the current user is allowed the view the specified device or not
+ * @return bool Whether the current user is allowed the view the specified device or not.
  */
 function is_device_allowed($device_id, $user_id = 0) {
 	$total_rows = -2;
@@ -857,12 +888,14 @@ function is_device_allowed($device_id, $user_id = 0) {
 }
 
 /**
- * is_graph_template_allowed - determines whether the current user is allowed to view a certain graph template
+ * Determines whether the current user is allowed to view a certain graph template. Used as part
+ * of Cacti's lib functionality.
  *
- * @param  (int)  $graph_template_id - The ID of the graph template to check permissions for
- * @param  (int)  If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param int $graph_template_id The ID of the graph template to check permissions for.
+ * @param int $user If checking a user, specify the user_id otherwise for the current user leave
+ *   blank.
  *
- * @return (bool) whether the current user is allowed the view the specified graph template or not
+ * @return bool Whether the current user is allowed the view the specified graph template or not.
  */
 function is_graph_template_allowed($graph_template_id, $user = 0) {
 	$total_rows = -2;
@@ -872,12 +905,13 @@ function is_graph_template_allowed($graph_template_id, $user = 0) {
 }
 
 /**
- * is_view_allowed - Returns a true or false as to whether or not a specific view type is allowed
- *   View options include 'show_tree', 'show_list', 'show_preview', 'graph_settings'
+ * Returns a true or false as to whether or not a specific view type is allowed View options
+ * include 'show_tree', 'show_list', 'show_preview', 'graph_settings'. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string) $view - the view to check for permissions on
+ * @param string $view The view to check for permissions on.
  *
- * @return (bool) True if allowed, else false
+ * @return bool True if allowed, else false.
  */
 function is_view_allowed($view = 'show_tree') {
 	$allowed_views = array('show_tree', 'show_list', 'show_preview', 'graph_settings');
@@ -926,12 +960,13 @@ function is_view_allowed($view = 'show_tree') {
 }
 
 /**
- * is_tree_branch_empty - Given a tree id and a branch id, check if it's empty
+ * Given a tree id and a branch id, check if it's empty. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (int)  $tree_id - The Cacti Tree id
- * @param  (int)  $parent  - The Cacti Tree branch id
+ * @param int $tree_id The Cacti Tree id.
+ * @param int $parent The Cacti Tree branch id.
  *
- * @return (bool) True if empty, else false
+ * @return bool True if empty, else false.
  */
 function is_tree_branch_empty($tree_id, $parent = 0) {
 	$graphs = array_rekey(
@@ -1014,15 +1049,14 @@ function is_tree_branch_empty($tree_id, $parent = 0) {
 }
 
 /**
- * is_realm_allowed - Given a realm and a user, check their permissions if the
- *   admin changed a users settings, setup the case to redirect by clearing
- *   session variables so that when an admin makes a change, the user does not
- *   have to login again to receive them.
+ * Given a realm and a user, check their permissions if the admin changed a users settings, setup
+ * the case to redirect by clearing session variables so that when an admin makes a change, the
+ * user does not have to login again to receive them. Used as part of Cacti's lib functionality.
  *
- * @param  (int)      $realm      The realm to check
- * @param  (int|bool) $check_user The either false or the user id to check
+ * @param int $realm The realm to check.
+ * @param int|bool $check_user The either false or the user id to check.
  *
- * @return (bool) True if allowed, otherwise false
+ * @return bool True if allowed, otherwise false.
  */
 function is_realm_allowed($realm, $check_user = false) {
 	global $config;
@@ -1154,14 +1188,15 @@ function is_realm_allowed($realm, $check_user = false) {
 }
 
 /**
- * get_allowed_tree_level - Get the permitted tree branch data available to the user
+ * Get the permitted tree branch data available to the user. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (int)  The tree id to check
- * @param  (int)  The branch id, 0 is the root of the tree
- * @param  (bool) Tells the function that the user is editing
- * @param  (int)  The user id to check for permissions. if 0 then check the current user
+ * @param int $tree_id The tree id to check.
+ * @param int $parent_id The branch id, 0 is the root of the tree.
+ * @param bool $editing Tells the function that the user is editing.
+ * @param int $user_id The user id to check for permissions. if 0 then check the current user.
  *
- * @return (array) An array of Tree branch items that a re allowed (graphs, devices)
+ * @return array An array of Tree branch items that a re allowed (graphs, devices).
  */
 function get_allowed_tree_level($tree_id, $parent_id, $editing = false, $user_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -1206,18 +1241,19 @@ function get_allowed_tree_level($tree_id, $parent_id, $editing = false, $user_id
 }
 
 /**
- * get_allowed_tree_content - A function that gathers items and statistics of those items
- *   that are permitted on the tree specified
+ * A function that gathers items and statistics of those items that are permitted on the tree
+ * specified. Used as part of Cacti's lib functionality.
  *
- * @param  (int)    The tree id to check
- * @param  (int)    The branch id, 0 is the root of the tree
- * @param  (string) The Tree SQL where when searching for specific content
- * @param  (string) The SQL Order clause to use for the sorting of items
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param int $tree_id The tree id to check.
+ * @param int $parent The branch id, 0 is the root of the tree.
+ * @param string $sql_where The Tree SQL where when searching for specific content.
+ * @param string $sql_order The SQL Order clause to use for the sorting of items.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
  *
- * @return (array) An array of Tree branch items that a re allowed (graphs, devices)
+ * @return array An array of Tree branch items that a re allowed (graphs, devices).
  */
 function get_allowed_tree_content($tree_id, $parent = 0, $sql_where = '', $sql_order = '', $sql_limit = '', &$total_rows = 0, $user_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -1312,12 +1348,13 @@ function get_allowed_tree_content($tree_id, $parent = 0, $sql_where = '', $sql_o
 }
 
 /**
- * get_policies - Searches both the users and the users groups and returns a policy
- *   array to be used for determining object permissions.
+ * Searches both the users and the users groups and returns a policy array to be used for
+ * determining object permissions.
  *
- * @param  (int)  If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
  *
- * @return (array) An array of policy objects comprising the users permissions
+ * @return array An array of policy objects comprising the users permissions.
  */
 function get_policies($user_id) {
 	/* get policies for all user groups */
@@ -1341,17 +1378,19 @@ function get_policies($user_id) {
 }
 
 /**
- * get_allowed_tree_header_graphs - Returns the graphs that are permitted at the branch/leaf id specified
+ * Returns the graphs that are permitted at the branch/leaf id specified. Used as part of Cacti's
+ * lib functionality.
  *
- * @param  (int)    The tree id to check
- * @param  (int)    The branch id, 0 is the root of the tree
- * @param  (string) The Tree SQL where when searching for specific content
- * @param  (string) The SQL Order clause to use for the sorting of items
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param int $tree_id The tree id to check.
+ * @param int $leaf_id The branch id, 0 is the root of the tree.
+ * @param string $sql_where The Tree SQL where when searching for specific content.
+ * @param string $sql_order The SQL Order clause to use for the sorting of items.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
  *
- * @return (array) Array of tree header graphs to display
+ * @return array Of tree header graphs to display.
  */
 function get_allowed_tree_header_graphs($tree_id, $leaf_id = 0, $sql_where = '', $sql_order = 'gti.position', $sql_limit = '', &$total_rows = 0, $user_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -1443,17 +1482,18 @@ function get_allowed_tree_header_graphs($tree_id, $leaf_id = 0, $sql_where = '',
 }
 
 /**
- * get_allowed_graphs - Returns the graphs that are permitted by the user.  Used for table displays
- *   where users will view the graphs that they are permitted to access
+ * Returns the graphs that are permitted by the user. Used for table displays where users will
+ * view the graphs that they are permitted to access.
  *
- * @param  (string) The SQL where when searching for specific content
- * @param  (string) The SQL Order clause to use for the sorting of graphs
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
- * @param  (int)    If just searching for if a single graph is permitted, the id of that graph
+ * @param string $sql_where The SQL where when searching for specific content.
+ * @param string $sql_order The SQL Order clause to use for the sorting of graphs.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
+ * @param int $graph_id If just searching for if a single graph is permitted, the id of that graph.
  *
- * @return (array) Array of allowed graphs
+ * @return array Of allowed graphs.
  */
 function get_allowed_graphs($sql_where = '', $sql_order = 'gtg.title_cache', $sql_limit = '', &$total_rows = 0, $user_id = 0, $graph_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -1485,7 +1525,7 @@ function get_allowed_graphs($sql_where = '', $sql_order = 'gtg.title_cache', $sq
 	}
 
 	if ($graph_id > 0) {
-		$sql_where .= ($sql_where != '' ? ' AND ' : ' ') . " gl.id = $graph_id";
+		$sql_where .= ($sql_where != '' ? ' AND ' : ' ') . " gl.id = " . (int) $graph_id;
 	}
 
 	if (read_user_setting('hide_disabled', false, false, $user_id) == 'on') {
@@ -1545,17 +1585,18 @@ function get_allowed_graphs($sql_where = '', $sql_order = 'gtg.title_cache', $sq
 }
 
 /**
- * get_allowed_aggregate_graphs - Returns the aggregate graphs that are permitted by the user.
- *   Used for table displays where users will view the graphs that they are permitted to access
+ * Returns the aggregate graphs that are permitted by the user. Used for table displays where
+ * users will view the graphs that they are permitted to access.
  *
- * @param  (string) The SQL where when searching for specific content
- * @param  (string) The SQL Order clause to use for the sorting of graphs
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
- * @param  (int)    If just searching for if a single graph is permitted, the id of that graph
+ * @param string $sql_where The SQL where when searching for specific content.
+ * @param string $sql_order The SQL Order clause to use for the sorting of graphs.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
+ * @param int $graph_id If just searching for if a single graph is permitted, the id of that graph.
  *
- * @return (array) Array of allowed graphs
+ * @return array Of allowed graphs.
  */
 function get_allowed_aggregate_graphs($sql_where = '', $sql_order = 'gtg.title_cache', $sql_limit = '', &$total_rows = 0, $user_id = 0, $graph_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -1587,7 +1628,7 @@ function get_allowed_aggregate_graphs($sql_where = '', $sql_order = 'gtg.title_c
 	}
 
 	if ($graph_id > 0) {
-		$sql_where .= ($sql_where != '' ? ' AND ' : ' ') . " gl.id = $graph_id";
+		$sql_where .= ($sql_where != '' ? ' AND ' : ' ') . " gl.id = " . (int) $graph_id;
 	}
 
 	if (read_user_setting('hide_disabled', false, false, $user_id) == 'on') {
@@ -1659,13 +1700,13 @@ function get_allowed_aggregate_graphs($sql_where = '', $sql_order = 'gtg.title_c
 }
 
 /**
- * get_simple_device_perms - Returns a boolean true or false if the user has full access to
- *   all devices in the system.  This function is used to shortcut complex queries that may
- *   take multiple seconds to return an answer.
+ * Returns a boolean true or false if the user has full access to all devices in the system. This
+ * function is used to shortcut complex queries that may take multiple seconds to return an
+ * answer.
  *
- * @param  (int)    The user id to check for permissions for
+ * @param int $user The user id to check for permissions for.
  *
- * @return (bool)   True if simple permissions are in place, otherwise false
+ * @return bool True if simple permissions are in place, otherwise false.
  */
 function get_simple_device_perms($user) {
 	$policy_hosts = db_fetch_cell_prepared('SELECT policy_hosts
@@ -1706,13 +1747,13 @@ function get_simple_device_perms($user) {
 }
 
 /**
- * get_simple_graph_perms - Returns a boolean true or false if the user has full access to
- *   all graphs in the system.  This function is used to shortcut complex queries that may
- *   take multiple seconds to return an answer.
+ * Returns a boolean true or false if the user has full access to all graphs in the system. This
+ * function is used to shortcut complex queries that may take multiple seconds to return an
+ * answer.
  *
- * @param  (int)    The user id to check for permissions for
+ * @param int $user_id The user id to check for permissions for.
  *
- * @return (bool)   True if simple permissions are in place, otherwise false
+ * @return bool True if simple permissions are in place, otherwise false.
  */
 function get_simple_graph_perms($user_id) {
 	if (isset($_SESSION['sess_simple_perms'])) {
@@ -1763,13 +1804,13 @@ function get_simple_graph_perms($user_id) {
 }
 
 /**
- * get_simple_graph_template_perms - Returns a boolean true or false if the user has full access to
- *   all graphs templates in the system.  This function is used to shortcut complex queries that may
- *   take multiple seconds to return an answer.
+ * Returns a boolean true or false if the user has full access to all graphs templates in the
+ * system. This function is used to shortcut complex queries that may take multiple seconds to
+ * return an answer.
  *
- * @param  (int)    The user id to check for permissions for
+ * @param int $user_id The user id to check for permissions for.
  *
- * @return (bool)   True if simple permissions are in place, otherwise false
+ * @return bool True if simple permissions are in place, otherwise false.
  */
 function get_simple_graph_template_perms($user_id) {
 	if (isset($_SESSION['sess_simple_template_perms'])) {
@@ -1820,17 +1861,20 @@ function get_simple_graph_template_perms($user_id) {
 }
 
 /**
- * get_allowed_graph_templates - returns the list of Graph Templates that the user is allowed
- *   To access.  This function is generally intended for both listbox and table displays.
+ * Returns the list of Graph Templates that the user is allowed To access. This function is
+ * generally intended for both listbox and table displays. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string) The SQL where when searching for specific content
- * @param  (string) The SQL Order clause to use for the sorting of graphs
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
- * @param  (int)    If just searching for if a single graph template is permitted, the id of that graph template
+ * @param string $sql_where The SQL where when searching for specific content.
+ * @param string $sql_order The SQL Order clause to use for the sorting of graphs.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
+ * @param int $graph_template_id If just searching for if a single graph template is permitted,
+ *   the id of that graph template.
  *
- * @return (array)  An array of permitted Graph Templates
+ * @return array An array of permitted Graph Templates.
  */
 function get_allowed_graph_templates($sql_where = '', $sql_order = 'gt.name', $sql_limit = '', &$total_rows = 0, $user_id = 0, $graph_template_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -1934,12 +1978,13 @@ function get_allowed_graph_templates($sql_where = '', $sql_order = 'gt.name', $s
 }
 
 /**
- * get_policy_join_select - Parse the policies in order to visually display user permissions
+ * Parse the policies in order to visually display user permissions. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (array) $policies  The list of user and group policies.  Will be reversed to
- *   show user permissions first.
+ * @param array $policies The list of user and group policies. Will be reversed to show user
+ *   permissions first.
  *
- * @return (array)  Array containing both $sql_select and $sql_join
+ * @return array Containing both $sql_select and $sql_join.
  */
 function get_policy_join_select($policies) {
 	$sql_join   = '';
@@ -1967,14 +2012,15 @@ function get_policy_join_select($policies) {
 }
 
 /**
- * get_policy_where - Parse the policies in order to downselect matching graphs
- *   without the use of the SQL Having clause which is very inefficient
+ * Parse the policies in order to downselect matching graphs without the use of the SQL Having
+ * clause which is very inefficient. Used as part of Cacti's lib functionality.
  *
- * @param  (int)    $graph_auth_method - The graph auth method: permissive, restrictive, device, graph_template
- * @param  (array)  $policies - The list of user and group policies.  Will be reversed to
- * @param  (string) $sql_where - The SQL where filter provided by the calling function.
+ * @param int $graph_auth_method The graph auth method: permissive, restrictive, device,
+ *   graph_template.
+ * @param array $policies The list of user and group policies. Will be reversed to.
+ * @param string $sql_where The SQL where filter provided by the calling function.
  *
- * @return (string) - Updated sql_where value
+ * @return string Updated sql_where value.
  */
 function get_policy_where($graph_auth_method, $policies, $sql_where) {
 	if ($graph_auth_method == 1) {
@@ -2239,40 +2285,33 @@ function get_policy_where($graph_auth_method, $policies, $sql_where) {
 }
 
 /**
- * get_permission_string - get the effective permission string for the graph in question.  The
- *   logic for this is somewhat complex, but understandable.  First, the $graph object will include
- *   three columns generally graphX, deviceX, and templateX for each of the user or groups in the collection.
- *   The way we assign a restrictive or permissive value is based upon the graph permission setting
- *   in Cacti, but also whether or not the default access for the object type is either 'Allow' or 'Deny'.
+ * Get the effective permission string for the graph in question. The logic for this is somewhat
+ * complex, but understandable. First, the $graph object will include three columns generally
+ * graphX, deviceX, and templateX for each of the user or groups in the collection. The way we
+ * assign a restrictive or permissive value is based upon the graph permission setting in Cacti,
+ * but also whether or not the default access for the object type is either 'Allow' or 'Deny'. -
+ * If the 'default access' for the object type is 'Deny', then a numeric value in userX means the
+ * user has permission to an object. - If the default access for the object is 'Allow', then a
+ * numeric value in userX means that the object is blocked. Again, each of the graphX, deviceX,
+ * and templateX will always come in three's. They equate to: - graphX - The user does or does not
+ * have permission to the Graph at the Graph Level - deviceX - The user does or does not have
+ * permission to the Graph at the Device Level - templateX - The user does or does not have
+ * permission to the Graph at the Graph Template Level Then, the effective permission are
+ * calculated by the Graph Permission Model in Cacti. They are - Permissive - If the user has
+ * access to the Graph, the Device, or Graph Template, then the user will have access to the
+ * Graph. - Restrictive - If the user has access to the Graph, or both the Device and Graph
+ * Template, then the user will have access to the Graph - Device - If the user has access to the
+ * Graph, or the Device, then the user will have access to the Graph - Graph Template - If the
+ * user has access to the Graph, or the Graph Template, then the user will have access to the
+ * Graph. This function will apply this logic, and then respond to the user a 'Granted' or
+ * 'Restricted' column value, and a Tooltip, that shows how the permissions were evaluated. In
+ * other words why was the user either permitted to or denied access to the Graph. Used as part of
+ * Cacti's lib functionality.
  *
- *   - If the 'default access' for the object type is 'Deny', then a numeric value in userX means
- *     the user has permission to an object.
- *   - If the default access for the object is 'Allow', then a numeric
- *     value in userX means that the object is blocked.
+ * @param mixed &$graph The graph data.
+ * @param mixed &$policies The policies to evaluate.
  *
- *   Again, each of the graphX, deviceX, and templateX will always come in three's.  They equate to:
- *
- *   - graphX    - The user does or does not have permission to the Graph at the Graph Level
- *   - deviceX   - The user does or does not have permission to the Graph at the Device Level
- *   - templateX - The user does or does not have permission to the Graph at the Graph Template Level
- *
- *   Then, the effective permission are calculated by the Graph Permission Model in Cacti.  They are
- *
- *   - Permissive - If the user has access to the Graph, the Device, or Graph Template, then the
- *     user will have access to the Graph.
- *
- *   - Restrictive - If the user has access to the Graph, or both the Device and Graph Template,
- *     then the user will have access to the Graph
- *
- *   - Device - If the user has access to the Graph, or the Device, then the user will have
- *     access to the Graph
- *
- *   - Graph Template - If the user has access to the Graph, or the Graph Template, then the user
- *     will have access to the Graph.
- *
- *   This function will apply this logic, and then respond to the user a 'Granted' or 'Restricted'
- *   column value, and a Tooltip, that shows how the permissions were evaluated.  In other words
- *   why was the user either permitted to or denied access to the Graph.
+ * @return string The permission string.
  */
 function get_permission_string(&$graph, &$policies) {
 	$grantStr   = '';
@@ -2466,19 +2505,21 @@ function get_permission_string(&$graph, &$policies) {
 }
 
 /**
- * get_allowed_trees - returns the list of Trees that the user is allowed
- *   To access.  This function is generally intended for both listbox and table displays as
- *   well as to build out the tree for a user.
+ * Returns the list of Trees that the user is allowed To access. This function is generally
+ * intended for both listbox and table displays as well as to build out the tree for a user. Used
+ * as part of Cacti's lib functionality.
  *
- * @param  (bool)   Is the Tree in Edit mode or not
- * @param  (bool)   Return either the SQL used to get the values or the values
- * @param  (string) The SQL Order clause to use for the sorting of graphs
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
- * @param  (int)    If just searching for if a single graph template is permitted, the id of that graph template
+ * @param bool $edit Is the Tree in Edit mode or not.
+ * @param bool $return_sql Return either the SQL used to get the values or the values.
+ * @param string $sql_where The SQL Order clause to use for the sorting of graphs.
+ * @param int $sql_order The limit on items to return. If empty or -1, return all items.
+ * @param int $sql_limit The number of rows found, to be returned to the caller.
+ * @param mixed &$total_rows If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
+ * @param int $user_id If just searching for if a single graph template is permitted, the id of
+ *   that graph template.
  *
- * @return (string|array)  An array of permitted Trees or the SQL to gather them
+ * @return string|array An array of permitted Trees or the SQL to gather them.
  */
 function get_allowed_trees($edit = false, $return_sql = false, $sql_where = '', $sql_order = 'name', $sql_limit = '', &$total_rows = 0, $user_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -2584,18 +2625,17 @@ function get_allowed_trees($edit = false, $return_sql = false, $sql_where = '', 
 }
 
 /**
- * get_allowed_branches - returns the list of Tree branches that the user is allowed
- *   To access.  This function is generally intended for both listbox and table displays as
- *   well as to build out the tree for a user.
+ * Returns the list of Tree branches that the user is allowed To access. This function is
+ * generally intended for both listbox and table displays as well as to build out the tree for a
+ * user. Used as part of Cacti's lib functionality.
  *
- * @param  (bool)   Is the Tree in Edit mode or not
- * @param  (string) The SQL Where used to get the values or the values
- * @param  (string) The SQL Order clause to use for the sorting of branches
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param bool $sql_where Is the Tree in Edit mode or not.
+ * @param string $sql_order The SQL Where used to get the values or the values.
+ * @param string $sql_limit The SQL Order clause to use for the sorting of branches.
+ * @param mixed &$total_rows The limit on items to return. If empty or -1, return all items.
+ * @param int $user_id The number of rows found, to be returned to the caller.
  *
- * @return (array)  An array of permitted Tree branches
+ * @return array An array of permitted Tree branches.
  */
 function get_allowed_branches($sql_where = '', $sql_order = 'name', $sql_limit = '', &$total_rows = 0, $user_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -2753,17 +2793,19 @@ function get_allowed_branches($sql_where = '', $sql_order = 'name', $sql_limit =
 }
 
 /**
- * get_allowed_devices - returns the list of devices that the user is allowed
- *   To access.  This function is generally intended for both listbox and table displays as
- *   well as other tasks.
+ * Returns the list of devices that the user is allowed To access. This function is generally
+ * intended for both listbox and table displays as well as other tasks. Used as part of Cacti's
+ * lib functionality.
  *
- * @param  (string) The SQL Where used to get the values or the values
- * @param  (string) The SQL Order clause to use for the sorting of devices
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param string $sql_where The SQL Where used to get the values or the values.
+ * @param string $sql_order The SQL Order clause to use for the sorting of devices.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
+ * @param int $device_id The ID of a specific device to retrieve. Default is 0.
  *
- * @return (array)  An array of permitted devices
+ * @return array An array of permitted devices.
  */
 function get_allowed_devices($sql_where = '', $sql_order = 'description', $sql_limit = '', &$total_rows = 0, $user_id = 0, $device_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -2811,7 +2853,7 @@ function get_allowed_devices($sql_where = '', $sql_order = 'description', $sql_l
 	}
 
 	if ($device_id > 0) {
-		$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . " h.id = $device_id";
+		$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . " h.id = " . (int) $device_id;
 	}
 
 	$graph_auth_method = read_config_option('graph_auth_method');
@@ -2870,18 +2912,19 @@ function get_allowed_devices($sql_where = '', $sql_order = 'description', $sql_l
 }
 
 /**
- * get_allowed_sites - returns the list of sites that the user is allowed
- *   To access.  This function is generally intended for both listbox and table displays as
- *   well as other tasks.
+ * Returns the list of sites that the user is allowed To access. This function is generally
+ * intended for both listbox and table displays as well as other tasks. Used as part of Cacti's
+ * lib functionality.
  *
- * @param  (string) The SQL Where used to get the values or the values
- * @param  (string) The SQL Order clause to use for the sorting of devices
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
- * @param  (int)    If checking a single site, specify the site_id
+ * @param string $sql_where The SQL Where used to get the values or the values.
+ * @param string $sql_order The SQL Order clause to use for the sorting of devices.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
+ * @param int $site_id If checking a single site, specify the site_id.
  *
- * @return (array)  An array of permitted sites
+ * @return array An array of permitted sites.
  */
 function get_allowed_sites($sql_where = '', $sql_order = 'name', $sql_limit = '', &$total_rows = 0, $user_id = 0, $site_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -2939,18 +2982,19 @@ function get_allowed_sites($sql_where = '', $sql_order = 'name', $sql_limit = ''
 }
 
 /**
- * get_allowed_site_devices - returns the list of devices in a site that the user is allowed
- *   To access.  This function is generally intended for both listbox and table displays as
- *   well as other tasks.
+ * Returns the list of devices in a site that the user is allowed To access. This function is
+ * generally intended for both listbox and table displays as well as other tasks. Used as part of
+ * Cacti's lib functionality.
  *
- * @param  (int)    The site id for the site
- * @param  (string) The SQL Where used to get the values or the values
- * @param  (string) The SQL Order clause to use for the sorting of devices
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param int $site_id The site id for the site.
+ * @param string $sql_where The SQL Where used to get the values or the values.
+ * @param string $sql_order The SQL Order clause to use for the sorting of devices.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
  *
- * @return (array)  An array of permitted site devices
+ * @return array An array of permitted site devices.
  */
 function get_allowed_site_devices($site_id, $sql_where = '', $sql_order = 'description', $sql_limit = '', &$total_rows = 0, $user_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -3050,18 +3094,19 @@ function get_allowed_site_devices($site_id, $sql_where = '', $sql_order = 'descr
 }
 
 /**
- * get_allowed_graph_templates_normalized - returns the list of graph templates aligned with the
- *   To be able to differentiate between Graph Templates based on a non-data query data input mode
- *   and those related to data queries.
+ * Returns the list of graph templates aligned with the To be able to differentiate between Graph
+ * Templates based on a non-data query data input mode and those related to data queries. Used as
+ * part of Cacti's lib functionality.
  *
- * @param  (string) The SQL Where used to get the values or the values
- * @param  (string) The SQL Order clause to use for the sorting of devices
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
- * @param  (int)    If checking a single graph template, specify the graph_template_id
+ * @param string $sql_where The SQL Where used to get the values or the values.
+ * @param string $sql_order The SQL Order clause to use for the sorting of devices.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param mixed &$total_rows The number of rows found, to be returned to the caller.
+ * @param int $user_id If checking a user, specify the user_id otherwise for the current user
+ *   leave blank.
+ * @param int $graph_template_id If checking a single graph template, specify the graph_template_id.
  *
- * @return (array)  An array of permitted and normalized graph templates
+ * @return array An array of permitted and normalized graph templates.
  */
 function get_allowed_graph_templates_normalized($sql_where = '', $sql_order = 'name', $sql_limit = '', &$total_rows = 0, $user_id = 0, $graph_template_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -3108,13 +3153,13 @@ function get_allowed_graph_templates_normalized($sql_where = '', $sql_order = 'n
 }
 
 /**
- * auth_valid_user - Returns true or false depending on if the user is valid for the system
- *   users with an id of 0 or -1 are special cases.  All non-zero users should be found in the
- *   user_auth table.
+ * Returns true or false depending on if the user is valid for the system users with an id of 0 or
+ * -1 are special cases. All non-zero users should be found in the user_auth table. Used as part
+ * of Cacti's lib functionality.
  *
- * @param  int   A valid or invalid user.
+ * @param int $user_id Int A valid or invalid user.
  *
- * @return bool  True is valid otherwise false
+ * @return bool True is valid otherwise false.
  */
 function auth_valid_user($user_id) {
 	static $users = array();
@@ -3146,20 +3191,18 @@ function auth_valid_user($user_id) {
 }
 
 /**
- * get_total_row_data - returns the total rows based upon a set of criteria
+ * Returns the total rows based upon a set of criteria This function will hash the $sql, and then
+ * search for the total row counter based upon that criteria and if it finds a unexpired match for
+ * that data, it will return the row count in the table otherwise, it will execute the SQL and
+ * return the data. Used as part of Cacti's lib functionality.
  *
- * This function will hash the $sql, and then search for the total
- * row counter based upon that criteria and if it finds a unexpired
- * match for that data, it will return the row count in the table
- * otherwise, it will execute the SQL and return the data.
+ * @param int $user_id The user id making the request.
+ * @param string $sql The sql to be executed, either prepared or otherwise.
+ * @param array $sql_params In the case of a prepared statement the.
+ * @param string $class The user defined class of data.
+ * @param int $timeout The timeout for the Class if not controlled by Cacti.
  *
- * @param  (int)    The user id making the request
- * @param  (string) The sql to be executed, either prepared or otherwise
- * @param  (array)  In the case of a prepared statement the
- * @param  (string) The user defined class of data
- * @param  (int)    The timeout for the Class if not controlled by Cacti
- *
- * @return (array) an array containing a list of hosts
+ * @return array An array containing a list of hosts.
  */
 function get_total_row_data($user_id, $sql, $sql_params = array(), $class = '', $timeout = 86400) {
 	$execute  = true;
@@ -3213,9 +3256,10 @@ function get_total_row_data($user_id, $sql, $sql_params = array(), $class = '', 
 }
 
 /**
- * get_host_array - returns a list of hosts taking permissions into account if necessary
+ * Returns a list of hosts taking permissions into account if necessary. Used as part of Cacti's
+ * lib functionality.
  *
- * @return (array) an array containing a list of hosts
+ * @return array An array containing a list of hosts.
  */
 function get_host_array() {
 	$total_rows = -1;
@@ -3230,16 +3274,16 @@ function get_host_array() {
 }
 
 /**
- * get_allowed_ajax_hosts - returns a list of hosts in a way that can be easily read through
- *   a callback, in JSON.  The 'term' request variable will include an optional search term.
+ * Returns a list of hosts in a way that can be easily read through a callback, in JSON. The
+ * 'term' request variable will include an optional search term. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (bool)   Include the 'Any' item as the first in the list
- @ @param  (bool)   Include the 'None' item as the first or second in the list
- * @param  (string) SQL Where expression to use to gather the hosts in addition to the 'term'
- *   request variable.
+ * @param bool $include_any Include the 'Any' item as the first in the list.
+ * @param string $include_none SQL Where expression to use to gather the hosts in addition to the
+ *   'term'.
+ * @param string $sql_where Additional SQL WHERE clause to filter the hosts.
  *
- * @return (string) A json array of matching devices upto a limit specified in the system
- *   settings
+ * @return string A json array of matching devices upto a limit specified in the system settings.
  */
 function get_allowed_ajax_hosts($include_any = true, $include_none = true, $sql_where = '') {
 	$user_id = $_SESSION['sess_user_id'];
@@ -3281,16 +3325,17 @@ function get_allowed_ajax_hosts($include_any = true, $include_none = true, $sql_
 }
 
 /**
- * get_allowed_ajax_graph_templates - returns a list of graph_template in a way that can be easily
- *   read through a callback, in JSON.  The 'term' request variable will include an optional search term.
+ * Returns a list of graph_template in a way that can be easily read through a callback, in JSON.
+ * The 'term' request variable will include an optional search term. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (bool)   Include the 'Any' item as the first in the list
- @ @param  (bool)   Include the 'None' item as the first or second in the list
- * @param  (string) SQL Where expression to use to gather the graph templates in addition to the 'term'
- *   request variable.
+ * @param bool $include_any Include the 'Any' item as the first in the list.
+ * @param string $include_none SQL Where expression to use to gather the graph templates in
+ *   addition to the 'term'.
+ * @param string $sql_where Additional SQL WHERE clause conditions.
  *
- * @return (string) A json array of matching graph templates upto a limit specified in the system
- *   settings
+ * @return string A json array of matching graph templates upto a limit specified in the system
+ *   settings.
  */
 function get_allowed_ajax_graph_templates($include_any = true, $include_none = true, $sql_where = '') {
 	$user_id = $_SESSION['sess_user_id'];
@@ -3328,15 +3373,17 @@ function get_allowed_ajax_graph_templates($include_any = true, $include_none = t
 }
 
 /**
- * get_allowed_ajax_graph_items - returns a list of graph items in a way that can be easily
- *   read through a callback, in JSON.  The 'term' request variable will include an optional search term.
+ * Returns a list of graph items in a way that can be easily read through a callback, in JSON. The
+ * 'term' request variable will include an optional search term. @ @param (bool) Include the
+ * 'None' item as the first item in the list. Used as part of Cacti's lib functionality.
  *
- @ @param  (bool)   Include the 'None' item as the first item in the list
- * @param  (string) SQL Where expression to use to gather the hosts in addition to the 'term'
- *   request variable.
+ * @param string $include_none SQL Where expression to use to gather the hosts in addition to the
+ *   'term'.
+ * @param string $sql_where Additional SQL WHERE conditions to filter the graph items. Default is
+ *   an empty string.
  *
- * @return (string) A json array of matching graph items upto a limit specified in the system
- *   settings
+ * @return string A json array of matching graph items upto a limit specified in the system
+ *   settings.
  */
 function get_allowed_ajax_graph_items($include_none = true, $sql_where = '') {
 	$user_id = $_SESSION['sess_user_id'];
@@ -3371,14 +3418,14 @@ function get_allowed_ajax_graph_items($include_none = true, $sql_where = '') {
 }
 
 /**
- * get_allowed_ajax_graph - returns a list of allowed graphs in a way that can be easily
- *   read through a callback, in JSON.  The 'term' request variable will include an optional search term.
+ * Returns a list of allowed graphs in a way that can be easily read through a callback, in JSON.
+ * The 'term' request variable will include an optional search term. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string) SQL Where expression to use to gather the graphs in addition to the 'term'
- *   request variable.
+ * @param string $sql_where SQL Where expression to use to gather the graphs in addition to the
+ *   'term'.
  *
- * @return (string) A json array of matching graphs upto a limit specified in the system
- *   settings
+ * @return string A json array of matching graphs upto a limit specified in the system settings.
  */
 function get_allowed_ajax_graphs($sql_where = '') {
 	$user_id = $_SESSION['sess_user_id'];
@@ -3407,16 +3454,15 @@ function get_allowed_ajax_graphs($sql_where = '') {
 }
 
 /**
- * get_allowed_graph_items - returns a array of allowed graph items in a way that can be easily
- *   use in a table or list.
+ * Returns a array of allowed graph items in a way that can be easily use in a table or list. Used
+ * as part of Cacti's lib functionality.
  *
- * @param  (string) The SQL Where expression to use to gather the graph items
- * @param  (string) The SQL Order clause to use for the sorting of devices
- * @param  (int)    The limit on items to return.  If empty or -1, return all items
- * @param  (int)    The number of rows found, to be returned to the caller
- * @param  (int)    If checking a user, specify the user_id otherwise for the current user leave blank
+ * @param string $sql_where The SQL Where expression to use to gather the graph items.
+ * @param string $sql_order The SQL Order clause to use for the sorting of devices.
+ * @param int $sql_limit The limit on items to return. If empty or -1, return all items.
+ * @param int $user_id The number of rows found, to be returned to the caller.
  *
- * @return (array) An array of permitted graph items
+ * @return array An array of permitted graph items.
  */
 function get_allowed_graph_items($sql_where, $sql_order = 'name', $sql_limit = 20, $user_id = 0) {
 	if (!auth_valid_user($user_id)) {
@@ -3468,9 +3514,10 @@ function get_allowed_graph_items($sql_where, $sql_order = 'name', $sql_limit = 2
 }
 
 /**
- * auth_get_username - returns the login username for the user attempting to login
+ * Returns the login username for the user attempting to login. Used as part of Cacti's lib
+ * functionality.
  *
- * @return (string) the username attempting to login
+ * @return string The username attempting to login.
  */
 function auth_get_username() {
 	$auth_method = read_config_option('auth_method');
@@ -3493,12 +3540,13 @@ function auth_get_username() {
 }
 
 /**
- * auth_checkclear_lockout - checks the lockout status of a user and unlocks if necessary
+ * Checks the lockout status of a user and unlocks if necessary. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string) $username The username of the user to check
- * @param  (int)    $realm The realm of the user to check
+ * @param string $username The username of the user to check.
+ * @param int $realm The realm of the user to check.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function auth_checkclear_lockout($username, $realm) {
 	// Unlock the user account if timing permits
@@ -3538,14 +3586,14 @@ function auth_checkclear_lockout($username, $realm) {
 }
 
 /**
- * auth_process_lockout_check - checks to see if the user is locked out of their account
- *   if there is an error, the globals error and error_msg will be set to notify the caller
- *   that a lockout is present and not to proceed with login.
+ * Checks to see if the user is locked out of their account if there is an error, the globals
+ * error and error_msg will be set to notify the caller that a lockout is present and not to
+ * proceed with login. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $username - The name of the user account
- * @param  (int)    $realm - The logging realm for the user
+ * @param string $username The name of the user account.
+ * @param int $realm The logging realm for the user.
  *
- * @return (bool)   True if locked out, otherwise false
+ * @return bool True if locked out, otherwise false.
  */
 function auth_process_lockout_check($username, $realm) {
 	global $error, $error_msg;
@@ -3576,14 +3624,14 @@ function auth_process_lockout_check($username, $realm) {
 }
 
 /**
- * auth_process_lockout - called when a user login attempt fails to increment or lockout the user
- *   if there is an error, the globals error and error_msg will be set to notify the caller
- *   that a lockout is present and not to proceed with login.
+ * Called when a user login attempt fails to increment or lockout the user if there is an error,
+ * the globals error and error_msg will be set to notify the caller that a lockout is present and
+ * not to proceed with login. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $username - The name of the user account
- * @param  (int)    $realm - The logging realm for the user
+ * @param string $username The name of the user account.
+ * @param int $realm The logging realm for the user.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function auth_process_lockout($username, $realm) {
 	global $error, $error_msg;
@@ -3663,15 +3711,15 @@ function auth_process_lockout($username, $realm) {
 }
 
 /**
- * basic_auth_login_process - login a basic auth account or generate an error
- *   if there is an error, the globals error and error_msg will be set to notify the caller
- *   that a lockout is present and not to proceed with login.  This function will also
- *   exit and return html to the display to notify the user of critical errors.
+ * Login a basic auth account or generate an error if there is an error, the globals error and
+ * error_msg will be set to notify the caller that a lockout is present and not to proceed with
+ * login. This function will also exit and return html to the display to notify the user of
+ * critical errors. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $username The user to process
+ * @param string $username The user to process.
  *
- * @return (array|void) $user The valid user, an empty array if the user must be created
- *   or void in the case of an exit condition
+ * @return array|void $user The valid user, an empty array if the user must be created or void in
+ *   the case of an exit condition.
  */
 function basic_auth_login_process($username) {
 	global $error, $error_msg;
@@ -3704,13 +3752,13 @@ function basic_auth_login_process($username) {
 }
 
 /**
- * local_auth_login_process - login a local account or generate an error
- *   if there is an error, the globals error and error_msg will be set to notify the caller
- *   that error and not to proceed with login.
+ * Login a local account or generate an error if there is an error, the globals error and
+ * error_msg will be set to notify the caller that error and not to proceed with login. Used as
+ * part of Cacti's lib functionality.
  *
- * @param  (string) $username - The user to process
+ * @param string $username The user to process.
  *
- * @return (array)  $user - The valid user information, or empty array if user must be created
+ * @return array $user - The valid user information, or empty array if user must be created.
  */
 function local_auth_login_process($username) {
 	$user = array();
@@ -3719,37 +3767,29 @@ function local_auth_login_process($username) {
 		$user = secpass_login_process($username);
 
 		/**
-		 * If the password needs to be rehashed for security purposes,
-		 * do that now.
+		 * secpass_login_process() is the single password-verification path
+		 * (real hash for an existing user, dummy hash otherwise), so a non-empty
+		 * $user already means the password verified. Re-fetch the full row and
+		 * rehash if needed, but do NOT verify again: a second verify here made an
+		 * existing account cost two bcrypt operations versus one for an unknown
+		 * user, a login-timing enumeration oracle (GHSA-p3rg-7pc3-2h86).
 		 */
-		$stored_pass = db_fetch_cell_prepared('SELECT password
-			FROM user_auth
-			WHERE username = ?
-			AND realm = 0',
-			array($username));
+		if (cacti_sizeof($user)) {
+			$user = db_fetch_row_prepared('SELECT *
+				FROM user_auth
+				WHERE username = ?
+				AND realm = 0',
+				array($username));
 
-		if ($stored_pass != '') {
-			$password = get_nfilter_request_var('login_password');
+			$stored_pass = $user['password'];
 
-			$valid = compat_password_verify($password, $stored_pass);
-
-			cacti_log("DEBUG: User '" . $username . "' password for rehash is " . ($valid ? '':'in') . 'valid', false, 'AUTH', POLLER_VERBOSITY_DEBUG);
-
-			if ($valid) {
-				$user = db_fetch_row_prepared('SELECT *
-					FROM user_auth
-					WHERE username = ?
-					AND realm = 0',
-					array($username));
-
-				if (compat_password_needs_rehash($stored_pass, PASSWORD_DEFAULT)) {
-					$password = compat_password_hash($password, PASSWORD_DEFAULT);
-					db_check_password_length();
-					db_execute_prepared('UPDATE user_auth
-						SET password = ?
-						WHERE username = ?',
-						array($password, $username));
-				}
+			if ($stored_pass != '' && compat_password_needs_rehash($stored_pass, PASSWORD_DEFAULT)) {
+				$password = compat_password_hash(get_nfilter_request_var('login_password'), PASSWORD_DEFAULT);
+				db_check_password_length();
+				db_execute_prepared('UPDATE user_auth
+					SET password = ?
+					WHERE username = ?',
+					array($password, $username));
 			}
 		}
 	}
@@ -3758,13 +3798,13 @@ function local_auth_login_process($username) {
 }
 
 /**
- * ldap_login_process - login to an LDAP account or generate an error
- *   if there is an error, the globals error and error_msg will be set to notify the caller
- *   that error and not to proceed with login.
+ * Login to an LDAP account or generate an error if there is an error, the globals error and
+ * error_msg will be set to notify the caller that error and not to proceed with login. Used as
+ * part of Cacti's lib functionality.
  *
- * @param  (string) $username - The user to process
+ * @param string $username The user to process.
  *
- * @return (array)  $user - The valid user information, or empty array if user must be created
+ * @return array $user - The valid user information, or empty array if user must be created.
  */
 function ldap_login_process($username) {
 	global $error, $error_msg;
@@ -3842,18 +3882,18 @@ function ldap_login_process($username) {
 }
 
 /**
- * domains_login_process - login to an LDAP domain account or generate an error
- *   if there is an error, the globals error and error_msg will be set to notify the caller
- *   that error and not to proceed with login.
+ * Login to an LDAP domain account or generate an error if there is an error, the globals error
+ * and error_msg will be set to notify the caller that error and not to proceed with login. Used
+ * as part of Cacti's lib functionality.
  *
- * @param  (string) $username - The user to process
+ * @param string $username The user to process.
  *
- * @return (array)  $user - The valid user information, or empty array if user must be created
+ * @return array $user - The valid user information, or empty array if user must be created.
  */
 function domains_login_process($username) {
 	global $realm, $error, $error_msg;
 
-	$realm    = get_nfilter_request_var('realm');
+	$realm    = get_filter_request_var('realm');
 	$password = get_nfilter_request_var('login_password');
 
 	if ($username == '') {
@@ -3861,6 +3901,15 @@ function domains_login_process($username) {
 		$error_msg = __('Access Denied!  Login Failed.');
 
 		cacti_log('LOGIN FAILED: Empty Domains Username provided', false, 'AUTH');
+
+		return array();
+	}
+
+	if (!array_key_exists($realm, get_auth_realms(true))) {
+		$error     = true;
+		$error_msg = __('Access Denied!  Login Failed.');
+
+		cacti_log(sprintf("LOGIN FAILED: Unknown Login Realm '%s' provided for user '%s' from IP address %s", $realm, $username, get_client_addr()), false, 'AUTH');
 
 		return array();
 	}
@@ -3873,25 +3922,23 @@ function domains_login_process($username) {
 
 	$user = array();
 
-	// realm >= 3: domain realms start at 3; > 3 allowed realm=3 to skip LDAP bind (GHSA-3jj2-v5ch-wmq5)
-	if ($realm >= 3 && $password != '') {
+	if ($realm >= 1000 && $password != '') {
 		/* get user DN */
 		$ldap_dn_search_response = domains_ldap_search_dn($username, $realm);
-		if ($ldap_dn_search_response['error_num'] == '0') {
+		if (is_array($ldap_dn_search_response) && $ldap_dn_search_response['error_num'] == '0') {
 			$ldap_dn = $ldap_dn_search_response['dn'];
 		} else {
-			/* error searching */
 			$error     = true;
-			$error_msg = __('LDAP Search Error: %s', $ldap_dn_search_response['error_text']);
+			$error_msg = __('Access Denied!  Login Failed.');
 
-			cacti_log('LOGIN FAILED: LDAP Error: ' . $ldap_dn_search_response['error_text'], false, 'AUTH');
+			cacti_log('LOGIN FAILED: LDAP Error: ' . (is_array($ldap_dn_search_response) ? $ldap_dn_search_response['error_text'] : 'No LDAP configuration for realm'), false, 'AUTH');
 		}
 
 		if (!$error) {
 			/* auth user with LDAP */
 			$ldap_auth_response = domains_ldap_auth($username, $password, $ldap_dn, $realm);
 
-			if ($ldap_auth_response['error_num'] == '0') {
+			if (is_array($ldap_auth_response) && $ldap_auth_response['error_num'] == '0') {
 				/* User ok */
 				$domain_name = db_fetch_cell_prepared('SELECT domain_name
 					FROM user_domains
@@ -3959,7 +4006,7 @@ function domains_login_process($username) {
 
 								user_copy($user_template['username'], $username, 0, $realm, false, $data_override);
 							} else {
-								cacti_log('LOGIN: fields not found ' . $ldap_cn_search_response[0] . 'code: ' . $ldap_cn_search_response['error_num'], false, 'AUTH');
+								cacti_log('LOGIN: fields not found code: ' . (is_array($ldap_cn_search_response) ? $ldap_cn_search_response['error_num'] : ''), false, 'AUTH');
 								user_copy($user_template['username'], $username, 0, $realm);
 							}
 						} else {
@@ -3980,17 +4027,20 @@ function domains_login_process($username) {
 						cacti_log("LOGIN FAILED: Template user id '" . $template_user . "' does not exist.", false, 'AUTH');
 					}
 				}
+
+				if (!$error && !cacti_sizeof($user)) {
+					$error     = true;
+					$error_msg = __('Access Denied!  Domain template is not configured.  Please contact your Administrator.');
+
+					cacti_log("LOGIN FAILED: LDAP user '" . $username . "' authenticated but the domain has no template and no existing account.", false, 'AUTH');
+				}
 			} else {
-				/* error */
 				$error     = true;
-				$error_msg = __('Access Denied!  LDAP Error: %s', $ldap_auth_response['error_text']);
+				$error_msg = __('Access Denied!  Login Failed.');
 
-				cacti_log('LOGIN FAILED: LDAP Error: ' . $ldap_auth_response['error_text'], false, 'AUTH');
+				cacti_log('LOGIN FAILED: LDAP Error: ' . (is_array($ldap_auth_response) ? $ldap_auth_response['error_text'] : 'No LDAP configuration for realm'), false, 'AUTH');
 
-				/* error_text is a string; the correct field for the numeric
-				 * bind-failure code is error_num (mirrors the check in
-				 * ldap_login_process at line ~3818).  GHSA-2px8-gvmq-85f3 */
-				if ($ldap_auth_response['error_num'] == 1) {
+				if (is_array($ldap_auth_response) && $ldap_auth_response['error_num'] == 1) {
 					auth_process_lockout($username, $realm);
 				}
 			}
@@ -4003,20 +4053,25 @@ function domains_login_process($username) {
 		cacti_log(sprintf('LOGIN FAILED: LDAP No password provided for user %s', $username), false, 'AUTH');
 
 		auth_process_lockout($username, $realm);
+	} else {
+		$error     = true;
+		$error_msg = __('Access Denied!  Login Failed.');
+
+		cacti_log(sprintf("LOGIN FAILED: Login Realm '%s' is not an LDAP domain for user '%s' from IP address %s", $realm, $username, get_client_addr()), false, 'AUTH');
 	}
 
 	return $user;
 }
 
 /**
- * domains_ldap_auth - authentications a LDAP domain login
+ * Authentications a LDAP domain login. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $username  - The user to process
- * @param  (string) $password  - The users password
- * @param  (string) $dn        - The domain name
- * @param  (int)    $realm     - The LDAP Realm number
+ * @param string $username The user to process.
+ * @param string $password The users password.
+ * @param string $dn The domain name.
+ * @param int $realm The LDAP Realm number.
  *
- * @return (array)  $response - The ldap response of false on a general error
+ * @return array $response - The ldap response of false on a general error.
  */
 function domains_ldap_auth($username, $password = '', $dn = '', $realm = 0) {
 	$ldap = new Ldap;
@@ -4081,12 +4136,12 @@ function domains_ldap_auth($username, $password = '', $dn = '', $realm = 0) {
 }
 
 /**
- * domains_ldap_search_dn - searches the user dn for existence
+ * Searches the user dn for existence. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $username  - The user to process
- * @param  (int)    $realm     - The LDAP Realm number
+ * @param string $username The user to process.
+ * @param int $realm The LDAP Realm number.
  *
- * @return (array)  $response - The ldap response, or false on general error
+ * @return array $response - The ldap response, or false on general error.
  */
 function domains_ldap_search_dn($username, $realm) {
 	$ldap = new Ldap;
@@ -4144,6 +4199,17 @@ function domains_ldap_search_dn($username, $realm) {
 	}
 }
 
+/**
+ * Searches for a common name (CN) in an LDAP directory based on the provided username and realm.
+ * Used as part of Cacti's lib functionality.
+ *
+ * @param string $username The username to search for in the LDAP directory.
+ * @param array $cn An array of common names (CN) to search for.
+ * @param int $realm The realm ID used to fetch LDAP domain configuration from the database.
+ *
+ * @return mixed Returns an array with the LDAP response if successful, or false if the search
+ *   fails.
+ */
 function domains_ldap_search_cn($username, $cn = array(), $realm = 0) {
 	$ldap = new Ldap;
 
@@ -4203,14 +4269,14 @@ function domains_ldap_search_cn($username, $cn = array(), $realm = 0) {
 }
 
 /**
- * secpass_login_process - process a local login checking for triggers
- *   such as those that would force a password check and take the appropriate action.
- *   if there is an error, the globals error and error_msg will be set to notify the caller
- *   that error and not to proceed with login.
+ * Process a local login checking for triggers such as those that would force a password check and
+ * take the appropriate action. if there is an error, the globals error and error_msg will be set
+ * to notify the caller that error and not to proceed with login. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string) $username  - The user to process
+ * @param string $username The user to process.
  *
- * @return (array)  $user - The login user or an empty array if the user does not exist
+ * @return array $user - The login user or an empty array if the user does not exist.
  */
 function secpass_login_process($username) {
 	global $error, $error_msg;
@@ -4248,6 +4314,12 @@ function secpass_login_process($username) {
 
 	if (cacti_sizeof($user)) {
 		if ($user['enabled'] != 'on') {
+			if (trim($password) != '') {
+				// Match the enabled/unknown paths' single verify so a disabled
+				// account is not distinguishable by login timing (GHSA-p3rg-7pc3-2h86).
+				compat_password_verify($password, '$2y$10$qgRPCKzfZe/81cu3L9PMA.zjHKgXHc6iRfsedEe4NmSMbXrod1uEq');
+			}
+
 			$error     = true;
 			$error_msg = __('Access Denied!  Login Failed.');
 
@@ -4281,6 +4353,12 @@ function secpass_login_process($username) {
 			return array();
 		}
 	} else {
+		if (trim($password) != '') {
+			// Dummy verify so a non-existent account costs the same as a real one,
+			// closing a username-enumeration login-timing side channel (GHSA-p3rg-7pc3-2h86)
+			compat_password_verify($password, '$2y$10$qgRPCKzfZe/81cu3L9PMA.zjHKgXHc6iRfsedEe4NmSMbXrod1uEq');
+		}
+
 		/* error */
 		$error     = true;
 		$error_msg = __('Access Denied!  Login Failed.');
@@ -4326,11 +4404,12 @@ function secpass_login_process($username) {
 }
 
 /**
- * secpass_check_pass - Validate a given password for various password rules
+ * Validate a given password for various password rules. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string) $password - The user password
+ * @param string $password The user password.
  *
- * @return (string) Either 'ok', or an error message to present to the user
+ * @return string Either 'ok', or an error message to present to the user.
  */
 function secpass_check_pass($password) {
 	$minlen = read_config_option('secpass_minlen');
@@ -4358,12 +4437,12 @@ function secpass_check_pass($password) {
 }
 
 /**
- * secpass_check_history - Checks for password reuse for local accounts
+ * Checks for password reuse for local accounts. Used as part of Cacti's lib functionality.
  *
- * @param  (int)    $id - The user id to check
- * @param  (string) $password  - The user password
+ * @param int $id The user id to check.
+ * @param string $password The user password.
  *
- * @return (bool)   True if the user password provided meets history rules
+ * @return bool True if the user password provided meets history rules.
  */
 function secpass_check_history($id, $password) {
 	$history = intval(read_config_option('secpass_history'));
@@ -4399,10 +4478,10 @@ function secpass_check_history($id, $password) {
 }
 
 /**
- * rsa_check_keypair - Checks that Cacti ras_public_key is present.  If not
- *   it will insert the information into the Cacti database.
+ * Checks that Cacti ras_public_key is present. If not it will insert the information into the
+ * Cacti database. Used as part of Cacti's lib functionality.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function rsa_check_keypair() {
 	global $config;
@@ -4421,12 +4500,12 @@ function rsa_check_keypair() {
 }
 
 /**
- * Expires persistent authentication tokens and reloads permissions for users
- * who are members of the changed group.
+ * Expires persistent authentication tokens and reloads permissions for users who are members of
+ * the changed group. Used as part of Cacti's lib functionality.
  *
  * @param int $group_id ID of the group whose user permissions changed.
  *
- * @return void
+ * @return void No value is returned.
  */
 function reset_group_perms($group_id) {
 	$users = array_rekey(db_fetch_assoc_prepared('SELECT user_id
@@ -4450,11 +4529,12 @@ function reset_group_perms($group_id) {
 }
 
 /**
- * Expires persistent authentication tokens and reloads permissions for a user.
+ * Expires persistent authentication tokens and reloads permissions for a user. Used as part of
+ * Cacti's lib functionality.
  *
  * @param int $user_id ID of the user whose permissions changed.
  *
- * @return void
+ * @return void No value is returned.
  */
 function reset_user_perms($user_id) {
 	db_execute_prepared('DELETE FROM user_auth_cache WHERE user_id = ?', array($user_id));
@@ -4473,11 +4553,12 @@ function reset_user_perms($user_id) {
 }
 
 /**
- * is_user_perms_valid - checks to see if the admin has changed users permissions
+ * Checks to see if the admin has changed users permissions. Used as part of Cacti's lib
+ * functionality.
  *
- *  @param  (int)  $user_id - the id of the current user
+ * @param int $user_id The id of the current user.
  *
- *  @return (bool) true if still valid, false otherwise
+ * @return bool True if still valid, false otherwise.
  */
 function is_user_perms_valid($user_id) {
 	global $config;
@@ -4508,14 +4589,13 @@ function is_user_perms_valid($user_id) {
 }
 
 /**
- * compat_password_verify - if the secure function exists, verify against that
- *   first.  If that checks fails or does not exist, check against older md5
- *   version
+ * If the secure function exists, verify against that first. If that checks fails or does not
+ * exist, check against older md5 version. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $password - password to verify
- * @param  (string) $hash     - current password hash
+ * @param string $password Password to verify.
+ * @param string $hash Current password hash.
  *
- * @return (bool)   true if password hash matches, false otherwise
+ * @return bool True if password hash matches, false otherwise.
  */
 function compat_password_verify($password, $hash) {
 	if (function_exists('password_verify')) {
@@ -4530,14 +4610,13 @@ function compat_password_verify($password, $hash) {
 }
 
 /**
- * compat_hash_equals - compatibility wrapper for hash_equals
- *   Uses native hash_equals when available, otherwise falls back
- *   to a constant-time string comparison.
+ * Compatibility wrapper for hash_equals Uses native hash_equals when available, otherwise falls
+ * back to a constant-time string comparison. Used as part of Cacti's lib functionality.
  *
- * @param (string) $known_string - expected string
- * @param (string) $user_string  - user-provided string
+ * @param string $known_string Expected string.
+ * @param string $user_string User-provided string.
  *
- * @return (bool) true if strings are identical, false otherwise
+ * @return bool True if strings are identical, false otherwise.
  */
 function compat_hash_equals($known_string, $user_string) {
 	if (function_exists('hash_equals')) {
@@ -4566,13 +4645,15 @@ function compat_hash_equals($known_string, $user_string) {
 }
 
 /**
- * compat_password_hash - if the secure function exists, hash using that.
- *   If that does not exist, hash older md5 function instead
+ * If the secure function exists, hash using that. If that does not exist, hash older md5 function
+ * instead. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $password - password to hash
- * @param  (string) $algo     - algorithm to use (PASSWORD_DEFAULT)
+ * @param string $password Password to hash.
+ * @param string $algo Algorithm to use (PASSWORD_DEFAULT).
+ * @param array $options Optional. An associative array of options. Refer to the `password_hash`
+ *   documentation for supported options.
  *
- * @return (bool)   true if password hash matches, false otherwise
+ * @return bool True if password hash matches, false otherwise.
  */
 function compat_password_hash($password, $algo, $options = array()) {
 	if (function_exists('password_hash')) {
@@ -4586,14 +4667,14 @@ function compat_password_hash($password, $algo, $options = array()) {
 }
 
 /**
- * compat_password_needs_rehash - if the secure function exists, check hash
- *   using that. If that does not exist, return false as md5 doesn't need a
- *   rehash
+ * If the secure function exists, check hash using that. If that does not exist, return false as
+ * md5 doesn't need a rehash. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $password - password to hash
- * @param  (string) $algo     - algorithm to use (PASSWORD_DEFAULT)
+ * @param string $password Password to hash.
+ * @param string $algo Algorithm to use (PASSWORD_DEFAULT).
+ * @param array $options (optional) An associative array of options.
  *
- * @return (bool)   true if password hash needs changing, false otherwise
+ * @return bool True if password hash needs changing, false otherwise.
  */
 function compat_password_needs_rehash($password, $algo, $options = array()) {
 	if (function_exists('password_needs_rehash')) {
@@ -4607,11 +4688,12 @@ function compat_password_needs_rehash($password, $algo, $options = array()) {
 }
 
 /**
- * auth_user_has_access - Verify that the user account has some access to cacti
+ * Verify that the user account has some access to cacti. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (int)  $user - The user id of the account to check
+ * @param int $user The user id of the account to check.
  *
- * @return (bool) True if the user has access false otherwise
+ * @return bool True if the user has access false otherwise.
  */
 function auth_user_has_access($user) {
 	$access = false;
@@ -4663,12 +4745,12 @@ function auth_user_has_access($user) {
 }
 
 /**
- * auth_display_custom_error_message - displays a custom error message to the browser that looks like
- *   the pre-defined error messages
+ * Displays a custom error message to the browser that looks like the pre-defined error messages.
+ * Used as part of Cacti's lib functionality.
  *
- * @param  (string) $message - the actual text of the error message to display
+ * @param string $message The actual text of the error message to display.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function auth_display_custom_error_message($message) {
 	global $config;
@@ -4703,11 +4785,12 @@ function auth_display_custom_error_message($message) {
 }
 
 /**
- * auth_login_redirect - provide default page re-direction when a user first logs in.
+ * Provide default page re-direction when a user first logs in. Used as part of Cacti's lib
+ * functionality.
  *
- * @param  (string|array) $login_opts - optional array of user details
+ * @param string|array $login_opts Optional array of user details.
  *
- * @return (void)
+ * @return void No value is returned.
  */
 function auth_login_redirect($login_opts = '') {
 	global $config;
@@ -4808,11 +4891,11 @@ function auth_login_redirect($login_opts = '') {
 }
 
 /**
- * auth_basename - provides a URL-knowledgeable basename function
+ * Provides a URL-knowledgeable basename function. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $referer - a URL that will included a basename
+ * @param string $referer A URL that will included a basename.
  *
- * @return (string) the file name without the arguments
+ * @return string The file name without the arguments.
  */
 function auth_basename($referer) {
 	$parts = explode('?', $referer);
@@ -4821,16 +4904,15 @@ function auth_basename($referer) {
 }
 
 /**
- * auth_login_create_user_from_template - creates a new user account from a template account
- *   if there is an error that would block login, the function set's the globals
- *   error and error_msg to inform the caller not to proceed with the login.
- *   in special cases, such as basic auth, the function will print out a custom
- *   error message and exit.
+ * Creates a new user account from a template account if there is an error that would block login,
+ * the function set's the globals error and error_msg to inform the caller not to proceed with the
+ * login. in special cases, such as basic auth, the function will print out a custom error message
+ * and exit. Used as part of Cacti's lib functionality.
  *
- * @param  (string) $username - The username to use for the copy
- * @param  (int)    $realm - The login realm to use for the copy
+ * @param string $username The username to use for the copy.
+ * @param int $realm The login realm to use for the copy.
  *
- * @return (array|void)  The copied new user account details or void on exit
+ * @return array|void The copied new user account details or void on exit.
  */
 function auth_login_create_user_from_template($username, $realm) {
 	global $error, $error_msg;
@@ -4908,109 +4990,33 @@ function auth_login_create_user_from_template($username, $realm) {
 }
 
 /**
- * check_reset_no_authentication - Attempts to switch Cacti from No Authentication to Local
- *   authentication, or generate an error on failure through the globals error, and error_msg.
+ * Attempts to switch Cacti from No Authentication to Local authentication, or generate an error
+ * on failure through the globals error, and error_msg. Used as part of Cacti's lib functionality.
  *
- * @param  (int)  $auth_method - The current auth method
+ * @param int $auth_method The current auth method.
  *
- * @return (bool) Returns false on failure to set user account, otherwise redirects
+ * @return bool Returns false on failure to set user account, otherwise redirects.
  */
 function check_reset_no_authentication($auth_method) {
-	global $config, $error, $error_msg;
-
+	// No Authentication mode has been removed. If a legacy configuration still
+	// has auth_method set to 0, migrate it to Builtin Authentication without
+	// granting a session or clearing the admin password, so a normal login is
+	// required (GHSA-69vw-qxxv-p8w2).
 	if ($auth_method == 0) {
-		$admin_id = db_execute_prepared('SELECT id
-			FROM user_auth
-			WHERE id = ?',
-			array(read_config_option('admin_user')));
-
-		cacti_log('Admin User (' . read_config_option('admin_user') . ' vs ' . $admin_id . ')', true, 'AUTH_NONE', POLLER_VERBOSITY_DEVDBG);
-
-		if (!$admin_id) {
-			$admin_sql_query = 'SELECT TOP 1 id FROM (
-				SELECT ua.id
-				FROM user_auth AS ua
-				INNER JOIN user_auth_realm AS uar
-				ON uar.user_id = ua.id
-				WHERE uar.realm_id = ?';
-
-			$admin_sql_params = array(15);
-
-			if (db_table_exists('user_auth_group_realm')) {
-				$admin_sql_query .= '
-				UNION
-				SELECT ua.id
-				FROM user_auth AS ua
-				INNER JOIN user_auth_group_members AS uagm
-				ON uagm.user_id = ua.id
-				INNER JOIN user_auth_group AS uag
-				ON uag.id = uagm.group_id
-				INNER JOIN user_auth_group_realm AS uagr
-				ON uagr.group_id=uag.group_id
-				WHERE uag.enabled="on" AND ua.enabled="on"
-				AND uagr.realm_id = ?';
-
-				$admin_sql_params[] = 15;
-			}
-
-			$admin_sql_query .= '
-				) AS id';
-
-			cacti_log('SQL query ' . $admin_sql_query, true, 'AUTH_NONE', POLLER_VERBOSITY_DEVDBG);
-			cacti_log('SQL param ' . implode(',', $admin_sql_params), true, 'AUTH_NONE', POLLER_VERBOSITY_DEVDBG);
-
-			$admin_id = db_fetch_cell_prepared($admin_sql_query, $admin_sql_params);
-
-			cacti_log('SQL result ' . $admin_id, true, 'AUTH_NONE', POLLER_VERBOSITY_DEVDBG);
-		}
-
-		if (!$admin_id) {
-			$admin_id = db_fetch_cell('SELECT id FROM user_auth WHERE username = \'admin\'');
-
-			cacti_log('Final attempt ' . $admin_id, true, 'AUTH_NONE', POLLER_VERBOSITY_DEVDBG);
-		}
-
-		if (!$admin_id) {
-			$error     = true;
-			$error_msg = __('Authentication was previously not set.  Attempted to set to Local Authentication, but no Administrative account was found.');
-
-			return false;
-		}
-
-		// Authentication method is currently set to none
-		// lets switch this to basic and allow setting of
-		// a password.
-		db_execute_prepared("UPDATE user_auth SET
-			password = '',
-			must_change_password = 'on',
-			password_change = 'on'
-			WHERE id = ?",
-			array($admin_id));
-
-		$auth_method = 1;
-		set_config_option('auth_method', $auth_method, true);
-
-		$_SESSION['sess_user_id'] = $admin_id;
-		$_SESSION['sess_change_password'] = true;
-		header ('Location: ' . $config['url_path'] . 'auth_changepassword.php?action=force&ref=' . urlencode(validate_redirect_url(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'index.php')));
-		exit;
+		set_config_option('auth_method', 1, true);
 	}
 }
 
 /**
- * Perform a safe authentication state transition.
+ * Perform a safe authentication state transition. Regenerates the session ID to prevent fixation,
+ * checks the lockout table, rotates the remember-me cookie if present, and logs the transition
+ * reason for audit purposes. Call this at privilege-level changes: login, role switch, password
+ * change, or sudo-style elevation. Used as part of Cacti's lib functionality.
  *
- * Regenerates the session ID to prevent fixation, checks the
- * lockout table, rotates the remember-me cookie if present,
- * and logs the transition reason for audit purposes.
+ * @param int $user_id The user ID undergoing the transition.
+ * @param string $reason Short label for audit log (e.g. 'login', 'role_switch').
  *
- * Call this at privilege-level changes: login, role switch,
- * password change, or sudo-style elevation.
- *
- * @param  int    $user_id The user ID undergoing the transition
- * @param  string $reason  Short label for audit log (e.g. 'login', 'role_switch')
- *
- * @return bool True if the transition succeeded, false if the user is locked out
+ * @return bool True if the transition succeeded, false if the user is locked out.
  */
 function cacti_auth_transition($user_id, $reason = 'login') {
 	/* check lockout status before allowing transition */
@@ -5041,15 +5047,13 @@ function cacti_auth_transition($user_id, $reason = 'login') {
 }
 
 /**
- * cacti_csrf_rotate - Rotate CSRF token by regenerating the session.
+ * Rotate CSRF token by regenerating the session. Call at privilege boundaries (login, role
+ * change, sensitive form post) to prevent session fixation and CSRF token reuse. Also refreshes
+ * the remember-me cookie when present. Used as part of Cacti's lib functionality.
  *
- * Call at privilege boundaries (login, role change, sensitive form post)
- * to prevent session fixation and CSRF token reuse. Also refreshes the
- * remember-me cookie when present.
+ * @param string $reason Reason for the rotation (logged at medium verbosity).
  *
- * @param  string $reason  Reason for the rotation (logged at medium verbosity)
- *
- * @return void
+ * @return void No value is returned.
  */
 function cacti_csrf_rotate($reason = 'boundary') {
 	cacti_session_regenerate();
@@ -5070,30 +5074,21 @@ function cacti_csrf_rotate($reason = 'boundary') {
 
 
 /**
- * cacti_authorize_resource - returns true iff the given user has ownership
- * or admin-level access to a specific resource row.
+ * Returns true iff the given user has ownership or admin-level access to a specific resource row.
+ * Root-cause mitigation for IDOR (Insecure Direct Object Reference) bugs: endpoints that accept a
+ * resource ID from the request and act on it without checking that the current user is allowed to
+ * touch that row. Applies to: GHSA-8p2f-6jvx-j75j (Reports IDOR — any authenticated user can
+ * modify reports owned by other users) The helper is intentionally strict: - unknown
+ * resource_type returns false (fail closed) - a user who is not the owner AND not a system admin
+ * returns false - missing resource row returns false (don't leak existence) Extend by adding a
+ * new case to the resource-type switch below; the same ownership predicate then applies to every
+ * endpoint that calls this helper. Used as part of Cacti's lib functionality.
  *
- * Root-cause mitigation for IDOR (Insecure Direct Object Reference) bugs:
- * endpoints that accept a resource ID from the request and act on it
- * without checking that the current user is allowed to touch that row.
+ * @param int $user_id The id of the acting user (from $_SESSION[SESS_USER_ID]).
+ * @param int $resource_id The id of the row being acted on.
+ * @param string $resource_type A short string naming the resource (e.g. 'reports').
  *
- * Applies to:
- *   GHSA-8p2f-6jvx-j75j (Reports IDOR — any authenticated user can modify
- *                        reports owned by other users)
- *
- * The helper is intentionally strict:
- *   - unknown resource_type returns false (fail closed)
- *   - a user who is not the owner AND not a system admin returns false
- *   - missing resource row returns false (don't leak existence)
- *
- * Extend by adding a new case to the resource-type switch below; the same
- * ownership predicate then applies to every endpoint that calls this helper.
- *
- * @param int    $user_id        The id of the acting user (from $_SESSION[SESS_USER_ID])
- * @param int    $resource_id    The id of the row being acted on
- * @param string $resource_type  A short string naming the resource (e.g. 'reports')
- *
- * @return bool  true if the user may act on the resource, false otherwise
+ * @return bool True if the user may act on the resource, false otherwise.
  */
 function cacti_authorize_resource($user_id, $resource_id, $resource_type) {
 	$user_id     = (int) $user_id;
@@ -5159,12 +5154,15 @@ function cacti_authorize_resource($user_id, $resource_id, $resource_type) {
 }
 
 /**
- * cacti_authorize_has_realm - returns true iff the user is assigned the
- * given realm_id through user_auth_realm or via group membership.
+ * Returns true iff the user is assigned the given realm_id through user_auth_realm or via group
+ * membership. Helper for cacti_authorize_resource to express "admins of this resource class
+ * bypass ownership". Realm ids are the fixed values in user_auth_realm_subrealm (21 = reports, 1
+ * = system admin, etc). Used as part of Cacti's lib functionality.
  *
- * Helper for cacti_authorize_resource to express "admins of this resource
- * class bypass ownership". Realm ids are the fixed values in
- * user_auth_realm_subrealm (21 = reports, 1 = system admin, etc).
+ * @param mixed $user_id The user ID.
+ * @param mixed $realm_id The realm ID.
+ *
+ * @return mixed The result of the operation, or false on failure.
  */
 function cacti_authorize_has_realm($user_id, $realm_id) {
 	static $realm_cache = array();
@@ -5198,16 +5196,14 @@ function cacti_authorize_has_realm($user_id, $realm_id) {
 }
 
 /**
- * cacti_authorize_is_admin - returns true iff the user holds the system
- * admin realm (realm 1 in Cacti's user_auth_realm table).
+ * Returns true iff the user holds the system admin realm (realm 1 in Cacti's user_auth_realm
+ * table). Cached per-request to avoid hammering the DB on hot paths. Intentionally a private
+ * helper — callers should use cacti_authorize_resource() which consults this internally. Used
+ * as part of Cacti's lib functionality.
  *
- * Cached per-request to avoid hammering the DB on hot paths. Intentionally
- * a private helper — callers should use cacti_authorize_resource() which
- * consults this internally.
+ * @param int $user_id The user ID.
  *
- * @param int $user_id
- *
- * @return bool
+ * @return mixed Bool.
  */
 function cacti_authorize_is_admin($user_id) {
 	static $admin_cache = array();

@@ -56,14 +56,18 @@ switch (get_request_var('action')) {
 		break;
 }
 
-/** draw_color_template_items_list 	- draws a nicely formatted list of color items for display
- *   								  on an edit form
- * @param array $item_list 			- an array representing the list of color items. this array should
- *   								  come directly from the output of db_fetch_assoc()
- * @param string $filename 			- the filename to use when referencing any external url
- * @param string $url_data 			- any extra GET url information to pass on when referencing any
- *   								  external url
- * @param bool $disable_controls 	- whether to hide all edit/delete functionality on this form
+/**
+ * Draws a nicely formatted list of color items for display on an edit form. Used as part of
+ * Cacti's color templates functionality.
+ *
+ * @param array $item_list An array representing the list of color items. this array should come
+ *   directly from the output of db_fetch_assoc().
+ * @param string $filename The filename to use when referencing any external url.
+ * @param string $url_data Any extra GET url information to pass on when referencing any external
+ *   url.
+ * @param bool $disable_controls Whether to hide all edit/delete functionality on this form.
+ *
+ * @return void No value is returned.
  */
 function draw_color_template_items_list($item_list, $filename, $url_data, $disable_controls) {
 	global $config;
@@ -108,13 +112,13 @@ function draw_color_template_items_list($item_list, $filename, $url_data, $disab
 
 				if (read_config_option('drag_and_drop') == '') {
 					if ($i < $total_items && $total_items > 1) {
-						echo '<a class="pic fa fa-caret-down moveArrow" href="' . html_escape('color_templates_items.php?action=item_movedown&color_template_item_id=' . $item['color_template_item_id'] . '&color_template_id=' . $item['color_template_id']) . '" title="' . __esc('Move Down') . '"></a>';
+						echo '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="#" data-url="' . html_escape('color_templates_items.php?action=item_movedown&color_template_item_id=' . $item['color_template_item_id'] . '&color_template_id=' . $item['color_template_id']) . '" title="' . __esc('Move Down') . '"></a>';
 					} else {
 						echo '<span class="moveArrowNone"></span>';
 					}
 
 					if ($i > 1 && $i <= $total_items) {
-						echo '<a class="pic fa fa-caret-up moveArrow" href="' . html_escape('color_templates_items.php?action=item_moveup&color_template_item_id=' . $item['color_template_item_id'] . '&color_template_id=' . $item['color_template_id']) . '" title="' . __esc('Move Up') . '"></a>';
+						echo '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="#" data-url="' . html_escape('color_templates_items.php?action=item_moveup&color_template_item_id=' . $item['color_template_item_id'] . '&color_template_id=' . $item['color_template_id']) . '" title="' . __esc('Move Up') . '"></a>';
 					} else {
 						echo '<span class="moveArrowNone"></span>';
 					}
@@ -138,7 +142,10 @@ function draw_color_template_items_list($item_list, $filename, $url_data, $disab
     The Save Function
    -------------------------- */
 /**
- * aggregate_color_form_save	the save function
+ * Aggregate_color_form_save the save function. Used as part of Cacti's color templates
+ * functionality.
+ *
+ * @return void No value is returned.
  */
 function aggregate_color_form_save() {
 	if (isset_request_var('save_component_color')) {
@@ -172,7 +179,10 @@ function aggregate_color_form_save() {
     The 'actions' function
    ------------------------ */
 /**
- * aggregate_color_form_actions		the action function
+ * Aggregate_color_form_actions the action function. Used as part of Cacti's color templates
+ * functionality.
+ *
+ * @return void No value is returned.
  */
 function aggregate_color_form_actions() {
 	global $aggregate_actions, $config;
@@ -286,7 +296,10 @@ function aggregate_color_form_actions() {
 }
 
 /**
- * aggregate_color_item		show all color template items
+ * Aggregate_color_item show all color template items. Used as part of Cacti's color templates
+ * functionality.
+ *
+ * @return void No value is returned.
  */
 function aggregate_color_item() {
 	global $config;
@@ -371,7 +384,10 @@ function aggregate_color_item() {
     template - Color Templates
    ---------------------------- */
 /**
- * aggregate_color_template_edit	edit the color template
+ * Aggregate_color_template_edit edit the color template. Used as part of Cacti's color templates
+ * functionality.
+ *
+ * @return void No value is returned.
  */
 function aggregate_color_template_edit() {
 	global $config, $image_types, $fields_color_template_template_edit, $struct_aggregate;
@@ -423,6 +439,13 @@ function aggregate_color_template_edit() {
 }
 
 
+/**
+ * Handles the sync color templates. Used as part of Cacti's color templates functionality.
+ *
+ * @param int $color_template The color template.
+ *
+ * @return void No value is returned.
+ */
 function sync_color_templates($color_template) {
 	global $config;
 
@@ -471,14 +494,17 @@ function sync_color_templates($color_template) {
 	}
 
 	if ($found) {
-		raise_message('color_template_sync', __('Color Template \'%s\' had %d Aggregate Templates pushed out and %d Non-Templated Aggregates pushed out', $name, $templates, $graphs), MESSAGE_LEVEL_INFO);
+		raise_message('color_template_sync', __esc('Color Template \'%s\' had %d Aggregate Templates pushed out and %d Non-Templated Aggregates pushed out', $name, $templates, $graphs), MESSAGE_LEVEL_INFO);
 	} else {
-		raise_message('color_template_sync', __('Color Template \'%s\' had no Aggregate Templates or Graphs using this Color Template.', $name, $templates, $graphs), MESSAGE_LEVEL_INFO);
+		raise_message('color_template_sync', __esc('Color Template \'%s\' had no Aggregate Templates or Graphs using this Color Template.', $name, $templates, $graphs), MESSAGE_LEVEL_INFO);
 	}
 }
 
 /**
- * aggregate_color_template		maintain color templates
+ * Aggregate_color_template maintain color templates. Used as part of Cacti's color templates
+ * functionality.
+ *
+ * @return void No value is returned.
  */
 function aggregate_color_template() {
 	global $aggregate_actions, $item_rows, $config;

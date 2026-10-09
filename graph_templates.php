@@ -86,6 +86,12 @@ switch (get_request_var('action')) {
 /* --------------------------
     The Save Function
    -------------------------- */
+/**
+ * -------------------------- The Save Function --------------------------. Used as part of
+ * Cacti's graph templates functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_save() {
 	// sanitize ids
@@ -213,6 +219,12 @@ function form_save() {
 /* ------------------------
     The 'actions' function
    ------------------------ */
+/**
+ * ------------------------ The 'actions' function ------------------------. Used as part of
+ * Cacti's graph templates functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function form_actions() {
 	global $graph_actions, $config, $image_types;
@@ -314,9 +326,9 @@ function form_actions() {
 						array($selected_items[$i]));
 
 					if (isset($_SESSION['sess_gt_repairs']) && $_SESSION['sess_gt_repairs'] > 0) {
-						raise_message('gt_repair' . $selected_items[$i], __('Sync of Graph Template \'%s\' Resulted in %s Repairs!', $graph_template_name, $_SESSION['sess_gt_repairs']), MESSAGE_LEVEL_WARN);
+						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in %s Repairs!', $graph_template_name, $_SESSION['sess_gt_repairs']), MESSAGE_LEVEL_WARN);
 					} else {
-						raise_message('gt_repair' . $selected_items[$i], __('Sync of Graph Template \'%s\' Resulted in no Repairs.', $graph_template_name), MESSAGE_LEVEL_INFO);
+						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in no Repairs.', $graph_template_name), MESSAGE_LEVEL_INFO);
 					}
 				}
 			} elseif (get_request_var('drp_action') == '5') { // resequence graphs with sequences off
@@ -329,9 +341,9 @@ function form_actions() {
 						array($selected_items[$i]));
 
 					if (isset($_SESSION['sess_gt_repairs']) && $_SESSION['sess_gt_repairs'] > 0) {
-						raise_message('gt_repair' . $selected_items[$i], __('Sync of Graph Template \'%s\' Resulted in %s Repairs!', $graph_template_name, $_SESSION['sess_gt_repairs']), MESSAGE_LEVEL_WARN);
+						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in %s Repairs!', $graph_template_name, $_SESSION['sess_gt_repairs']), MESSAGE_LEVEL_WARN);
 					} else {
-						raise_message('gt_repair' . $selected_items[$i], __('Sync of Graph Template \'%s\' Resulted in no Repairs.', $graph_template_name), MESSAGE_LEVEL_INFO);
+						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in no Repairs.', $graph_template_name), MESSAGE_LEVEL_INFO);
 					}
 				}
 			}
@@ -447,6 +459,11 @@ function form_actions() {
 	bottom_footer();
 }
 
+/**
+ * Handles the item. Used as part of Cacti's graph templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function item() {
 	global $consolidation_functions, $graph_item_types;
 
@@ -545,6 +562,12 @@ function item() {
 /* ----------------------------
     template - Graph Templates
    ---------------------------- */
+/**
+ * ---------------------------- template - Graph Templates ----------------------------. Used as
+ * part of Cacti's graph templates functionality.
+ *
+ * @return void No value is returned.
+ */
 
 function template_edit() {
 	global $struct_graph, $image_types, $fields_graph_template_template_edit;
@@ -662,6 +685,11 @@ function template_edit() {
 	<?php
 }
 
+/**
+ * Handles the template. Used as part of Cacti's graph templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function template() {
 	global $graph_actions, $item_rows, $image_types;
 
@@ -745,7 +773,7 @@ function template() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -769,7 +797,7 @@ function template() {
 		}
 
 		$(function() {
-			$('#refresh, #has_graphs').on('click', function() {
+			$('#has_graphs').on('click', function() {
 				applyFilter();
 			});
 

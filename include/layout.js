@@ -21,6 +21,11 @@
  +-------------------------------------------------------------------------+
 */
 
+/* size the open dropdown to fit its options instead of the (possibly narrower) control */
+if (typeof $ !== 'undefined' && $.fn.select2) {
+	$.fn.select2.defaults.set('dropdownAutoWidth', true);
+}
+
 const MESSAGE_LEVEL_NONE  = 0;
 const MESSAGE_LEVEL_INFO  = 1;
 const MESSAGE_LEVEL_WARN  = 2;
@@ -447,6 +452,16 @@ function escapeString(string) {
 	});
 }
 
+// Reverses escapeString()/html_escape() so a value that was already HTML-escaped
+// server-side isn't escaped a second time by a renderer (e.g. Select2's escapeMarkup)
+// that expects to receive raw text.
+function decodeHtmlEntities(string) {
+	var el = document.createElement('textarea');
+	el.innerHTML = string;
+
+	return el.value;
+}
+
 // Plugin to apply numeric format for tablesorter
 $.tablesorter.addParser({
 	id: 'numberFormat',
@@ -784,13 +799,34 @@ function handleTableNav() {
 	});
 }
 
+/** setupSelectmenuScrollClose - Close open select menus when their scroll
+ *  container moves so the detached menu cannot remain over unrelated fields. */
+function setupSelectmenuScrollClose() {
+	$('.cactiConsoleContentArea, .cactiGraphContentArea, .cactiGraphContentAreaPreview, .cactiTreeNavigationArea')
+		.add(window)
+		.off('scroll.cactiSelectmenu')
+		.on('scroll.cactiSelectmenu', function() {
+			if (!$('.ui-selectmenu-open').length) {
+				return;
+			}
+
+			$('select').each(function() {
+				if ($(this).selectmenu('instance') !== undefined) {
+					$(this).selectmenu('close');
+				}
+			});
+		});
+}
+
 /** applySkin - This function re-asserts all javascript behavior to a page
  *  that can't be set using a live attribute 'on()' */
 function applySkin() {
 	// Support callback nonces
-	$.ajaxSetup({
-		nonce: cactiNonce
-	});
+	if (typeof cactiNonce !== 'undefined') {
+		$.ajaxSetup({
+			nonce: cactiNonce
+		});
+	}
 
 	pageName = basename($(location).attr('pathname'));
 
@@ -845,6 +881,8 @@ function applySkin() {
 	if (typeof themeReady == 'function') {
 		themeReady();
 	}
+
+	setupSelectmenuScrollClose();
 
 	makeFiltersResponsive();
 
@@ -918,12 +956,334 @@ function applySkin() {
 	displayMessages();
 
 	renderLanguages();
+
+	/* applySkin() runs more than once per page view (initial load, then again
+	 * after every AJAX load/filter apply); tear down any select2 widget still
+	 * attached before the blocks below re-initialize, instead of relying only
+	 * on the :not(.select2-hidden-accessible) guards to skip them, so a widget
+	 * can never end up duplicated. */
+	$('.select2-hidden-accessible').each(function() {
+		if ($(this).data('select2')) {
+			$(this).select2('destroy');
+		}
+	});
+
+	$('select.select2:not(.select2-hidden-accessible)').each(function() {
+		var options = {
+			minimumResultsForSearch: select2SearchRows
+		};
+
+		if ($(this).closest('.ui-dialog').length) {
+			options.dropdownParent = $(this).closest('.ui-dialog');
+		}
+
+		$(this).select2(options);
+	});
+
+	$('select.select2-nosearch:not(.select2-hidden-accessible)').each(function() {
+		if ($(this).closest('.ui-dialog').length) {
+			var dropdownParent = $(this).closest('.ui-dialog');
+
+			$(this).select2({
+				minimumResultsForSearch: Infinity,
+				dropdownParent: dropdownParent
+			});
+		} else {
+			$(this).select2({
+				minimumResultsForSearch: Infinity
+			});
+		}
+	});
+
+	$('select.select2-tags:not(.select2-hidden-accessible)').each(function() {
+		if ($(this).closest('.ui-dialog').length) {
+			var dropdownParent = $(this).closest('.ui-dialog');
+
+			$(this).select2({
+				tags: true,
+				dropdownParent: dropdownParent
+			});
+		} else {
+			$(this).select2({
+				tags: true
+			});
+		}
+	});
+
+	$('select.select2-multi:not(.select2-hidden-accessible)').each(function() {
+		var options = {
+			minimumResultsForSearch: select2SearchRows
+		};
+
+		if ($(this).closest('.ui-dialog').length) {
+			options.dropdownParent = $(this).closest('.ui-dialog');
+		}
+
+		$(this).select2(options);
+	});
+
+	/* multi-select that reports "N selected"/"All selected" instead of one chip per option */
+	/* select2 normally puts a multi-select's type-to-filter box inside the control itself,
+	 * which grows its height and shoves the surrounding form down when opened. Build adapters
+	 * that instead search from the floating dropdown panel (how single-selects behave) and
+	 * drop the inline box entirely, so the control stays a fixed height whether open or closed */
+	var multiCountDropdownAdapter, multiCountSelectionAdapter;
+	if ($.fn.select2 && $.fn.select2.amd) {
+		/* string-form require() resolves synchronously; the array form defers via
+		 * setTimeout, which would leave these undefined when the init loop below runs */
+		var s2amd            = $.fn.select2.amd;
+		var Utils            = s2amd.require('select2/utils');
+		var Dropdown         = s2amd.require('select2/dropdown');
+		var DropdownSearch   = s2amd.require('select2/dropdown/search');
+		var MinResults       = s2amd.require('select2/dropdown/minimumResultsForSearch');
+		var AttachBody       = s2amd.require('select2/dropdown/attachBody');
+		var MultipleSelection = s2amd.require('select2/selection/multiple');
+		var EventRelay       = s2amd.require('select2/selection/eventRelay');
+
+		multiCountDropdownAdapter = Utils.Decorate(
+			Utils.Decorate(
+				Utils.Decorate(Dropdown, DropdownSearch),
+				MinResults
+			),
+			AttachBody
+		);
+
+		multiCountSelectionAdapter = Utils.Decorate(MultipleSelection, EventRelay);
+	}
+
+	$('select.select2-multi-count:not(.select2-hidden-accessible)').each(function() {
+		var $select    = $(this);
+		var allText    = $select.data('select-all-text') || 'All Selected';
+		var countText  = $select.data('select-count-text') || 'Selected';
+		var allValue   = $select.data('select-all-value');
+		var zeroValue  = $select.data('select-zero-value');
+		var zeroText   = $select.data('select-zero-text');
+
+		var options = {
+			/* without this select2 defaults width to 'resolve', which sizes the control
+			 * (and thus the body-attached dropdown) to the native multi-select's wide
+			 * content box instead of the rendered summary label */
+			width: 'auto',
+			minimumResultsForSearch: select2SearchRows,
+			closeOnSelect: false,
+			/* checkbox-styled option rows, closer to the old jquery-multiselect look;
+			 * the checked mark itself is drawn from [aria-selected] via CSS */
+			templateResult: function(state) {
+				if (!state.id) {
+					return state.text;
+				}
+
+				return $('<span class="select2-checkbox-option">').text(state.text);
+			}
+		};
+
+		if (multiCountDropdownAdapter && multiCountSelectionAdapter) {
+			options.dropdownAdapter  = multiCountDropdownAdapter;
+			options.selectionAdapter = multiCountSelectionAdapter;
+		}
+
+		if ($select.closest('.ui-dialog').length) {
+			options.dropdownParent = $select.closest('.ui-dialog');
+		}
+
+		$select.select2(options);
+
+		function updateSelect2CountLabel() {
+			var selected = $select.val() || [];
+			var rendered = $select.next('.select2-container').find('.select2-selection__rendered');
+			/* own span instead of bare text, so it can be centered independently of
+			 * whatever else (e.g. select2's inline search box) shares this container */
+			var label    = $('<span class="select2-count-label">');
+
+			if (selected.length == 0 || (allValue !== undefined && $.inArray(String(allValue), selected) > -1)) {
+				label.text(allText);
+			} else if (zeroValue !== undefined && zeroText !== undefined && selected.length == 1 && selected[0] === String(zeroValue)) {
+				label.text(zeroText);
+			} else {
+				label.text(selected.length + ' ' + countText);
+			}
+
+			rendered.empty().append(label);
+		}
+
+		$select.on('select2:select select2:unselect change', updateSelect2CountLabel);
+
+		updateSelect2CountLabel();
+	});
+
+	$('select.select2-multi-tags:not(.select2-hidden-accessible)').each(function() {
+		if ($(this).closest('.ui-dialog').length) {
+			var dropdownParent = $(this).closest('.ui-dialog');
+
+			$(this).select2({
+				tags: true,
+				dropdownParent: dropdownParent
+			});
+		} else {
+			$(this).select2({
+				tags: true
+			});
+		}
+	});
+
+	/* ajax-backed lookup select: replaces the legacy per-field jQuery UI autocomplete
+	 * widget form_callback() prints inline, for fields opted into it (see
+	 * form_callback()'s $class parameter) */
+	$('select.select2-callback:not(.select2-hidden-accessible)').each(function() {
+		var $select     = $(this);
+		var action      = $select.data('action');
+		var requestVars = $select.data('variables');
+		var changeFunc  = $select.data('callback');
+
+		var options = {
+			dropdownParent: $select.closest('.ui-dialog').length ? $select.closest('.ui-dialog') : document.body,
+			minimumInputLength: 0,
+			ajax: {
+				type: 'post',
+				dataType: 'json',
+				delay: 250,
+				cache: false,
+				url: function(params) {
+					var url = pageName + '?action=' + encodeURIComponent(action);
+
+					if (requestVars) {
+						$.each(requestVars.split(','), function(index, field) {
+							if ($('#' + field).length) {
+								url += '&' + encodeURIComponent(field) + '=' + encodeURIComponent($('#' + field).val());
+							}
+						});
+					}
+
+					if (params.term !== undefined && params.term != '') {
+						url += '&term=' + encodeURIComponent(params.term);
+					}
+
+					return url + '&page=' + encodeURIComponent(params.page || 1);
+				},
+				data: function() {
+					// These callback endpoints are regular Cacti actions guarded by the same
+					// CSRF check as any other POST - the nonce configured above is the CSP
+					// nonce, not the CSRF token, so it must be sent separately here.
+					return { __csrf_magic: csrfMagicToken };
+				},
+				processResults: function(data) {
+					return {
+						results: $.map(data, function(item) {
+							// item.label is already HTML-escaped server-side (html_escape() in the
+							// callback producers, e.g. lib/auth.php); Select2's default
+							// templateResult/templateSelection escapes 'text' again via escapeMarkup,
+							// so decode it once here first to avoid double-escaping (e.g. '&amp;'
+							// becoming '&amp;amp;').
+							return { id: item.id, text: decodeHtmlEntities(item.label) };
+						})
+					};
+				}
+			}
+		};
+
+		$select.select2(options);
+
+		if (changeFunc) {
+			/* namespaced + unbound-before-rebound: applySkin() destroys/recreates this
+			 * select2 widget on every AJAX filter reload, but that destroy doesn't remove
+			 * a plain jQuery listener bound to the underlying <select> itself, so without
+			 * this the handler would accumulate and fire the callback multiple times */
+			$select.off('select2:select.select2Callback').on('select2:select.select2Callback', function() {
+				executeFunctionByName(changeFunc.replace('(', '').replace(')', ''), window);
+			});
+		}
+	});
+
+	/* legacy jQuery UI selectmenu widget catch-all is superseded by select2 below; every plain
+	 * <select> not already handled above (or explicitly excluded) becomes a select2 */
+	$('select').not('#user_language').not('#i18n_default_language').not('.multiselect').not('.colordropdown')
+		.not('.select2').not('.select2-nosearch').not('.select2-tags').not('.select2-multi').not('.select2-multi-tags').not('.select2-multi-count').not('.select2-callback')
+		.not('.select2-hidden-accessible')
+		.each(function() {
+		var $this = $(this);
+
+		/* a plugin may have already deliberately widget-ified this element with
+		 * jQuery UI selectmenu itself; don't layer select2 on top of that too */
+		if ($this.selectmenu('instance')) {
+			return;
+		}
+
+		var options = {
+			width: 'auto',
+			minimumResultsForSearch: select2SearchRows
+		};
+
+		if ($this.closest('.ui-dialog').length) {
+			options.dropdownParent = $this.closest('.ui-dialog');
+		}
+
+		$this.select2(options);
+	});
+
+	/* graph_template_id's '-1' option means "All Graphs & Templates"; picking it clears
+	 * every other selection and picking anything else clears '-1' */
+	var graphTemplateValueAtOpen = null;
+
+	$('#graph_template_id.select2-multi-count').off('select2:select.graphTemplateSentinel select2:unselect.graphTemplateSentinel select2:open.graphTemplateSentinel select2:close.graphTemplateSentinel')
+		.on('select2:open.graphTemplateSentinel', function(event) {
+		graphTemplateValueAtOpen = ($(this).val() || []).join(',');
+	}).on('select2:select.graphTemplateSentinel', function(event) {
+		var $this    = $(this);
+		var instance = $this.data('select2');
+
+		if (!instance) {
+			return;
+		}
+
+		/* unselect through select2's own event bus (not just the underlying <option>s)
+		 * so the open dropdown's checkboxes redraw along with the selection - a plain
+		 * .prop('selected', ...) + change only updates the "N Selected" summary label */
+		if (event.params.data.id == '-1') {
+			$this.find('option:selected').not('[value="-1"]').each(function() {
+				instance.trigger('unselect', { data: { id: this.value, text: this.text, element: this } });
+			});
+		} else {
+			var $allOption = $this.find('option[value="-1"]:selected');
+
+			if ($allOption.length) {
+				instance.trigger('unselect', { data: { id: '-1', text: $allOption.text(), element: $allOption[0] } });
+			}
+		}
+
+		/* belt-and-suspenders: force the open dropdown's checkboxes to match the
+		 * current selection right now, rather than trusting internal event-ordering
+		 * between the data and results adapters to have already redrawn them */
+		if (instance.results && instance.results.setClasses) {
+			instance.results.setClasses();
+		}
+	}).on('select2:unselect.graphTemplateSentinel', function(event) {
+		var $this      = $(this);
+		var instance   = $this.data('select2');
+		var $allOption = $this.find('option[value="-1"]');
+
+		if (instance && $allOption.length && $this.find('option:selected').length == 0) {
+			instance.trigger('select', { data: { id: '-1', text: $allOption.text(), element: $allOption[0] } });
+		}
+
+		if (instance && instance.results && instance.results.setClasses) {
+			instance.results.setClasses();
+		}
+	}).on('select2:close.graphTemplateSentinel', function(event) {
+		var currentValue = ($(this).val() || []).join(',');
+
+		/* only reload if the selection actually changed while open - just opening
+		 * and closing without picking anything shouldn't refresh the page */
+		if (currentValue !== graphTemplateValueAtOpen) {
+			/* defer past select2's own close teardown so the reload isn't torn down with it */
+			setTimeout(applyGraphFilter, 0);
+		}
+	});
 }
 
 function renderLanguages() {
-	if ($('select#user_language').selectmenu('instance') !== undefined) {
-		$('select#user_language').selectmenu('destroy');
-
+	/* themeReady() no longer widget-ifies every select first, so init this
+	 * directly instead of relying on an existing selectmenu instance to destroy */
+	if ($('select#user_language').languageselect('instance') === undefined) {
 		$('select#user_language').languageselect({
 			width: '220',
 			change: function() {
@@ -945,9 +1305,7 @@ function renderLanguages() {
 		}).languageselect('menuWidget').addClass('ui-menu-icons customicons');
 	}
 
-	if ($('select#i18n_default_language').selectmenu('instance') !== undefined) {
-		$('select#i18n_default_language').selectmenu('destroy');
-
+	if ($('select#i18n_default_language').languageselect('instance') === undefined) {
 		$('select#i18n_default_language').languageselect({
 			width: '220'
 		}).languageselect('menuWidget').addClass('ui-menu-icons customicons');
@@ -1171,7 +1529,7 @@ function makeFiltersResponsive() {
 				if (pageHasHidableColumnsAndProfile()) {
 					if (filterHeader.find('.cactiSwitchConstraints').length == 0) {
 						if (hScroll) {
-							$('#main, .cactiConsoleContentArea').css({ 'overflow-x': 'visible' });
+							$('#main, .cactiConsoleContentArea').css({ 'overflow-x': 'auto' });
 							filterHeader.find('div.cactiTableButton').append('<span class="cactiSwitchConstraintWrapper"><a title="'+tableConstraints+'" class="linkOverDark cactiSwitchConstraints" href="#"><i id="overflow" class="fa fa-compress"></i></a></span>');
 						} else {
 							$('#main, .cactiConsoleContentArea').css({ 'overflow-x': 'hidden' });
@@ -1190,7 +1548,7 @@ function makeFiltersResponsive() {
 								value: hScroll ? 'on':''
 								}, function() {
 								if (hScroll) {
-									$('#main, .cactiConsoleContentArea').css({ 'overflow-x': 'visible' });
+									$('#main, .cactiConsoleContentArea').css({ 'overflow-x': 'auto' });
 									$('#overflow').removeClass('fa-expand').addClass('fa-compress');
 
 									resetTables();
@@ -2160,7 +2518,7 @@ function loadTopTab(href, id, force) {
 
 					checkForRedirects(html, href);
 
-					$('title').text(htmlTitle);
+					$('title').text(decodeHtmlEntities(htmlTitle));
 					$('#breadcrumbs').html(breadCrumbs);
 					$('div[class^="ui-"]').remove();
 					$('#cactiContent').replaceWith(html);
@@ -2338,7 +2696,7 @@ function loadPage(href, force) {
 						$('.cactiTreeNavigationArea').html(jstree);
 					}
 					$('#main').empty().hide();
-					$('title').text(htmlTitle);
+					$('title').text(decodeHtmlEntities(htmlTitle));
 					$('#breadcrumbs').html(breadCrumbs);
 					$('div[class^="ui-"]').remove();
 					$('#main').html(html);
@@ -2502,7 +2860,7 @@ function loadPageNoHeader(href, scroll, force) {
 					var html        = htmlObject.filter('#main').html();
 
 					$('#main').empty().hide();
-					$('title').text(htmlTitle);
+					$('title').text(decodeHtmlEntities(htmlTitle));
 					$('#breadcrumbs').html(breadCrumbs);
 					$('div[class^="ui-"]').remove();
 					$('#main').html(html);
@@ -2670,7 +3028,8 @@ function ajaxAnchors() {
 		}
 
 		if ($(this).hasClass('cactiPostAction')) {
-			submitPageUsingPost(href);
+			event.stopImmediatePropagation();
+			submitPageUsingPost($(this).data('url') || href);
 
 			return false;
 		}
@@ -2754,7 +3113,7 @@ function setupCollapsible() {
 
 		if (state == 'hide') {
 			$(this).addClass('collapsed');
-			$(this).nextUntil('div.spacer').hide();
+			$(this).nextUntil('div.spacer', 'div.formRow').hide();
 			$(this).find('i').removeClass('fa-angle-double-up').addClass('fa-angle-double-down');
 			storage.set(id, 'hide');
 		}
@@ -2765,13 +3124,13 @@ function setupCollapsible() {
 
 		if ($(this).find('i').hasClass('fa-angle-double-up')) {
 			$(this).addClass('collapsed');
-			$(this).nextUntil('div.spacer').slideUp('slow');
+			$(this).nextUntil('div.spacer', 'div.formRow').slideUp('slow');
 			$(this).find('i').removeClass('fa-angle-double-up').addClass('fa-angle-double-down');
 			storage.set(id, 'hide');
 		} else {
 			$(this).removeClass('collapsed');
-			$(this).nextUntil('div.spacer').slideDown('slow');
-			$(this).nextUntil('div.spacer').each(function(data) {
+			$(this).nextUntil('div.spacer', 'div.formRow').slideDown('slow');
+			$(this).nextUntil('div.spacer', 'div.formRow').each(function(data) {
 				$(this).find('input, select').change();
 			});
 			$(this).find('i').removeClass('fa-angle-double-down').addClass('fa-angle-double-up');
@@ -3017,6 +3376,10 @@ function applyTableSizing() {
 		}
 	});
 
+	$('.tableHeader').not('.tableFixed').each(function() {
+		$(this).find('th:visible').last().resizable('destroy');
+	});
+
 	saveTableWidths(true);
 }
 
@@ -3174,7 +3537,7 @@ $(function() {
 				clearTimeout(tapped);
 				tapped = null;
 
-				if (screenfull.enabled) {
+				if (screenfull.isEnabled) {
 					screenfull.request();
 				}
 			}
@@ -3974,6 +4337,15 @@ function initializeGraphs(disable_cache) {
 			rra_id=0;
 		}
 
+		var graph_start = $(this).attr('graph_start') || '';
+		var graph_end = $(this).attr('graph_end') || '';
+		// Graph lists use the current date filters; detailed panels keep their own ranges.
+		if (rra_id == 0 && $('#date1').length && $('#date2').length &&
+			timestampDate1 > 0 && timestampDate2 > timestampDate1) {
+			graph_start = timestampDate1;
+			graph_end = timestampDate2;
+		}
+
 		var graph_height = $(this).attr('graph_height');
 		var graph_width  = $(this).attr('graph_width');
 		var error_url    = urlPath + 'graph_view.php';
@@ -4128,7 +4500,7 @@ function initializeGraphs(disable_cache) {
 
 			if (realtimeArray[graph_id]) {
 				$('#wrapper_'+graph_id).html(keepRealtime[graph_id]).change();
-				$(this).html("<img class='drillDown' title='"+realtimeClickOn+"' alt='' src='" + urlPath + "images/chart_curve_go.png'>");
+				$(this).html("<i class='drillDown fa fa-chart-area realTime' title='"+realtimeClickOn+"'></i>");
 
 				$('graph_id'+graph_id).tooltip().zoom({
 					inputfieldStartTime : 'date1',
@@ -4304,7 +4676,13 @@ $.widget('custom.dropcolor', {
 		if (hex != null) {
 			this.wrapper.find('#bgc').css('background-color', '#'+hex[1]);
 		}
-		this.input = $('<input class="ui-autocomplete-input ui-state-default ui-selectmenu-text" style="background:transparent;border:0px;padding:0px;padding-left:24px;margin-left:-24px" value="'+value+'">')
+		// GHSA-9x9h-2577-9w86: build the input as a node so a colour name cannot
+		// break out of the value attribute once the browser decodes the entities.
+		this.input = $('<input>', {
+			'class': 'ui-autocomplete-input ui-state-default ui-selectmenu-text',
+			style: 'background:transparent;border:0px;padding:0px;padding-left:24px;margin-left:-24px',
+			value: value
+		})
 		.appendTo(this.wrapper)
 		.on('click', function() {
 			$(this).autocomplete('search', '');
@@ -4322,17 +4700,20 @@ $.widget('custom.dropcolor', {
 			},
 			create: function() {
 				$(this).data('ui-autocomplete')._renderItem = function(ul, item) {
+					// GHSA-9x9h-2577-9w86: build nodes and insert the label as text,
+					// dropping the parseHTML round-trip, so a decoded colour name
+					// cannot be re-parsed as HTML.
 					var regExp = /\(([^)]+)\)/;
-					var hex   = regExp.exec(item.label);
-					var mylabel = $($.parseHTML(item.label));
-					var label = mylabel.text();
+					var hex    = regExp.exec(item.label);
+					var icon   = $('<span>', { 'class': 'ui-icon color-icon' });
 
 					if (hex !== null) {
-						color = hex[1];
-						return $('<li>').attr('data-value', item.value).html('<div><span style="background-color:#'+color+';" class="ui-icon color-icon"></span>' + label + '</div>').appendTo(ul);
-					} else {
-						return $('<li>').attr('data-value', item.value).html('<div><span class="ui-icon color-icon"></span>' + label + '</div>').appendTo(ul);
+						icon.css('background-color', '#' + hex[1]);
 					}
+
+					return $('<li>').attr('data-value', item.value)
+						.append($('<div>').append(icon).append(document.createTextNode(item.label)))
+						.appendTo(ul);
 				}
 
 				$(this).data('ui-autocomplete')._resizeMenu = function () {
@@ -4599,6 +4980,8 @@ function setSNMPSecurity() {
 			var selectmenu = ($('#snmp_security_level').selectmenu('instance') !== undefined);
 			if (selectmenu) {
 				$('#snmp_security_level').selectmenu('refresh');
+			} else if ($('#snmp_security_level').hasClass('select2-hidden-accessible')) {
+				$('#snmp_security_level').trigger('change.select2');
 			}
 
 			$('#snmp_password').on('keyup', function() {
@@ -4805,6 +5188,12 @@ function setSNMP() {
 				$('#snmp_priv_protocol').selectmenu('refresh');
 			}
 
+			if ($('#snmp_security_level').hasClass('select2-hidden-accessible')) {
+				$('#snmp_security_level').trigger('change.select2');
+				$('#snmp_auth_protocol').trigger('change.select2');
+				$('#snmp_priv_protocol').trigger('change.select2');
+			}
+
 			break;
 	}
 }
@@ -4871,4 +5260,18 @@ function checkSNMPPassphraseConfirm(type) {
 			$(pass).after('<span id="'+spanconf+'"><i class="goodpassword fa fa-check"></i><span style="padding-left:4px;">'+passwordMatch+'</span></span>');
 		}
 	}
+}
+
+/* resolves a dotted-path function name (e.g. 'Foo.bar') against context and invokes it;
+ * used by select2-callback's opt-in $on_change contract */
+function executeFunctionByName(functionName, context /*, args */) {
+	var args       = Array.prototype.slice.call(arguments, 2);
+	var namespaces = functionName.split('.');
+	var func       = namespaces.pop();
+
+	for (var i = 0; i < namespaces.length; i++) {
+		context = context[namespaces[i]];
+	}
+
+	return context[func].apply(context, args);
 }

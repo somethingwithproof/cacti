@@ -30,15 +30,32 @@ class MibCache{
 	private $cache__tables         = array();
 	private $cache__tables_columns = array();
 
+	/**
+	 * Handles the construct. Used as part of Cacti's lib functionality.
+	 *
+	 * @param string $mib The MIB.
+	 *
+	 * @return mixed The result of the operation, or false on failure.
+	 */
 	public function __construct($mib='CACTI-MIB') {
 		$this->active_mib = $mib;
 		return $this;
 	}
 
+	/**
+	 * Handles the destruct. Used as part of Cacti's lib functionality.
+	 *
+	 * @return void No value is returned.
+	 */
 	public function __destruct() {
 
 	}
 
+	/**
+	 * Handles the uninstall. Used as part of Cacti's lib functionality.
+	 *
+	 * @return mixed The result of the operation, or false on failure.
+	 */
 	public function uninstall() {
 		/* avoid that our default mib will be dropped by some plugin developer */
 		if ($this->active_mib == 'CACTI-MIB') {
@@ -51,14 +68,55 @@ class MibCache{
 		}
 	}
 
-	public function install($path, $replace=false, $mib_name='optional') {
+	/**
+	 * Handles the install. Used as part of Cacti's lib functionality.
+	 *
+	 * @param mixed $path The path.
+	 * @param bool $replace The replace.
+	 * @param string $mib_name The MIB name.
+	 * @param bool $manage_transaction The manage transaction.
+	 *
+	 * @return void No value is returned.
+	 */
+	public function install($path, $replace=false, $mib_name='optional', $manage_transaction=true) {
 		global $config;
 
-		include_once($config['include_path'] . '/vendor/phpsnmp/mib_parser.php');
+		if (!is_readable($path) || filesize($path) > 16 * 1024 * 1024) {
+			cacti_log('ERROR: Refusing to parse missing, unreadable, or oversized MIB file: ' . basename($path), false, 'SYSTEM');
 
-		$mp = new MibParser();
-		$mp->add_mib($path, $mib_name);
-		$mp->generate();
+			return false;
+		}
+
+		include_once(__DIR__ . '/mib_parser.php');
+
+		$old_memory_limit = ini_get('memory_limit');
+		$old_time_limit   = ini_get('max_execution_time');
+		$old_error_level  = error_reporting();
+
+		set_error_handler(function($severity, $message, $file, $line) {
+			if ($severity == E_USER_ERROR || $severity == E_RECOVERABLE_ERROR) {
+				throw new ErrorException($message, 0, $severity, $file, $line);
+			}
+
+			return false;
+		});
+
+		try {
+			$mp = new MibParser();
+			ini_set('memory_limit', $old_memory_limit == '-1' ? '256M' : $old_memory_limit);
+			set_time_limit(60);
+			$mp->add_mib($path, $mib_name);
+			$mp->generate();
+		} catch (Throwable $e) {
+			cacti_log('ERROR: Unable to parse MIB file ' . basename($path) . ': ' . $e->getMessage(), false, 'SYSTEM');
+
+			return false;
+		} finally {
+			restore_error_handler();
+			error_reporting($old_error_level);
+			ini_set('memory_limit', $old_memory_limit);
+			set_time_limit((int) $old_time_limit);
+		}
 
 		if (isset($mp->mib) && isset($mp->oids) && $mp->mib ) {
 			/* check if this mib has already been installed */
@@ -68,44 +126,86 @@ class MibCache{
 					unset($mp->oids);
 					unset($mp->mib);
 					return false;
-				} else {
-					$this->uninstall();
 				}
 			}
-			db_execute_prepared('INSERT INTO snmpagent_mibs SET `id` = 0, `name` = ?, `file` = ?', array($mp->mib, $path));
 
-			foreach($mp->oids as $object_name => $object_params) {
-				if ($object_params['otype'] != 'TEXTUAL-CONVENTION') {
-					db_execute_prepared('INSERT IGNORE INTO `snmpagent_cache`
-						(`oid`, `name`, `mib`, `type`, `otype`, `kind`, `max-access`, `description`)
-						VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-						array($object_params['oid'], $object_name, $object_params['mib'], $object_params['syntax'],
-							$object_params['otype'], $object_params['kind'], $object_params['max-access'],
-							str_replace("\r\n", '<br>', trim($object_params['description']))));
+			$transaction_started = $manage_transaction ? db_begin_transaction() : false;
+			if ($manage_transaction && !$transaction_started) {
+				return false;
+			}
 
-					if ($object_params['otype'] == 'NOTIFICATION-TYPE') {
-						foreach($object_params['objects'] as $notification_object_index => $notification_object) {
-							db_execute_prepared('INSERT INTO `snmpagent_cache_notifications`
-								(`name`, `mib`, `attribute`, `sequence_id`)
-								VALUES (?, ?, ?, ?)',
-								array($object_name, $object_params['mib'], $notification_object, $notification_object_index));
+			try {
+				if ($existing && $replace) {
+					db_execute_prepared('DELETE FROM snmpagent_cache WHERE `mib` = ?', array($mp->mib));
+					db_execute_prepared('DELETE FROM snmpagent_cache_notifications WHERE `mib` = ?', array($mp->mib));
+					db_execute_prepared('DELETE FROM snmpagent_cache_textual_conventions WHERE `mib` = ?', array($mp->mib));
+					db_execute_prepared('DELETE FROM snmpagent_mibs WHERE `name` = ?', array($mp->mib));
+				}
+
+				if (db_execute_prepared('INSERT INTO snmpagent_mibs SET `id` = 0, `name` = ?, `file` = ?', array($mp->mib, $path)) === false) {
+					throw new RuntimeException('Unable to register MIB');
+				}
+
+				foreach($mp->oids as $object_name => $object_params) {
+					if ($object_params['otype'] != 'TEXTUAL-CONVENTION') {
+						if (db_execute_prepared('INSERT IGNORE INTO `snmpagent_cache`
+							(`oid`, `name`, `mib`, `type`, `otype`, `kind`, `max-access`, `description`)
+							VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+							array($object_params['oid'], $object_name, $object_params['mib'], $object_params['syntax'],
+								$object_params['otype'], $object_params['kind'], $object_params['max-access'],
+								str_replace("\r\n", '<br>', trim($object_params['description'] ?? '')))) === false) {
+							throw new RuntimeException('Unable to cache MIB object');
+						}
+
+						if ($object_params['otype'] == 'NOTIFICATION-TYPE') {
+							foreach(($object_params['objects'] ?? array()) as $notification_object_index => $notification_object) {
+								if (db_execute_prepared('INSERT INTO `snmpagent_cache_notifications`
+									(`name`, `mib`, `attribute`, `sequence_id`)
+									VALUES (?, ?, ?, ?)',
+									array($object_name, $object_params['mib'], $notification_object, $notification_object_index)) === false) {
+									throw new RuntimeException('Unable to cache MIB notification');
+								}
+							}
+						}
+					} else {
+						if (db_execute_prepared('INSERT INTO `snmpagent_cache_textual_conventions`
+							(`name`, `mib`, `type`, `description`)
+							VALUES (?, ?, ?, ?)',
+							array($object_name, $object_params['mib'], $object_params['syntax'], nl2br($object_params['description'] ?? ''))) === false) {
+							throw new RuntimeException('Unable to cache MIB textual convention');
 						}
 					}
-				} else {
-					db_execute_prepared('INSERT INTO `snmpagent_cache_textual_conventions`
-						(`name`, `mib`, `type`, `description`)
-						VALUES (?, ?, ?, ?)',
-						array($object_name, $object_params['mib'], $object_params['syntax'], nl2br($object_params['description'])));
 				}
+
+				if ($transaction_started) {
+					db_commit_transaction();
+				}
+			} catch (Throwable $e) {
+				if ($transaction_started) {
+					db_rollback_transaction();
+				}
+
+				cacti_log('ERROR: Unable to install MIB ' . $mp->mib . ': ' . $e->getMessage(), false, 'SYSTEM');
+
+				return false;
 			}
 
 			unset($mp->oids);
 			unset($mp->mib);
+
+			return true;
 		} else {
 			return false;
 		}
 	}
 
+	/**
+	 * Handles the MIB. Used as part of Cacti's lib functionality.
+	 *
+	 * @param string $mib The MIB.
+	 *
+	 * @return object The result of the operation, or false on failure.
+	 */
 	public function mib($mib) {
 		$this->active_mib = $mib;
 		$this->active_object = '';
@@ -114,11 +214,25 @@ class MibCache{
 		return $this;
 	}
 
+	/**
+	 * Handles the object. Used as part of Cacti's lib functionality.
+	 *
+	 * @param string $object The object.
+	 *
+	 * @return object The result of the operation, or false on failure.
+	 */
 	public function object($object) {
 		$this->active_object = $object;
 		return $this;
 	}
 
+	/**
+	 * Handles the table. Used as part of Cacti's lib functionality.
+	 *
+	 * @param string $table The table.
+	 *
+	 * @return object The result of the operation, or false on failure.
+	 */
 	public function table($table) {
 		if ($this->active_table != $table) {
 			if (!isset($this->cache__tables[$this->active_mib][$table])) {
@@ -154,16 +268,35 @@ class MibCache{
 		}
 	}
 
+	/**
+	 * Handles the row. Used as part of Cacti's lib functionality.
+	 *
+	 * @param mixed $index The index.
+	 *
+	 * @return object The result of the operation, or false on failure.
+	 */
 	public function row($index) {
 		/* limited to one single $index so far */
 		$this->active_table_entry = $index;
 		return $this;
 	}
 
+	/**
+	 * Handles the gettype. Used as part of Cacti's lib functionality.
+	 *
+	 * @return void No value is returned.
+	 */
 	public function gettype() {
 
 	}
 
+	/**
+	 * Sets the. Used as part of Cacti's lib functionality.
+	 *
+	 * @param mixed $value The value.
+	 *
+	 * @return mixed The result of the operation, or false on failure.
+	 */
 	public function set($value) {
 		return db_execute_prepared('UPDATE `snmpagent_cache`
 			SET `value` = ?
@@ -172,6 +305,11 @@ class MibCache{
 			array($value, $this->active_mib, $this->active_object));
 	}
 
+	/**
+	 * Retrieves the. Used as part of Cacti's lib functionality.
+	 *
+	 * @return mixed The result of the operation, or false on failure.
+	 */
 	public function get() {
 		return db_fetch_row_prepared('SELECT *
 			FROM snmpagent_cache
@@ -180,6 +318,11 @@ class MibCache{
 			array($this->active_object, $this->active_mib));
 	}
 
+	/**
+	 * Handles the count. Used as part of Cacti's lib functionality.
+	 *
+	 * @return mixed The result of the operation, or false on failure.
+	 */
 	public function count() {
 		return db_execute_prepared('UPDATE snmpagent_cache
 			SET `value` = CASE
@@ -190,6 +333,13 @@ class MibCache{
 			array($this->active_mib, $this->active_object));
 	}
 
+	/**
+	 * Handles the insert. Used as part of Cacti's lib functionality.
+	 *
+	 * @param array $values The values.
+	 *
+	 * @return bool True on success, false otherwise.
+	 */
 	public function insert($values) {
 		$oid_entry = $this->exists();
 		if ($oid_entry == false) {
@@ -219,6 +369,13 @@ class MibCache{
 		return false;
 	}
 
+	/**
+	 * Handles the select. Used as part of Cacti's lib functionality.
+	 *
+	 * @param mixed $column The column.
+	 *
+	 * @return mixed The result of the operation, or false on failure.
+	 */
 	public function select($column=false) {
 		$result = array();
 		if ($this->active_table_entry) {
@@ -349,6 +506,11 @@ class MibCache{
 		return false;
 	}
 
+	/**
+	 * Deletes the. Used as part of Cacti's lib functionality.
+	 *
+	 * @return bool True on success, false otherwise.
+	 */
 	public function delete() {
 		$oid_entry = $this->exists();
 		if ($oid_entry !== false) {
@@ -365,6 +527,13 @@ class MibCache{
 		return false;
 	}
 
+	/**
+	 * Updates the. Used as part of Cacti's lib functionality.
+	 *
+	 * @param array $values The values.
+	 *
+	 * @return bool True on success, false otherwise.
+	 */
 	public function update($values) {
 		$oid_entry = $this->exists();
 		if ($oid_entry !== false) {
@@ -393,11 +562,23 @@ class MibCache{
 		return false;
 	}
 
+	/**
+	 * Handles the replace. Used as part of Cacti's lib functionality.
+	 *
+	 * @param array $values The values.
+	 *
+	 * @return bool True on success, false otherwise.
+	 */
 	public function replace($values) {
 		$this->delete();
 		return $this->insert($values);
 	}
 
+	/**
+	 * Handles the truncate. Used as part of Cacti's lib functionality.
+	 *
+	 * @return bool True on success, false otherwise.
+	 */
 	public function truncate() {
 		$oid_entry = $this->cache__tables[$this->active_mib][$this->active_table] . '.1.%';
 		db_execute_prepared('DELETE FROM `snmpagent_cache`
@@ -409,6 +590,11 @@ class MibCache{
 		return true;
 	}
 
+	/**
+	 * Handles the columns. Used as part of Cacti's lib functionality.
+	 *
+	 * @return mixed The result of the operation, or false on failure.
+	 */
 	public function columns() {
 		/* As defined by SMI the OID value assigned to the row must be the same as the OID value assigned to the table containing
 		   the row with addition of a single value of one. */
@@ -422,6 +608,11 @@ class MibCache{
 			array($filter));
 	}
 
+	/**
+	 * Handles the exists. Used as part of Cacti's lib functionality.
+	 *
+	 * @return bool True on success, false otherwise.
+	 */
 	private function exists() {
 		$oid_entry = $this->cache__tables[$this->active_mib][$this->active_table] . '.1';
 
@@ -432,4 +623,3 @@ class MibCache{
 		return ($exists) ? $oid_entry : false;
 	}
 }
-

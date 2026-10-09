@@ -22,10 +22,22 @@
  +-------------------------------------------------------------------------+
  */
 
+/**
+ * Handles the snmpagent enabled. Used as part of Cacti's lib functionality.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_enabled() {
 	return read_config_option('enable_snmp_agent') == 'on';
 }
 
+/**
+ * Handles the snmpagent cacti stats update. Used as part of Cacti's lib functionality.
+ *
+ * @param array $data The data.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_cacti_stats_update($data){
 	$mc = new MibCache();
 
@@ -64,6 +76,11 @@ function snmpagent_cacti_stats_update($data){
 	$mc->object('cactiStatsLastUpdate')->set( time() );
 }
 
+/**
+ * Handles the snmpagent global settings update. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function snmpagent_global_settings_update(){
 	$mc = new MibCache();
 	$mc->object('cactiApplVersion')->set( snmpagent_read('cactiApplVersion') );
@@ -95,6 +112,13 @@ function snmpagent_global_settings_update(){
 	$mc->object('boostApplLastUpdate')->set( time() );
 }
 
+/**
+ * Handles the snmpagent API device new. Used as part of Cacti's lib functionality.
+ *
+ * @param array $device The device.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_api_device_new($device){
 	if (!snmpagent_enabled()) {
 		return false;
@@ -149,6 +173,13 @@ function snmpagent_api_device_new($device){
 }
 
 
+/**
+ * Handles the snmpagent data source action bottom. Used as part of Cacti's lib functionality.
+ *
+ * @param array $data The data.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_data_source_action_bottom($data){
 	if (!snmpagent_enabled()) {
 		return false;
@@ -168,6 +199,13 @@ function snmpagent_data_source_action_bottom($data){
 	}
 }
 
+/**
+ * Handles the snmpagent graphs action bottom. Used as part of Cacti's lib functionality.
+ *
+ * @param array $data The data.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_graphs_action_bottom($data){
 	if (!snmpagent_enabled()) {
 		return false;
@@ -187,6 +225,13 @@ function snmpagent_graphs_action_bottom($data){
 	}
 }
 
+/**
+ * Handles the snmpagent device action bottom. Used as part of Cacti's lib functionality.
+ *
+ * @param array $data The data.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_device_action_bottom($data){
 	if (!snmpagent_enabled()) {
 		return false;
@@ -286,6 +331,13 @@ function snmpagent_device_action_bottom($data){
 	}
 }
 
+/**
+ * Handles the snmpagent poller exiting. Used as part of Cacti's lib functionality.
+ *
+ * @param int $poller_index The poller index.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_poller_exiting($poller_index = 1){
 	if (!snmpagent_enabled()) {
 		return false;
@@ -314,6 +366,11 @@ function snmpagent_poller_exiting($poller_index = 1){
 	}
 }
 
+/**
+ * Handles the snmpagent poller bottom. Used as part of Cacti's lib functionality.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_poller_bottom() {
 	global $config;
 
@@ -330,7 +387,15 @@ function snmpagent_poller_bottom() {
 	}
 
 	if (api_plugin_is_enabled('maint')) {
-		include_once($config['base_path'] . '/plugins/maint/functions.php');
+		/* The maint plugin relocated its library to includes/functions.php. Prefer the
+		   new location and fall back to the legacy root path for older maint releases.
+		   This fallback will be unwound in a future release once those older maint
+		   versions are no longer supported. */
+		if (file_exists($config['base_path'] . '/plugins/maint/includes/functions.php')) {
+			include_once($config['base_path'] . '/plugins/maint/includes/functions.php');
+		} elseif (file_exists($config['base_path'] . '/plugins/maint/functions.php')) {
+			include_once($config['base_path'] . '/plugins/maint/functions.php');
+		}
 	}
 
 	$device_in_maintenance = false;
@@ -560,6 +625,11 @@ function snmpagent_poller_bottom() {
 	}
 }
 
+/**
+ * Handles the snmpagent get pluginslist. Used as part of Cacti's lib functionality.
+ *
+ * @return array An array of results.
+ */
 function snmpagent_get_pluginslist(){
 	global $config, $plugins, $plugins_integrated;
 	/* update the list of known plugins only once per polling cycle. In all other cases we would
@@ -593,9 +663,10 @@ function snmpagent_get_pluginslist(){
 }
 
 /**
- * snmpagent_cache_install()
- * Generates a SNMP caching tables reflecting all objects of the Cacti MIB
- * @return
+ * Snmpagent_cache_install() Generates a SNMP caching tables reflecting all objects of the Cacti
+ * MIB. Used as part of Cacti's lib functionality.
+ *
+ * @return bool Bool.
  */
 function snmpagent_cache_install() {
 	global $config;
@@ -604,19 +675,43 @@ function snmpagent_cache_install() {
 		return false;
 	}
 
-	/* drop everything */
-	snmpagent_cache_uninstall();
+	$transaction_started = db_begin_transaction();
+	if (!$transaction_started) {
+		return false;
+	}
 
-	$mc = new MibCache();
-	$mc->install($config['base_path'] . '/mibs/CACTI-MIB');
-	$mc->install($config['base_path'] . '/mibs/CACTI-SNMPAGENT-MIB');
-	$mc->install($config['base_path'] . '/mibs/CACTI-BOOST-MIB');
-	snmpagent_cache_init();
+	try {
+		/* Rebuild the core cache atomically so a parser or insert failure leaves
+		 * the prior working cache available. */
+		snmpagent_cache_uninstall();
+
+		$mc = new MibCache();
+		if (!$mc->install($config['base_path'] . '/mibs/CACTI-MIB', false, 'optional', false) ||
+			!$mc->install($config['base_path'] . '/mibs/CACTI-SNMPAGENT-MIB', false, 'optional', false) ||
+			!$mc->install($config['base_path'] . '/mibs/CACTI-BOOST-MIB', false, 'optional', false)) {
+			throw new RuntimeException('Unable to rebuild the core SNMP agent MIB cache');
+		}
+
+		snmpagent_cache_init();
+		db_commit_transaction();
+	} catch (Throwable $e) {
+		db_rollback_transaction();
+		cacti_log('ERROR: ' . $e->getMessage(), false, 'SYSTEM');
+
+		return false;
+	}
 
 	/* call install routine of plugins supporting the SNMPAgent */
 	api_plugin_hook('snmpagent_cache_install');
+
+	return true;
 }
 
+/**
+ * Handles the snmpagent cache uninstall. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function snmpagent_cache_uninstall() {
 	/* drop everything if not empty */
 
@@ -628,21 +723,33 @@ function snmpagent_cache_uninstall() {
 	);
 
 	foreach($tables as $table) {
-		$rows = db_fetch_cell("SELECT COUNT(*) FROM $table");
-		if ($rows > 0) {
-			db_execute("TRUNCATE $table");
-		}
+		db_execute("DELETE FROM $table");
 	}
 }
 
+/**
+ * Handles the snmpagent cache initialized. Used as part of Cacti's lib functionality.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function snmpagent_cache_initialized() {
 	return db_fetch_cell('SELECT COUNT(*) FROM `snmpagent_cache`') > 0;
 }
 
+/**
+ * Handles the snmpagent cache rebuilt. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function snmpagent_cache_rebuilt(){
 	snmpagent_cache_install();
 }
 
+/**
+ * Handles the snmpagent cache init. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
 function snmpagent_cache_init(){
 	/* fill up the cache with a minimum of data and ignore all values that
 	   *  will be updated automatically at the bottom of the next poller run
@@ -756,6 +863,13 @@ function snmpagent_cache_init(){
 	}
 }
 
+/**
+ * Handles the snmpagent read. Used as part of Cacti's lib functionality.
+ *
+ * @param string $object The object.
+ *
+ * @return mixed The result of the operation, or false on failure.
+ */
 function snmpagent_read($object){
 	switch($object) {
 		case 'cactiApplVersion':
@@ -798,6 +912,17 @@ function snmpagent_read($object){
 	return $value;
 }
 
+/**
+ * Handles the snmpagent notification. Used as part of Cacti's lib functionality.
+ *
+ * @param string $notification The notification.
+ * @param string $mib The MIB.
+ * @param array $varbinds The varbinds.
+ * @param int $severity The severity.
+ * @param mixed $overwrite The overwrite.
+ *
+ * @return bool True on success, false otherwise.
+ */
 function snmpagent_notification($notification, $mib, $varbinds, $severity = SNMPAGENT_EVENT_SEVERITY_MEDIUM, $overwrite = false){
 	global $config, $snmpagent_event_severity;
 
@@ -840,7 +965,7 @@ function snmpagent_notification($notification, $mib, $varbinds, $severity = SNMP
 
 	if (cacti_sizeof($notification_managers) == 0) {
 		/* No receivers found for the message, record it to the cacti.log */
-		cacti_log('WARNING: No notification receivers configured for event: ' . $notification . ' (' . $mib . '), severity: ' . $snmpagent_event_severity[$severity], false, 'SNMPAGENT', POLLER_VERBOSITY_NONE);
+		cacti_log('NOTICE: No enabled SNMP notification receivers are configured for event: ' . $notification . ' (' . $mib . '), severity: ' . $snmpagent_event_severity[$severity] . '. Configure or enable receivers under Console > Utilities > SNMP Agent Utilities > SNMP Notification Receivers, or ignore this notice when SNMP traps are intentionally disabled.', false, 'SNMPAGENT', POLLER_VERBOSITY_NONE);
 		if (!in_array($severity, array(SNMPAGENT_EVENT_SEVERITY_HIGH, SNMPAGENT_EVENT_SEVERITY_CRITICAL))) {
 			/* Prevent log spam of messages lower than a high severity */
 			$config['snmpagent']['notifications']['ignore'][$notification] = 1;
@@ -929,27 +1054,51 @@ function snmpagent_notification($notification, $mib, $varbinds, $severity = SNMP
 			);
 
 			$log_notification_varbinds  = '';
-			$snmp_notification_varbinds = '';
+			$snmp_notification_varbinds = array();
 
 			foreach($notification_managers as $notification_manager) {
-				if (!$snmp_notification_varbinds) {
+				if (!cacti_sizeof($snmp_notification_varbinds)) {
 					foreach($registered_var_binds as $name => $attributes ) {
-						$snmp_notification_varbinds .= ' ' . cacti_escapeshellarg($attributes['oid']) . ' ' . $smi2netsnmp_datatypes[strtolower($attributes['type'])] . ' ' . cacti_escapeshellarg($varbinds[$name]);
+						$snmp_notification_varbinds[] = $attributes['oid'];
+						$snmp_notification_varbinds[] = $smi2netsnmp_datatypes[strtolower($attributes['type'])];
+						$snmp_notification_varbinds[] = $varbinds[$name];
 						$log_notification_varbinds .= $name . ":\"" . str_replace('"', "'", $varbinds[$name]) . "\" ";
 					}
 				}
 
 				if ($notification_manager['snmp_version'] == 1 ) {
-					$args = ' -v 1 -c ' . cacti_escapeshellarg($notification_manager['snmp_community']) . ' ' . cacti_escapeshellarg($notification_manager['hostname'] . ':' . $notification_manager['snmp_port']) . ' ' . cacti_escapeshellarg($enterprise_oid) . ' "" 6 ' . cacti_escapeshellarg($specific_trap_number) . ' ""' . $snmp_notification_varbinds;
+					$args = array_merge(array(
+						'-v', '1',
+						'-c', $notification_manager['snmp_community'],
+						$notification_manager['hostname'] . ':' . $notification_manager['snmp_port'],
+						$enterprise_oid,
+						'', '6', $specific_trap_number, ''
+					), $snmp_notification_varbinds);
 				}else if ($notification_manager['snmp_version'] == 2 ) {
-					$args = ' -v 2c -c ' . cacti_escapeshellarg($notification_manager['snmp_community']) . ( ($notification_manager['snmp_message_type'] == 2 )? ' -Ci ' : '' )  . ' ' . cacti_escapeshellarg($notification_manager['hostname'] . ':' . $notification_manager['snmp_port']) . ' "" ' . cacti_escapeshellarg($enterprise_oid) . $snmp_notification_varbinds;
+					$args = array('-v', '2c', '-c', $notification_manager['snmp_community']);
+
+					if ($notification_manager['snmp_message_type'] == 2 ) {
+						$args[] = '-Ci';
+					}
+
+					$args = array_merge($args, array(
+						$notification_manager['hostname'] . ':' . $notification_manager['snmp_port'],
+						'', $enterprise_oid
+					), $snmp_notification_varbinds);
 				}else if ($notification_manager['snmp_version'] == 3 ) {
 
 					if ( $overwrite && isset($overwrite['snmp_engine_id']) && $overwrite['snmp_engine_id'] ) {
 						$notification_manager['snmp_engine_id'] = $overwrite['snmp_engine_id'];
 					}
 
-					$args = ' -v 3 -e ' . cacti_escapeshellarg($notification_manager['snmp_engine_id']) . (($notification_manager['snmp_message_type'] == 2 )? ' -Ci ' : '' ) .  ' -u ' . cacti_escapeshellarg($notification_manager['snmp_username']);
+					$args = array('-v', '3', '-e', $notification_manager['snmp_engine_id']);
+
+					if ($notification_manager['snmp_message_type'] == 2 ) {
+						$args[] = '-Ci';
+					}
+
+					$args[] = '-u';
+					$args[] = $notification_manager['snmp_username'];
 
 					if ( $notification_manager['snmp_password'] && $notification_manager['snmp_priv_passphrase']) {
 						$snmp_security_level = 'authPriv';
@@ -958,11 +1107,35 @@ function snmpagent_notification($notification, $mib, $varbinds, $severity = SNMP
 					} else {
 						$snmp_security_level = 'noAuthNoPriv';
 					}
-					$args .= ' -l ' . $snmp_security_level . (($snmp_security_level != 'noAuthNoPriv') ? ' -a ' . cacti_escapeshellarg($notification_manager['snmp_auth_protocol']) . ' -A ' . cacti_escapeshellarg($notification_manager['snmp_password']) : '' ) . (($snmp_security_level == 'authPriv')? ' -x ' . cacti_escapeshellarg($notification_manager['snmp_priv_protocol']) . ' -X ' . cacti_escapeshellarg($notification_manager['snmp_priv_passphrase']) : '')  . ' ' . cacti_escapeshellarg($notification_manager['hostname'] . ':' . $notification_manager['snmp_port']) . ' "" ' . cacti_escapeshellarg($enterprise_oid) . $snmp_notification_varbinds;
+
+					$args[] = '-l';
+					$args[] = $snmp_security_level;
+
+					if ($snmp_security_level != 'noAuthNoPriv') {
+						$args[] = '-a';
+						$args[] = $notification_manager['snmp_auth_protocol'];
+						$args[] = '-A';
+						$args[] = $notification_manager['snmp_password'];
+					}
+
+					if ($snmp_security_level == 'authPriv') {
+						$args[] = '-x';
+						$args[] = $notification_manager['snmp_priv_protocol'];
+						$args[] = '-X';
+						$args[] = $notification_manager['snmp_priv_passphrase'];
+					}
+
+					$args = array_merge($args, array(
+						$notification_manager['hostname'] . ':' . $notification_manager['snmp_port'],
+						'', $enterprise_oid
+					), $snmp_notification_varbinds);
 				}
 
-				/* execute net-snmp to generate this notification in the background */
-				exec_background(cacti_escapeshellcmd($path_snmptrap), $args);
+				/* execute net-snmp to generate this notification in the background.
+				 * proc_open with bypass_shell means every argument reaches the
+				 * process exactly as given, with no shell (and therefore no
+				 * cmd.exe metacharacter or %VAR% expansion) involved at all. */
+				exec_background_process($path_snmptrap, $args);
 
 				/* insert a new entry into the notification log for that SNMP receiver */
 				$save = array();
@@ -990,7 +1163,7 @@ function snmpagent_notification($notification, $mib, $varbinds, $severity = SNMP
 
 				$safe_args = cacti_sizeof($redactable) ? str_replace($redactable, '[REDACTED]', $args) : $args;
 
-				cacti_log("NOTE: $path_snmptrap " . $safe_args, false, 'SNMPAGENT', POLLER_VERBOSITY_MEDIUM);
+				cacti_log("NOTE: $path_snmptrap " . implode(' ', array_map(function($arg) { return cacti_escapeshellarg_cmd($arg); }, $safe_args)), false, 'SNMPAGENT', POLLER_VERBOSITY_MEDIUM);
 			}
 		}
 	} else {
@@ -999,4 +1172,3 @@ function snmpagent_notification($notification, $mib, $varbinds, $severity = SNMP
 		return false;
 	}
 }
-

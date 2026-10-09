@@ -24,6 +24,7 @@
 
 include('./include/auth.php');
 include_once('./lib/poller.php');
+include_once('./lib/snmp.php');
 
 /* set default action */
 set_default_action();
@@ -100,7 +101,11 @@ case 'save':
 			} else {
 				$continue = true;
 
-				if ($field_name == 'path_cactilog' || $field_name == 'path_stderrlog') {
+				// path_boost_log is optional and defaults to blank; only enforce the
+				// .log extension when a value was supplied so saving Boost settings
+				// with debug logging disabled does not raise a false error (GHSA-m6wx-f538-m6q3)
+				if ($field_name == 'path_cactilog' || $field_name == 'path_stderrlog' ||
+					($field_name == 'path_boost_log' && get_nfilter_request_var($field_name) != '')) {
 					$extension = pathinfo(get_nfilter_request_var($field_name), PATHINFO_EXTENSION);
 
 					if ($extension != 'log') {
@@ -265,7 +270,7 @@ case 'save':
 
 			foreach($pollers as $p => $t) {
 				if ($t > $gone_time) {
-					raise_message('poller_' . $p, __('Settings save to Data Collector %d skipped due to heartbeat.', $p), MESSAGE_LEVEL_WARN);
+					raise_message('poller_' . $p, __esc('Settings save to Data Collector %d skipped due to heartbeat.', $p), MESSAGE_LEVEL_WARN);
 				} else {
 					$rcnn_id = poller_connect_to_remote($p);
 
@@ -277,7 +282,7 @@ case 'save':
 
 					// check if we still have rcnn_id, if it's now become false, we had a problem
 					if (!$rcnn_id) {
-						raise_message('poller_' . $p, __('Settings save to Data Collector %d Failed.', $p), MESSAGE_LEVEL_ERROR);
+						raise_message('poller_' . $p, __esc('Settings save to Data Collector %d Failed.', $p), MESSAGE_LEVEL_ERROR);
 					}
 				}
 			}
@@ -472,6 +477,15 @@ default:
 		$form_array['spikekill_templates']['array'] = $spikekill_templates;
 	}
 
+	/* drop the legacy MD5/DES SNMPv3 algorithms from the default pickers when disabled */
+	if (isset($form_array['snmp_auth_protocol'])) {
+		$form_array['snmp_auth_protocol']['array'] = snmp_auth_protocol_options(read_config_option('snmp_auth_protocol'));
+	}
+
+	if (isset($form_array['snmp_priv_protocol'])) {
+		$form_array['snmp_priv_protocol']['array'] = snmp_priv_protocol_options(read_config_option('snmp_priv_protocol'));
+	}
+
 	draw_edit_form(
 		array(
 			'config' => array('no_form_tag' => true),
@@ -536,102 +550,12 @@ default:
 			currentLanguage    = $('#i18n_default_language').val();
 			currentLangSupport = $('#i18n_language_support').val();
 
-			$('#selective_plugin_debug').multiselect({
-				menuHeight: $(window).height()*.7,
-				menuWidth: 230,
-				linkInfo: faIcons,
-				noneSelectedText: '<?php print __('Select Plugin(s)');?>',
-				selectedText: function(numChecked, numTotal, checkedItems) {
-					myReturn = numChecked + ' <?php print __('Plugins Selected');?>';
-					return myReturn;
-				},
-				checkAllText: '<?php print __('All');?>',
-				uncheckAllText: '<?php print __('None');?>',
-				uncheckall: function() {
-					$(this).multiselect('widget').find(':checkbox:first').each(function() {
-						$(this).prop('checked', true);
-					});
-				}
-			}).multiselectfilter( {
-				label: '<?php print __('Search');?>',
-				placeholder: '<?php print __('Enter keyword');?>',
-				width: '150'
-			});
-
-			$('#selective_debug').multiselect({
-				menuHeight: $(window).height()*.7,
-				menuWidth: 230,
-				linkInfo: faIcons,
-				noneSelectedText: '<?php print __('Select File(s)');?>',
-				selectedText: function(numChecked, numTotal, checkedItems) {
-					myReturn = numChecked + ' <?php print __('Files Selected');?>';
-					return myReturn;
-				},
-				checkAllText: '<?php print __('All');?>',
-				uncheckAllText: '<?php print __('None');?>',
-			}).multiselectfilter( {
-				label: '<?php print __('Search');?>',
-				placeholder: '<?php print __('Enter keyword');?>',
-				width: '150'
-			});
-
 			$('#graph_auth_method').on('change', function() {
 				permsChanger();
 			});
 
 			$('#i18n_default_language, #i18n_auto_detection, #i18n_language_support').on('change', function() {
 				langDetectionChanger();
-			});
-		} else if (currentTab == 'spikes') {
-			$('#spikekill_templates').multiselect({
-				menuHeight: $(window).height()*.7,
-				menuWidth: 'auto',
-				linkInfo: faIcons,
-				noneSelectedText: '<?php print __('Select Template(s)');?>',
-				selectedText: function(numChecked, numTotal, checkedItems) {
-					myReturn = numChecked + ' <?php print __('Templates Selected');?>';
-					$.each(checkedItems, function(index, value) {
-						if (value.value == '0') {
-							myReturn='<?php print __('All Templates Selected');?>';
-							return false;
-						}
-					});
-					return myReturn;
-				},
-				checkAllText: '<?php print __('All');?>',
-				uncheckAllText: '<?php print __('None');?>',
-				uncheckAll: function() {
-					$(this).multiselect('widget').find(':checkbox:first').each(function() {
-						$(this).prop('checked', true);
-					});
-				},
-				click: function(event, ui) {
-					checked=$(this).multiselect('widget').find('input:checked').length;
-
-					if (ui.value == '0') {
-						if (ui.checked == true) {
-							$('#host').multiselect('uncheckAll');
-							$(this).multiselect('widget').find(':checkbox:first').each(function() {
-								$(this).prop('checked', true);
-							});
-						}
-					}else if (checked == 0) {
-						$(this).multiselect('widget').find(':checkbox:first').each(function() {
-							$(this).click();
-						});
-					}else if ($(this).multiselect('widget').find('input:checked:first').val() == '0') {
-						if (checked > 0) {
-							$(this).multiselect('widget').find(':checkbox:first').each(function() {
-								$(this).click();
-								$(this).prop('disable', true);
-							});
-						}
-					}
-				}
-			}).multiselectfilter( {
-				label: '<?php print __('Search');?>',
-				placeholder: '<?php print __('Enter keyword');?>',
-				width: '150'
 			});
 		} else if (currentTab == 'data') {
 			$('#storage_location').on('change', function() {

@@ -324,6 +324,39 @@ label {
 
 .drillDown {
 	cursor: pointer;
+	font-size: 15px;
+}
+
+.actionCog {
+	color:#FDAC53 !important;
+}
+
+.fileCSV {
+	color:#9BB7D4 !important;
+}
+
+.threeBars {
+	color:#B55A30 !important;
+}
+
+.editDevice {
+	color:#F5DF4D !important;
+}
+
+.editTemplate {
+	color:#0072B5 !important;
+}
+
+.realTime {
+	color:#A0DAA9 !important;
+}
+
+.spikeKill {
+	color:#E9897E !important;
+}
+
+.viewSources {
+	color:#56C6A9 !important;
 }
 
 .monoSpace {
@@ -352,7 +385,7 @@ label {
 }
 
 .deviceUp {
-	color: rgba(148, 179, 107, 0.8) !important;
+	color: rgba(40, 180, 40, 1.0) !important;
 }
 
 .deviceDown {
@@ -606,43 +639,43 @@ label {
 }
 
 .tableRow {
-	color: white;
+	color: #333333;
 	line-height: 20px;
 }
 
 .odd {
 	border: none;
-	background: none repeat scroll 0 0 #222;
+	background: none repeat scroll 0 0 #e8e8e8;
 }
 
 .odd.tableRow {
-	color: #ccc;
-	background: none repeat scroll 0 0 #252525;
+	color: #333333;
+	background: none repeat scroll 0 0 #f0f0f0;
 }
 
 .tableRowGraph td {
 	padding: 3px;
 	vertical-align: top;
-	background: none repeat scroll 0 0 #FFFFFF;
+	background: none repeat scroll 0 0 #222222;
 }
 
 .even {
 	border: none;
-	background: none repeat scroll 0 0 #222;
+	background: none repeat scroll 0 0 #e8e8e8;
 }
 
 .even.tableRow {
-	color: #ccc;
-	background: none repeat scroll 0 0 #222;
+	color: #333333;
+	background: none repeat scroll 0 0 #e8e8e8;
 }
 
 .even-alternate {
-	background: none repeat scroll 0 0 #252525;
+	background: none repeat scroll 0 0 #f0f0f0;
 }
 
 .even-alternate.tableRow {
-	color: #ccc;
-	background: none repeat scroll 0 0 #222;
+	color: #333333;
+	background: none repeat scroll 0 0 #e8e8e8;
 }
 
 .tableRow {
@@ -656,16 +689,16 @@ label {
 }
 
 .saveRow > input.ui-button {
-	border: 1px solid #93CEFF;
-	color: #93CEFF;
-	background: transparent;
+	border: 1px solid #707274;
+	color: #ffffff;
+	background: #5c5e60;
 	outline-style: none;
 }
 
 .saveRow > input.ui-button:hover {
-	color: #FFFFFF;
-	border: 1px solid #FFFFFF;
-	background: #5CB85C;
+	color: #ffffff;
+	border: 1px solid #808284;
+	background: #6c6e70;
 }
 
 .treeArea, .treeItemsArea {
@@ -908,16 +941,16 @@ label {
 }
 
 .cactiLoginTable input.ui-button {
-	border: 1px solid #93CEFF;
-	color: #93CEFF;
-	background: transparent;
+	border: 1px solid #707274;
+	color: #ffffff;
+	background: #5c5e60;
 	outline-style: none;
 }
 
 .cactiLoginTable input.ui-button:hover {
-	color: #FFFFFF;
-	border: 1px solid #FFFFFF;
-	background: #5CB85C;
+	color: #ffffff;
+	border: 1px solid #808284;
+	background: #6c6e70;
 }
 
 .loginErrors, .logoutErrors {
@@ -966,18 +999,18 @@ legend {
 }
 
 .actionsDropdown > div > span.ui-selectmenu-button {
-	background: transparent;
+	background: #ffffff !important;
 	outline-style: none;
-	color: #93CEFF;
-	border: 1px solid #93CEFF;
+	color: #555555;
+	border: 1px solid #bbbbbb;
 }
 
 .actionsDropdown > div > span.ui-selectmenu-button:hover,
 .actionsDropdown > div > span.ui-selectmenu-button[aria-expanded="true"] {
 	outline-style: none;
-	color: #FFFFFF;
-	border: 1px solid #FFFFFF;
-	background: #5CB85C;
+	color: #333333;
+	border: 1px solid #888888;
+	background: #ffffff !important;
 }
 
 .actionsDropdownButton {
@@ -989,17 +1022,17 @@ legend {
 }
 
 .actionsDropdownButton > input.ui-button {
-	border: 1px solid #93CEFF;
-	color: #93CEFF;
-	background: transparent;
+	border: 1px solid #555555;
+	color: #ffffff;
+	background: linear-gradient(to bottom, #3a3b3c 0%, #100000 100%) !important;
 	outline-style: none;
 	padding: 4px;
 }
 
 .actionsDropdownButton > input.ui-button:hover {
-	color: #FFFFFF;
-	border: 1px solid #FFFFFF;
-	background: #5CB85C;
+	color: #ffffff;
+	border: 1px solid #777777;
+	background: linear-gradient(to bottom, #4a4b4c 0%, #200000 100%) !important;
 }
 
 .actionsDropdownArrow {
@@ -1139,12 +1172,12 @@ legend {
 	display: inline-block;
 }
 
-.piinstall, .pienable, .pidisable, .piuninstall, .pierror {
+.piinstall, .pienable, .pidisable, .piuninstall, .pierror, .piforceremove {
 	padding: 0px 3px !important;
 }
 
 .linkEditMain, .linkEditMain:visited, .linkEditMain:active {
-	color: #ddd;
+	color: #1b7a3d;
 	text-decoration: none;
 	font-size: 12px;
 	white-space: nowrap;
@@ -1152,7 +1185,7 @@ legend {
 }
 
 .linkEditMain:hover {
-	color: yellow;
+	color: #333333;
 	white-space: nowrap;
 	text-decoration: none;
 }
@@ -1284,7 +1317,7 @@ tr>td.textInfo.right {
 	margin-left: auto;
 	margin-right: auto;
 	border-color: #222;
-	color: #ccc;
+	color: #333333;
 }
 
 .cactiInstallLoaderSpinnerTheme {
@@ -1305,6 +1338,103 @@ tr>td.textInfo.right {
 	border-color: #222;
 	background-image: linear-gradient(to bottom, #3a3b3c 0%, #100000 100%);
 	background-repeat: repeat-x;
+}
+
+/* jQuery UI selectmenu + autocomplete + dialog - match this theme's select2 /
+   html_start_box styling instead of the jquery-ui.css themeroller look. */
+.ui-selectmenu-button.ui-button {
+	background: #f5f5f5;
+	border: 1px solid #d3d3d3;
+	border-radius: 6px;
+	color: #555555;
+}
+
+.ui-selectmenu-button.ui-button:hover,
+.ui-selectmenu-button.ui-selectmenu-button-open {
+	background: #f5f5f5;
+	border-color: #d3d3d3;
+	color: #555555;
+}
+
+.ui-selectmenu-menu .ui-menu,
+.ui-menu.ui-autocomplete {
+	background: #f5f5f5;
+	border: 1px solid #d3d3d3;
+	color: #555555;
+}
+
+.ui-selectmenu-menu .ui-menu .ui-menu-item-wrapper,
+.ui-menu.ui-autocomplete .ui-menu-item-wrapper {
+	color: #555555;
+}
+
+.ui-selectmenu-menu .ui-menu .ui-state-focus,
+.ui-selectmenu-menu .ui-menu .ui-state-active,
+.ui-menu.ui-autocomplete .ui-state-focus,
+.ui-menu.ui-autocomplete .ui-state-active {
+	background: linear-gradient(to bottom, #3a3b3c 0%, #100000 100%);
+	border: 1px solid transparent;
+	color: #ffffff;
+}
+
+.ui-dialog {
+	padding: 0;
+	border: 1px solid #d3d3d3;
+	border-radius: 6px;
+	background: #f5f5f5;
+	color: #555555;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+	overflow: hidden;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+	border: 0;
+	border-radius: 0;
+	padding: 0 8px;
+	box-sizing: border-box;
+	height: 28px;
+	line-height: 28px;
+	background: linear-gradient(to bottom, #3a3b3c 0%, #100000 100%);
+	color: #ffffff;
+	font-size: 1em;
+	font-weight: bold;
+}
+
+.ui-dialog .ui-dialog-title {
+	font-weight: bold;
+	line-height: 28px;
+}
+
+.ui-dialog .ui-dialog-titlebar .ui-dialog-titlebar-close,
+.ui-dialog .ui-dialog-titlebar-close.ui-state-hover,
+.ui-dialog .ui-dialog-titlebar-close:hover,
+.ui-dialog .ui-dialog-titlebar-close:focus {
+	background: transparent;
+	border: 0;
+}
+
+.ui-dialog .ui-dialog-titlebar-close .ui-icon {
+	filter: brightness(0) invert(1);
+}
+
+.ui-dialog .ui-dialog-content {
+	background: #f5f5f5;
+	color: #555555;
+	padding: 14px 16px;
+	overflow: visible;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+	margin: 0;
+	border-top: 1px solid #d3d3d3;
+	background: #f5f5f5;
+	padding: 8px 12px;
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-button:first-child {
+	background: linear-gradient(to bottom, #3a3b3c 0%, #100000 100%);
+	color: #ffffff;
+	border-color: #222222;
 }
 
 .cactiTableTitle {
@@ -2162,12 +2292,13 @@ tr.selectable {
 	white-space: nowrap;
 }
 
+tr.selectable:hover a.linkEditMain,
 tr.selectable a.linkEditMain:hover {
-	color: blue;
+	color: #7ee787;
 }
 
 tr.selectable:hover:not(.selected) {
-	background: #444;
+	background: #1D1F21;
 	color: #fff;
 }
 
@@ -2239,6 +2370,10 @@ ul#nav {
 }
 
 @media print {
+	html {
+		--graph-print-background: #1d1f21;
+	}
+
 	.noprint {
 		display: none;
 	}
@@ -2504,10 +2639,6 @@ tr#realtime td:first-child {
 	left: 4px;
 	bottom: 4px;
 	background-color: white;
-	background-image: url('./images/cacti_logo.svg');
-	background-repeat: no-repeat;
-	background-size: 7px;
-	background-position: center;
 	-webkit-transition: .4s;
 	transition: .4s;
 }
@@ -2586,10 +2717,6 @@ input:checked + .checkboxSlider:before {
 	left: 4px;
 	bottom: 4px;
 	background-color: white;
-	background-image: url('./images/cacti_logo.svg');
-	background-repeat: no-repeat;
-	background-size: 7px;
-	background-position: center;
 	-webkit-transition: .4s;
 	transition: .4s;
 }
@@ -2827,8 +2954,8 @@ circle {
 	fill: transparent !important;
 }
 
-[id*='_edit'] .tableRowGraph:hover, .tableRowGraph:hover td {
-     background: none repeat scroll 0 0 rgba(200,200,200,0.8) !important;
+[id*='_edit'] .tableRowGraph:hover, .tableRowGraph:hover > td {
+     background: none repeat scroll 0 0 rgba(255,255,255,0.08) !important;
 }
 
 .tableRowGraph {
@@ -2837,7 +2964,404 @@ circle {
 
 .ui-state-default, .ui-selectmenu-button, .ui-button {
 	border: 1px solid #d3d3d3;
-	background: #111 !important;
+	background: #f5f5f5 !important;
 	font-weight: normal;
 	color: #555555;
+}
+
+.ui-button {
+	background: #5c5e60 !important;
+	color: #ffffff !important;
+	border: 1px solid #707274 !important;
+}
+
+.ui-button:hover, .ui-button:focus {
+	background: #6c6e70 !important;
+	background-image: none !important;
+	color: #ffffff !important;
+	border: 1px solid #808284 !important;
+}
+
+/* Secondary buttons (type=button): lighter than the primary submit buttons */
+input[type='button'].ui-button {
+	background: #e6e6e6 !important;
+	color: #555555 !important;
+	border: 1px solid #d3d3d3 !important;
+}
+
+input[type='button'].ui-button:hover, input[type='button'].ui-button:focus {
+	background: #dadada !important;
+	background-image: none !important;
+	color: #212121 !important;
+	border: 1px solid #999999 !important;
+}
+
+.ui-selectmenu-button, .ui-multiselect {
+	background: #ffffff !important;
+	color: #555555 !important;
+	border: 1px solid #bbbbbb !important;
+}
+
+.ui-selectmenu-button:hover, .ui-multiselect:hover {
+	background: #ffffff !important;
+	background-image: none !important;
+	color: #333333 !important;
+	border: 1px solid #888888 !important;
+}
+
+/* Select2 - adapt to look like a native Cacti/jQuery UI control.
+   Paper Plane is a dark theme; these overrides reuse its own dark
+   surface/text colors (see .ui-state-default / .ui-state-active in this
+   file) instead of the generic light jQuery UI palette. */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+	border: 1px solid #d3d3d3;
+	border-radius: 6px;
+	background: #f5f5f5;
+	color: #555555;
+}
+
+/* match jQuery UI's shorter button height */
+.select2-container--default .select2-selection--single {
+	height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	line-height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+	height: 22px;
+}
+
+/* match the multi-select (e.g. Templates) control to the single-select height;
+   flexbox centers content vertically regardless of font metrics */
+.select2-container--default .select2-selection--multiple {
+	min-height: 24px;
+	padding: 0 20px 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+	display: block;
+	flex: 1;
+	margin: 0;
+	padding-left: 8px;
+	overflow: hidden;
+	line-height: 24px;
+}
+
+/* select2-multi-count always replaces the rendered area with "N Selected" text;
+   only hide the inline search-while-typing box while closed (it doesn't fit
+   that display and was inflating the control's height) - let it reappear once
+   the dropdown opens, since that's the only place multi-selects can search from */
+select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.select2-container--open) .select2-search--inline {
+	display: none;
+}
+
+.select2-selection--multiple .select2-count-label {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* once open, let the search box sit on its own row below the current
+   selection instead of overlapping it */
+.select2-container--default .select2-selection--multiple .select2-search--inline {
+	display: block;
+	width: 100%;
+	margin: 4px 0 0;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+	width: 100% !important;
+	box-sizing: border-box;
+	margin: 0 !important;
+}
+
+/* select2 doesn't draw a dropdown arrow for multi-selects by default; add one to match */
+.select2-container--default .select2-selection--multiple::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	margin-top: -2px;
+	border-color: currentColor transparent transparent transparent;
+	border-style: solid;
+	border-width: 5px 4px 0 4px;
+	height: 0;
+	width: 0;
+	pointer-events: none;
+}
+
+.select2-container--default.select2-container--open .select2-selection--multiple::after {
+	border-color: transparent transparent currentColor transparent;
+	border-width: 0 4px 5px 4px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.select2-results__option {
+	white-space: nowrap;
+	min-height: 24px;
+	box-sizing: border-box;
+}
+
+/* keep the first 15 results visible before the list needs to scroll */
+.select2-container--default .select2-results > .select2-results__options {
+	max-height: 360px;
+}
+
+/* checkbox-style indicator for select2-multi-count option rows */
+.select2-results__option .select2-checkbox-option {
+	position: relative;
+	display: block;
+	padding-left: 20px;
+}
+
+.select2-results__option .select2-checkbox-option::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 13px;
+	height: 13px;
+	margin-top: -7px;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+	box-sizing: border-box;
+}
+
+/* select2 also (re)uses aria-selected for mouse-hover/keyboard highlight
+ * tracking, unrelated to actual selection - key off the --selected class
+ * instead, which setClasses() only ever sets from the real selected data */
+.select2-results__option.select2-results__option--selected .select2-checkbox-option::after {
+	content: '\2713';
+	position: absolute;
+	left: 2px;
+	top: 50%;
+	margin-top: -7px;
+	font-size: 11px;
+	line-height: 13px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered,
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+	color: #333333;
+}
+
+/* select2 keeps --focus set after the dropdown closes; only --open should get the active look */
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+	border-color: #888888;
+	background: #ffffff;
+	color: #333333;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+	border-top-color: #555555;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+	background: #3a3b3c;
+	border: 1px solid #d3d3d3;
+	color: #ffffff;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+	color: #ffffff;
+}
+
+.select2-dropdown {
+	border: 1px solid #d3d3d3;
+	background: #f5f5f5;
+	color: #555555;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field,
+.select2-container--default .select2-search--inline .select2-search__field {
+	border: 1px solid #d3d3d3;
+	background: #f5f5f5;
+	color: #555555;
+}
+
+.select2-container--default .select2-results__option--selected {
+	background: #3a3b3c;
+	color: #ffffff;
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+	background-image: linear-gradient(to bottom, #3a3b3c 0%, #100000 100%);
+	color: #ffffff;
+}
+/* ======================================================================== */
+/* jsTree glyph icons - node type colors, sizing, and open/close carets     */
+/* ======================================================================== */
+
+/* remove the indent/connector dotted lines (also disabled via dots:false)  */
+.jstree-default .jstree-node { background: transparent !important; }
+
+/* node type glyphs, centered in the 20px node row */
+.jstree-default .jstree-anchor > .jstree-themeicon {
+	background-image: none !important;
+	font-size: 14px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-sitemap { color: #546E7A; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-folder { color: #F9A825; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-building { color: #00897B; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-map-marker-alt { color: #E53935; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-server { color: #1E88E5; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-cubes { color: #8E24AA; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-database { color: #0097A7; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-chart-line { color: #388E3C; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-chart-bar { color: #F57C00; }
+.jstree-default .jstree-anchor > .jstree-themeicon.fa-chart-pie { color: #C2185B; }
+
+/* open/close carets as glyphs, centered to match the node glyphs */
+.jstree-default .jstree-ocl {
+	background: none !important;
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+	font-size: 14px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: middle;
+	color: #78909C;
+}
+.jstree-default .jstree-open > .jstree-ocl,
+.jstree-default .jstree-closed > .jstree-ocl { padding-top: 4px; }
+.jstree-default .jstree-closed > .jstree-ocl::before { content: "\f105"; }
+.jstree-default .jstree-open > .jstree-ocl::before { content: "\f107"; }
+.jstree-default .jstree-leaf > .jstree-ocl::before { content: ""; }
+
+/* Tree search box sits in the dark tree nav area - keep it dark with light text */
+#searcher {
+	background: #262626 !important;
+	color: #ffffff !important;
+	border: 1px solid #555555 !important;
+}
+
+/* Device status pills - translucent badges per state (matches the Deepness theme) */
+.deviceStatus {
+	display: inline-block;
+	padding: 1px 9px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 16px;
+	white-space: nowrap;
+}
+
+.deviceStatus.deviceUp {
+	background-color: rgba(46, 125, 50, 0.16);
+	border-color: rgba(46, 125, 50, 0.55);
+	color: #1b5e20 !important;
+}
+
+.deviceStatus.deviceDown {
+	background-color: rgba(198, 40, 40, 0.16);
+	border-color: rgba(198, 40, 40, 0.55);
+	color: #b71c1c !important;
+}
+
+.deviceStatus.deviceRecovering {
+	background-color: rgba(230, 126, 34, 0.16);
+	border-color: rgba(230, 126, 34, 0.55);
+	color: #d35400 !important;
+}
+
+.deviceStatus.deviceError {
+	background-color: rgba(123, 31, 162, 0.16);
+	border-color: rgba(123, 31, 162, 0.5);
+	color: #6a1b9a !important;
+}
+
+.deviceStatus.deviceUnknown {
+	background-color: rgba(21, 101, 192, 0.16);
+	border-color: rgba(21, 101, 192, 0.5);
+	color: #0d47a1 !important;
+}
+
+.deviceStatus.deviceDisabled {
+	background-color: rgba(97, 97, 97, 0.16);
+	border-color: rgba(97, 97, 97, 0.5);
+	color: #424242 !important;
+}
+
+/*
+ * Filter-table toggle switches (1.2.x). Render the raw filter checkboxes
+ * (<input type='checkbox'> directly inside a .filterTable wrapper) as on/off
+ * toggle switches styled to match this theme's form checkboxSlider, with the
+ * label text first and the switch second. form_checkbox() sliders (class
+ * 'formCheckbox') already render this way and are left untouched.
+ */
+.filterTable span:has(> input[type='checkbox']:not(.formCheckbox)),
+.filterTable div:has(> input[type='checkbox']:not(.formCheckbox)) {
+	display: inline-flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 6px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) {
+	-webkit-appearance: none;
+	appearance: none;
+	box-sizing: border-box;
+	position: relative;
+	flex: 0 0 auto;
+	width: 45px;
+	height: 24px;
+	margin: 0;
+	padding: 0;
+	border-radius: 24px !important;
+	background: #aaaaaa;
+	cursor: pointer;
+	vertical-align: middle;
+	transition: background 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox)::before {
+	content: '';
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #ffffff;
+	transition: transform 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked {
+	background: #3a3b3c;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked::before {
+	transform: translateX(20px);
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):focus-visible {
+	outline: 2px solid #3a3b3c;
+	outline-offset: 1px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) + label {
+	cursor: pointer;
 }

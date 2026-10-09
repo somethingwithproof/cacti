@@ -110,6 +110,26 @@ function updateNavigation() {
 		var menu_element = $('.cactiConsoleNavigationArea a[href^="'+window.location.pathname+'"').first();
 		if (menu_element.length !== 0) return midWinterNavigation(menu_element);
 	}
+
+	// Graph-only accounts and plugin pages may have no matching console menu.
+	let breadcrumbs = $('#breadcrumbs > li > a');
+	if (breadcrumbs.length === 0) {
+		return;
+	}
+
+	$('#navTitle .rubric, #navTitle .category, #navTitle .action').empty();
+	let slots = ['.rubric', '.category', '.action'];
+	breadcrumbs.each(function(index) {
+		let slot = Math.min(index, slots.length - 1);
+		let target = $('#navTitle ' + slots[slot]);
+		if (target.children().length) {
+			target.append(document.createTextNode(' / '));
+		}
+		target.append($(this).clone(false).removeAttr('id'));
+	});
+	$('#navTitle .separator').each(function(index) {
+		$(this).toggle(index < Math.min(breadcrumbs.length - 1, 2));
+	});
 }
 
 function setupTree() {
@@ -574,33 +594,11 @@ function setupDefaultElements() {
 
 	$('select.colordropdown').dropcolor();
 
-	$('select').not('.colordropdown').each(function() {
-		if ($(this).prop('multiple') != true) {
-			$(this).each(function() {
-				id = $(this).attr('id');
-
-				$(this).selectmenu({
-					open: function(event, ui) {
-						var instance = $(this).selectmenu('instance');
-						instance.menuInstance.focus(null, instance._getSelectedItem());
-					},
-					change: function(event, ui) {
-						$(this).val(ui.item.value).change();
-					},
-					position: {
-						my: "left top",
-						at: "left bottom",
-						collision: "flip"
-					},
-					width: false
-				});
-
-				$('#'+id+'-menu').css('max-height', '250px');
-			});
-		} else {
-			$(this).addClass('ui-state-default ui-corner-all');
-		}
-	});
+	/* jQuery UI selectmenu is superseded by select2, applied later in applySkin();
+	 * don't double-widgetize every select here, just keep multi-selects' outline */
+	$('select').not('.colordropdown').filter(function() {
+		return $(this).prop('multiple') === true;
+	}).addClass('ui-state-default ui-corner-all');
 
 	$('#host').off().autocomplete({
 		source: pageName+'?action=ajax_hosts',
@@ -735,7 +733,7 @@ function getDocumentAttribute(name) {
 }
 
 function setCookieValue(name, value) {
-	$.cookie(name, value.toString(), { expires: 365, path: urlPath + ';SameSite=Lax', secure: true });
+	$.cookie(name, value.toString(), { expires: 365, path: urlPath + ';SameSite=Lax', secure: (window.location.protocol === 'https:') });
 }
 
 function getCookieValue(name) {

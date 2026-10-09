@@ -79,6 +79,12 @@ switch (get_request_var('action')) {
 		break;
 }
 
+/**
+ * Handles the automation template dnd. Used as part of Cacti's automation templates
+ * functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_template_dnd() {
 	/* ================= Input validation ================= */
 	get_filter_request_var('id');
@@ -105,19 +111,39 @@ function automation_template_dnd() {
 	exit;
 }
 
+/**
+ * Handles the automation movedown. Used as part of Cacti's automation templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_movedown() {
 	move_item_down('automation_templates', get_filter_request_var('id'));
 }
 
+/**
+ * Handles the automation moveup. Used as part of Cacti's automation templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_moveup() {
 	move_item_up('automation_templates', get_filter_request_var('id'));
 }
 
+/**
+ * Handles the automation remove. Used as part of Cacti's automation templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function automation_remove() {
 	db_execute_prepared('DELETE FROM automation_templates WHERE id = ?', array(get_filter_request_var('id')));
 }
 
 
+/**
+ * Handles the form actions. Used as part of Cacti's automation templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_actions() {
 	global $at_actions;
 
@@ -194,6 +220,11 @@ function form_actions() {
 	bottom_footer();
 }
 
+/**
+ * Handles the form save. Used as part of Cacti's automation templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function form_save() {
 	if (isset_request_var('save_component_template')) {
 		$redirect_back = false;
@@ -228,6 +259,17 @@ function form_save() {
 	}
 }
 
+/**
+ * Handles the automation get child branches. Used as part of Cacti's automation templates
+ * functionality.
+ *
+ * @param int $tree_id The tree ID.
+ * @param int $id The ID.
+ * @param string $spaces The spaces.
+ * @param array $headers The headers.
+ *
+ * @return array An array of results.
+ */
 function automation_get_child_branches($tree_id, $id, $spaces, $headers) {
 	$items = db_fetch_assoc_prepared('SELECT id, title
 		FROM graph_tree_items
@@ -249,6 +291,12 @@ function automation_get_child_branches($tree_id, $id, $spaces, $headers) {
 	return $headers;
 }
 
+/**
+ * Handles the automation get tree headers. Used as part of Cacti's automation templates
+ * functionality.
+ *
+ * @return array An array of results.
+ */
 function automation_get_tree_headers() {
 	$headers = array();
 	$trees   = db_fetch_assoc('SELECT id, name FROM graph_tree ORDER BY name');
@@ -261,6 +309,11 @@ function automation_get_tree_headers() {
 	return $headers;
 }
 
+/**
+ * Handles the template edit. Used as part of Cacti's automation templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function template_edit() {
 	global $availability_options;
 
@@ -357,6 +410,11 @@ function template_edit() {
 	form_save_button('automation_templates.php');
 }
 
+/**
+ * Handles the template. Used as part of Cacti's automation templates functionality.
+ *
+ * @return void No value is returned.
+ */
 function template() {
 	global $at_actions, $item_rows, $availability_options;
 
@@ -418,7 +476,7 @@ function template() {
 					</td>
 					<td>
 						<span>
-							<input type='button' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
+							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
 							<input type='button' class='ui-button ui-corner-all ui-widget' id='clear' value='<?php print __esc('Clear');?>' title='<?php print __esc('Clear Filters');?>'>
 						</span>
 					</td>
@@ -441,10 +499,6 @@ function template() {
 			}
 
 			$(function() {
-				$('#refresh').on('click', function() {
-					applyFilter();
-				});
-
 				$('#rows').on('change', function() {
 					applyFilter();
 				});
@@ -531,13 +585,13 @@ function template() {
 			if (read_config_option('drag_and_drop') == '') {
 				$add_text = '';
 				if ($i < $total_items && $total_items > 1) {
-					$add_text .= '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="' . html_escape('automation_templates.php?action=movedown&id=' . $dt['id']) . '" title="' . __esc('Move Down') . '"></a>';
+					$add_text .= '<a class="pic fa fa-caret-down moveArrow cactiPostAction" href="#" data-url="' . html_escape('automation_templates.php?action=movedown&id=' . $dt['id']) . '" title="' . __esc('Move Down') . '"></a>';
 				} else {
 					$add_text .= '<span class="moveArrowNone"></span>';
 				}
 
 				if ($i > 1 && $i <= $total_items) {
-					$add_text .= '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="' . html_escape('automation_templates.php?action=moveup&id=' . $dt['id']) . '" title="' . __esc('Move Up') . '"></a>';
+					$add_text .= '<a class="pic fa fa-caret-up moveArrow cactiPostAction" href="#" data-url="' . html_escape('automation_templates.php?action=moveup&id=' . $dt['id']) . '" title="' . __esc('Move Up') . '"></a>';
 				} else {
 					$add_text .= '<span class="moveArrowNone"></span>';
 				}
