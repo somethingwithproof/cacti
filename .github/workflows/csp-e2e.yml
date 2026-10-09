@@ -55,6 +55,14 @@ on:
       - automation_tree_rules.php
       - user_admin.php
       - user_group_admin.php
+      - graphs.php
+      - graphs_items.php
+      - graphs_new.php
+      - aggregate_graphs.php
+      - data_debug.php
+      - data_sources.php
+      - rrdcheck.php
+      - rrdcleaner.php
       - tests/integration/**
       - tests/e2e/**
       - .github/workflows/csp-e2e.yml
@@ -231,6 +239,11 @@ jobs:
         run: |
           docker compose exec -T mariadb mariadb -ucactiuser -pcactipass cacti -e "UPDATE user_auth SET password_change='on' WHERE username='admin';"
           node ./node_modules/@playwright/test/cli.js test tests/auth-form-semantics.spec.ts
+      - name: Run graph and data filter accessibility regressions
+        working-directory: tests/e2e
+        run: |
+          docker compose exec -T php php cli/add_device.php --description="E2E filter device" --ip=127.0.0.1 --template=0 --version=0 --avail=none --disable=1
+          node ./node_modules/@playwright/test/cli.js test tests/graph-data-filters.spec.ts
 
       - name: Run Playwright suite (plugin CSP -- thold + monitor)
         working-directory: tests/e2e
