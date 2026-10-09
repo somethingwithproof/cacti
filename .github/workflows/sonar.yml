@@ -63,6 +63,20 @@ jobs:
             args="-Dsonar.branch.name=$REF_NAME"
           fi
           echo "args=$args" >> "$GITHUB_OUTPUT"
+      - name: Use the official Docker Hub image cache
+        if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
+        run: |
+          set -euo pipefail
+          configuration="$RUNNER_TEMP/cacti-docker-daemon.json"
+          if sudo test -f /etc/docker/daemon.json; then
+            sudo cat /etc/docker/daemon.json > "$configuration"
+          else
+            printf '%s\n' '{}' > "$configuration"
+          fi
+          jq '."registry-mirrors" = (["https://mirror.gcr.io"] + (."registry-mirrors" // []) | unique)' "$configuration" > "$configuration.tmp"
+          sudo install -m 644 "$configuration.tmp" /etc/docker/daemon.json
+          sudo systemctl restart docker
+          docker info --format '{{json .RegistryConfig.Mirrors}}'
       - name: Set up PHP for static browser fixtures
         if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
@@ -132,6 +146,9 @@ jobs:
             export CACTI_GENERAL_MENU_FIXTURE="$RUNNER_TEMP/cacti-general-menu.html"
             docker compose exec -T php php tests/fixtures/Core/GeneralMenuProbe.php > "$CACTI_GENERAL_MENU_FIXTURE"
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/editor-rendering-semantics.spec.ts
+          fi
+          if [[ -f tests/remaining-filter-labels.spec.ts ]]; then
+            node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/remaining-filter-labels.spec.ts
           fi
           node report-browser-coverage.js "$CACTI_BROWSER_COVERAGE_DIR" coverage/sonar-browser.xml
           node report-php-coverage.js ../../cache/php-coverage coverage/sonar-php.xml
