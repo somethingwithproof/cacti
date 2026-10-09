@@ -39,6 +39,14 @@ on:
       - graph_templates.php
       - vdef.php
       - host_templates.php
+      - host.php
+      - sites.php
+      - pollers.php
+      - plugins.php
+      - links.php
+      - user_domains.php
+      - managers.php
+      - lib/clog_webapi.php
       - tests/integration/**
       - tests/e2e/**
       - .github/workflows/csp-e2e.yml
@@ -201,6 +209,9 @@ jobs:
           # under test identical to the checkout after seeding its DB records.
           git -C ../.. restore --source=HEAD --worktree -- scripts/ss_hstats.php scripts/ping.pl resource/snmp_queries/interface.xml
           node ./node_modules/@playwright/test/cli.js test tests/template-filter-labels.spec.ts
+      - name: Run operator filter accessibility regressions
+        working-directory: tests/e2e
+        run: node ./node_modules/@playwright/test/cli.js test tests/admin-filter-labels.spec.ts
 
       - name: Run Playwright suite (plugin CSP -- thold + monitor)
         working-directory: tests/e2e
