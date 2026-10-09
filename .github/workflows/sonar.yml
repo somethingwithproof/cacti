@@ -122,6 +122,9 @@ jobs:
             docker compose exec -T php php cli/add_device.php --description="E2E filter device" --ip=127.0.0.1 --template=0 --version=0 --avail=none --disable=1
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/graph-data-filters.spec.ts
           fi
+          if [[ -f tests/shared-filter-semantics.spec.ts ]]; then
+            node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/shared-filter-semantics.spec.ts
+          fi
           node report-browser-coverage.js "$CACTI_BROWSER_COVERAGE_DIR" coverage/sonar-browser.xml
           node report-php-coverage.js ../../cache/php-coverage coverage/sonar-php.xml
       - name: Select measured coverage report
