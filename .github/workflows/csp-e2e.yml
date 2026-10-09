@@ -63,6 +63,16 @@ on:
       - data_sources.php
       - rrdcheck.php
       - rrdcleaner.php
+      - lib/api_automation.php
+      - tree.php
+      - lib/html.php
+      - lib/html_tree.php
+      - lib/html_graph.php
+      - graph_view.php
+      - index.php
+      - include/top_header.php
+      - include/top_general_header.php
+      - utilities.php
       - tests/integration/**
       - tests/e2e/**
       - .github/workflows/csp-e2e.yml
@@ -244,6 +254,9 @@ jobs:
         run: |
           docker compose exec -T php php cli/add_device.php --description="E2E filter device" --ip=127.0.0.1 --template=0 --version=0 --avail=none --disable=1
           node ./node_modules/@playwright/test/cli.js test tests/graph-data-filters.spec.ts
+      - name: Run shared filter and tree semantics regressions
+        working-directory: tests/e2e
+        run: node ./node_modules/@playwright/test/cli.js test tests/shared-filter-semantics.spec.ts
 
       - name: Run Playwright suite (plugin CSP -- thold + monitor)
         working-directory: tests/e2e
