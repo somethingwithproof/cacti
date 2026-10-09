@@ -65,7 +65,7 @@ jobs:
           echo "args=$args" >> "$GITHUB_OUTPUT"
       - name: Set up PHP for static browser fixtures
         if: hashFiles('tests/e2e/tests/client-state.spec.ts') != ''
-        uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           php-version: '8.2'
           coverage: none
@@ -105,6 +105,9 @@ jobs:
             docker compose exec -T php php cli/import_package.php --filename=install/templates/Generic_SNMP_Device.xml.gz
             git -C ../.. restore --source=HEAD --worktree -- scripts/ss_hstats.php scripts/ping.pl resource/snmp_queries/interface.xml
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/template-filter-labels.spec.ts
+          fi
+          if [[ -f tests/admin-filter-labels.spec.ts ]]; then
+            node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/admin-filter-labels.spec.ts
           fi
           node report-browser-coverage.js "$CACTI_BROWSER_COVERAGE_DIR" coverage/sonar-browser.xml
           node report-php-coverage.js ../../cache/php-coverage coverage/sonar-php.xml
