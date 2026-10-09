@@ -79,6 +79,22 @@ RUN set -eux; \
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Coverage is opt-in for the disposable CI fixture. Regular E2E runs retain
+# the same PHP runtime; no application image or configuration is changed.
+ARG CACTI_E2E_COVERAGE=0
+COPY php-coverage.php /usr/local/lib/cacti-e2e-coverage.php
+RUN set -eux; if [ "${CACTI_E2E_COVERAGE}" = "1" ]; then \
+        apk add --no-cache --virtual .coverage-build-deps $PHPIZE_DEPS; \
+        pecl install pcov-1.0.12; \
+        docker-php-ext-enable pcov; \
+        apk del --no-network .coverage-build-deps; \
+        printf '%s\n' \
+            'pcov.enabled=1' \
+            'pcov.directory=/var/www/html/cacti' \
+            'auto_prepend_file=/usr/local/lib/cacti-e2e-coverage.php' \
+            > /usr/local/etc/php/conf.d/cacti-e2e-coverage.ini; \
+    fi
+
 WORKDIR /var/www/html/cacti
 
 EXPOSE 9000
