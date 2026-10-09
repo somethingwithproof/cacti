@@ -69,7 +69,7 @@ jobs:
           set -euo pipefail
           configuration="$RUNNER_TEMP/cacti-docker-daemon.json"
           if sudo test -f /etc/docker/daemon.json; then
-            sudo cat /etc/docker/daemon.json > "$configuration"
+            sudo cat /etc/docker/daemon.json | tee "$configuration" > /dev/null
           else
             printf '%s\n' '{}' > "$configuration"
           fi
