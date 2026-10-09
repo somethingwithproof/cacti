@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+name: SonarQube
+
+on:
+  push:
+    branches: [develop, 1.2.x]
+  pull_request:
+    branches: [develop, 1.2.x]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sonar-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: SonarQube analysis
+    if: >-
+      github.repository == 'somethingwithproof/cacti' &&
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'pull_request' ||
+       github.event.pull_request.head.repo.full_name == github.repository) &&
+      (github.event_name != 'workflow_dispatch' ||
+       github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/1.2.x')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify analysis credential
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [[ -z "$SONAR_TOKEN" ]]; then
+            echo '::error::SONAR_TOKEN must be configured in repository Actions secrets.'
+            exit 1
+          fi
+      # The scanner detects branch/PR context from GitHub Actions. In particular,
+      # 1.2.x must be reported as its own branch rather than overwriting develop.
+      - name: Analyze and wait for the quality gate
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >-
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=600
