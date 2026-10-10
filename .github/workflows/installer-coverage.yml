@@ -5,9 +5,14 @@ on:
     branches: [develop]
     paths:
       - '.github/workflows/installer-coverage.yml'
+      - '.github/actions/setup-php-composer/**'
+      - '.github/actions/setup-ci-docker/**'
+      - 'composer.json'
+      - 'composer.lock'
       - 'cacti.sql'
       - 'cli/convert_tables.php'
       - 'cli/install_cacti.php'
+      - 'cli/upgrade_database.php'
       - 'docker/**'
       - 'install/**'
       - 'lib/import.php'
@@ -17,15 +22,21 @@ on:
       - 'tests/Unit/Installer/**'
       - 'tests/Unit/Security/Csrf/InstallerCsrfRecoveryTest.php'
       - 'tests/e2e/installer_resilience_docker.sh'
+      - 'tests/e2e/installer_failure_paths.php'
       - 'tests/fixtures/InstallerCliProbe.php'
       - 'tests/integration/Installer*.php'
   pull_request:
     branches: [develop]
     paths:
       - '.github/workflows/installer-coverage.yml'
+      - '.github/actions/setup-php-composer/**'
+      - '.github/actions/setup-ci-docker/**'
+      - 'composer.json'
+      - 'composer.lock'
       - 'cacti.sql'
       - 'cli/convert_tables.php'
       - 'cli/install_cacti.php'
+      - 'cli/upgrade_database.php'
       - 'docker/**'
       - 'install/**'
       - 'lib/import.php'
@@ -35,6 +46,7 @@ on:
       - 'tests/Unit/Installer/**'
       - 'tests/Unit/Security/Csrf/InstallerCsrfRecoveryTest.php'
       - 'tests/e2e/installer_resilience_docker.sh'
+      - 'tests/e2e/installer_failure_paths.php'
       - 'tests/fixtures/InstallerCliProbe.php'
       - 'tests/integration/Installer*.php'
   workflow_dispatch:
@@ -111,6 +123,9 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Set up Docker with the public registry cache
+        uses: ./.github/actions/setup-ci-docker
 
       - name: Run fresh, upgrade, CLI, and background scenarios
         run: tests/e2e/installer_resilience_docker.sh

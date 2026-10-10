@@ -184,9 +184,9 @@ function db_connect_real(string $device, string $user, string $pass, string $db_
 
 			$ver = db_get_global_variable('version', $cnn_id);
 
-			if (str_contains($ver, 'MariaDB')) {
+			if (stripos($ver, 'MariaDB') !== false) {
 				$srv              = 'MariaDB';
-				$ver              = str_replace('-MariaDB', '', $ver);
+				$ver              = str_ireplace('-MariaDB', '', $ver);
 				$required_modes[] = 'NO_ENGINE_SUBSTITUTION';
 			} else {
 				$srv = 'MySQL';
@@ -1001,7 +1001,7 @@ function db_fetch_insert_id(mixed $db_conn = false) : mixed {
 		}
 	}
 
-	if (is_object($db_conn)) {
+	if ($db_conn instanceof PDO) {
 		return $db_conn->lastInsertId();
 	}
 
@@ -1442,7 +1442,7 @@ function db_cacti_initialized(bool $is_web = true) : bool {
 		$db_conn = false;
 	}
 
-	if (!is_object($db_conn)) {
+	if (!($db_conn instanceof PDO)) {
 		return false;
 	}
 
@@ -1496,7 +1496,8 @@ function db_column_exists(string $table, string $column, bool $log = true, mixed
 		return $results[$index][$table][$column];
 	}
 
-	$results[$index][$table][$column] = (db_fetch_cell("SHOW columns FROM `$table` LIKE '$column'", '', $log, $db_conn) ? true : false);
+	// GHSA-rp5g-r5vp-q7j6: this helper validates attacker-supplied identifiers, so its own LIKE term must be quoted on the same connection that runs the query.
+	$results[$index][$table][$column] = (db_fetch_cell("SHOW columns FROM `$table` LIKE " . db_qstr($column, $db_conn), '', $log, $db_conn) ? true : false);
 
 	return $results[$index][$table][$column];
 }
@@ -1628,6 +1629,17 @@ function db_update_table(string $table, array $data, bool $removecolumns = false
 		}
 	}
 
+	// Backward compatibility: fold a legacy unique_keys[] definition into keys[]
+	// with the unique flag so the shared key handling below applies to it.
+	if (isset($data['unique_keys']) && is_array($data['unique_keys'])) {
+		foreach ($data['unique_keys'] as $unique_key) {
+			$unique_key['unique'] = true;
+			$data['keys'][]       = $unique_key;
+		}
+
+		unset($data['unique_keys']);
+	}
+
 	if (!db_table_exists($table, $log, $db_conn)) {
 		return db_table_create($table, $data, $log, $db_conn);
 	}
@@ -1728,7 +1740,6 @@ function db_update_table(string $table, array $data, bool $removecolumns = false
 			$columns_changed = true;
 		} else {
 			// Check that column is correct and fix it
-			// FIXME: Need to still check default value
 			$arr = db_fetch_row("SHOW columns FROM `$table` LIKE '" . $column['name'] . "'", $log, $db_conn);
 
 			$arr = array_change_key_case(is_array($arr) ? $arr : [], CASE_LOWER);
@@ -1742,10 +1753,32 @@ function db_update_table(string $table, array $data, bool $removecolumns = false
 				$arr['unsigned'] = true;
 			}
 
+			// Detect drift in the column default (e.g. DEFAULT NULL vs DEFAULT '')
+			// which the type/NULL/unsigned/auto_increment checks below do not catch.
+			// Date/time defaults are represented differently by the server, so they
+			// are left to the type comparison to avoid needless churn.
+			$default_differs = false;
+			$live_default    = $arr['default'] ?? null;
+
+			if (isset($column['default'])) {
+				if (!in_array(cacti_strtolower($column['type']), ['timestamp', 'datetime', 'date'], true)) {
+					if ($live_default === null) {
+						$default_differs = true;
+					} elseif (is_numeric($column['default']) && is_numeric($live_default)) {
+						$default_differs = ($column['default'] != $live_default);
+					} else {
+						$default_differs = (strval($column['default']) !== strval($live_default));
+					}
+				}
+			} elseif (isset($column['NULL']) && $column['NULL'] === true) {
+				$default_differs = ($live_default !== null);
+			}
+
 			if ($column['type'] != $arr['type'] || (isset($column['NULL']) && ($column['NULL'] ? 'YES' : 'NO') != ($arr['null'] ?? ''))
 				|| (((!isset($column['unsigned']) || !$column['unsigned']) && isset($arr['unsigned']))
 					|| (isset($column['unsigned']) && $column['unsigned'] && !isset($arr['unsigned'])))
-				|| (isset($column['auto_increment']) && ($column['auto_increment'] ? 'auto_increment' : '') != ($arr['extra'] ?? ''))) {
+				|| (isset($column['auto_increment']) && ($column['auto_increment'] ? 'auto_increment' : '') != ($arr['extra'] ?? ''))
+				|| $default_differs) {
 				$alter_clauses[] = 'CHANGE `' . $column['name'] . '` ' . $column_definition($column, false);
 				$columns_changed = true;
 			}
@@ -1906,6 +1939,17 @@ function db_table_create(string $table, array $data, bool $log = true, mixed $db
 		if (!is_object($db_conn)) {
 			return false;
 		}
+	}
+
+	// Backward compatibility: fold a legacy unique_keys[] definition into keys[]
+	// with the unique flag so the shared key handling below applies to it.
+	if (isset($data['unique_keys']) && is_array($data['unique_keys'])) {
+		foreach ($data['unique_keys'] as $unique_key) {
+			$unique_key['unique'] = true;
+			$data['keys'][]       = $unique_key;
+		}
+
+		unset($data['unique_keys']);
 	}
 
 	if (!db_table_exists($table, $log, $db_conn)) {
@@ -2080,12 +2124,12 @@ function db_begin_transaction(mixed $db_conn = false) : bool {
 	global $database_sessions, $database_default, $database_hostname, $database_port;
 
 	// check for a connection being passed, if not use legacy behavior
-	if (!is_object($db_conn)) {
+	if (!($db_conn instanceof PDO)) {
 		if (isset($database_sessions["$database_hostname:$database_port:$database_default"])) {
 			$db_conn = $database_sessions["$database_hostname:$database_port:$database_default"];
 		}
 
-		if (!is_object($db_conn)) {
+		if (!($db_conn instanceof PDO)) {
 			return false;
 		}
 	}
@@ -2104,12 +2148,12 @@ function db_commit_transaction(mixed $db_conn = false) : bool {
 	global $database_sessions, $database_default, $database_hostname, $database_port;
 
 	// check for a connection being passed, if not use legacy behavior
-	if (!is_object($db_conn)) {
+	if (!($db_conn instanceof PDO)) {
 		if (isset($database_sessions["$database_hostname:$database_port:$database_default"])) {
 			$db_conn = $database_sessions["$database_hostname:$database_port:$database_default"];
 		}
 
-		if (!is_object($db_conn)) {
+		if (!($db_conn instanceof PDO)) {
 			return false;
 		}
 	}
@@ -2136,12 +2180,12 @@ function db_rollback_transaction(mixed $db_conn = false) : bool {
 	global $database_sessions, $database_default, $database_hostname, $database_port;
 
 	// check for a connection being passed, if not use legacy behavior
-	if (!is_object($db_conn)) {
+	if (!($db_conn instanceof PDO)) {
 		if (isset($database_sessions["$database_hostname:$database_port:$database_default"])) {
 			$db_conn = $database_sessions["$database_hostname:$database_port:$database_default"];
 		}
 
-		if (!is_object($db_conn)) {
+		if (!($db_conn instanceof PDO)) {
 			return false;
 		}
 	}
@@ -2422,7 +2466,7 @@ function db_qstr(mixed $s, mixed $db_conn = false) : string {
 		return 'NULL';
 	}
 
-	if (is_object($db_conn)) {
+	if ($db_conn instanceof PDO) {
 		return $db_conn->quote($s);
 	}
 
@@ -2822,7 +2866,7 @@ function db_get_permissions(bool $include_unknown = false, bool $log = false, mi
 							$db_grant_perms = preg_split('/,[ ]*/', $db_grant_match[1]);
 
 							if (cacti_sizeof($db_grant_perms)) {
-								foreach ($db_grant_perms as $db_grant_perm) {
+								foreach (($db_grant_perms ?: []) as $db_grant_perm) {
 									$db_grant_perm = cacti_strtoupper($db_grant_perm);
 
 									if ($db_grant_perm == 'ALL' ||
@@ -2914,9 +2958,9 @@ function get_mysql_info(int $poller_id = 1) : array {
 		$variables = array_rekey(db_fetch_assoc('SHOW GLOBAL VARIABLES', false, $local_db_cnn_id), 'Variable_name', 'Value');
 	}
 
-	if (str_contains($variables['version'], 'MariaDB')) {
+	if (stripos($variables['version'], 'MariaDB') !== false) {
 		$database = 'MariaDB';
-		$version  = str_replace('-MariaDB', '', $variables['version']);
+		$version  = str_ireplace('-MariaDB', '', $variables['version']);
 
 		if (isset($variables['innodb_version'])) {
 			$link_ver = substr($variables['innodb_version'], 0, 3);

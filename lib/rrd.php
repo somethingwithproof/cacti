@@ -2377,6 +2377,32 @@ function rrdtool_resolve_graph_text(string $value, array $graph, array $graph_it
 	return (string) $resolver($value, $graph, $graph_item);
 }
 
+/**
+ * Return the established graph failure response for an invalid CDEF.
+ *
+ * @param array         $graph_data_array Graph output options
+ * @param int           $cdef_id          Invalid CDEF identifier
+ * @param int           $graph_id         Graph identifier
+ * @param callable|null $error_image      Test seam for the image renderer
+ *
+ * @return string|false
+ */
+function rrdtool_invalid_cdef_response(array $graph_data_array, int $cdef_id, int $graph_id, ?callable $error_image = null) : string|false {
+	$message = __('ERROR: Invalid CDEF %d for graph %d.', $cdef_id, $graph_id);
+
+	if (isset($graph_data_array['export_csv'])) {
+		return false;
+	}
+
+	if (isset($graph_data_array['get_error']) || isset($graph_data_array['print_source'])) {
+		return $message;
+	}
+
+	$error_image ??= 'rrdtool_create_error_image';
+
+	return $error_image($message);
+}
+
 function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph_data_array,
 	mixed $rrdtool_pipe = null, mixed &$xport_meta = [], int $user = 0) : mixed {
 	global $consolidation_functions, $graph_item_types, $encryption;
@@ -2757,15 +2783,16 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 			}
 
 			// cache cdef value here to support data query variables in the cdef string
-			if (empty($graph_item['cdef_id'])) {
-				$graph_item['cdef_cache']      = '';
-				$graph_items[$j]['cdef_cache'] = '';
-			} else {
-				$cdef = get_cdef($graph_item['cdef_id']);
+			$cdef = empty($graph_item['cdef_id']) ? '' : get_cdef($graph_item['cdef_id']);
 
-				$graph_item['cdef_cache']      = $cdef;
-				$graph_items[$j]['cdef_cache'] = $cdef;
+			if ($cdef === null) {
+				cacti_log('ERROR: Invalid CDEF ' . $graph_item['cdef_id'] . ' for graph ' . $local_graph_id . '; graph rendering aborted.', true, 'RRD');
+
+				return rrdtool_invalid_cdef_response($graph_data_array, (int) $graph_item['cdef_id'], $local_graph_id);
 			}
+
+			$graph_item['cdef_cache']      = $cdef;
+			$graph_items[$j]['cdef_cache'] = $cdef;
 
 			// cache vdef value here
 			if (empty($graph_item['vdef_id'])) {
@@ -2945,6 +2972,7 @@ function rrdtool_function_graph(int $local_graph_id, mixed $rra_id, array $graph
 			if ($graph_item['cdef_id'] > 0 && !isset($cdef_cache[$cdef_cache_key])) {
 				/** @var string $cdef_string */
 				$cdef_string  = $graph_variables['cdef_cache'][$graph_item['graph_templates_item_id']];
+
 				$magic_item   = [];
 				$already_seen = [];
 				$sources_seen = [];
@@ -3955,7 +3983,7 @@ function rrdtool_function_theme_font_options(array &$graph_data_array) : string 
 			}
 		}
 
-		if (isset(${$themeborder}) && cacti_version_compare($rrdversion, '1.4', '>=')) { // @phpstan-ignore-line
+		if (isset(${$themeborder}) && cacti_version_compare($rrdversion, '1.4', '>=')) {
 			$graph_opts .= '--border ' . ${$themeborder} . RRD_NL; // @phpstan-ignore-line
 		}
 
@@ -4978,7 +5006,7 @@ function rrd_datasource_add(array $file_array, array $ds_array, bool $debug) : m
 			 * version 0003 => RRDtool 1.2.x, 1.3.x, 1.4.x, 1.5.x, 1.6.x
 			 */
 			$version_node = $dom->getElementsByTagName('version')->item(0);
-			$version      = $version_node !== null ? trim($version_node->nodeValue) : RRD_FILE_VERSION3;
+			$version      = $version_node !== null ? trim((string) $version_node->nodeValue) : RRD_FILE_VERSION3;
 
 			// now start XML processing
 			foreach ($ds_array as $ds) {
@@ -5552,7 +5580,8 @@ function rrdtool_create_error_image(string $string, mixed $width = '', mixed $he
 		$font_file = 'C:/Windows/Fonts/Arial.ttf';
 	}
 
-	$themefile  = CACTI_PATH_INCLUDE . '/themes/' . get_selected_theme() . '/rrdtheme.php';
+	// GHSA-mpfm-qhvj-5879: get_selected_theme() bypasses the theme allowlist, so validate it before it builds an include path.
+	$themefile  = CACTI_PATH_INCLUDE . '/themes/' . cacti_validate_theme(get_selected_theme()) . '/rrdtheme.php';
 
 	if (file_exists($themefile) && is_readable($themefile)) {
 		include($themefile);

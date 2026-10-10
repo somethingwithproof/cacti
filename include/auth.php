@@ -60,9 +60,11 @@ if (is_install_needed() && !defined('IN_CACTI_INSTALL')) {
 
 /**
  * The logout page does not require authentication
- * so, short cut the process.
+ * so, short cut the process. login_sso.php is the public SAML2/OpenID
+ * redirect+callback endpoint: every request to it is, by definition, still
+ * unauthenticated, so it must never hit the login-page redirect below.
  */
-if (get_current_page() == 'logout.php' || get_current_page() == 'auth_changepassword.php' || get_current_page() == 'auth_resetpassword.php') {
+if (get_current_page() == 'logout.php' || get_current_page() == 'auth_changepassword.php' || get_current_page() == 'auth_resetpassword.php' || get_current_page() == 'login_sso.php') {
 	return true;
 }
 
@@ -142,7 +144,9 @@ if ($auth_method == AUTH_METHOD_BASIC && !isset($_SESSION[SESS_USER_ID])) {
 				VALUES (?, ?, 1, ?, NOW())',
 				[$username, $current_user['id'], $_SESSION[SESS_CLIENT_ADDR]]);
 
-			return true;
+			// GHSA-4rmr-wvjq-qxc2: fall through to the per-page realm check below
+			// instead of returning, so a Basic Auth login still has its
+			// authorization verified for the requested page.
 		} else {
 			require_once(CACTI_PATH_BASE . '/auth_login.php');
 		}
@@ -197,7 +201,9 @@ if (isset($guest_account)) {
 			WHERE id = ?',
 			[$_SESSION[SESS_USER_ID]]);
 
-		return true;
+		// GHSA-4rmr-wvjq-qxc2: fall through to the per-page realm check below
+		// instead of returning, so the guest account's access to this page is
+		// authorized rather than assumed.
 	}
 }
 
@@ -399,4 +405,9 @@ if (empty($_SESSION[SESS_USER_ID])) {
 		FROM user_auth
 		WHERE id = ?',
 		[$_SESSION[SESS_USER_ID]]);
+
+	// Handle saved filter-layout AJAX (save/rename/delete/publish) posted to
+	// any filter page, now that the user is authenticated and authorized for
+	// the current page. Returns immediately for all non-layout requests.
+	filter_layouts_handle_request();
 }

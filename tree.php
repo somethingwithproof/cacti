@@ -134,11 +134,26 @@ switch (grv('action')) {
 
 		break;
 	case 'lock':
+		// GHSA-73qf-hq23-c4m7: lock/unlock/get_node reached api_tree_* with no owner check; gate them like the node write actions.
+		if (!is_tree_allowed((int) grv('id'))) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+
+			exit;
+		}
+
 		api_tree_lock(grv('id'), $_SESSION[SESS_USER_ID]);
 		tree_edit(true);
 
 		break;
 	case 'unlock':
+		if (!is_tree_allowed((int) grv('id'))) {
+			raise_message('tree_idor', __('You do not have permission to modify this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+
+			exit;
+		}
+
 		api_tree_unlock(grv('id'), $_SESSION[SESS_USER_ID]);
 		tree_edit(true);
 
@@ -199,6 +214,13 @@ switch (grv('action')) {
 
 		break;
 	case 'get_node':
+		if (!is_tree_allowed((int) grv('tree_id'))) {
+			raise_message('tree_idor', __('You do not have permission to view this tree.'), MESSAGE_LEVEL_ERROR);
+			header('Location: tree.php');
+
+			exit;
+		}
+
 		api_tree_get_node(grv('tree_id'), grv('id'));
 
 		break;
@@ -641,7 +663,7 @@ function sort_recursive(int $branch, int $tree_id) : void {
 }
 
 function leaves_exist(int $parent, int $tree_id) : int {
-	return db_fetch_assoc_prepared('SELECT COUNT(*)
+	return (int) db_fetch_cell_prepared('SELECT COUNT(*)
 		FROM graph_tree_items
 		WHERE graph_tree_id = ?
 		AND parent = ?
@@ -1219,16 +1241,19 @@ function tree_edit(bool $partial = false) : void {
 			$("#ctree").jstree({
 				'types' : {
 					'site' : {
-						icon : 'images/site.png',
+						icon : 'ti ti-building',
 						max_children : 0
 					},
 					'device' : {
-						icon : 'images/server.png',
+						icon : 'ti ti-server',
 						max_children : 0
 					},
 					'graph' : {
-						icon : 'images/server_chart_curve.png',
+						icon : 'ti ti-chart-line',
 						max_children : 0
+					},
+					'default' : {
+						icon : 'ti ti-folder'
 					}
 				},
 				'contextmenu' : {
@@ -1519,17 +1544,17 @@ function tree_edit(bool $partial = false) : void {
 			.jstree({
 				'types' : {
 					'site' : {
-						icon : 'images/site.png',
+						icon : 'ti ti-building',
 						valid_children: 'none',
 						max_children : 0
 					},
 					'device' : {
-						icon : 'images/server.png',
+						icon : 'ti ti-server',
 						valid_children: 'none',
 						max_children : 0
 					},
 					'graph' : {
-						icon : 'images/server_chart_curve.png',
+						icon : 'ti ti-chart-line',
 						valid_children: 'none',
 						max_children : 0
 					}
@@ -1544,7 +1569,7 @@ function tree_edit(bool $partial = false) : void {
 					'always_copy' : true,
 					'check_while_dragging': true
 				},
-				'themes' : { 'stripes' : true },
+				'themes' : { 'stripes' : true, 'dots' : false },
 				'plugins' : plugins
 			})
 			.on('ready.jstree', function(e, data) {

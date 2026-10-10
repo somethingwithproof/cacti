@@ -56,15 +56,18 @@ global $weekly_timespans, $yearly_timespans;
 
 // Workaround End
 
-while (false !== ($entry = $dir->read())) {
-	if ($entry != '.' && $entry != '..') {
-		if (is_dir(CACTI_PATH_INCLUDE . '/themes/' . $entry)) {
-			$themes[$entry] = __(ucwords($entry));
+if ($dir !== false) {
+	while (false !== ($entry = $dir->read())) {
+		if ($entry != '.' && $entry != '..') {
+			if (is_dir(CACTI_PATH_INCLUDE . '/themes/' . $entry)) {
+				$themes[$entry] = __(ucwords($entry));
+			}
 		}
 	}
+
+	asort($themes);
+	$dir->close();
 }
-asort($themes);
-$dir->close();
 
 // tab information
 $tabs = [
@@ -411,18 +414,22 @@ $settings['logging'] = [
 		'default'       => ''
 	],
 	'selective_debug' => [
-		'friendly_name' => __('Selective File Debug'),
-		'description'   => __('Select which files you wish to place in Debug mode regardless of the Generic Log Level setting.  Any files selected will be treated as they are in Debug mode.'),
-		'method'        => 'drop_multi',
-		'array'         => $logfiles,
-		'default'       => ''
+		'friendly_name'     => __('Selective File Debug'),
+		'description'       => __('Select which files you wish to place in Debug mode regardless of the Generic Log Level setting.  Any files selected will be treated as they are in Debug mode.'),
+		'method'            => 'drop_multi',
+		'array'             => $logfiles,
+		'select_all_text'   => __('Select File(s)'),
+		'select_count_text' => __('Files Selected'),
+		'default'           => ''
 	],
 	'selective_plugin_debug' => [
-		'friendly_name' => __('Selective Plugin Debug'),
-		'description'   => __('Select which Plugins you wish to place in Debug mode regardless of the Generic Log Level setting.  Any files used by this plugin will be treated as they are in Debug mode.'),
-		'method'        => 'drop_multi',
-		'array'         => $logplugins,
-		'default'       => ''
+		'friendly_name'     => __('Selective Plugin Debug'),
+		'description'       => __('Select which Plugins you wish to place in Debug mode regardless of the Generic Log Level setting.  Any files used by this plugin will be treated as they are in Debug mode.'),
+		'method'            => 'drop_multi',
+		'array'             => $logplugins,
+		'select_all_text'   => __('Select Plugin(s)'),
+		'select_count_text' => __('Plugins Selected'),
+		'default'           => ''
 	],
 	'selective_device_debug' => [
 		'friendly_name' => __('Selective Device Debug'),
@@ -1004,7 +1011,7 @@ $settings['snmp'] = [
 		'method'        => 'drop_array',
 		'friendly_name' => __('Auth Protocol (v3)'),
 		'description'   => __('Default SNMPv3 Authorization Protocol for all new Devices.'),
-		'default'       => 'MD5',
+		'default'       => 'SHA',
 		'array'         => $snmp_auth_protocols,
 	],
 	'snmp_username' => [
@@ -1027,7 +1034,7 @@ $settings['snmp'] = [
 		'method'        => 'drop_array',
 		'friendly_name' => __('Privacy Protocol (v3)'),
 		'description'   => __('Default SNMPv3 Privacy Protocol for all new Devices.'),
-		'default'       => 'DES',
+		'default'       => 'AES',
 		'array'         => $snmp_priv_protocols,
 	],
 	'snmp_priv_passphrase' => [
@@ -1088,6 +1095,37 @@ $settings['snmp'] = [
 			fn () => new Assert\Range(min: 0, max: 100, notInRangeMessage: __('must be between {{ min }} and {{ max }}.')),
 		],
 	],
+	'snmp_behavior_header' => [
+		'friendly_name' => __('SNMP Behavior'),
+		'method'        => 'spacer',
+		'collapsible'   => 'true'
+	],
+	'enable_snmp_agent' => [
+		'friendly_name' => __('SNMP Agent Support Enabled'),
+		'description'   => __('If this option is checked, Cacti will populate SNMP Agent tables with Cacti device and system information.  It does not enable the SNMP Agent itself.'),
+		'method'        => 'checkbox',
+		'default'       => 'on'
+	],
+	'snmp_md5_des_enabled' => [
+		'friendly_name' => __('Enable MD5 and DES for SNMPv3'),
+		'description'   => __('The MD5 authentication and DES privacy algorithms are legacy, weak, and unavailable on hardened (FIPS) PHP and Net-SNMP builds.  When disabled, MD5 and DES are removed from the SNMPv3 Authentication and Privacy Protocol dropdowns shown when editing a Device and in the Automation SNMP Options, leaving only the stronger SHA and AES algorithms.'),
+		'method'        => 'checkbox',
+		'default'       => ''
+	],
+	'snmp_credential_cache' => [
+		'friendly_name' => __('Enable Credential Cache'),
+		'description'   => __('Pre-harden and cache SNMPv3 credential arguments once per credential change so each poller process reuses them instead of rebuilding them on every request.  This yields a marginal savings when collecting with SNMPv3 credentials through the Net-SNMP binaries.  The php-snmp extension handles most SNMPv3 gets in-process and bypasses this cache, but the Net-SNMP binaries (and therefore this cache) are still used for SNMP walks, hex output, requests that set a context or engine id, and protocol combinations that the running PHP version does not support.  Enable this if you collect any of those workloads with SNMPv3 credentials.'),
+		'method'        => 'checkbox',
+		'default'       => ''
+	],
+	'max_get_size' => [
+		'friendly_name' => __('Max OID Limit'),
+		'description'   => __('The default maximum number of SNMP Get OIDs to issue per snmpget request.  For Devices, this setting is controlled at the Device level.  You should only use this setting when using Cacti\'s SNMP API natively in your scripts or plugins.'),
+		'method'        => 'textbox',
+		'default'       => '10',
+		'max_length'    => '10',
+		'size'          => '5'
+	],
 	'snmp_bulk_walk_size' => [
 		'friendly_name' => __('Bulkwalk Fetch Size'),
 		'description'   => __('How many OID\'s should be returned per snmpbulkwalk request?  For Devices with large SNMP trees, increasing this size will increase re-index performance over a WAN.'),
@@ -1108,13 +1146,11 @@ $settings['snmp'] = [
 			'200' => '200'
 		]
 	],
-	'max_get_size' => [
-		'friendly_name' => __('Max OID Limit'),
-		'description'   => __('The default maximum number of SNMP Get OIDs to issue per snmpget request.  For Devices, this setting is controlled at the Device level.  You should only use this setting when using Cacti\'s SNMP API natively in your scripts or plugins.'),
-		'method'        => 'textbox',
-		'default'       => '10',
-		'max_length'    => '10',
-		'size'          => '5'
+	'oid_increasing_check_disable' => [
+		'friendly_name' => __('Disable increasing OID Check'),
+		'description'   => __('Controls disabling check for increasing OID while walking OID tree.'),
+		'method'        => 'checkbox',
+		'default'       => ''
 	],
 	'availability_header' => [
 		'friendly_name' => __('Availability/Reachability'),
@@ -1300,14 +1336,18 @@ $settings['visual'] = [
 		'default'       => '30',
 		'array'         => $item_rows
 	],
-	'autocomplete_enabled' => [
-		'friendly_name' => __('Autocomplete Enabled'),
-		'description'   => __('In very large systems, select lists can slow the user interface significantly.  If this option is enabled, Cacti will use autocomplete callbacks to populate the select list systematically.  Note: autocomplete is forcibly disabled on the Classic theme.'),
+	'select2_search_rows' => [
+		'friendly_name' => __('Select Search Minimum Rows'),
+		'description'   => __('The minimum number of options a dropdown must have before Cacti shows a search box inside it.  Choose \'Always\' to show the search box regardless of the number of options.'),
 		'method'        => 'drop_array',
-		'default'       => '1',
+		'default'       => '10',
 		'array'         => [
-			1 => __('Yes'),
-			0 => __('No')
+			'0'  => __('Always'),
+			'5'  => '5',
+			'10' => '10',
+			'15' => '15',
+			'20' => '20',
+			'25' => '25'
 		]
 	],
 	'autocomplete_rows' => [
@@ -1590,12 +1630,6 @@ $settings['poller'] = [
 		'default'       => 'on',
 		'tab'           => 'poller'
 	],
-	'enable_snmp_agent' => [
-		'friendly_name' => __('SNMP Agent Support Enabled'),
-		'description'   => __('If this option is checked, Cacti will populate SNMP Agent tables with Cacti device and system information.  It does not enable the SNMP Agent itself.'),
-		'method'        => 'checkbox',
-		'default'       => 'on'
-	],
 	'poller_type' => [
 		'friendly_name' => __('Poller Type'),
 		'description'   => __('The poller type to use.  This setting will take affect at next polling interval.'),
@@ -1648,12 +1682,6 @@ $settings['poller'] = [
 	'poller_debug' => [
 		'friendly_name' => __('Debug Output Width'),
 		'description'   => __('If you choose this option, Cacti will check for output that exceeds Cacti\'s ability to store it and issue a warning when it finds it.'),
-		'method'        => 'checkbox',
-		'default'       => ''
-	],
-	'oid_increasing_check_disable' => [
-		'friendly_name' => __('Disable increasing OID Check'),
-		'description'   => __('Controls disabling check for increasing OID while walking OID tree.'),
 		'method'        => 'checkbox',
 		'default'       => ''
 	],
@@ -3201,10 +3229,12 @@ $settings['spikes'] = [
 		'size'          => '10'
 	],
 	'spikekill_templates' => [
-		'friendly_name' => __('Graph Templates to Spike Kill'),
-		'method'        => 'drop_multi',
-		'description'   => __('When performing batch spike removal, only the templates selected below will be acted on.'),
-		'array'         => [],
+		'friendly_name'     => __('Graph Templates to Spike Kill'),
+		'method'            => 'drop_multi',
+		'description'       => __('When performing batch spike removal, only the templates selected below will be acted on.'),
+		'array'             => [],
+		'select_all_text'   => __('Select Template(s)'),
+		'select_count_text' => __('Templates Selected'),
 	],
 	'spikekill_purge' => [
 		'friendly_name' => __('Backup Retention'),
@@ -3231,6 +3261,16 @@ $settings_user = [
 			'method'        => 'drop_array',
 			'array'         => $graph_views,
 			'default'       => '1'
+		],
+		'page_filter_format' => [
+			'friendly_name' => __('Page Filter Format'),
+			'description'   => __('How table filters are presented. Modern collapses the filter into a Layouts selector with an Edit dialog that holds the filter fields; Legacy shows the classic inline filter. The Layouts selector is available in both.'),
+			'method'        => 'drop_array',
+			'default'       => 'modern',
+			'array'         => [
+				'modern' => __('Modern'),
+				'legacy' => __('Legacy')
+			]
 		],
 		'client_timezone_support' => [
 			'friendly_name' => __('TimeZone Support'),

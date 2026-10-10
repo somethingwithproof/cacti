@@ -29,6 +29,8 @@ set_default_action();
 
 switch (grv('action')) {
 	case 'purge_execute':
+		csrf_require_post();
+
 		clear_user_log();
 		raise_message('purge_user_log', __('User Log Purged.'), MESSAGE_LEVEL_INFO);
 		header('location: user_log.php');
@@ -220,7 +222,7 @@ function purge_user_log() : void {
 				$(function() {
 					$('#pc').click(function() {
 						strURL = location.pathname+'?action=purge_execute';
-						loadUrl({url:strURL})
+						postUrl({url: strURL}, {__csrf_magic: csrfMagicToken});
 					});
 
 					$('#cancel').click(function() {
@@ -240,18 +242,20 @@ function create_user_log_filter() : array {
 
 	$all     = ['-1' => __('All')];
 	$deleted = ['-2' => __('Deleted/Invalid')];
-	$users   = db_fetch_assoc('SELECT DISTINCT id,
-		IF(ud.domain_name != "",
-			CONCAT(ua.username, " (", ud.domain_name, ")"),
+	$users   = db_fetch_assoc('SELECT DISTINCT ua.id,
+		IF(ud.name != "",
+			CONCAT(ua.username, " (", ud.name, ")"),
 			IF(ua.realm = 0,
 				CONCAT(ua.username, " (' . __esc('Local Auth') . ')"),
 				CONCAT(ua.username, " (' . __esc('Basic Auth') . ')")
 			)
 		) AS name
 		FROM user_auth AS ua
-		LEFT JOIN user_domains AS ud
-		ON ua.realm = ud.domain_id+1000
+		LEFT JOIN login_providers AS ud
+		ON ua.realm = ud.id+1000
 		ORDER BY username, realm');
+
+	$users = is_array($users) ? $users : [];
 
 	if (cacti_sizeof($users)) {
 		$users = array_rekey($users, 'id', 'name');

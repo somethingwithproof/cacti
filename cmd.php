@@ -351,7 +351,7 @@ if (cacti_sizeof($poller_items) && read_config_option('poller_enabled') == 'on')
 		} else {
 			$output = fgets($pipes[1], 1024);
 
-			if (substr_count($output, 'Started') != 0) {
+			if (substr_count((string) $output, 'Started') != 0) {
 				cacti_log('PHP Script Server Started Properly', $print_data_to_stdout, 'POLLER', POLLER_VERBOSITY_HIGH);
 			}
 
@@ -668,8 +668,16 @@ function open_snmp_session(int $host_id, array &$item) : mixed {
 		$item['max_oids'] = read_config_option('max_get_size');
 	}
 
-	if (!isset($sessions[$host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port']]) && !isset($downhosts[$host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port']])) {
-		$sessions[$host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port']] = cacti_snmp_session(
+	$key = $host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port'];
+
+	/* a host already marked down this run has no cached session, so return the
+	   down sentinel instead of falling through to an unset $sessions[$key] (null) */
+	if (isset($downhosts[$key])) {
+		return false;
+	}
+
+	if (!isset($sessions[$key])) {
+		$sessions[$key] = cacti_snmp_session(
 			$item['hostname'],
 			$item['snmp_community'],
 			$item['snmp_version'],
@@ -686,15 +694,15 @@ function open_snmp_session(int $host_id, array &$item) : mixed {
 			$item['max_oids']
 		);
 
-		if ($sessions[$host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port']] === false) {
-			unset($sessions[$host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port']]);
-			$downhosts[$host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port']] = true;
+		if ($sessions[$key] === false) {
+			unset($sessions[$key]);
+			$downhosts[$key] = true;
 
 			return false;
 		}
 	}
 
-	return $sessions[$host_id . '_' . $item['snmp_version'] . '_' . $item['snmp_port']];
+	return $sessions[$key];
 }
 
 function snmp_mark_host_down(int $host_id, array &$item) : void {
@@ -740,7 +748,10 @@ function update_system_mibs(int $host_id) : void {
 				}
 			}
 
-			$uptime = cacti_snmp_select_uptime($system_uptime, $engine_time);
+			// spine always prefers a numeric, non-wall-clock engine time when
+			// updating host.snmp_sysUpTimeInstance; match that here so this PHP
+			// poller path and spine agree on the stored value
+			$uptime = cacti_snmp_select_uptime($system_uptime, $engine_time, null, true);
 
 			if ($uptime !== false) {
 				db_execute_prepared("UPDATE host SET snmp_sysUpTimeInstance = ?
@@ -916,7 +927,12 @@ function ping_and_reindex_check(array &$item, bool $mibs, int $script_timeout) :
 							if (trim($index_item['arg1']) == '.1.3.6.1.2.1.1.3.0') {
 								$engine_time   = cacti_snmp_session_get($session, '.1.3.6.1.6.3.10.2.1.3.0');
 								$system_uptime = cacti_snmp_session_get($session, $index_item['arg1']);
-								$output        = cacti_snmp_select_uptime($system_uptime, $engine_time);
+
+								// spine always prefers a numeric, non-wall-clock engine time when
+								// re-checking this assert, with no magnitude comparison of its own;
+								// match that here so the stored baseline and this live re-check
+								// can't permanently disagree
+								$output = cacti_snmp_select_uptime($system_uptime, $engine_time, null, true);
 
 								if ($output === false) {
 									$output = 'U';

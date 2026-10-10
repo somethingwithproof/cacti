@@ -1194,7 +1194,7 @@ function display_matching_trees(int $rule_id, int $rule_type, array $item, strin
 	} else {
 		$sql_field = '"SQL Injection" AS source ';
 		cacti_log("Attempted SQL Injection found in Tree Automation for the field variable {$item['field']}.", false, 'AUTOM8');
-		raise_message('sql_injection', __("Attempted SQL Injection found in Tree Automation for the field variable {$item['field']}."), MESSAGE_LEVEL_ERROR);
+		raise_message('sql_injection', __esc("Attempted SQL Injection found in Tree Automation for the field variable {$item['field']}."), MESSAGE_LEVEL_ERROR);
 	}
 
 	// now we build up a new query for counting the rows
@@ -1271,9 +1271,10 @@ function display_matching_trees(int $rule_id, int $rule_type, array $item, strin
 			for ($j = 0; cacti_sizeof($replacement); $j++) {
 				if ($j > 0) {
 					$repl .= '<br>';
-					$repl .= str_pad('', $j * 3, '-') . '&nbsp;' . array_shift($replacement);
+					// GHSA-f7jw-gfhr-cxwm: the replacement values carry attacker-influenced device/data fields; escape them while keeping the <br> layout.
+					$repl .= str_pad('', $j * 3, '-') . '&nbsp;' . htmle((string) array_shift($replacement));
 				} else {
-					$repl  = array_shift($replacement);
+					$repl  = htmle((string) array_shift($replacement));
 				}
 			}
 
@@ -1815,7 +1816,7 @@ function build_graph_object_sql_having(array $rule, string $filter) : string {
 
 			$i = 0;
 
-			foreach ($field_names as $column) {
+			foreach (($field_names ?: []) as $column) {
 				/* The name becomes an identifier in the generated SQL, and it
 				 * arrives from snmp_query_field, which a data query XML import
 				 * populates. A backtick in it would close the quoting the
@@ -1881,9 +1882,9 @@ function build_data_query_sql(array $rule) : string {
 	$sql_query   = "\n\tSELECT h.hostname AS automation_host, host_id, \n\th.disabled, $sdisabled \n\th.status, snmp_query_id, snmp_index ";
 
 	if (cacti_sizeof($field_names) > 0) {
-		foreach ($field_names as $column) {
+		foreach (($field_names ?: []) as $column) {
 			$field_name = $column['field_name'];
-			$sql_query .= ",\n\tMAX(CASE WHEN field_name='$field_name' THEN field_value ELSE NULL END) AS '$field_name'";
+			$sql_query .= ",\n\tMAX(CASE WHEN field_name = " . db_qstr($field_name) . ' THEN field_value ELSE NULL END) AS ' . db_qstr($field_name);
 		}
 	}
 
@@ -2089,9 +2090,9 @@ function build_sort_order(string $index_order, string $default_order = '') : str
  * @param int    $rule_type The type of rule to apply.
  * @param string $sql_where Optional SQL WHERE clause to filter the results.
  *
- * @return array|bool - The list of matching hosts.
+ * @return array The list of matching hosts.
  */
-function get_matching_hosts(array $rule, int $rule_type, string $sql_where = '') : array|bool {
+function get_matching_hosts(array $rule, int $rule_type, string $sql_where = '') : array {
 	$function = automation_function_with_pid(__FUNCTION__);
 
 	cacti_log($function . ' called: ' . json_encode($rule) . ' type: ' . $rule_type, false, 'AUTOM8 TRACE', POLLER_VERBOSITY_HIGH);
@@ -2144,9 +2145,9 @@ function get_matching_hosts(array $rule, int $rule_type, string $sql_where = '')
  * @param int    $rule_type The type of rule to apply.
  * @param string $sql_where Optional SQL WHERE clause to further filter the results.
  *
- * @return array|bool The list of matching graphs.
+ * @return array The list of matching graphs.
  */
-function get_matching_graphs(array $rule, int $rule_type, string $sql_where = '') : array|bool {
+function get_matching_graphs(array $rule, int $rule_type, string $sql_where = '') : array {
 	$function = automation_function_with_pid(__FUNCTION__);
 
 	cacti_log($function . ' called: ' . json_encode($rule) . ' type: ' . $rule_type, false, 'AUTOM8 TRACE', POLLER_VERBOSITY_HIGH);
@@ -2273,7 +2274,7 @@ function make_host_snnp_cache_sql() : string|false {
 		$sql = "\t\tSELECT host_id ";
 
 		foreach ($fields as $field) {
-			$sql .= ",\n\t\t\tMAX(CASE WHEN field_name = '{$field['field_name']}' THEN field_value ELSE NULL END) AS `{$field['field_name']}`";
+			$sql .= ",\n\t\t\tMAX(CASE WHEN field_name = " . db_qstr($field['field_name']) . ' THEN field_value ELSE NULL END) AS ' . db_qstr($field['field_name']);
 		}
 
 		$sql .= "\n\t\t\tFROM host_snmp_cache AS hsc GROUP BY host_id";
@@ -2360,9 +2361,9 @@ function get_query_fields(string $table, array $excluded_fields) : array {
  *
  * @param string $snmp_query_id The ID of the SNMP query for which to retrieve field names.
  *
- * @return array|bool An array of field names associated with the specified SNMP query ID.
+ * @return array An array of field names associated with the specified SNMP query ID.
  */
-function get_field_names(string $snmp_query_id) : array|bool {
+function get_field_names(string $snmp_query_id) : array {
 	$function = automation_function_with_pid(__FUNCTION__);
 	cacti_log($function . " called: $snmp_query_id", false, 'AUTOM8 TRACE', POLLER_VERBOSITY_HIGH);
 
@@ -3223,7 +3224,7 @@ function create_dq_graphs(int $host_id, int $snmp_query_id, array $rule) : bool 
 
 	if (cacti_sizeof($field_names) > 0) {
 		foreach ($field_names as $column) {
-			$sql_query .= ", MAX(CASE WHEN field_name ='$column' THEN field_value ELSE NULL END) AS '$column'";
+			$sql_query .= ', MAX(CASE WHEN field_name = ' . db_qstr($column) . ' THEN field_value ELSE NULL END) AS ' . db_qstr($column);
 			$i++;
 		}
 	}
@@ -3397,7 +3398,7 @@ function create_all_header_nodes(int $item_id, array $rule) : int {
 				$target = db_fetch_cell($sql, '', false);
 			} else {
 				cacti_log("Attempted SQL Injection found in Tree Automation for the field variable {$tree_item['field']}.", false, 'AUTOM8');
-				raise_message('sql_injection', __("Attempted SQL Injection found in Tree Automation for the field variable {$tree_item['field']}."), MESSAGE_LEVEL_ERROR);
+				raise_message('sql_injection', __esc("Attempted SQL Injection found in Tree Automation for the field variable {$tree_item['field']}."), MESSAGE_LEVEL_ERROR);
 
 				$sql    = '';
 				$target = '';
@@ -5342,7 +5343,7 @@ function automation_tree_rule_export(mixed $tree_rule_ids) : array {
 				[$rule_id]);
 
 			if (!cacti_sizeof($tree_rule)) {
-				raise_message('rule_missing', __('Can not find the Tree Rule with the ID %s', $rule_id), MESSAGE_LEVEL_ERROR);
+				raise_message('rule_missing', __esc('Can not find the Tree Rule with the ID %s', $rule_id), MESSAGE_LEVEL_ERROR);
 
 				return [];
 			}
@@ -5363,8 +5364,8 @@ function automation_tree_rule_export(mixed $tree_rule_ids) : array {
 			unset($tree_rule['id']);
 
 			// pick up the tree and branch name as they may not be on the foreign system
-			$tree_rule['tree_data']        = db_fetch_row_prepared('SELECT name, sort_type FROM graph_tree WHERE id = ?', [$tree_rule['tree_id']]); // @phpstan-ignore-line
-			$tree_rule['tree_branch_data'] = automation_device_rule_export_branches($tree_rule['tree_id'], $tree_rule['tree_item_id']); // @phpstan-ignore-line
+			$tree_rule['tree_data']        = db_fetch_row_prepared('SELECT name, sort_type FROM graph_tree WHERE id = ?', [$tree_rule['tree_id']]);
+			$tree_rule['tree_branch_data'] = automation_device_rule_export_branches($tree_rule['tree_id'], $tree_rule['tree_item_id']);
 
 			// collapse the graph rule items
 			$tree_rule['tree_rule_items'] = $tree_rule_items;

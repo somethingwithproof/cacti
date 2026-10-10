@@ -172,14 +172,14 @@ function reports_add_devices(int $report_id, array $device_ids, array $timespan,
 						]
 					);
 
-					raise_message('reports_add_device_' . $device_id, __('Device \'%s\' successfully added to Report.', $description), MESSAGE_LEVEL_INFO);
+					raise_message('reports_add_device_' . $device_id, __esc('Device \'%s\' successfully added to Report.', $description), MESSAGE_LEVEL_INFO);
 				} else {
 					$errors++;
 					raise_message('reports_device_not_found', __('Device not found! Unable to add to Report'), MESSAGE_LEVEL_ERROR);
 				}
 			} else {
 				$errors++;
-				raise_message('reports_no_add_device_' . $device_id, __('Device \'%s\' not added to Report as it already exists on report.', $description), MESSAGE_LEVEL_WARN);
+				raise_message('reports_no_add_device_' . $device_id, __esc('Device \'%s\' not added to Report as it already exists on report.', $description), MESSAGE_LEVEL_WARN);
 			}
 		}
 
@@ -358,11 +358,11 @@ function reports_interval_start(int $interval, int $count, int $offset, int $tim
 			$nth_weekday  = ceil($day_of_month / 7);
 
 			$date_str     = '+' . $count . ' months';
-			$month_base   = strtotime($date_str, $timestamp);
+			$month_base   = (int) strtotime($date_str, $timestamp);
 			$new_month    = mktime((int) date('H', $month_base), (int) date('i', $month_base), (int) date('s', $month_base), (int) date('m', $month_base), 1, (int) date('Y', $month_base));
 
 			$date_str     = '+' . ($nth_weekday - 1) . ' week ' . $weekday;
-			$base         = strtotime($date_str, $new_month);
+			$base         = (int) strtotime($date_str, $new_month);
 			$ts           = mktime((int) date('H', $month_base), (int) date('i', $month_base), (int) date('s', $month_base), (int) date('m', $base), (int) date('d', $base), (int) date('Y', $base));
 
 			break;
@@ -711,7 +711,7 @@ function reports_load_format_file(string $format_file, mixed &$output, bool &$re
 	$output = '';
 
 	if (cacti_sizeof($contents)) {
-		foreach ($contents as $line) {
+		foreach (($contents ?: []) as $line) {
 			$line = trim($line);
 
 			if (substr_count($line, '<REPORT>')) {
@@ -856,7 +856,7 @@ function reports_generate_history_html(int $history_id, int $output = REPORTS_OU
 			$report = str_replace('<table>', '<table class="cactiTable">', $report);
 		}
 
-		$graph_data = json_decode(base64_decode($data['report_attachments'], true), true);
+		$graph_data = json_decode((string) base64_decode($data['report_attachments'], true), true);
 
 		foreach ($graph_data as $graph) {
 			$report = str_replace('<GRAPH:' . $graph['local_graph_id'] . ':' . $graph['timespan'] . '>',
@@ -879,9 +879,9 @@ function reports_remove_history(int $history_id, int $report_id = 0) : void {
 	if (is_reports_admin() || $report['user_id'] == SESS_USER_ID) {
 		db_execute_prepared('DELETE FROM reports_log WHERE id = ?', [$history_id]);
 
-		raise_message('remove_message', __('Report \'%s\' History Removed by user \'%s\' or a Report Administrator can remove the report.', $report['name'], get_username($_SESSION[SESS_USER_ID])), MESSAGE_LEVEL_INFO);
+		raise_message('remove_message', __esc('Report \'%s\' History Removed by user \'%s\' or a Report Administrator can remove the report.', $report['name'], get_username($_SESSION[SESS_USER_ID])), MESSAGE_LEVEL_INFO);
 	} else {
-		raise_message('remove_error', __('Only the owning user \'%s\' or a Report Administrator can remove the report.', get_username($_SESSION[SESS_USER_ID])), MESSAGE_LEVEL_ERROR);
+		raise_message('remove_error', __esc('Only the owning user \'%s\' or a Report Administrator can remove the report.', get_username($_SESSION[SESS_USER_ID])), MESSAGE_LEVEL_ERROR);
 	}
 }
 
@@ -1594,7 +1594,7 @@ function reports_expand_tree(array &$report, array $item, int $parent, int $outp
 
 							if (cacti_sizeof($outgraphs)) {
 								// let's sort the graphs naturally
-								usort($outgraphs, 'necturally_sort_graphs'); // @phpstan-ignore-line
+								usort($outgraphs, 'necturally_sort_graphs');
 
 								// start graph display
 								if ($title != '') {
@@ -1974,7 +1974,7 @@ function reports_get_format_files() : array {
 					$contents = file($dir . '/' . $file);
 
 					if (cacti_sizeof($contents)) {
-						foreach ($contents as $line) {
+						foreach (($contents ?: []) as $line) {
 							$line = trim($line);
 
 							if (substr_count($line, 'Description:') && str_starts_with($line, '#')) {
@@ -2335,7 +2335,7 @@ function reports_log_and_notify(int $id, int $start_time, string $report_type, s
 		$save['report_raw_output']  = $oput_raw;
 		$save['report_html_output'] = $oput_html;
 		$save['report_txt_output']  = $oput_text;
-		$save['report_attachments'] = base64_encode(json_encode($attachments));
+		$save['report_attachments'] = base64_encode((string) json_encode($attachments));
 		$save['send_type']          = $report['request_type'];
 		$save['send_time']          = date('Y-m-d H:i:s');
 		$save['run_time']           = $end_time - $start_time;
@@ -2387,7 +2387,7 @@ function reports_queue(string $name, int $request_type, string $source, int $sou
 		}
 	} else {
 		if ($requested_id > 0) {
-			raise_message('report_not_scheduled', __("The Report '%s' from source %s with id %s was not scheduled to run due to an error!", $name, $source, $source_id, 'flowview'), MESSAGE_LEVEL_ERROR);
+			raise_message('report_not_scheduled', __esc("The Report '%s' from source %s with id %s was not scheduled to run due to an error!", $name, $source, $source_id, 'flowview'), MESSAGE_LEVEL_ERROR);
 		} else {
 			cacti_log(sprintf("FATAL: The Report '%s' from source %s with id %s was not scheduled to run due to an error!", $name, $source, $source_id), false, 'REPORTS');
 		}

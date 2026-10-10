@@ -1616,10 +1616,10 @@ function data_source_to_data_template(int $local_data_id, string $data_source_ti
 			if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
 				poller_item_delete_for_data_source($local_data_id, $rcnn_id, false);
 			} else {
-				raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+				raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 			}
 		} else {
-			raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+			raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 		}
 	}
 }
@@ -2585,7 +2585,7 @@ function verify_data_input_whitelist(string $hash, string $input_string) : mixed
 		return true;
 	}
 
-	$whitelist = json_decode(file_get_contents(CACTI_WHITELIST), true);
+	$whitelist = json_decode((string) file_get_contents(CACTI_WHITELIST), true);
 
 	if (isset($whitelist[$hash])) {
 		if ($input_string == $whitelist[$hash]) {
@@ -2614,7 +2614,7 @@ function graph_template_whitelist_check(int $graph_template_id) : bool {
 
 	// load whitelist, but only once within process execution
 	if ($data_input_whitelist == null) {
-		$data_input_whitelist = json_decode(file_get_contents(CACTI_WHITELIST), true);
+		$data_input_whitelist = json_decode((string) file_get_contents(CACTI_WHITELIST), true);
 
 		if ($data_input_whitelist === null) {
 			cacti_log('ERROR: Failed to parse input whitelist file: ' . CACTI_WHITELIST);

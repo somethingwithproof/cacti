@@ -67,13 +67,14 @@ test('sql.php uses no bare escapeshellarg calls', function () use ($sqlPhpPath) 
 test('sql.php handles null return from shell_exec', function () use ($sqlPhpPath) {
 	$contents = file_get_contents($sqlPhpPath);
 
-	expect($contents)->toContain("?? ''");
+	// (string) cast coerces both null and false from shell_exec() to ''.
+	expect($contents)->toContain('(string) $sql');
 });
 
 test('sql.php returns U on empty/null shell_exec output', function () use ($sqlPhpPath) {
 	$contents = file_get_contents($sqlPhpPath);
 
-	/* Cacti data source scripts must return 'U' on error, never empty string. */
+	// Cacti data source scripts must return 'U' on error, never empty string.
 	expect($contents)->toContain(": 'U'");
 });
 
@@ -125,22 +126,22 @@ test('ss_sql.php handles null return from shell_exec', function () use ($ssSqlPh
 test('ss_sql.php returns U on empty/null shell_exec output', function () use ($ssSqlPhpPath) {
 	$contents = file_get_contents($ssSqlPhpPath);
 
-	/* Cacti data source scripts must return 'U' on error, never empty string. */
+	// Cacti data source scripts must return 'U' on error, never empty string.
 	expect($contents)->toContain(": 'U'");
 });
 
 // --- runtime: cacti_escapeshellarg is callable and ss_sql() falls back to 'U' ---
 
 test('ss_sql() returns U when shell_exec produces no output', function () use ($ssSqlPhpPath) {
-	/* Bootstrap cacti_escapeshellarg if global.php has not yet been loaded. */
+	// Bootstrap cacti_escapeshellarg if global.php has not yet been loaded.
 	if (!function_exists('cacti_escapeshellarg')) {
-		/* Minimal stub: delegate to the native call so arg-quoting still works. */
+		// Minimal stub: delegate to the native call so arg-quoting still works.
 		function cacti_escapeshellarg(string $arg, bool $quote = true): string {
 			return escapeshellarg($arg);
 		}
 	}
 
-	/* Provide dummy globals so the function can build its command string. */
+	// Provide dummy globals so the function can build its command string.
 	$GLOBALS['database_hostname'] = '0.0.0.0';
 	$GLOBALS['database_username'] = 'cacti_test_no_such_user';
 	$GLOBALS['database_password'] = '';
@@ -148,6 +149,7 @@ test('ss_sql() returns U when shell_exec produces no output', function () use ($
 	/* Include the script in "called by script server" mode so only the
 	 * function definition is loaded, not the top-level print statement. */
 	$called_by_script_server = true;
+
 	if (!function_exists('ss_sql')) {
 		require $ssSqlPhpPath;
 	}

@@ -15,13 +15,13 @@ const SNMPAGENT_EVENT_SEVERITY_HIGH     = 3;
 const SNMPAGENT_EVENT_SEVERITY_CRITICAL = 4;
 const POLLER_VERBOSITY_NONE             = 1;
 
-$GLOBALS['snmpagent_notification_logs'] = array();
-$GLOBALS['snmpagent_event_severity']    = array(
+$GLOBALS['snmpagent_notification_logs'] = [];
+$GLOBALS['snmpagent_event_severity']    = [
 	SNMPAGENT_EVENT_SEVERITY_LOW      => 'low',
 	SNMPAGENT_EVENT_SEVERITY_MEDIUM   => 'medium',
 	SNMPAGENT_EVENT_SEVERITY_HIGH     => 'high',
 	SNMPAGENT_EVENT_SEVERITY_CRITICAL => 'critical'
-);
+];
 
 function read_config_option($name) {
 	return $name == 'path_snmptrap' ? '/usr/bin/snmptrap' : '';
@@ -32,7 +32,7 @@ function db_fetch_cell_prepared($sql, $params) {
 }
 
 function db_fetch_assoc_prepared($sql, $params) {
-	return array();
+	return [];
 }
 
 function cacti_sizeof($value) {
@@ -40,7 +40,7 @@ function cacti_sizeof($value) {
 }
 
 function cacti_log($message, $output, $environ, $level) {
-	$GLOBALS['snmpagent_notification_logs'][] = array($message, $output, $environ, $level);
+	$GLOBALS['snmpagent_notification_logs'][] = [$message, $output, $environ, $level];
 
 	return true;
 }
@@ -59,8 +59,8 @@ eval('namespace SnmpAgentNotificationReceiverTest;' . $matches[0]);
 
 beforeEach(function () {
 	$GLOBALS['snmpagent_notification_receiver_test_prior_config'] = $GLOBALS['config'] ?? null;
-	$GLOBALS['config']                                            = array();
-	$GLOBALS['snmpagent_notification_logs']                       = array();
+	$GLOBALS['config']                                            = [];
+	$GLOBALS['snmpagent_notification_logs']                       = [];
 });
 
 afterEach(function () {
@@ -72,7 +72,7 @@ test('missing receivers produce an actionable notice', function () {
 	$result = snmpagent_notification(
 		'cactiNotifyDeviceFailedPoll',
 		'CACTI-MIB',
-		array(),
+		[],
 		SNMPAGENT_EVENT_SEVERITY_MEDIUM
 	);
 
@@ -87,16 +87,16 @@ test('missing receivers produce an actionable notice', function () {
 });
 
 test('medium-severity missing receiver notices remain suppressed after the first event', function () {
-	snmpagent_notification('cactiNotifyDeviceFailedPoll', 'CACTI-MIB', array(), SNMPAGENT_EVENT_SEVERITY_MEDIUM);
-	snmpagent_notification('cactiNotifyDeviceFailedPoll', 'CACTI-MIB', array(), SNMPAGENT_EVENT_SEVERITY_MEDIUM);
+	snmpagent_notification('cactiNotifyDeviceFailedPoll', 'CACTI-MIB', [], SNMPAGENT_EVENT_SEVERITY_MEDIUM);
+	snmpagent_notification('cactiNotifyDeviceFailedPoll', 'CACTI-MIB', [], SNMPAGENT_EVENT_SEVERITY_MEDIUM);
 
 	expect($GLOBALS['snmpagent_notification_logs'])->toHaveCount(1)
 		->and($GLOBALS['config']['snmpagent']['notifications']['ignore']['cactiNotifyDeviceFailedPoll'])->toBe(1);
 });
 
 test('high-severity missing receiver notices are not suppressed', function () {
-	snmpagent_notification('cactiNotifyDeviceDown', 'CACTI-MIB', array(), SNMPAGENT_EVENT_SEVERITY_HIGH);
-	snmpagent_notification('cactiNotifyDeviceDown', 'CACTI-MIB', array(), SNMPAGENT_EVENT_SEVERITY_HIGH);
+	snmpagent_notification('cactiNotifyDeviceDown', 'CACTI-MIB', [], SNMPAGENT_EVENT_SEVERITY_HIGH);
+	snmpagent_notification('cactiNotifyDeviceDown', 'CACTI-MIB', [], SNMPAGENT_EVENT_SEVERITY_HIGH);
 
 	expect($GLOBALS['snmpagent_notification_logs'])->toHaveCount(2)
 		->and($GLOBALS['config']['snmpagent']['notifications']['ignore']['cactiNotifyDeviceDown'] ?? null)->toBeNull();

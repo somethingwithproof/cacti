@@ -76,7 +76,7 @@ test('GHSA-fc82: the bulk change-data-source-profile action skips unauthorized d
 	$body = substr($source, $start, $end - $start);
 
 	$checkPos  = strpos($body, 'if (!data_source_authorized((int) $local_data_id)) {');
-	$updatePos = strpos($body, "UPDATE data_template_data");
+	$updatePos = strpos($body, 'UPDATE data_template_data');
 
 	expect($checkPos)->not->toBeFalse();
 	expect($updatePos)->not->toBeFalse();

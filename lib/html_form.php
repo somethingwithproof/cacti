@@ -262,6 +262,25 @@ function draw_edit_control(string $field_name, array &$field_array) : void {
 			);
 
 			break;
+		case 'textcert':
+			form_cert_box(
+				$field_name,
+				$field_array['value'],
+				($field_array['default'] ?? ''),
+				$field_array['textarea_rows'],
+				$field_array['textarea_cols']
+			);
+
+			break;
+		case 'privkey':
+			form_privkey_box(
+				$field_name,
+				$field_array['value'],
+				$field_array['textarea_rows'],
+				$field_array['textarea_cols']
+			);
+
+			break;
 		case 'drop_array':
 			form_dropdown(
 				$field_name,
@@ -387,7 +406,10 @@ function draw_edit_control(string $field_name, array &$field_array) : void {
 				(isset($field_array['sql']) ? db_fetch_assoc($field_array['sql']) : $field_array['value']),
 				'id',
 				($field_array['class'] ?? ''),
-				($field_array['on_change'] ?? '')
+				($field_array['on_change'] ?? ''),
+				($field_array['select_all_text'] ?? ''),
+				($field_array['select_count_text'] ?? ''),
+				($field_array['select_all_value'] ?? '')
 			);
 
 			break;
@@ -745,6 +767,107 @@ function form_dirpath_box(string $form_name, mixed $prev_val, mixed $default_val
 }
 
 /**
+ * Draws a textarea for pasting a PEM certificate that, like
+ * form_privkey_box(), never redisplays the stored value - the textarea is
+ * always left blank, and leaving it blank on save means "keep the existing
+ * certificate" rather than clearing it. Like form_filepath_box()/
+ * form_dirpath_box(), a status indicator next to it shows the certificate's
+ * expiration date (YYYY-MM-DD) rather than a found/not-found file check.
+ *
+ * @param string $form_name    The name of this form element
+ * @param mixed  $stored_val   The current (PEM) stored value; only used to
+ *                             compute the expiration status, never displayed
+ * @param mixed  $default_val  The value to check for a stored certificate when there is no current value
+ * @param int    $form_rows    The number of rows for the textarea
+ * @param int    $form_columns The number of columns for the textarea
+ *
+ * @return void
+ */
+function form_cert_box(string $form_name, mixed $stored_val, mixed $default_val, int $form_rows, int $form_columns) : void {
+	if ($stored_val == '') {
+		$stored_val = $default_val;
+	}
+
+	$error_class = '';
+
+	if (isset($_SESSION[SESS_ERROR_FIELDS])) {
+		if (!empty($_SESSION[SESS_ERROR_FIELDS][$form_name])) {
+			$error_class = ' txtErrorTextBox';
+			unset($_SESSION[SESS_ERROR_FIELDS][$form_name]);
+		}
+	}
+
+	// Unconditionally blank: form_input_validate() writes SESS_FIELD_VALUES
+	// on every submission (even a successful save), and that save's redirect
+	// runs before bottom_footer() clears it - repopulating from it here would
+	// echo the just-submitted certificate back on the very next page load.
+	$textarea_val = '';
+
+	if (trim((string) $stored_val) == '') {
+		$extra_data = '';
+	} else {
+		// @ - openssl_x509_parse() emits a warning for non-PEM input; the
+		// false return value already tells us the certificate is invalid.
+		$parsed = @openssl_x509_parse((string) $stored_val);
+
+		if ($parsed === false || empty($parsed['validTo_time_t'])) {
+			$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-xmark deviceDown' style='padding:5px;font-size:16px' title='" . __esc('Not a valid Certificate') . "'></span>";
+		} else {
+			$expires = date('Y-m-d', $parsed['validTo_time_t']);
+
+			if ($parsed['validTo_time_t'] < time()) {
+				$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-xmark deviceDown' style='padding:5px;font-size:16px' title='" . __esc('Certificate expired on %s', $expires) . "'>" . __esc('Expired: %s', $expires) . '</span>';
+			} else {
+				$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-check deviceUp' style='padding:5px;font-size:16px' title='" . __esc('Certificate expires on %s', $expires) . "'>" . __esc('Good Till: %s', $expires) . '</span>';
+			}
+		}
+	}
+
+	print "<textarea class='ui-state-default ui-corner-all$error_class' aria-multiline='true' cols='$form_columns' rows='$form_rows' id='$form_name' name='$form_name' placeholder='" . __esc('Paste your Certificate Here') . "'>" . htmle($textarea_val) . '</textarea>' . $extra_data;
+}
+
+/**
+ * Draws a textarea for pasting a private key that, unlike every other
+ * field, never redisplays its stored value - the textarea is always left
+ * blank, and leaving it blank on save means "keep the existing key"
+ * rather than "clear it". The status area (styled like form_cert_box()'s
+ * expiration date) instead shows whether a key is currently stored.
+ *
+ * @param string $form_name    The name of this form element
+ * @param mixed  $stored_val   The current (still-encrypted) stored value; only its
+ *                             presence is used, its content is never displayed
+ * @param int    $form_rows    The number of rows for the textarea
+ * @param int    $form_columns The number of columns for the textarea
+ *
+ * @return void
+ */
+function form_privkey_box(string $form_name, mixed $stored_val, int $form_rows, int $form_columns) : void {
+	$error_class = '';
+
+	if (isset($_SESSION[SESS_ERROR_FIELDS])) {
+		if (!empty($_SESSION[SESS_ERROR_FIELDS][$form_name])) {
+			$error_class = ' txtErrorTextBox';
+			unset($_SESSION[SESS_ERROR_FIELDS][$form_name]);
+		}
+	}
+
+	// Unconditionally blank: form_input_validate() writes SESS_FIELD_VALUES
+	// on every submission (even a successful save), and that save's redirect
+	// runs before bottom_footer() clears it - repopulating from it here would
+	// echo the just-submitted plaintext private key back on the very next
+	// page load. Never restore this field's value from session.
+	$textarea_val = '';
+
+	if (trim((string) $stored_val) == '') {
+		$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-xmark' style='padding:5px;font-size:16px;color:red' title='" . __esc('No Private Key is currently stored') . "'>" . __esc('[not set]') . '</span>';
+	} else {
+		$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-check' style='padding:5px;font-size:16px;color:green' title='" . __esc('A Private Key is currently stored. Leave blank to keep it unchanged.') . "'>" . __esc('[stored]') . '</span>';
+	}
+
+	print "<textarea class='ui-state-default ui-corner-all$error_class' aria-multiline='true' cols='$form_columns' rows='$form_rows' id='$form_name' name='$form_name' placeholder='" . __esc('Paste your Private Key Here') . "'>" . htmle($textarea_val) . '</textarea>' . $extra_data;
+}
+
+/**
  * Draws a standard html textbox
  *
  * @param string $form_name   The name of this form element
@@ -1051,14 +1174,11 @@ function form_callback(string $form_name, string $classic_sql, string $column_di
 		}
 	}
 
-	if ($class != '') {
-		$class = " class='$class' ";
-	}
-
-	$theme = get_selected_theme();
-
-	if (read_config_option('autocomplete') > 0) {
-		print "<select id='" . htmle($form_name) . "' name='" . htmle($form_name) . "'" . $class . '>';
+	/* A non-zero 'autocomplete' config renders the full option list inline as a
+	 * plain <select>; every other case uses the ajax-backed select2 lookup that
+	 * replaced the old .drop-callback autocomplete widget. */
+	if (read_config_option('autocomplete') > 0 && !preg_match('/(^|\s)select2-callback(\s|$)/', $class)) {
+		print "<select id='" . htmle($form_name) . "' name='" . htmle($form_name) . "'" . ($class != '' ? " class='$class'" : '') . '>';
 
 		if (!empty($none_entry)) {
 			print "<option value='0'" . (empty($prev_val) ? ' selected' : '') . ">$none_entry</option>";
@@ -1069,13 +1189,28 @@ function form_callback(string $form_name, string $classic_sql, string $column_di
 		html_create_list($form_data, $column_display, $column_id, $previous_id);
 
 		print '</select>';
-	} else {
-		if (empty($previous_id) && $prev_val == '') {
-			$prev_val = $none_entry;
-		}
 
-		print "<input id='$form_name' name='$form_name' type='text' class='drop-callback ui-state-default ui-corner-all' data-action='$action' data-variables='$request_vars' data-callback='$on_change' data-value='" . htmle($prev_val) . "' value='" . htmle($previous_id) . "'>";
+		return;
 	}
+
+	if (!preg_match('/(^|\s)select2-callback(\s|$)/', $class)) {
+		$class .= ($class != '' ? ' ' : '') . 'select2-callback';
+	}
+
+	if (empty($previous_id) && $prev_val == '') {
+		$prev_val = $none_entry;
+	}
+
+	print "<select id='" . html_escape_attr($form_name) . "' name='" . html_escape_attr($form_name) . "' class='" . html_escape_attr($class) . "'"
+		. " data-action='" . html_escape_attr($action) . "' data-variables='" . html_escape_attr($request_vars) . "' data-callback='" . html_escape_attr($on_change) . "'>";
+
+	if ($previous_id != '' && $prev_val != '') {
+		print "<option value='" . html_escape_attr($previous_id) . "' selected>" . htmle($prev_val) . '</option>';
+	} elseif (!empty($none_entry)) {
+		print "<option value='0' selected>" . htmle($none_entry) . '</option>';
+	}
+
+	print '</select>';
 }
 
 /**
@@ -1232,21 +1367,28 @@ function form_text_area(string $form_name, mixed $prev_val, int $form_rows, int 
 /**
  * Draws a standard html multiple select dropdown
  *
- * @param string $form_name     - the name of this form element
- * @param array  $array_display - an array containing display values for this dropdown. it must
- *                              be formatted like:
- *                              $array[id] = display;
- * @param mixed  $prev_vals     - an array containing keys that should be marked as selected.
- *                              it must be formatted like:
- *                              $array[0][$column_id] = key
- * @param string $column_id     - the name of the key used to reference the keys above
- * @param string $class         - Optional. Additional CSS classes to apply to the select element.
- * @param string $on_change     - Optional. JavaScript code to execute when the selection changes.
+ * @param string $form_name         - the name of this form element
+ * @param array  $array_display     - an array containing display values for this dropdown. it must
+ *                                  be formatted like:
+ *                                  $array[id] = display;
+ * @param mixed  $prev_vals         - an array containing keys that should be marked as selected.
+ *                                  it must be formatted like:
+ *                                  $array[0][$column_id] = key
+ * @param string $column_id         - the name of the key used to reference the keys above
+ * @param string $class             - Optional. Additional CSS classes to apply to the select element.
+ * @param string $on_change         - Optional. JavaScript code to execute when the selection changes.
+ * @param string $select_all_text   - Optional. For class 'select2-multi-count', the summary text shown
+ *                                  when $select_all_value is selected (or nothing is selected).
+ * @param string $select_count_text - Optional. For class 'select2-multi-count', the suffix appended
+ *                                  after the selected count (e.g. '3 <suffix>').
+ * @param string $select_all_value  - Optional. For class 'select2-multi-count', the option value that
+ *                                  represents "all" and takes priority over showing a count.
  *
  * @return void
  */
 function form_multi_dropdown(string $form_name, array $array_display, mixed $prev_vals,
-	string $column_id, string $class = '', string $on_change = '') : void {
+	string $column_id, string $class = '', string $on_change = '', string $select_all_text = '',
+	string $select_count_text = '', string $select_all_value = '') : void {
 	if (!is_array($prev_vals) && $prev_vals != '') {
 		$values              = explode(',', $prev_vals);
 		$prev_vals           = [];
@@ -1273,17 +1415,41 @@ function form_multi_dropdown(string $form_name, array $array_display, mixed $pre
 		}
 	}
 
-	$class = "multiselect $class";
+	/* The drop_multi form method renders a select2 'N Selected' multi dropdown by default.
+	 * A caller keeps the legacy jquery-multiselect widget (e.g. the Scheduler used by
+	 * Automation Networks, and the Data Source Profiles Consolidation Functions) by
+	 * including 'multiselect' in $class; those pages supply their own .multiselect() init
+	 * and must not also be decorated by select2. */
+	$class = trim($class);
 
-	if ($class != '') {
-		$class .= " $class";
+	if (preg_match('/(^|\s)multiselect(\s|$)/', $class)) {
+		/* legacy opt-in wins: strip any select2-multi-count so applySkin() does not
+		 * also decorate the field and collide with the page's own .multiselect() init */
+		$class = preg_replace('/(^|\s)select2-multi-count(?=\s|$)/', '', $class) ?? $class;
+		$class = trim(preg_replace('/\s+/', ' ', $class) ?? $class);
+	} elseif (!preg_match('/(^|\s)select2-multi-count(\s|$)/', $class)) {
+		$class = trim('select2-multi-count ' . $class);
 	}
 
 	if ($on_change != '') {
 		$on_change = " onChange='$on_change' ";
 	}
 
-	print "<select style='height:20px;' size='1' class='$class' id='$form_name' name='$form_name" . "[]' multiple>";
+	$select2Attrs = '';
+
+	if ($select_all_text != '') {
+		$select2Attrs .= " data-select-all-text='" . html_escape_attr($select_all_text) . "'";
+	}
+
+	if ($select_count_text != '') {
+		$select2Attrs .= " data-select-count-text='" . html_escape_attr($select_count_text) . "'";
+	}
+
+	if ($select_all_value != '') {
+		$select2Attrs .= " data-select-all-value='" . html_escape_attr($select_all_value) . "'";
+	}
+
+	print "<select style='height:20px;' size='1' class='$class'$select2Attrs id='$form_name' name='$form_name" . "[]' multiple>";
 
 	foreach (array_keys($array_display) as $id) {
 		print "<option value='" . $id . "'";
@@ -1466,7 +1632,7 @@ function form_font_box(string $form_name, mixed $prev_val, mixed $default_val,
  *
  * $form_data = array(
  *	'general' => array(
- *		'page'       => 'user_domains.php',
+ *		'page'       => 'login_providers.php',
  *		'actions'    => $actions,
  *		'eaction'    => 'action_variable', // Extra Action
  *		'optvar'     => 'drp_action'

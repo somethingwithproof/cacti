@@ -298,6 +298,7 @@ function create_graphs_preview_filter(string $session_var) : array {
 					'friendly_name'  => __('Device'),
 					'filter'         => FILTER_VALIDATE_INT,
 					'default'        => '-1',
+					'class'          => 'select2-callback',
 					'pageset'        => true,
 					'request_vars'   => 'location,site_id',
 					'sql'            => 'SELECT DISTINCT id, description AS name FROM host ORDER BY description',
@@ -309,16 +310,20 @@ function create_graphs_preview_filter(string $session_var) : array {
 			],
 			[
 				'graph_template_id' => [
-					'method'         => 'drop_multi',
-					'friendly_name'  => __('Template'),
-					'filter'         => FILTER_VALIDATE_REGEXP,
-					'filter_options' => ['options' => ['regexp' => '/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)$/']],
-					'default'        => '-1',
-					'dynamic'        => false,
-					'class'          => 'graph-multiselect',
-					'pageset'        => true,
-					'array'          => $normalized_templates,
-					'value'          => gnrv('graph_template_id')
+					'method'            => 'drop_multi',
+					'bar'               => true,
+					'friendly_name'     => __('Template'),
+					'filter'            => FILTER_VALIDATE_REGEXP,
+					'filter_options'    => ['options' => ['regexp' => '/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)(,(cg_[0-9]+|dq_[0-9]+|-?[0-9]+))*$/']],
+					'default'           => '-1',
+					'dynamic'           => false,
+					'class'             => 'select2-multi-count',
+					'select_all_text'   => __('All Graph Templates'),
+					'select_count_text' => __('Templates Selected'),
+					'select_all_value'  => '-1',
+					'pageset'           => true,
+					'array'             => $normalized_templates,
+					'value'             => gnrv('graph_template_id')
 				],
 			],
 				[
@@ -940,7 +945,13 @@ function html_graph_preview_view() : void {
 	$sql_where  = '';
 
 	if (!ierv('rfilter')) {
-		$sql_where .= ' gtg.title_cache RLIKE ' . db_qstr(grv('rfilter'));
+		$sql_where .= ' (gtg.title_cache RLIKE ' . db_qstr(grv('rfilter'));
+
+		if (ctype_digit(grv('rfilter'))) {
+			$sql_where .= ' OR gl.id = ' . (int) grv('rfilter');
+		}
+
+		$sql_where .= ')';
 	}
 
 	$sql_where .= ($sql_or != '' && $sql_where != '' ? ' AND ' : '') . $sql_or;
@@ -952,7 +963,7 @@ function html_graph_preview_view() : void {
 	}
 
 	if (!ierv('host_id') && grv('host_id') > 0) {
-		$sql_where .= ($sql_where == '' ? '' : ' AND') . ' gl.host_id=' . grv('host_id');
+		$sql_where .= ($sql_where == '' ? '' : ' AND') . ' gl.host_id=' . gfrv('host_id');
 	} elseif (ierv('host_id')) {
 		$sql_where .= ($sql_where == '' ? '' : ' AND') . ' gl.host_id=0';
 	}
@@ -1120,6 +1131,7 @@ function create_listview_filter(string $session_var) : array {
 					'friendly_name'  => __('Device'),
 					'filter'         => FILTER_VALIDATE_INT,
 					'default'        => '-1',
+					'class'          => 'select2-callback',
 					'pageset'        => true,
 					'request_vars'   => 'location,site_id',
 					'sql'            => 'SELECT DISTINCT id, description AS name FROM host ORDER BY description',
@@ -1142,16 +1154,19 @@ function create_listview_filter(string $session_var) : array {
 					'value'          => ''
 				],
 				'graph_template_id' => [
-					'method'         => 'drop_multi',
-					'friendly_name'  => __('Template'),
-					'filter'         => FILTER_VALIDATE_REGEXP,
-					'filter_options' => ['options' => ['regexp' => '/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)$/']],
-					'default'        => '-1',
-					'dynamic'        => false,
-					'class'          => 'graph-multiselect',
-					'pageset'        => true,
-					'array'          => $normalized_templates,
-					'value'          => gnrv('graph_template_id')
+					'method'            => 'drop_multi',
+					'friendly_name'     => __('Template'),
+					'filter'            => FILTER_VALIDATE_REGEXP,
+					'filter_options'    => ['options' => ['regexp' => '/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)(,(cg_[0-9]+|dq_[0-9]+|-?[0-9]+))*$/']],
+					'default'           => '-1',
+					'dynamic'           => false,
+					'class'             => 'select2-multi-count',
+					'select_all_text'   => __('All Graph Templates'),
+					'select_count_text' => __('Templates Selected'),
+					'select_all_value'  => '-1',
+					'pageset'           => true,
+					'array'             => $normalized_templates,
+					'value'             => gnrv('graph_template_id')
 				],
 				'graphs' => [
 					'method'         => 'drop_array',
@@ -1334,7 +1349,13 @@ function html_graph_list_view() : void {
 	$sql_where  = '';
 
 	if (!ierv('rfilter')) {
-		$sql_where .= ' gtg.title_cache RLIKE ' . db_qstr(grv('rfilter'));
+		$sql_where .= ' (gtg.title_cache RLIKE ' . db_qstr(grv('rfilter'));
+
+		if (ctype_digit(grv('rfilter'))) {
+			$sql_where .= ' OR gl.id = ' . (int) grv('rfilter');
+		}
+
+		$sql_where .= ')';
 	}
 
 	if (!ierv('site_id') && grv('site_id') > 0) {
@@ -1344,7 +1365,7 @@ function html_graph_list_view() : void {
 	}
 
 	if (!ierv('host_id') && grv('host_id') > 0) {
-		$sql_where .= ($sql_where == '' ? '' : ' AND') . ' gl.host_id=' . grv('host_id');
+		$sql_where .= ($sql_where == '' ? '' : ' AND') . ' gl.host_id=' . gfrv('host_id');
 	} elseif (ierv('host_id')) {
 		$sql_where .= ($sql_where == '' ? '' : ' AND') . ' gl.host_id=0';
 	}
@@ -1838,7 +1859,7 @@ function html_graph_single_view() : void {
 		$suffix = 'preview';
 	}
 
-	print "<div class='cactiTable'>";
+	print "<div class='cactiTable graphDetailView'>";
 
 	html_start_box(__esc('Graph Utility View for Graph: %s', $graph_title), '100%', true, 3, 'center', '');
 

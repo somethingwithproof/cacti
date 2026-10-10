@@ -63,7 +63,7 @@ function support_lockout() : void {
 	$admin = read_config_option('admin_user', true);
 
 	if ($admin != $_SESSION[SESS_USER_ID]) {
-		raise_message('lockout_user', __('Only the Primary Cacti Administrator \'%s\' can lockout the Cacti system.', get_username($admin)), MESSAGE_LEVEL_ERROR);
+		raise_message('lockout_user', __esc('Only the Primary Cacti Administrator \'%s\' can lockout the Cacti system.', get_username($admin)), MESSAGE_LEVEL_ERROR);
 	} else {
 		$status    = read_config_option('cacti_lockout_status', true);
 		$is_locked = ($status != '');
@@ -79,11 +79,11 @@ function support_lockout() : void {
 		} elseif ($is_locked !== ($expected === 'locked')) {
 			raise_message('lockout', __('The Cacti maintenance lockout state was changed by another administrator since this page was loaded.  Please review the current status and try again.'), MESSAGE_LEVEL_INFO);
 		} elseif (!$is_locked) {
-			raise_message('lockout', __('Cacti has been locked out by \'%s\'.  Press the button again after Cacti maintenance is over.', get_username($admin)), MESSAGE_LEVEL_WARN);
+			raise_message('lockout', __esc('Cacti has been locked out by \'%s\'.  Press the button again after Cacti maintenance is over.', get_username($admin)), MESSAGE_LEVEL_WARN);
 			cacti_log('WARNING: Cacti has been locked out by the primary administrator!');
 			set_config_option('cacti_lockout_status', json_encode(['session' => session_id(), 'time' => time()]));
 		} else {
-			raise_message('lockout', __('Cacti maintenance lockout has been cleared by \'%s\'.  Press the button again after Cacti maintenance is over.', get_username($admin)), MESSAGE_LEVEL_INFO);
+			raise_message('lockout', __esc('Cacti maintenance lockout has been cleared by \'%s\'.  Press the button again after Cacti maintenance is over.', get_username($admin)), MESSAGE_LEVEL_INFO);
 			cacti_log('WARNING: Cacti maintenance lockout has been cleared by the primary administrator!');
 			set_config_option('cacti_lockout_status', '');
 		}
@@ -1175,7 +1175,7 @@ function show_database_tables() : void {
 function show_cacti_changelog() : void {
 	$changelog = file(CACTI_PATH_BASE . '/CHANGELOG');
 
-	foreach ($changelog as $s) {
+	foreach (($changelog ?: []) as $s) {
 		if (trim($s) == '') {
 			continue;
 		}
@@ -1685,7 +1685,7 @@ function show_tech_summary() : void {
 
 	// Get Maximum Memory in GB for MySQL/MariaDB
 	if (POLLER_ID == 1) {
-		if (($database == 'MySQL' && version_compare($version, '8.0', '<')) || $database == 'MariaDB') {
+		if ($database == 'MariaDB') {
 			$systemMemory = db_fetch_cell('SELECT
 				(@@GLOBAL.key_buffer_size
 				+ @@GLOBAL.query_cache_size
@@ -1737,7 +1737,7 @@ function show_tech_summary() : void {
 			+ @@GLOBAL.thread_stack
 			+ @@GLOBAL.binlog_cache_size) / 1024 / 1024 / 1024');
 	} else {
-		if (($database == 'MySQL' && version_compare($version, '8.0', '<')) || $database == 'MariaDB') {
+		if ($database == 'MariaDB') {
 			$maxPossibleMyMemory = db_fetch_cell('SELECT (
 				(@@GLOBAL.key_buffer_size
 				+ @@GLOBAL.query_cache_size
@@ -1904,7 +1904,7 @@ function show_tech_summary() : void {
 	} elseif (!CACTI_PHP_SNMP) {
 		print __('Installed, but disabled by $php_snmp_support in include/config.php.  The Net-SNMP binaries are used instead.');
 	} else {
-		print __('Installed. <span class="deviceDown">Note: If you are planning on using SNMPv3, you must remove php-snmp and use the Net-SNMP toolset, or set $php_snmp_support = false; in include/config.php.</span>');
+		print __('Installed.');
 	}
 	print '</td>';
 	form_end_row();
@@ -1952,6 +1952,8 @@ function show_tech_summary() : void {
 	form_end_row();
 
 	utilities_get_mysql_recommendations();
+
+	utilities_get_mysql_capabilities();
 
 	// Shareable diagnostics report (Feature: Copy Diagnostics).
 	// When the redact toggle is on, hostnames/IPs embedded in the SNMP version
@@ -2020,7 +2022,7 @@ function show_tech_environment() : void {
 
 	if ($php_binary != '' && file_exists($php_binary) && is_executable($php_binary)) {
 		$cli_json = shell_exec(cacti_escapeshellcmd($php_binary) . ' -q ' . cacti_escapeshellarg(CACTI_PATH_INSTALL . '/cli_check.php') . ' extensions');
-		$cli_ext  = @json_decode($cli_json, true);
+		$cli_ext  = @json_decode((string) $cli_json, true);
 
 		if (is_array($cli_ext)) {
 			foreach ($cli_ext as $name => $ext) {
@@ -2176,7 +2178,7 @@ function support_redact(string $value) : string {
 	$value = preg_replace_callback('/(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}/', function ($m) {
 		return filter_var($m[0], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false ? '<ipv6>' : $m[0];
 	}, $value);
-	$value = preg_replace('/\b(?:\d{1,3}\.){3}\d{1,3}\b/', '<ipv4>', $value);
+	$value = preg_replace('/\b(?:\d{1,3}\.){3}\d{1,3}\b/', '<ipv4>', (string) $value);
 
 	// FQDNs (foo.bar.example).  The alphabetic TLD requirement leaves version
 	// numbers such as 1.7.2 untouched.  This must run before the node-name
@@ -2184,7 +2186,7 @@ function support_redact(string $value) : string {
 	// in "db01.local"), masking the node name first would strip the prefix and
 	// leave a bare suffix ("local") that no longer looks like an FQDN, leaking
 	// part of the domain.
-	$value = preg_replace('/\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b/', '<host>', $value);
+	$value = preg_replace('/\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b/', '<host>', (string) $value);
 
 	// Replace this host's own node name wherever it appears (php_uname, SNMP banner, etc.).
 	$node = function_exists('php_uname') ? php_uname('n') : '';
@@ -2194,7 +2196,7 @@ function support_redact(string $value) : string {
 	}
 
 	// /home/<user>/ and /Users/<user>/ path segments.
-	$value = preg_replace('#/(?:home|Users)/[^/\s]+#', '/home/<redacted>', $value);
+	$value = preg_replace('#/(?:home|Users)/[^/\s]+#', '/home/<redacted>', (string) $value);
 
 	return $value;
 }

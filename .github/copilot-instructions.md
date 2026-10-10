@@ -6,7 +6,7 @@
 - **Core Purpose**: Polls devices (SNMP, scripts), stores time-series data in **RRDtool**, and renders historical graphs for network operations.
 
 - **Architecture**:
-  - **Frontend**: PHP web UI (supported versions are declared in `composer.json` and CI) for configuration and visualization.
+  - **Frontend**: PHP 8.3+ web UI for configuration and visualization.
   - **Backend**: MySQL/MariaDB for metadata/state/configuration/statistics; 
                  RRD files for metrics.
   - **Polling**: Scalable data collection via `cmd.php` (PHP) or `spine` (C), supporting remote pollers.
@@ -54,6 +54,11 @@
 - **CSRF**: AJAX posts include `__csrf_magic: csrfMagicToken`.
 - **Logging**: use `cacti_log(...)` and `cacti_log_file()`.
 - **i18n**: wrap UI strings with `__('...')`.
+  - Translatable strings are managed with GNU gettext. `locales/po/cacti.pot` is the source template; **Weblate owns syncing** the per-language `.po`/`.mo` files.
+  - **Any PR that adds, changes, or removes a `__('...')` (or `__n()`/`__esc()` etc.) string MUST update `locales/po/cacti.pot` in the same PR.** This is mandatory — a PR that touches translatable strings without updating `cacti.pot` is incomplete. Removing a string counts: it must be dropped from the template too.
+  - **Never commit the per-language `.po` or compiled `.mo` files** — `locales/po/cacti.pot` is the only translation artifact a PR may add or modify. Stage **only** that file.
+  - Regenerate with `locales/update-pot.sh` (it runs `xgettext`), or, to keep the diff focused, add/remove just the affected `msgid` entries. Validate with `msgfmt --check-format -o /dev/null locales/po/cacti.pot`.
+  - If `update-pot.sh` rewrites `.po`/`.mo` side effects, revert them (`git checkout -- locales/po/*.po locales/LC_MESSAGES`) so the PR touches `cacti.pot` only.
 - **Plugins**:
   - Hooks via `api_plugin_hook(...)` in `lib/plugins.php`.
   - Must have an `INFO` file (INI format).
@@ -69,7 +74,12 @@
   - Use `cacti_redirect($path, $params)` for local redirects; it rejects absolute and protocol-relative destinations (checking both raw and percent-decoded forms) and terminates the request.
   - Escape output for HTML attribute contexts with `html_escape_attr()`, not `htmle()`/`html_escape()`; only the attribute helper double-encodes to stop pre-encoded entities from breaking out of the attribute.
 
+## Pull request pre-flight (MANDATORY)
+- **Before creating any pull request you MUST run `composer run-script php-cs-fixit`** to apply the repo's `php-cs-fixer` formatting rules, then commit any resulting changes. This script fixes in place (unlike the dry-run `composer phpcsfixer`), so creating a PR without running it is what trips the coding-standards job in CI. Run it from WSL (see Windows/WSL note below). Do not open the PR until the working tree is clean after the fixer runs.
+- **Every commit must also pass PHPStan static analysis.** Run `composer run-script phpstan -- --memory-limit=2G` from WSL and confirm it reports `No errors` before opening the PR. The default 128M limit crashes a parallel worker, so always pass `--memory-limit=2G` (or higher). The repo config (`.phpstan.neon`) analyses at **level 8**, which is cumulative and therefore satisfies the Level 6 floor; `tests/*` is excluded from analysis, so test-only files will not surface here but production code (e.g. `lib/`) will.
+
 ## Workflows you’ll actually use
+- **Windows/WSL**: When working in VS Code from a Windows machine, run all fixes, builds, linters, tests, and git operations inside WSL (a Linux distro) rather than native Windows. The toolchain (PHP 8.3, Composer, `php-cs-fixer`, Pest) and the repo's tab indentation / `\n` line-ending conventions are Linux-first; running them on native Windows produces spurious diffs and failures. Edit the WSL-mounted checkout (e.g. under `/mnt/c/...` or a native WSL path) and invoke `composer` scripts such as `composer php-cs-fixit` from the WSL shell.
 - Install deps: `composer install` (CI validates via `.github/workflows/syntax.yml`).
 - Install/upgrade DB: `php -q cli/install_cacti.php --accept-eula --install --force` and `php -q cli/upgrade_database.php --forcever=$(cat include/cacti_version)`.
 - Run poller: `php poller.php --poller=1 --force --debug` (daemon debug: `./cactid.php --foreground --debug`).
@@ -146,3 +156,28 @@ frontend contracts. Install/upgrade and poller examples above modify a live
 installation and require a deliberately selected disposable environment or
 explicit deployment authorization. Keep private research notes and credentials
 out of tracked guidance. Preserve hook failures; missing checks are unverified.
+
+## Pending upstream dependency: select2 multi-select dropdown search
+- `include/layout.js` (`select2-multi-count` init, both this branch and `feature/select2-select-conversion-1.2.x`)
+  works around select2 4.1.0 not natively supporting "search from the dropdown
+  panel instead of an inline box" for multi-selects. It manually builds custom
+  `dropdownAdapter`/`selectionAdapter` combinations via
+  `$.fn.select2.amd.require('select2/...')` (synchronous string-form require -
+  see the comment at that call site for why array-form must not be used).
+- TheWitness has an upstream pull request open against `select2/select2`
+  proposing this behavior as a first-class option:
+  `https://github.com/select2/select2/pull/6462`
+- **Action item for any future Copilot session working in this repo:** when
+  starting work here, check whether a select2 release has shipped that
+  includes that PR (check `select2/select2` releases/CHANGELOG for a
+  first-class dropdown-search-for-multiple-selects option). If it has:
+  1. Bump the vendored `include/js/select2.js` to that release.
+  2. Replace the manual adapter-composition workaround in `include/layout.js`
+     with the new native option on both `feature/select2-select-conversion`
+     (develop) and `feature/select2-select-conversion-1.2.x` (1.2.x), or their
+     successor branches/develop/1.2.x if already merged.
+  3. Remove the now-unnecessary `multiCountDropdownAdapter`/
+     `multiCountSelectionAdapter` wiring and related comments once the native
+     option covers it.
+  4. Open a Cacti PR for this cleanup as a matter of course - don't wait to be
+     asked.

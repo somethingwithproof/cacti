@@ -39,5 +39,5 @@ $cases = [
 ];
 
 foreach ($cases as $label => $result) {
-	echo $label . "\t" . $result . "\n";
+	print $label . "\t" . $result . "\n";
 }

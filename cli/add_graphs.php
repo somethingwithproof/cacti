@@ -429,7 +429,7 @@ if (cacti_sizeof($parms)) {
 
 	// process the snmp fields
 	if ($graph_type == 'dq' || $graph_type == 'ds' || $listSNMPFields || $listSNMPValues) {
-		$snmpFields = getSNMPFields($host_id, $dsGraph['snmpQueryId']);
+		$snmpFields = getSNMPFields($host_id, (int) $dsGraph['snmpQueryId']);
 
 		if ($listSNMPFields) {
 			displaySNMPFields($snmpFields, $host_id, $quietMode);
@@ -489,7 +489,7 @@ if (cacti_sizeof($parms)) {
 				}
 			}
 
-			$snmpValues = getSNMPValues($host_id, $snmpField, $dsGraph['snmpQueryId']);
+			$snmpValues = getSNMPValues($host_id, $snmpField, (int) $dsGraph['snmpQueryId']);
 
 			$snmpValue      = '';
 			$snmpValueRegex = '';
@@ -741,7 +741,7 @@ if (cacti_sizeof($parms)) {
 				if (isset($dsGraph['snmpValue'][$index_snmp_filter])) {
 					$req .= ' AND field_value = ' . db_qstr($dsGraph['snmpValue'][$index_snmp_filter]) . ')';
 				} elseif (isset($dsGraph['snmpValueRegex'][$index_snmp_filter])) {
-					$req .= ' AND field_value REGEXP "' . addslashes($dsGraph['snmpValueRegex'][$index_snmp_filter]) . '")';
+					$req .= ' AND field_value REGEXP ' . db_qstr($dsGraph['snmpValueRegex'][$index_snmp_filter]) . ')';
 				}
 
 				$index_snmp_filter++;
@@ -754,7 +754,7 @@ if (cacti_sizeof($parms)) {
 			foreach ($dsGraph['snmpFieldExclude'] as $snmpField) {
 				$req .= ' AND snmp_index NOT IN (
 					SELECT DISTINCT snmp_index FROM host_snmp_cache WHERE host_id=' . $host_id . ' AND field_name = ' . db_qstr($snmpField);
-				$req .= ' AND field_value REGEXP "' . addslashes($dsGraph['snmpValueExclude'][$index_snmp_filter]) . '")';
+				$req .= ' AND field_value REGEXP ' . db_qstr($dsGraph['snmpValueExclude'][$index_snmp_filter]) . ')';
 				$index_snmp_filter++;
 			}
 		}

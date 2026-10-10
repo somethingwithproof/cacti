@@ -98,6 +98,8 @@ if ($user['password_change'] != 'on') {
 
 	// destroy session information
 	kill_session_var(SESS_USER_ID);
+	// GHSA-cg45-2mww-g98p: revoke the server-side remember-me row too, not just the browser cookie.
+	clear_auth_cookie();
 	cacti_cookie_logout();
 
 	$return = validate_redirect_url($_SERVER['HTTP_REFERER'] ?? '', 'index.php');
@@ -318,7 +320,7 @@ if (isrv('ref')) {
 			}
 
 			if (!$valid && cacti_sizeof($server_info)) {
-				foreach ($server_info as $record) {
+				foreach (($server_info ?: []) as $record) {
 					if (isset($record['host']) && $record['host'] == $server_ref) {
 						$valid = true;
 

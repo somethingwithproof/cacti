@@ -462,6 +462,13 @@ function api_plugin_status_run(string $hook, array $required_capabilities, strin
 function api_plugin_db_table_create(string $plugin, string $table, array $data) : void {
 	include_once(CACTI_PATH_LIBRARY . '/database.php');
 
+	// GHSA-h5wg-qf6f-7f6r: reject an unsafe DDL identifier outright; normalizing it could silently collide with an unrelated table.
+	if ($table === '' || !preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+		cacti_log("ERROR: Refusing to create plugin table with invalid identifier '$table'", false, 'PLUGIN');
+
+		return;
+	}
+
 	$result = db_fetch_assoc('SHOW TABLES');
 	$tables = [];
 
@@ -516,7 +523,9 @@ function api_plugin_db_table_create(string $plugin, string $table, array $data) 
 		}
 
 		if (isset($data['primary'])) {
-			$sql .= ",\n PRIMARY KEY (`" . $data['primary'] . '`)';
+			// db_format_index_create() accepts a scalar column name (the legacy form,
+			// required for backward compatibility) or an array of columns.
+			$sql .= ",\n PRIMARY KEY (" . db_format_index_create($data['primary']) . ')';
 		}
 
 		if (isset($data['keys']) && cacti_sizeof($data['keys'])) {
@@ -559,11 +568,25 @@ function api_plugin_db_table_create(string $plugin, string $table, array $data) 
 				db_execute("ALTER TABLE `$table` COLLATE = " . $data['collate']);
 			}
 		}
+	} else {
+		// Table already exists: refresh its schema to match the definition.
+		// Do not record another 'create' change - plugin_db_changes has no
+		// unique key, so a REPLACE here would duplicate the ownership record
+		// on every call and could mark a pre-existing/shared table as
+		// plugin-created, causing it to be dropped on uninstall.
+		db_update_table($table, $data, true);
 	}
 }
 
 function api_plugin_drop_table(string $table) : void {
-	db_execute("DROP TABLE IF EXISTS $table");
+	// GHSA-h5wg-qf6f-7f6r: reject an unsafe identifier outright so a crafted name cannot extend the DROP across other tables or collide after normalization.
+	if ($table === '' || !preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+		cacti_log("ERROR: Refusing to drop plugin table with invalid identifier '$table'", false, 'PLUGIN');
+
+		return;
+	}
+
+	db_execute('DROP TABLE IF EXISTS `' . $table . '`');
 
 	api_plugin_drop_remote_table($table);
 }
@@ -749,11 +772,11 @@ function api_plugin_install(string $plugin) : bool {
 		$author  = $info['author'];
 		$version = $info['version'];
 	} elseif (str_contains($plugin, 'plugin_')) {
-		raise_message('directory_error', __('The Plugin directory \'%s\' needs to be renamed to remove \'plugin_\' from the name before it can be installed.', $plugin), MESSAGE_LEVEL_ERROR);
+		raise_message('directory_error', __esc('The Plugin directory \'%s\' needs to be renamed to remove \'plugin_\' from the name before it can be installed.', $plugin), MESSAGE_LEVEL_ERROR);
 
 		return false;
 	} else {
-		raise_message('version_error', __('The Plugin in the directory \'%s\' does not include an version function \'%s()\'.  This function must exist for the plugin to be installed.', $plugin, $function), MESSAGE_LEVEL_ERROR);
+		raise_message('version_error', __esc('The Plugin in the directory \'%s\' does not include an version function \'%s()\'.  This function must exist for the plugin to be installed.', $plugin, $function), MESSAGE_LEVEL_ERROR);
 
 		return false;
 	}
@@ -787,7 +810,7 @@ function api_plugin_install(string $plugin) : bool {
 			cacti_log(sprintf('WARNING: Cacti Plugin %s was not installed by %s due to Configuration Issues', $plugin, get_username()), false, 'PLUGIN');
 		}
 	} else {
-		raise_message('install_error', __('The Plugin in the directory \'%s\' does not include an install function \'%s()\'.  This function must exist for the plugin to be installed.', $plugin, $function), MESSAGE_LEVEL_ERROR);
+		raise_message('install_error', __esc('The Plugin in the directory \'%s\' does not include an install function \'%s()\'.  This function must exist for the plugin to be installed.', $plugin, $function), MESSAGE_LEVEL_ERROR);
 
 		return false;
 	}
@@ -987,9 +1010,9 @@ function api_plugin_remove_data(string $plugin) : void {
 		if (function_exists($rmdata_function)) {
 			$rmdata_function();
 
-			raise_message('rmdata_complete', __('Data for Plugin %s including Tables and Settings has been removed.', $plugin), MESSAGE_LEVEL_INFO);
+			raise_message('rmdata_complete', __esc('Data for Plugin %s including Tables and Settings has been removed.', $plugin), MESSAGE_LEVEL_INFO);
 		} else {
-			raise_message('rmdata_not_complete', __('Data for Plugin %s including Tables and Settings has not been removed due to missing removal function.', $plugin), MESSAGE_LEVEL_ERROR);
+			raise_message('rmdata_not_complete', __esc('Data for Plugin %s including Tables and Settings has not been removed due to missing removal function.', $plugin), MESSAGE_LEVEL_ERROR);
 		}
 	}
 }
@@ -1021,6 +1044,13 @@ function api_plugin_replicate_config() : void {
 function api_plugin_drop_remote_table(string $table) : void {
 	include_once(CACTI_PATH_LIBRARY . '/poller.php');
 
+	// GHSA-h5wg-qf6f-7f6r: self-protect so no caller can push an unsafe identifier to the remote pollers.
+	if ($table === '' || !preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+		cacti_log("ERROR: Refusing to drop remote plugin table with invalid identifier '$table'", false, 'PLUGIN');
+
+		return;
+	}
+
 	$gone_time = read_config_option('poller_interval') * 2;
 
 	$pollers = array_rekey(
@@ -1038,7 +1068,7 @@ function api_plugin_drop_remote_table(string $table) : void {
 			$rcnn_id = poller_connect_to_remote($poller_id);
 
 			if ($rcnn_id !== false) {
-				db_execute("DROP TABLE IF EXISTS $table", false, $rcnn_id);
+				db_execute('DROP TABLE IF EXISTS `' . $table . '`', false, $rcnn_id);
 			}
 		}
 	}
@@ -1463,7 +1493,7 @@ function api_plugin_archive_remove(string $plugin, string $id) : void {
 		WHERE plugin = ? AND id = ?',
 		[$plugin, $id]);
 
-	raise_message('plugin_archive_removed', __('The Archive for Plugin \'%s\' has been removed.', $plugin), MESSAGE_LEVEL_INFO);
+	raise_message('plugin_archive_removed', __esc('The Archive for Plugin \'%s\' has been removed.', $plugin), MESSAGE_LEVEL_INFO);
 }
 
 function api_plugin_archive_restore(string $plugin, string $id, string $type = 'archive') : bool {
@@ -1513,9 +1543,9 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 			if (!is_dir($restore_path)) {
 				if (!mkdir($restore_path, 0755, true)) {
 					if ($type == 'archive') {
-						raise_message('restore_failed', __('Restore failed!  The Plugin \'%s\' archive Restore failed.  Unable to create directory \'%s\'.', $plugin, $restore_path), MESSAGE_LEVEL_ERROR);
+						raise_message('restore_failed', __esc('Restore failed!  The Plugin \'%s\' archive Restore failed.  Unable to create directory \'%s\'.', $plugin, $restore_path), MESSAGE_LEVEL_ERROR);
 					} else {
-						raise_message('restore_failed', __('Restore failed!  The available Plugin \'%s\' Load failed.  Unable to create directory \'%s\'.', $plugin, $restore_path), MESSAGE_LEVEL_ERROR);
+						raise_message('restore_failed', __esc('Restore failed!  The available Plugin \'%s\' Load failed.  Unable to create directory \'%s\'.', $plugin, $restore_path), MESSAGE_LEVEL_ERROR);
 					}
 
 					$archive->__destruct();
@@ -1610,7 +1640,7 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 			foreach ($archive_files as $basefile => $pharpath) {
 				$output = file_get_contents("phar://my.tgz{$pharpath}");
 
-				if (strlen($output)) {
+				if (strlen((string) $output)) {
 					$rfile = ltrim($basefile, '/');
 
 					/**
@@ -1627,9 +1657,9 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 					if (basename($rfile) != $rfile) {
 						if (!is_dir(dirname($rfile)) && !mkdir(dirname($rfile), 0755, true)) {
 							if ($type == 'archive') {
-								raise_message('restore_failed', __('Restore failed!  The archived Plugin \'%s\' Restore failed. Unable to create directory %s', $plugin, dirname($basefile)), MESSAGE_LEVEL_INFO);
+								raise_message('restore_failed', __esc('Restore failed!  The archived Plugin \'%s\' Restore failed. Unable to create directory %s', $plugin, dirname($basefile)), MESSAGE_LEVEL_INFO);
 							} else {
-								raise_message('restore_failed', __('Load failed!  The available Plugin \'%s\' Load failed. Unable to create directory %s', $plugin, dirname($basefile)), MESSAGE_LEVEL_INFO);
+								raise_message('restore_failed', __esc('Load failed!  The available Plugin \'%s\' Load failed. Unable to create directory %s', $plugin, dirname($basefile)), MESSAGE_LEVEL_INFO);
 							}
 
 							$archive->__destruct();
@@ -1649,14 +1679,14 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 			unlink($tmpfile);
 
 			if ($type == 'archive') {
-				raise_message('archive_restored', __('Restore succeeded!  The archived Plugin \'%s\' Restore succeeded.', $plugin), MESSAGE_LEVEL_INFO);
+				raise_message('archive_restored', __esc('Restore succeeded!  The archived Plugin \'%s\' Restore succeeded.', $plugin), MESSAGE_LEVEL_INFO);
 
 				db_execute_prepared('UPDATE plugin_config
 					SET last_updated = ?
 					WHERE directory = ?',
 					[$new_updated, $plugin]);
 			} else {
-				raise_message('archive_restored', __('Load succeeded!  The available Plugin \'%s\' Load succeeded.', $plugin), MESSAGE_LEVEL_INFO);
+				raise_message('archive_restored', __esc('Load succeeded!  The available Plugin \'%s\' Load succeeded.', $plugin), MESSAGE_LEVEL_INFO);
 
 				if ($id == 'develop') {
 					db_execute_prepared('UPDATE plugin_config
@@ -1674,18 +1704,18 @@ function api_plugin_archive_restore(string $plugin, string $id, string $type = '
 			return true;
 		} else {
 			if ($type == 'archive') {
-				raise_message('archive_failed', __('Restore failed!  The archived Plugin \'%s\' Restore failed.  Check the cacti.log for warnings.', $plugin), MESSAGE_LEVEL_ERROR);
+				raise_message('archive_failed', __esc('Restore failed!  The archived Plugin \'%s\' Restore failed.  Check the cacti.log for warnings.', $plugin), MESSAGE_LEVEL_ERROR);
 			} else {
-				raise_message('archive_failed', __('Load failed!  The available Plugin \'%s\' Load failed.  Check the cacti.log for warnings.', $plugin), MESSAGE_LEVEL_ERROR);
+				raise_message('archive_failed', __esc('Load failed!  The available Plugin \'%s\' Load failed.  Check the cacti.log for warnings.', $plugin), MESSAGE_LEVEL_ERROR);
 			}
 
 			return false;
 		}
 	} else {
 		if ($type == 'archive') {
-			raise_message('plugin_archive_not_found', __('Restore failed!  Unable to locate the archive record for Plugin \'%s\' in the database.', $plugin), MESSAGE_LEVEL_ERROR);
+			raise_message('plugin_archive_not_found', __esc('Restore failed!  Unable to locate the archive record for Plugin \'%s\' in the database.', $plugin), MESSAGE_LEVEL_ERROR);
 		} else {
-			raise_message('plugin_archive_not_found', __('Load failed!  Unable to locate the available record for Plugin \'%s\' in the database.', $plugin), MESSAGE_LEVEL_ERROR);
+			raise_message('plugin_archive_not_found', __esc('Load failed!  Unable to locate the available record for Plugin \'%s\' in the database.', $plugin), MESSAGE_LEVEL_ERROR);
 		}
 
 		return false;
@@ -1748,18 +1778,18 @@ function api_plugin_archive(string $plugin, string $note = '') : void {
 					$md5sum,
 					date('Y-m-d H:i:s'),
 					$note,
-					base64_encode(file_get_contents($tmpafile))
+					base64_encode((string) file_get_contents($tmpafile))
 				]
 			);
 
 			unlink($tmpafile);
 
-			raise_message('plugin_archived', __('The Plugin \'%s\' has been archived successfully.', $plugin), MESSAGE_LEVEL_INFO);
+			raise_message('plugin_archived', __esc('The Plugin \'%s\' has been archived successfully.', $plugin), MESSAGE_LEVEL_INFO);
 		} else {
-			raise_message('plugin_archive_failed', __('The Plugin \'%s\' archiving process has failed.  Check the Cacti log for errors.', $plugin), MESSAGE_LEVEL_ERROR);
+			raise_message('plugin_archive_failed', __esc('The Plugin \'%s\' archiving process has failed.  Check the Cacti log for errors.', $plugin), MESSAGE_LEVEL_ERROR);
 		}
 	} else {
-		raise_message('plugin_archive_failed', __('The Plugin \'%s\' archiving process has failed due to the plugin directory being missing.', $plugin), MESSAGE_LEVEL_ERROR);
+		raise_message('plugin_archive_failed', __esc('The Plugin \'%s\' archiving process has failed due to the plugin directory being missing.', $plugin), MESSAGE_LEVEL_ERROR);
 	}
 }
 
@@ -2054,7 +2084,7 @@ function plugin_fetch_latest_plugins() : mixed {
 
 			if ($details === false) {
 				if (CACTI_WEB) {
-					raise_message('releases_warning', __('The Cacti plugin %s has no releases.', $plugin_name), MESSAGE_LEVEL_WARN);
+					raise_message('releases_warning', __esc('The Cacti plugin %s has no releases.', $plugin_name), MESSAGE_LEVEL_WARN);
 					header('Location: plugins.php');
 
 					exit;
@@ -2134,7 +2164,7 @@ function plugin_fetch_latest_plugins() : mixed {
 
 								if ($file_details === false) {
 									if (CACTI_WEB) {
-										raise_message('plugins_failed', __('Unable to get %s from GitHub/GitLab location.', $file), MESSAGE_LEVEL_ERROR);
+										raise_message('plugins_failed', __esc('Unable to get %s from GitHub/GitLab location.', $file), MESSAGE_LEVEL_ERROR);
 										header('Location: plugins.php');
 
 										exit;
@@ -2186,9 +2216,9 @@ function plugin_fetch_latest_plugins() : mixed {
 								$requires,
 								date('Y-m-d H:i:s', strtotime($json_data[0]['published_at'])),
 								base64_encode($json_data[0]['body']),
-								base64_encode($ofiles['info']),
-								base64_encode($ofiles['readme']),
-								base64_encode($ofiles['changelog']),
+								base64_encode((string) $ofiles['info']),
+								base64_encode((string) $ofiles['readme']),
+								base64_encode((string) $ofiles['changelog']),
 								base64_encode($ofiles['archive'])
 							]
 						);
@@ -2204,7 +2234,7 @@ function plugin_fetch_latest_plugins() : mixed {
 
 			if ($develop === false) {
 				if (CACTI_WEB) {
-					raise_message('plugins_failed', __('Unable to get develop repo data for plugin %s from GitHub/GitLab location.', $plugin_name), MESSAGE_LEVEL_ERROR);
+					raise_message('plugins_failed', __esc('Unable to get develop repo data for plugin %s from GitHub/GitLab location.', $plugin_name), MESSAGE_LEVEL_ERROR);
 					header('Location: plugins.php');
 
 					exit;
@@ -2217,7 +2247,7 @@ function plugin_fetch_latest_plugins() : mixed {
 
 			if (cacti_sizeof($develop) && isset($develop['pushed_at'])) {
 				$published_at = date('Y-m-d H:i:s', strtotime($develop['pushed_at']));
-				$tag_name     = 'develop';
+				$tag_name     = (isset($develop['default_branch']) && $develop['default_branch'] != '') ? $develop['default_branch'] : 'develop';
 
 				$unchanged = db_fetch_cell_prepared('SELECT COUNT(*)
 					FROM plugin_available
@@ -2229,7 +2259,7 @@ function plugin_fetch_latest_plugins() : mixed {
 
 				if ($unchanged) {
 					$skip = true;
-					cacti_log(sprintf('SKIPPED: Plugin:\'%s\', Tag/Release:\'%s\' Skipped as it has not changed', $plugin_name, 'develop'), false, 'PLUGIN');
+					cacti_log(sprintf('SKIPPED: Plugin:\'%s\', Tag/Release:\'%s\' Skipped as it has not changed', $plugin_name, $tag_name), false, 'PLUGIN');
 				} else {
 					$skip = false;
 				}
@@ -2239,15 +2269,15 @@ function plugin_fetch_latest_plugins() : mixed {
 
 					$pstart = microtime(true);
 
-					$avail_plugins[$plugin_name]['develop']['body']         = '';
-					$avail_plugins[$plugin_name]['develop']['published_at'] = $published_at;
+					$avail_plugins[$plugin_name][$tag_name]['body']         = '';
+					$avail_plugins[$plugin_name][$tag_name]['published_at'] = $published_at;
 
-					// insert develop
+					// insert default branch
 					$files = [
-						'changelog' => "$repo/repos/$user/plugin_{$plugin_name}/contents/CHANGELOG.md?ref=develop",
-						'readme'    => "$repo/repos/$user/plugin_{$plugin_name}/contents/README.md?ref=develop",
-						'info'      => "$repo/repos/$user/plugin_{$plugin_name}/contents/INFO?ref=develop",
-						'archive'   => "$repo/repos/$user/plugin_{$plugin_name}/tarball?ref=develop"
+						'changelog' => "$repo/repos/$user/plugin_{$plugin_name}/contents/CHANGELOG.md?ref=$tag_name",
+						'readme'    => "$repo/repos/$user/plugin_{$plugin_name}/contents/README.md?ref=$tag_name",
+						'info'      => "$repo/repos/$user/plugin_{$plugin_name}/contents/INFO?ref=$tag_name",
+						'archive'   => "$repo/repos/$user/plugin_{$plugin_name}/tarball?ref=$tag_name"
 					];
 
 					$ofiles = [];
@@ -2279,7 +2309,7 @@ function plugin_fetch_latest_plugins() : mixed {
 
 							if ($file_details === false) {
 								if (CACTI_WEB) {
-									raise_message('plugins_failed', __('Unable to get %s from GitHub/GitLab location.', $file), MESSAGE_LEVEL_ERROR);
+									raise_message('plugins_failed', __esc('Unable to get %s from GitHub/GitLab location.', $file), MESSAGE_LEVEL_ERROR);
 									header('Location: plugins.php');
 
 									exit;
@@ -2331,16 +2361,16 @@ function plugin_fetch_latest_plugins() : mixed {
 							$requires,
 							$published_at,
 							'',
-							base64_encode($ofiles['info']),
-							base64_encode($ofiles['readme']),
-							base64_encode($ofiles['changelog']),
+							base64_encode((string) $ofiles['info']),
+							base64_encode((string) $ofiles['readme']),
+							base64_encode((string) $ofiles['changelog']),
 							base64_encode($ofiles['archive'])
 						]
 					);
 
 					$pend = microtime(true);
 
-					cacti_log(sprintf('UPDATED: Plugin:\'%s\', Tag/Release:\'%s\' Updated in %0.2f seconds.', $plugin_name, 'develop', $pend - $pstart), false, 'PLUGIN');
+					cacti_log(sprintf('UPDATED: Plugin:\'%s\', Tag/Release:\'%s\' Updated in %0.2f seconds.', $plugin_name, $tag_name, $pend - $pstart), false, 'PLUGIN');
 				}
 			}
 		}
@@ -2352,9 +2382,9 @@ function plugin_fetch_latest_plugins() : mixed {
 	$updated_plugins = $updated;
 
 	if (cacti_sizeof($avail_plugins)) {
-		raise_message('plugins_fetched', __('There were \'%s\' Plugins found at The Cacti Groups GitHub site and \'%s\' Plugins Tags/Releases were retrieved and updated in %0.2f seconds.', $total_plugins, $updated_plugins, $end - $start), MESSAGE_LEVEL_INFO);
+		raise_message('plugins_fetched', __esc('There were \'%s\' Plugins found at The Cacti Groups GitHub site and \'%s\' Plugins Tags/Releases were retrieved and updated in %0.2f seconds.', $total_plugins, $updated_plugins, $end - $start), MESSAGE_LEVEL_INFO);
 	} else {
-		raise_message('plugins_fetched', __('Unable to reach The Cacti Groups GitHub site.  No plugin data retrieved in %0.2f seconds.', $end - $start), MESSAGE_LEVEL_WARN);
+		raise_message('plugins_fetched', __esc('Unable to reach The Cacti Groups GitHub site.  No plugin data retrieved in %0.2f seconds.', $end - $start), MESSAGE_LEVEL_WARN);
 	}
 
 	cacti_log(sprintf('PLUGIN STATS: Time:%0.2f Plugins:%d Updated:%d', $end - $start, cacti_sizeof($avail_plugins), $updated_plugins), false, 'SYSTEM');
@@ -2409,7 +2439,7 @@ function plugin_make_github_request(string $url, string $type = 'json') : mixed 
 		$error = curl_error($ch);
 
 		if ($info['http_code'] == 403 || $info['http_code'] == 429) {
-			$json_data = json_decode($data, true);
+			$json_data = json_decode((string) $data, true);
 
 			if (isset($json_data['message'])) {
 				raise_message('rate_limited', $json_data['message'], MESSAGE_LEVEL_ERROR);
@@ -2422,7 +2452,7 @@ function plugin_make_github_request(string $url, string $type = 'json') : mixed 
 
 		if ($errno == 0) {
 			if ($type == 'json') {
-				return json_decode($data, true);
+				return json_decode((string) $data, true);
 			}
 
 			if ($type == 'raw') {
