@@ -151,6 +151,8 @@ jobs:
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/remaining-filter-labels.spec.ts
           fi
           if [[ -f tests/row-filter-options.spec.ts ]]; then
+            export CACTI_ROWS_FILTER_FIXTURE="$RUNNER_TEMP/cacti-row-filter.html"
+            docker compose exec -T php php tests/fixtures/Core/RowsFilterProbe.php > "$CACTI_ROWS_FILTER_FIXTURE"
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/row-filter-options.spec.ts
           fi
           if [[ -f tests/user-action-audit.spec.ts ]]; then
