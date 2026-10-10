@@ -39,6 +39,15 @@ if (read_config_option('secpass_2fa_enabled') == 'on') {
 set_default_action();
 
 if (isrv('update_policy')) {
+	// GHSA-j67j-wpm4-9g3x: update_policy is read before the action dispatcher, so
+	// the global.php GET/CSRF denylist cannot cover it. csrf_check() only validates
+	// the token on POST, so require POST before rewriting the user's permission policy.
+	if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+		header('Allow: POST');
+		http_response_code(405);
+		exit;
+	}
+
 	update_policies();
 } else {
 	switch (grv('action')) {
@@ -578,6 +587,14 @@ function form_save() : void {
 			db_execute_prepared('DELETE FROM sessions WHERE user_id = ?', [$save['id']]);
 		}
 
+		// disabling here has to revoke like user_disable() does, or the account
+		// keeps its remember-me token and stays logged in on its current session
+		if (!empty($save['id']) && $save['enabled'] != 'on') {
+			db_execute_prepared('DELETE FROM user_auth_cache WHERE user_id = ?', [$save['id']]);
+			db_execute_prepared('DELETE FROM user_auth_row_cache WHERE user_id = ?', [$save['id']]);
+			db_execute_prepared('DELETE FROM sessions WHERE user_id = ?', [$save['id']]);
+		}
+
 		$save = api_plugin_hook_function('user_admin_setup_sql_save', $save);
 
 		if (!is_error_message()) {
@@ -949,7 +966,9 @@ function graph_perms_edit(string $tab, string $header_label) : void {
 				$(document).tooltip({
 					items: '[data-tooltip]',
 					content: function() {
-						return $(this).attr('data-tooltip');
+						// Render tooltip text as escaped content to prevent any markup
+						// in data-tooltip from being interpreted as HTML.
+						return $('<div>').text($(this).attr('data-tooltip') || '').html();
 					}
 				});
 			});
@@ -2206,6 +2225,29 @@ function user() : void {
 		ON ua.id = ug.user_id
 		$sql_where",
 		$sql_params);
+
+	// GHSA-m49v-hr7h-wwcj: keep every sort key on a displayed column so ORDER BY cannot pivot onto user_auth.password/locked/tfa_secret.
+	// update_order_string() has already merged the request value into $_SESSION['sort_data'], so validate the stored keys too,
+	// not just the current request, and clear both session entries (data + string) if any key is disallowed.
+	$allowed_sort = ['username', 'id', 'full_name', 'enabled', 'realm', 'policy_graphs', 'policy_hosts', 'policy_graph_templates', 'dtime'];
+	$order_page   = get_order_string_page(false);
+	$sort_ok      = in_array(grv('sort_column'), $allowed_sort, true);
+
+	if ($sort_ok && isset($_SESSION['sort_data'][$order_page]) && is_array($_SESSION['sort_data'][$order_page])) {
+		foreach (array_keys($_SESSION['sort_data'][$order_page]) as $stored_column) {
+			if (!in_array($stored_column, $allowed_sort, true)) {
+				$sort_ok = false;
+
+				break;
+			}
+		}
+	}
+
+	if (!$sort_ok) {
+		set_request_var('sort_column', 'username');
+		unset($_SESSION['sort_data'][$order_page]);
+		unset($_SESSION['sort_string'][$order_page]);
+	}
 
 	$sql_order = get_order_string();
 	$sql_limit = ' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows;

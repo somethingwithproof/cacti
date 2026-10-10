@@ -71,7 +71,7 @@ function inject_form_variables(array &$form_array, mixed $arg1 = [], mixed $arg2
 
 							// an empty field name in the variable means don't treat this as an array
 							if ($matches2 == '') {
-								if (is_array(${$matches1})) { // @phpstan-ignore-line
+								if (is_array(${$matches1})) {
 									// the existing value is already an array, leave it alone
 									$form_array[$field_name][$field_to_check] = ${$matches1};
 								} else {
@@ -82,7 +82,7 @@ function inject_form_variables(array &$form_array, mixed $arg1 = [], mixed $arg2
 								/* copy the value down from the array/key specified in the variable
 								 * replace up to three times for arg1:arg2:arg3 variables
 								 */
-								if (is_array(${$matches1})) { // @phpstan-ignore-line
+								if (is_array(${$matches1})) {
 									$array = ${$matches1};
 
 									if (isset($array[$matches2]) && $array[$matches2] != '') {
@@ -575,13 +575,13 @@ function form_process_visible_display_text(string $table_id, array $display_text
  * Format's a tables checkbox form element so that the cacti js actions work on it
  *
  * @param string $title    The title attribute for the checkbox, used for accessibility.
- * @param string $id       The unique identifier for the checkbox input element.
+ * @param mixed  $id       The unique identifier for the checkbox input element.
  * @param bool   $disabled Whether the checkbox should be disabled. Default is false.
  * @param bool   $checked  Whether the checkbox should be checked. Default is false.
  *
  * @return void
  */
-function form_checkbox_cell(string $title, string $id, bool $disabled = false, bool $checked = false) : void {
+function form_checkbox_cell(string $title, mixed $id, bool $disabled = false, bool $checked = false) : void {
 	print "\t<td class='checkbox' style='width:1%;'>\n";
 	print "\t\t<input type='checkbox' title='" . htmle($title) . "' class='checkbox" . ($disabled ? ' disabled' : '') . "' " . ($disabled ? " disabled='disabled'" : '') . ($checked ? " checked='checked'" : '') . " id='chk_" . $id . "' name='chk_" . $id . "'><label class='formCheckboxLabel' for='chk_" . $id . "'></label>\n";
 	print "\t</td>\n";
@@ -930,7 +930,7 @@ function get_filter_request_var(string $name, int $filter = FILTER_VALIDATE_INT,
 				$valid  = true;
 				$values = preg_split('/,/', $_REQUEST[$name], -1, PREG_SPLIT_NO_EMPTY);
 
-				foreach ($values as $number) {
+				foreach (($values ?: []) as $number) {
 					if (!is_numeric($number)) {
 						$valid = false;
 
@@ -956,7 +956,7 @@ function get_filter_request_var(string $name, int $filter = FILTER_VALIDATE_INT,
 
 		if ($value === false) {
 			if ($filter == FILTER_VALIDATE_IS_REGEX) {
-				raise_message('custom', __('The regular expression "%s" is not valid. Error is %s', htmle(get_nfilter_request_var($name)), htmle($custom_error)), MESSAGE_LEVEL_ERROR);
+				raise_message('custom', __esc('The regular expression "%s" is not valid. Error is %s', (string) get_nfilter_request_var($name), (string) $custom_error), MESSAGE_LEVEL_ERROR);
 				set_request_var($name, '');
 			} else {
 				die_html_input_error($name, get_nfilter_request_var($name));
@@ -1189,7 +1189,7 @@ function validate_store_request_vars(array $filters, string $sess_prefix = '') :
 					$valid  = true;
 					$values = preg_split('/,/', $_REQUEST[$variable], -1, PREG_SPLIT_NO_EMPTY);
 
-					foreach ($values as $number) {
+					foreach (($values ?: []) as $number) {
 						if (!is_numeric($number)) {
 							$valid = false;
 
@@ -1226,10 +1226,10 @@ function validate_store_request_vars(array $filters, string $sess_prefix = '') :
 				if ($value === false) {
 					if ($options['filter'] == FILTER_VALIDATE_IS_REGEX) {
 						raise_message('custom', __('The regular expression "%s" is not valid. Error is %s',
-							htmle(get_nfilter_request_var($variable)), htmle($custom_error)), MESSAGE_LEVEL_ERROR);
+							htmle((string) get_nfilter_request_var($variable)), htmle((string) $custom_error)), MESSAGE_LEVEL_ERROR);
 						set_request_var($variable, '');
 					} else {
-						die_html_input_error($variable, get_nfilter_request_var($variable), htmle($custom_error));
+						die_html_input_error($variable, get_nfilter_request_var($variable), htmle((string) $custom_error));
 					}
 				} else {
 					set_request_var($variable, $value);
@@ -1597,7 +1597,9 @@ function validate_redirect_url($url = '', $default = 'index.php') {
 /**
  * Builds a forced-HTTPS redirect using a server-configured host name.
  *
- * @param string $server_name  The web server's configured name.
+ * @param string $server_name  The web server's configured name, optionally
+ *                             followed by ':port' (IPv6 literals must be
+ *                             bracketed first, e.g. '[::1]:8080').
  * @param string $request_uri  The requested local path and query string.
  * @param string $default_path A local fallback when the request URI is invalid.
  *
@@ -1607,7 +1609,42 @@ function validate_redirect_url($url = '', $default = 'index.php') {
  */
 function cacti_build_https_redirect_url(string $server_name, string $request_uri, string $default_path = '/') : string {
 	$server_name = trim($server_name);
-	$host        = trim($server_name, '[]');
+
+	if ($server_name === '') {
+		return '';
+	}
+
+	/* split an optional port off first; a bracketed IPv6 literal keeps its
+	 * embedded colons and is only split on a ']:port' suffix, so a bare,
+	 * unbracketed IPv6 address (multiple colons, no brackets) is never
+	 * mistaken for a host:port pair */
+	if ($server_name[0] === '[') {
+		$close = strpos($server_name, ']');
+
+		if ($close === false) {
+			return '';
+		}
+
+		$host = substr($server_name, 1, $close - 1);
+		$port = '';
+
+		if (isset($server_name[$close + 1])) {
+			if ($server_name[$close + 1] !== ':') {
+				return '';
+			}
+
+			$port = substr($server_name, $close + 2);
+		}
+	} elseif (substr_count($server_name, ':') === 1) {
+		[$host, $port] = explode(':', $server_name, 2);
+	} else {
+		$host = $server_name;
+		$port = '';
+	}
+
+	if ($port !== '' && (!ctype_digit($port) || (int) $port < 1 || (int) $port > 65535)) {
+		return '';
+	}
 
 	if (filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false) {
 		$host = '[' . $host . ']';
@@ -1619,7 +1656,50 @@ function cacti_build_https_redirect_url(string $server_name, string $request_uri
 	$path = validate_redirect_url($request_uri, $default_path);
 	$path = '/' . ltrim($path, '/');
 
-	return 'https://' . $host . $path;
+	return 'https://' . $host . ($port !== '' ? ':' . $port : '') . $path;
+}
+
+/**
+ * Resolves a trusted host for the force_https redirect from the admin-configured
+ * base_url, in preference to the request's Host/SERVER_NAME.
+ *
+ * SERVER_NAME mirrors the client Host header under the common Apache default
+ * UseCanonicalName Off, so validating its format alone (see
+ * cacti_build_https_redirect_url()) still lets an attacker redirect to another
+ * valid-looking hostname. base_url is the trusted source Cacti already uses for
+ * absolute URLs, so it is preferred when configured.
+ *
+ * @return string A bare host, or 'host:port' when base_url configures a
+ *                non-default port, safe to pass to
+ *                cacti_build_https_redirect_url(), or '' when base_url is unset.
+ */
+function cacti_force_https_host() : string {
+	$base = trim((string) read_config_option('base_url'));
+
+	if ($base === '') {
+		return '';
+	}
+
+	/* base_url is stored in scheme-less form (e.g. 'monitor.example/cacti')
+	 * until the first linked graph report is rendered, see the same check in
+	 * lib/reports.php; parse_url() cannot extract a host without a scheme, so
+	 * add one for parsing purposes only. */
+	$parseable = (substr($base, 0, 4) === 'http') ? $base : 'http://' . $base;
+
+	$host = parse_url($parseable, PHP_URL_HOST);
+	$port = parse_url($parseable, PHP_URL_PORT);
+
+	if (!is_string($host) || $host === '') {
+		return '';
+	}
+
+	/* bracket a literal IPv6 host before appending a port so the two remain
+	 * unambiguous when cacti_build_https_redirect_url() splits them back apart */
+	if (strpos($host, ':') !== false) {
+		$host = '[' . $host . ']';
+	}
+
+	return ($port !== null && $port !== false) ? $host . ':' . $port : $host;
 }
 
 /**
@@ -1728,20 +1808,20 @@ function load_current_session_value(string $request_var_name, string $session_va
  */
 function get_colored_device_status(bool $disabled, int $status, int $thold_failure_count = -1, int $status_event_count = -1) : string {
 	if ($disabled) {
-		return "<span class='deviceDisabled'>" . __('Disabled') . '</span>';
+		return "<span class='deviceStatus deviceDisabled'>" . __('Disabled') . '</span>';
 	} else {
 		if ($status != HOST_RECOVERING && $thold_failure_count > 0) {
 			if ($status_event_count >= $thold_failure_count) {
-				return "<span class='deviceDown'>" . __('Down (Thold)') . '</span>';
+				return "<span class='deviceStatus deviceDown'>" . __('Down (Thold)') . '</span>';
 			}
 		}
 
 		return match ($status) {
-			HOST_DOWN       => "<span class='deviceDown'>" . __('Down') . '</span>',
-			HOST_RECOVERING => "<span class='deviceRecovering'>" . __('Recovering') . '</span>',
-			HOST_UP         => "<span class='deviceUp'>" . __('Up') . '</span>',
-			HOST_ERROR      => "<span class='deviceError'>" . __('Error') . '</span>',
-			default         => "<span class='deviceUnknown'>" . __('Unknown') . '</span>',
+			HOST_DOWN       => "<span class='deviceStatus deviceDown'>" . __('Down') . '</span>',
+			HOST_RECOVERING => "<span class='deviceStatus deviceRecovering'>" . __('Recovering') . '</span>',
+			HOST_UP         => "<span class='deviceStatus deviceUp'>" . __('Up') . '</span>',
+			HOST_ERROR      => "<span class='deviceStatus deviceError'>" . __('Error') . '</span>',
+			default         => "<span class='deviceStatus deviceUnknown'>" . __('Unknown') . '</span>',
 		};
 	}
 }

@@ -59,15 +59,15 @@ cmd_exec	./lib/ping.php						$result = shell_exec('ping -t ' . ceil($this->timeo
 cmd_exec	./lib/ping.php						$result = shell_exec('ping -t ' . ceil($this->timeout / 1000) . ' -c ' . $this->retries . ' ' . cacti_escapeshellarg_cmd($this->host['hostname'], true, true));
 cmd_exec	./lib/ping.php						$result = shell_exec('ping -w ' . ceil($this->timeout / 1000) . ' -c ' . $this->retries . ' ' . cacti_escapeshellarg_cmd($this->host['hostname'], true, true));
 cmd_exec	./lib/ping.php					$result = shell_exec(cacti_escapeshellarg($fping) . ' -q -t ' . $this->timeout . ' -c 1 -r ' . $this->retries . ' ' . cacti_escapeshellarg_cmd($this->host['hostname'], true, true) . ' 2>&1');
-cmd_exec	./lib/poller.php										$output = system($php_path . ' -l ' . $tmpfile, $exit);
+cmd_exec	./lib/poller.php										$output = system(cacti_escapeshellcmd($php_path) . ' -l ' . cacti_escapeshellarg($tmpfile), $exit);
 cmd_exec	./lib/poller.php						pclose(popen('start "Cactiplus" /I ' . $filename . ' ' . $args . ' ' . $redirect_args, 'r'));
 cmd_exec	./lib/poller.php						pclose(popen('start "Cactiplus" /I ' . $filename . ' ' . $args, 'r'));
 cmd_exec	./lib/poller.php					$fp = popen($command, 'r');
 cmd_exec	./lib/poller.php					$fp = popen($command, 'rb');
-cmd_exec	./lib/poller.php					exec($filename . ' ' . $args . ' ' . $redirect_args . ' &');
-cmd_exec	./lib/poller.php					exec($filename . ' ' . $args . ' > /dev/null 2>&1 &');
+cmd_exec	./lib/poller.php					exec($safe_filename . ' ' . $args . ' ' . $redirect_args . ' &');
+cmd_exec	./lib/poller.php					exec($safe_filename . ' ' . $args . ' > /dev/null 2>&1 &');
 cmd_exec	./lib/poller.php				$output = shell_exec($command);
-cmd_exec	./lib/poller.php			$setsid_path = trim(shell_exec('which setsid 2>/dev/null') ?? '');
+cmd_exec	./lib/poller.php			$setsid_path = trim((string) shell_exec('which setsid 2>/dev/null'));
 cmd_exec	./lib/poller.php		$process = @proc_open($command, $descriptors, $pipes, null, null, ['bypass_shell' => true]);
 cmd_exec	./lib/poller.php		$process = proc_open('exec ' . $cmd_full, $descriptors, $pipes);
 cmd_exec	./lib/poller.php	 *                                    of the proc_open() and proc_close() functions (php 4.3+)
@@ -111,6 +111,7 @@ cmd_exec	./support.php				exec(cacti_escapeshellcmd(read_config_option('path_rrd
 cmd_exec	./support.php			$cli_json = shell_exec(cacti_escapeshellcmd($php_binary) . ' -q ' . cacti_escapeshellarg(CACTI_PATH_INSTALL . '/cli_check.php') . ' extensions');
 cmd_exec	./support.php			$snmp_version   = (string) shell_exec(cacti_escapeshellcmd($snmpget_path) . ' -V 2>&1');
 cmd_exec	./support.php			exec(cacti_escapeshellcmd(read_config_option('path_spine')) . ' --version', $out_array);
+deserialize	./lib/cache.php			$data = @unserialize($wire, ['allowed_classes' => false]);
 deserialize	./lib/functions.php				$items = unserialize($unstripped, ['allowed_classes' => false]);
 deserialize	./lib/functions.php				$items = unserialize($unstripped, ['allowed_classes' => false]);
 deserialize	./lib/functions.php		return unserialize($strobj, ['allowed_classes' => false]);
@@ -173,6 +174,7 @@ fs_write	./lib/CactiFilesystem.php			self::default()->writeFile($filename, $cont
 fs_write	./lib/api_device.php							if (file_put_contents($new_xmlfile, $data) === false) {
 fs_write	./lib/boost.php								if ($fileptr = fopen($cache_file, 'rb')) {
 fs_write	./lib/boost.php		$fileptr = fopen($temp_file, 'wb');
+fs_write	./lib/cache.php			if ($blob === false || @file_put_contents($tmp, $blob, LOCK_EX) === false) {
 fs_write	./lib/clog_webapi.php					$log_fh = fopen($logfile, 'w');
 fs_write	./lib/csp_report_endpoint.php	$inputStream = fopen('php://input', 'rb');
 fs_write	./lib/database.php					file_put_contents(sys_get_temp_dir() . '/cacti-option.log',
@@ -214,7 +216,7 @@ fs_write	./script_server.php		define('STDIN', fopen('php://stdin', 'r'));
 fs_write	./script_server.php		define('STDOUT', fopen('php://stdout', 'w'));
 fs_write	./scripts/ss_net_snmp_disk_bytes.php				file_put_contents("$tmpdir/$tmpfile", $data);
 fs_write	./scripts/ss_net_snmp_disk_io.php				file_put_contents("$tmpdir/$tmpfile", $data);
-fs_write	./snmpagent_mibcachechild.php			file_put_contents($path_mibcache, '<?php $cache = ' . var_export($cache, true) . ';', LOCK_EX);
+fs_write	./snmpagent_mibcachechild.php				file_put_contents($path_mibcache, '<?php $cache = ' . var_export($cache, true) . ';', LOCK_EX);
 fs_write	./snmpagent_mibcachechild.php		$lock = fopen($path_mibcache_lock, 'w');
 fs_write	./support.php		$fp = @fopen($file, 'rb');
 fs_write	./templates_import.php				$fp       = fopen($_FILES['import_file']['tmp_name'],'r');
@@ -412,6 +414,9 @@ header_redirect	./graph_templates.php			header('Location: graph_templates.php?ac
 header_redirect	./graph_templates.php			header('Location: graph_templates.php?action=template_edit&id=' . grv('graph_template_id'));
 header_redirect	./graph_templates.php			header('Location: graph_templates.php?action=template_edit&id=' . grv('graph_template_id'));
 header_redirect	./graph_templates.php			header('Location: graph_templates.php?action=template_edit&id=' . grv('graph_template_id'));
+header_redirect	./graphs.php						header('Location: aggregate_graphs.php');
+header_redirect	./graphs.php						header('Location: aggregate_graphs.php');
+header_redirect	./graphs.php						header('Location: aggregate_graphs.php');
 header_redirect	./graphs.php					header("Location: aggregate_graphs.php?action=edit&tab=details&id=$local_graph_id");
 header_redirect	./graphs.php				header('Location: graphs.php');
 header_redirect	./graphs.php				header('Location: graphs.php');
@@ -474,6 +479,9 @@ header_redirect	./include/themes/carrot/index.php	header('Location:../index.php'
 header_redirect	./include/themes/dark/default/index.php	header('Location:../index.php');
 header_redirect	./include/themes/dark/images/index.php	header('Location:../index.php');
 header_redirect	./include/themes/dark/index.php	header('Location:../index.php');
+header_redirect	./include/themes/deepness/default/index.php	header('Location:../index.php');
+header_redirect	./include/themes/deepness/images/index.php	header("Location:../index.php");
+header_redirect	./include/themes/deepness/index.php	header('Location:../index.php');
 header_redirect	./include/themes/hollyberry/default/index.php	header('Location:../index.php');
 header_redirect	./include/themes/hollyberry/images/index.php	header('Location:../index.php');
 header_redirect	./include/themes/hollyberry/index.php	header('Location:../index.php');
@@ -499,14 +507,17 @@ header_redirect	./include/themes/sunrise/index.php	header('Location:../index.php
 header_redirect	./include/vendor/index.php	header("Location:../index.php");
 header_redirect	./include/views/index.php			header('Location:../index.php');
 header_redirect	./install/upgrades/index.php	header('Location:../../index.php');
+header_redirect	./lib/Auth/LocalAuthLoginProvider.php					header('Location: auth_changepassword.php');
+header_redirect	./lib/Auth/OpenIdLoginProvider.php			header('Location: ' . $discovery['authorization_endpoint'] . '?' . $query);
+header_redirect	./lib/Auth/SamlLoginProvider.php				header('Location: ' . $responseUrl);
+header_redirect	./lib/Auth/SamlLoginProvider.php			header('Location: ' . $redirectUrl);
+header_redirect	./lib/Auth/SamlLoginProvider.php			header('Location: ' . rtrim((string) read_config_option('base_url'), '/') . '/logout.php');
 header_redirect	./lib/auth.php					header('Location: ' . $referer);
 header_redirect	./lib/auth.php					header('Location: ' . CACTI_PATH_URL . 'graph_view.php' . ($newtheme ? '?newtheme=1' : ''));
 header_redirect	./lib/auth.php					header('Location: ' . CACTI_PATH_URL . 'index.php' . ($newtheme ? '?newtheme=1' : ''));
 header_redirect	./lib/auth.php					header('Location: graph_view.php');
 header_redirect	./lib/auth.php					header('Location: index.php');
 header_redirect	./lib/auth.php				header('Location: ' . CACTI_PATH_URL . 'graph_view.php' . ($newtheme ? '?newtheme=1' : ''));
-header_redirect	./lib/auth.php				header('Location: auth_changepassword.php');
-header_redirect	./lib/auth.php			header('Location: ' . CACTI_PATH_URL . 'auth_changepassword.php?action=force&ref=' . urlencode(validate_redirect_url($_SERVER['HTTP_REFERER'] ?? 'index.php')));
 header_redirect	./lib/clog_webapi.php				header('Location: clog.php?filename=' . basename($logfile));
 header_redirect	./lib/clog_webapi.php			header('Location: ' . get_current_page());
 header_redirect	./lib/functions.php		header('Location: ' . cacti_url(sanitize_redirect_path($path), $params));
@@ -550,6 +561,9 @@ header_redirect	./links.php			header('Location: links.php');
 header_redirect	./links.php			header('Location: links.php');
 header_redirect	./locales/index.php	header('Location:../index.php');
 header_redirect	./log/index.php	header('Location:../index.php');
+header_redirect	./login_providers.php			header('Location: login_providers.php');
+header_redirect	./login_providers.php			header('Location: login_providers.php?action=edit&id=' . (empty($id) ? gnrv('id') : $id));
+header_redirect	./login_providers.php		header('Location: login_providers.php');
 header_redirect	./logout.php		header('Location: index.php');
 header_redirect	./managers.php					header('Location: managers.php');
 header_redirect	./managers.php				header('Location: managers.php?action=edit&id=' . gnrv('id') . '&tab=notifications');
@@ -575,7 +589,10 @@ header_redirect	./package_repos.php		header('Location: package_repos.php?header=
 header_redirect	./plugins.php				header('Location: plugins.php');
 header_redirect	./plugins.php				header('Location: plugins.php');
 header_redirect	./plugins.php				header('Location: plugins.php');
+header_redirect	./plugins.php				header('Location: plugins.php');
+header_redirect	./plugins.php				header('Location: plugins.php');
 header_redirect	./plugins.php				header('Location: plugins.php?state=5');
+header_redirect	./plugins.php			header('Location: plugins.php');
 header_redirect	./plugins.php			header('Location: plugins.php');
 header_redirect	./plugins.php			header('Location: plugins.php');
 header_redirect	./plugins.php			header('Location: plugins.php');
@@ -622,6 +639,9 @@ header_redirect	./tree.php				header('Location: tree.php');
 header_redirect	./tree.php				header('Location: tree.php');
 header_redirect	./tree.php				header('Location: tree.php');
 header_redirect	./tree.php				header('Location: tree.php');
+header_redirect	./tree.php				header('Location: tree.php');
+header_redirect	./tree.php				header('Location: tree.php');
+header_redirect	./tree.php				header('Location: tree.php');
 header_redirect	./tree.php			header('Location: tree.php');
 header_redirect	./tree.php			header('Location: tree.php');
 header_redirect	./tree.php			header('Location: tree.php');
@@ -644,8 +664,6 @@ header_redirect	./user_admin.php			header('Location: user_admin.php?action=user_
 header_redirect	./user_admin.php		header('Location: user_admin.php?action=user_edit&id=' . (empty($user_id) ? gfrv('id') : $user_id));
 header_redirect	./user_admin.php		header('Location: user_admin.php?action=user_edit&tab=' . gnrv('tab') . '&id=' . gnrv('id'));
 header_redirect	./user_admin.php		header('Location: user_admin.php?action=user_edit&tab=graph_perms_edit&id=' . grv('user_id'));
-header_redirect	./user_domains.php			header('Location: user_domains.php');
-header_redirect	./user_domains.php		header('Location: user_domains.php?action=edit&domain_id=' . (empty($domain_id) ? gnrv('domain_id') : $domain_id));
 header_redirect	./user_group_admin.php					header('Location: user_group_admin.php');
 header_redirect	./user_group_admin.php					header('Location: user_group_admin.php');
 header_redirect	./user_group_admin.php					header('Location: user_group_admin.php');
@@ -668,7 +686,7 @@ header_redirect	./utilities.php			header('Location: utilities.php');
 header_redirect	./utilities.php			header('Location: utilities.php?action=view_poller_cache');
 header_redirect	./utilities.php			header('Location: utilities.php?action=view_snmpagent_cache');
 xml_parse	./cli/genmanifest.php							$xmldata = simplexml_load_string($data);
-xml_parse	./cli/rrdresize.php						$rrd_data = json_decode(json_encode(simplexml_load_string($file_dump)), true);
+xml_parse	./cli/rrdresize.php						$rrd_data = json_decode((string) json_encode(simplexml_load_string($file_dump)), true);
 xml_parse	./install/functions.php				$xmlget = simplexml_load_string($xml);
-xml_parse	./lib/import.php		$xmlget = simplexml_load_string($data);
 xml_parse	./lib/import.php		$xmlget = simplexml_load_string($xml);
+xml_parse	./lib/import.php		$xmlget = simplexml_load_string((string) $data);

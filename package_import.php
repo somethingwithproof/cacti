@@ -214,7 +214,7 @@ function form_actions() : void {
 
 						if (!is_dir($tmp_dir)) {
 							if (!mkdir($tmp_dir, 0777, true)) {
-								raise_message('tmpdir_fail', __('Unable to create package temporary directory %s.', $tmp_dir), MESSAGE_LEVEL_ERROR);
+								raise_message('tmpdir_fail', __esc('Unable to create package temporary directory %s.', $tmp_dir), MESSAGE_LEVEL_ERROR);
 
 								header('Location: package_import.php?package_location=' . $package_location);
 
@@ -230,9 +230,9 @@ function form_actions() : void {
 
 						if ($data !== false && cacti_sizeof($data[0])) {
 							import_display_results($data[0], [], true, true);
-							raise_message('import_success_' . md5($xmlfile), __('The Package %s Imported Successfully', $name), MESSAGE_LEVEL_INFO);
+							raise_message('import_success_' . md5($xmlfile), __esc('The Package %s Imported Successfully', $name), MESSAGE_LEVEL_INFO);
 						} else {
-							raise_message('import_fail_' . md5($xmlfile), __('The Package %s Import Failed', $name), MESSAGE_LEVEL_ERROR);
+							raise_message('import_fail_' . md5($xmlfile), __esc('The Package %s Import Failed', $name), MESSAGE_LEVEL_ERROR);
 						}
 
 						unlink($xmlfile);
@@ -266,7 +266,7 @@ function form_actions() : void {
 	foreach ($_POST as $var => $val) {
 		if (str_contains($var, 'chk_file_')) {
 			$id = base64_decode(str_replace('chk_file_', '', $var), true);
-			$id = json_decode($id, true);
+			$id = json_decode((string) $id, true);
 
 			// Get rid of the basename
 			$id['pfile'] = str_replace(CACTI_PATH_BASE . '/', '', $id['pfile']);
@@ -283,7 +283,7 @@ function form_actions() : void {
 
 		if (str_contains($var, 'chk_import_')) {
 			$id = base64_decode(str_replace('chk_import_', '', $var), true);
-			$id = json_decode($id, true);
+			$id = json_decode((string) $id, true);
 
 			$packages = explode('<br>', $id['package']);
 			$package  = '';
@@ -540,7 +540,7 @@ function form_save() : void {
 		foreach ($_POST as $var => $val) {
 			if (str_contains($var, 'chk_file_')) {
 				$id = base64_decode(str_replace('chk_file_', '', $var), true);
-				$id = json_decode($id, true);
+				$id = json_decode((string) $id, true);
 
 				if (str_contains($id['pfile'], '/')) {
 					$parts = explode('/', $id['pfile']);
@@ -569,7 +569,7 @@ function form_save() : void {
 
 			if (str_contains($var, 'chk_import_')) {
 				$id = base64_decode(str_replace('chk_import_', '', $var), true);
-				$id = json_decode($id, true);
+				$id = json_decode((string) $id, true);
 
 				$hashes[] = $id['hash'];
 			}
@@ -600,9 +600,9 @@ function form_save() : void {
 			import_display_package_data($templates, $files, $package_name, $xmlfile, $data, false);
 		} else {
 			if ($data !== false) {
-				raise_message('import_success_' . md5($xmlfile), __('The Package %s Imported Successfully', $package_name), MESSAGE_LEVEL_INFO);
+				raise_message('import_success_' . md5($xmlfile), __esc('The Package %s Imported Successfully', $package_name), MESSAGE_LEVEL_INFO);
 			} else {
-				raise_message('import_fail_' . md5($xmlfile), __('The Package %s Import Failed', $package_name), MESSAGE_LEVEL_ERROR);
+				raise_message('import_fail_' . md5($xmlfile), __esc('The Package %s Import Failed', $package_name), MESSAGE_LEVEL_ERROR);
 			}
 
 			unlink($xmlfile);
@@ -656,7 +656,7 @@ function package_file_get_contents(string $package_location, string $package_fil
 
 				$fdata = base64_decode($file['data'], true);
 
-				$ok = openssl_verify($fdata, $binary_signature, $public_key, OPENSSL_ALGO_SHA256);
+				$ok = openssl_verify((string) $fdata, (string) $binary_signature, $public_key, OPENSSL_ALGO_SHA256);
 
 				if ($ok != 1) {
 					$fdata = false;
@@ -699,7 +699,7 @@ function package_file_get_contents(string $package_location, string $package_fil
 
 					$fdata = base64_decode($file['data'], true);
 
-					$ok = openssl_verify($fdata, $binary_signature, $public_key, OPENSSL_ALGO_SHA256);
+					$ok = openssl_verify((string) $fdata, (string) $binary_signature, $public_key, OPENSSL_ALGO_SHA256);
 
 					if ($ok != 1) {
 						$fdata = false;
@@ -940,7 +940,7 @@ function package_accept_key() : void {
 
 					unlink($xmlfile);
 				} else {
-					raise_message('repo_missing', __('The Repo \'%s\' is NOT Reachable at the URL Location or the package.manifest file is missing.', $repo['name']), MESSAGE_LEVEL_WARN);
+					raise_message('repo_missing', __esc('The Repo \'%s\' is NOT Reachable at the URL Location or the package.manifest file is missing.', $repo['name']), MESSAGE_LEVEL_WARN);
 					header('Location: package_import.php');
 
 					exit;
@@ -2000,7 +2000,7 @@ function get_repo_file(string $repo_id, string $filename = 'package.manifest', b
 			}
 
 			if (!$javascript) {
-				raise_message('repo_missing', __('The Repo \'%s\' is NOT Reachable on GitHub or the \'%s\' file is missing or it could be an invalid branch.  Valid Package Locations are normally: https://github.com/Author/RepoName/.', $repo['name'], $filename), MESSAGE_LEVEL_ERROR);
+				raise_message('repo_missing', __esc('The Repo \'%s\' is NOT Reachable on GitHub or the \'%s\' file is missing or it could be an invalid branch.  Valid Package Locations are normally: https://github.com/Author/RepoName/.', $repo['name'], $filename), MESSAGE_LEVEL_ERROR);
 			}
 		} elseif ($repo['repo_type'] == 2) { // Direct URL
 			$file = $repo['repo_location'] . '/' . $filename;
@@ -2019,7 +2019,7 @@ function get_repo_file(string $repo_id, string $filename = 'package.manifest', b
 			}
 
 			if (!$javascript) {
-				raise_message('repo_missing', __('The Repo \'%s\' is NOT Reachable at the URL Location or the package.manifest file is missing.', $repo['name']), MESSAGE_LEVEL_ERROR);
+				raise_message('repo_missing', __esc('The Repo \'%s\' is NOT Reachable at the URL Location or the package.manifest file is missing.', $repo['name']), MESSAGE_LEVEL_ERROR);
 			}
 		} else { // Server Directory
 			$file = $repo['repo_location'] . '/' . $filename;
@@ -2032,10 +2032,10 @@ function get_repo_file(string $repo_id, string $filename = 'package.manifest', b
 				}
 
 				if (!$javascript) {
-					raise_message('repo_exists', __('The Repo \'%s\' is Reachable on the Local Cacti Server.  But not data returned from the manifest file.', $repo['name']), MESSAGE_LEVEL_ERROR);
+					raise_message('repo_exists', __esc('The Repo \'%s\' is Reachable on the Local Cacti Server.  But not data returned from the manifest file.', $repo['name']), MESSAGE_LEVEL_ERROR);
 				}
 			} elseif (!$javascript) {
-				raise_message('repo_missing', __('The Repo \'%s\' is NOT Reachable on the Local Cacti Server or the package.manifest file is missing.', $repo['name']), MESSAGE_LEVEL_ERROR);
+				raise_message('repo_missing', __esc('The Repo \'%s\' is NOT Reachable on the Local Cacti Server or the package.manifest file is missing.', $repo['name']), MESSAGE_LEVEL_ERROR);
 			}
 		}
 	}

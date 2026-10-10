@@ -361,7 +361,7 @@ label {
 }
 
 .deviceUp {
-	color: rgba(148, 179, 107, 0.8) !important;
+	color: rgba(40, 180, 40, 1.0) !important;
 }
 
 .deviceDown {
@@ -893,14 +893,18 @@ label {
 	top: 30%;
 	width: 360px;
 	max-height: 300px;
-	background: rgba(255,255,255,1);
-	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
-	background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(255,255,255,1)), color-stop(47%, rgba(246,246,246,1)), color-stop(100%, rgba(237,237,237,1)));
-	background: -webkit-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
-	background: -o-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
-	background: -ms-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
-	background: linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(246,246,246,1) 47%, rgba(237,237,237,1) 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#ededed', GradientType=0 );
+	background: #ffffff;
+	border: 1px solid #cccccc;
+}
+
+.cactiAuthBody input:-webkit-autofill,
+.cactiAuthBody input:-webkit-autofill:hover,
+.cactiAuthBody input:-webkit-autofill:focus,
+.cactiAuthBody input:-webkit-autofill:active {
+	-webkit-text-fill-color: #000000;
+	-webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+	caret-color: #000000;
+	transition: background-color 9999s ease-in-out 0s;
 }
 
 .cactiAuthTitle {
@@ -1027,7 +1031,7 @@ legend {
 	padding-bottom: 2px;
 }
 
-.piinstall, .pienable, .pidisable, .piuninstall, .pierror, .pirmdata, .piload, .pireadme, .pichangelog, .pirestore, .pirmarchive {
+.piinstall, .pienable, .pidisable, .piuninstall, .pierror, .piforceremove, .pirmdata, .piload, .pireadme, .pichangelog, .pirestore, .pirmarchive {
 	padding: 0px 3px !important;
 }
 
@@ -1256,6 +1260,10 @@ legend {
 	vertical-align: -10%;
 }
 
+.filterTable .filterColumn label.checkboxSwitch {
+	vertical-align: middle;
+}
+
 .filterTable .filterColumnButton {
 	display: table-cell;
 	padding: 5px 0px 5px 5px;
@@ -1264,6 +1272,97 @@ legend {
 
 .filterTable .filterColumn:first-child {
 	width: 55px;
+}
+
+/* Modern page filter dialog skin (page_filter_format = modern), scoped to the
+   cactiFilterDialog widget so other dialogs are unaffected. */
+.cactiFilterModernBar .filterColumn,
+.cactiFilterModernBar .filterColumnButton {
+	vertical-align: middle;
+}
+
+/* Narrow the regex Search box on the modern bar to the normal filter width. */
+.cactiFilterModernBar input#rfilter {
+	width: 30ch;
+}
+
+.icon-rotate {
+	display: inline-block;
+	animation: fa-spin 1.5s linear infinite;
+}
+
+.cactiFilterModernBar .barSep {
+	display: inline-block;
+	width: 1px;
+	height: 20px;
+	margin: 0 6px;
+	background-color: rgba(128, 128, 128, 0.45);
+	vertical-align: middle;
+}
+
+.ui-dialog.cactiFilterDialog {
+	padding: 0;
+	border-radius: 6px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+	overflow: hidden;
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-titlebar {
+	border: 0;
+	border-radius: 0;
+	padding: 10px 14px;
+	background: #2d4ca8;
+	color: #ffffff;
+	font-size: 14px;
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-title {
+	font-weight: bold;
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-titlebar .ui-dialog-titlebar-close {
+	background: transparent;
+	border: 0;
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-titlebar-close .ui-icon {
+	filter: invert(1) brightness(2);
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-content {
+	padding: 14px 16px;
+}
+
+.ui-dialog.cactiFilterDialog .cactiFilterEditTable {
+	white-space: normal;
+}
+
+.ui-dialog.cactiFilterDialog .cactiFilterEditRow .filterColumn:first-child {
+	min-width: 120px;
+	padding-right: 12px;
+	font-weight: bold;
+}
+
+.ui-dialog.cactiFilterDialog .cactiFilterEditRow .filterColumn:last-child select,
+.ui-dialog.cactiFilterDialog .cactiFilterEditRow .filterColumn:last-child input[type="text"] {
+	min-width: 220px;
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-buttonpane {
+	margin: 0;
+	border-top: 1px solid rgba(0, 0, 0, 0.12);
+	padding: 8px 12px;
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-buttonpane .ui-button {
+	margin: 0 0 0 6px;
+	padding: 5px 14px;
+}
+
+.ui-dialog.cactiFilterDialog .ui-dialog-buttonpane .ui-button:first-child {
+	background: #2d4ca8;
+	color: #ffffff;
+	border-color: rgba(0, 0, 0, 0.25);
 }
 
 .settingsFilter {
@@ -2578,9 +2677,140 @@ td.center > table {
 .select2-container--default .select2-selection--single,
 .select2-container--default .select2-selection--multiple {
 	border: 1px solid #aaaaaa;
-	border-radius: 4px;
-	background: #ffffff;
+	border-radius: 6px;
+	background: #e6e6e6 url("images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50% repeat-x;
 	color: #222222;
+}
+
+/* match jQuery UI's shorter button height */
+.select2-container--default .select2-selection--single {
+	height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	line-height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+	height: 22px;
+}
+
+/* match the multi-select (e.g. Templates) control to the single-select height;
+   flexbox centers content vertically regardless of font metrics */
+.select2-container--default .select2-selection--multiple {
+	min-height: 24px;
+	padding: 0 20px 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+	display: block;
+	flex: 1;
+	margin: 0;
+	padding-left: 8px;
+	overflow: hidden;
+	line-height: 24px;
+}
+
+/* select2-multi-count always replaces the rendered area with "N Selected" text;
+   only hide the inline search-while-typing box while closed (it doesn't fit
+   that display and was inflating the control's height) - let it reappear once
+   the dropdown opens, since that's the only place multi-selects can search from */
+select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.select2-container--open) .select2-search--inline {
+	display: none;
+}
+
+.select2-selection--multiple .select2-count-label {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* once open, let the search box sit on its own row below the current
+   selection instead of overlapping it */
+.select2-container--default .select2-selection--multiple .select2-search--inline {
+	display: block;
+	width: 100%;
+	margin: 4px 0 0;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+	width: 100% !important;
+	box-sizing: border-box;
+	margin: 0 !important;
+}
+
+/* select2 doesn't draw a dropdown arrow for multi-selects by default; add one to match */
+.select2-container--default .select2-selection--multiple::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	margin-top: -2px;
+	border-color: currentColor transparent transparent transparent;
+	border-style: solid;
+	border-width: 5px 4px 0 4px;
+	height: 0;
+	width: 0;
+	pointer-events: none;
+}
+
+.select2-container--default.select2-container--open .select2-selection--multiple::after {
+	border-color: transparent transparent currentColor transparent;
+	border-width: 0 4px 5px 4px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.select2-results__option {
+	white-space: nowrap;
+	min-height: 24px;
+	box-sizing: border-box;
+}
+
+/* keep the first 15 results visible before the list needs to scroll */
+.select2-container--default .select2-results > .select2-results__options {
+	max-height: 360px;
+}
+
+/* checkbox-style indicator for select2-multi-count option rows */
+.select2-results__option .select2-checkbox-option {
+	position: relative;
+	display: block;
+	padding-left: 20px;
+}
+
+.select2-results__option .select2-checkbox-option::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 13px;
+	height: 13px;
+	margin-top: -7px;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+	box-sizing: border-box;
+}
+
+/* select2 also (re)uses aria-selected for mouse-hover/keyboard highlight
+ * tracking, unrelated to actual selection - key off the --selected class
+ * instead, which setClasses() only ever sets from the real selected data */
+.select2-results__option.select2-results__option--selected .select2-checkbox-option::after {
+	content: '\2713';
+	position: absolute;
+	left: 2px;
+	top: 50%;
+	margin-top: -7px;
+	font-size: 11px;
+	line-height: 13px;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__rendered,
@@ -2588,8 +2818,7 @@ td.center > table {
 	color: #222222;
 }
 
-.select2-container--default.select2-container--focus .select2-selection--single,
-.select2-container--default.select2-container--focus .select2-selection--multiple,
+/* select2 keeps --focus set after the dropdown closes; only --open should get the active look */
 .select2-container--default.select2-container--open .select2-selection--single,
 .select2-container--default.select2-container--open .select2-selection--multiple {
 	border-color: #999999;
@@ -2632,4 +2861,112 @@ td.center > table {
 .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
 	background: rgba(0,119,0,0.9);
 	color: white;
+}
+/* ======================================================================== */
+/* jsTree glyph icons - node type colors, sizing, and open/close carets     */
+/* ======================================================================== */
+
+/* remove the indent/connector dotted lines (also disabled via dots:false)  */
+.jstree-default .jstree-node { background: transparent !important; }
+
+/* node type glyphs, centered in the 20px node row */
+.jstree-default .jstree-anchor > .jstree-themeicon {
+	background-image: none !important;
+	font-size: 14px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-folder { color: #F9A825; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-sitemap { color: #546E7A; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-building { color: #00897B; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-map-pin { color: #E53935; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-server { color: #1E88E5; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-server-cog { color: #8E24AA; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-list-search { color: #0097A7; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-chart-line { color: #388E3C; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-chart-histogram { color: #F57C00; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-chart-infographic { color: #C2185B; }
+
+/* open/close carets as glyphs, centered to match the node glyphs        */
+/* scoped to non-loading nodes so the AJAX loading throbber is preserved  */
+.jstree-default .jstree-node:not(.jstree-loading) > .jstree-ocl {
+	background: none !important;
+	font-family: "tabler-icons";
+	font-size: 14px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 20px;
+	color: #78909C;
+}
+.jstree-default .jstree-closed:not(.jstree-loading) > .jstree-ocl::before { content: "\ea61"; }
+.jstree-default .jstree-open:not(.jstree-loading) > .jstree-ocl::before { content: "\ea5f"; }
+.jstree-default .jstree-leaf:not(.jstree-loading) > .jstree-ocl::before { content: ""; }
+
+/*
+ * Filter-table toggle switches (1.2.x). Render the raw filter checkboxes
+ * (<input type='checkbox'> directly inside a .filterTable wrapper) as on/off
+ * toggle switches styled to match this theme's form checkboxSlider, with the
+ * label text first and the switch second. form_checkbox() sliders (class
+ * 'formCheckbox') already render this way and are left untouched.
+ */
+.filterTable span:has(> input[type='checkbox']:not(.formCheckbox)),
+.filterTable div:has(> input[type='checkbox']:not(.formCheckbox)) {
+	display: inline-flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 6px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) {
+	-webkit-appearance: none;
+	appearance: none;
+	box-sizing: border-box;
+	position: relative;
+	flex: 0 0 auto;
+	width: 45px;
+	height: 24px;
+	margin: 0;
+	padding: 0;
+	border-radius: 24px !important;
+	background: rgba(0, 59, 0, 0.55);
+	cursor: pointer;
+	vertical-align: middle;
+	transition: background 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox)::before {
+	content: '';
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #ffffff;
+	transition: transform 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked {
+	background: rgba(0, 179, 0, 0.9);
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked::before {
+	transform: translateX(20px);
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):focus-visible {
+	outline: 2px solid rgba(0, 179, 0, 0.9);
+	outline-offset: 1px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) + label {
+	cursor: pointer;
 }

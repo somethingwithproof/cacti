@@ -139,6 +139,10 @@ cpu_cores_check();
 // Remove deleted devices
 remove_aged_row_cache();
 
+// Sweep this collector's SNMP credential cache (each collector has its own
+// host-local cache file / shared-memory segment, so this runs everywhere)
+snmp_credential_cache_maintenance();
+
 // Update Object Totals Caches
 if (POLLER_ID == 1) {
 	update_graphs_data_source_templates_totals($force);
@@ -168,6 +172,40 @@ if (!$force) {
 }
 
 exit(0);
+
+/**
+ * Sweep this collector's shared SNMP credential cache once a day. Each collector
+ * keeps its own host-local cache file / shared-memory segment, so this runs on
+ * every collector (not just the main one), using a per-poller lastrun marker so
+ * one collector's sweep does not suppress another's.
+ *
+ * @return void No value is returned.
+ */
+function snmp_credential_cache_maintenance() : void {
+	require_once(CACTI_PATH_LIBRARY . '/snmp.php');
+
+	if (!function_exists('snmp_auth_cache_rebuild') || !snmp_auth_cache_enabled()) {
+		return;
+	}
+
+	$setting  = 'snmp_cred_cache_lastrun_' . POLLER_ID;
+	$last_run = read_config_option($setting);
+	$now      = time();
+
+	if (empty($last_run)) {
+		set_config_option($setting, $now);
+
+		return;
+	}
+
+	if (date('z', $now) != date('z', $last_run)) {
+		set_config_option($setting, $now);
+
+		maint_debug('Rebuilding SNMP credential cache');
+
+		snmp_auth_cache_rebuild();
+	}
+}
 
 function unlock_cacti() : void {
 	$lockout = read_config_option('cacti_lockout_status', true);
@@ -634,7 +672,11 @@ function logrotate_file_rotate(string $name, string $log, object $date) : int {
 			if (rename($log, $log . '-' . $ext)) {
 				touch($log);
 				chown($log, $owner);
-				chgrp($log, $group);
+
+				if ($group !== false) {
+					chgrp($log, $group);
+				}
+
 				chmod($log, $perms);
 
 				cacti_log('Cacti Log Rotation - Created ' . $name . ' Log : ' . basename($log) . '-' . $ext, true, 'MAINT');
@@ -926,8 +968,13 @@ function rrdclean_create_path(string $path) : bool {
 
 				// NOTE: chown/chgrp fails for non-root users, checking their
 				// result is therefore irrelevant
-				@chown($path, $owner_id);
-				@chgrp($path, $group_id);
+				if ($owner_id !== false) {
+					@chown($path, $owner_id);
+				}
+
+				if ($group_id !== false) {
+					@chgrp($path, $group_id);
+				}
 			}
 		} else {
 			cacti_log("ERROR: RRDfile Maintenance unable to create directory '" . $path . "'", false, 'MAINT');
@@ -954,8 +1001,8 @@ function cleanup_ds_and_graphs() : mixed {
 	foreach ($rrds as $item) {
 		$ldi      = $item['local_data_id'];
 		$name     = $item['name_cache'];
-		$ds_pth   = $item['data_source_path'];
-		$real_pth = str_replace('<path_rra>', CACTI_PATH_RRA, $ds_pth);
+		// resolve through get_data_source_path() so the RRA containment check applies here too
+		$real_pth = get_data_source_path($ldi, true);
 
 		if (!file_exists($real_pth)) {
 			if (!in_array($ldi, $remove_ldis, true)) {

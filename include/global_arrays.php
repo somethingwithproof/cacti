@@ -954,13 +954,13 @@ $auth_methods = [
 	AUTH_METHOD_BASIC => __('Web Basic Authentication')
 ];
 
-if (function_exists('ldap_connect')) {
-	$auth_methods[AUTH_METHOD_DOMAIN] = __('LDAP/AD User Domains');
-}
+$auth_methods[AUTH_METHOD_PROVIDERS] = __('Login Providers');
 
-$domain_types = [
-	DOMAIN_TYPE_LDAP => __('LDAP'),
-	DOMAIN_TYPE_AD   => __('Active Directory')
+$provider_types = [
+	PROVIDER_TYPE_LDAP   => __('LDAP'),
+	PROVIDER_TYPE_AD     => __('Active Directory'),
+	PROVIDER_TYPE_SAML2  => __('SAML2'),
+	PROVIDER_TYPE_OPENID => __('OpenID Connect'),
 ];
 
 $auth_realms = get_auth_realms();
@@ -1122,6 +1122,7 @@ if (POLLER_ID || $config['connection'] == 'online') { // @phpstan-ignore-line
 			'vdef.php'                 => __('VDEFs'),
 			'color.php'                => __('Colors'),
 			'gprint_presets.php'       => __('GPRINTs'),
+			'layouts.php'              => __('Layouts'),
 		],
 		__('Import/Export') => [
 			'package_import.php'   => __('Import Packages'),
@@ -1135,7 +1136,7 @@ if (POLLER_ID || $config['connection'] == 'online') { // @phpstan-ignore-line
 			'settings.php'         => __('Settings'),
 			'user_admin.php'       => __('Users'),
 			'user_group_admin.php' => __('User Groups'),
-			'user_domains.php'     => __('User Domains')
+			'login_providers.php'  => __('Login Providers')
 		],
 		__('Utilities') => [
 			'utilities.php'  => __('System Utilities'),
@@ -1437,6 +1438,7 @@ $user_auth_realm_filenames = [
 	'rrdcheck.php'               => 15,
 	'settings.php'               => 15,
 	'links.php'                  => 15,
+	'layouts.php'                => 15,
 	'data_queries.php'           => 13,
 	'templates_export.php'       => 16,
 	'templates_import.php'       => 17,
@@ -1446,7 +1448,7 @@ $user_auth_realm_filenames = [
 	'package_keys.php'           => 29,
 	'tree.php'                   => 4,
 	'user_admin.php'             => 1,
-	'user_domains.php'           => 1,
+	'login_providers.php'        => 1,
 	'user_group_admin.php'       => 1,
 	'utilities.php'              => 15,
 	'user_log.php'               => 15,
@@ -2122,6 +2124,7 @@ $i18n_themes = [
 	__('Classic'),
 	__('Modern'),
 	__('Dark'),
+	__('Deepness'),
 	__('Paper-plane'),
 	__('Paw'),
 	__('Sunrise'),
@@ -2305,6 +2308,12 @@ $navigation = [
 		'mapping' => 'index.php:,gprint_presets.php:',
 		'url'     => '',
 		'level'   => '2'
+	],
+	'layouts.php:' => [
+		'title'   => __('Layouts'),
+		'mapping' => 'index.php:',
+		'url'     => 'layouts.php',
+		'level'   => '1'
 	],
 	'cdef.php:' => [
 		'title'   => __('CDEFs'),
@@ -2780,16 +2789,16 @@ $navigation = [
 		'url'     => '',
 		'level'   => '2'
 	],
-	'user_domains.php:' => [
-		'title'   => __('User Domains'),
+	'login_providers.php:' => [
+		'title'   => __('Login Providers'),
 		'mapping' => 'index.php:',
-		'url'     => 'user_domains.php',
+		'url'     => 'login_providers.php',
 		'level'   => '1'
 	],
-	'user_domains.php:edit' => [
+	'login_providers.php:edit' => [
 		'title'   => __('(Edit)'),
-		'mapping' => 'user_domains.php:,index.php:',
-		'url'     => 'user_domains.php',
+		'mapping' => 'login_providers.php:,index.php:',
+		'url'     => 'login_providers.php',
 		'level'   => '2'
 	],
 	'user_group_admin.php:' => [
@@ -3098,7 +3107,7 @@ $sched_types = [
 
 if (CACTI_SERVER_OS == 'unix') {
 	$dejavu_paths = [
-		'/usr/share/fonts/dejavu/', // RHEL/CentOS
+		'/usr/share/fonts/dejavu/', // Rocky/CentOS
 		'/usr/share/fonts/truetype/', // SLES
 		'/usr/share/fonts/truetype/dejavu/', // Ubuntu
 		'/usr/local/share/fonts/dejavu/', // FreeBSD

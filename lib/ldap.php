@@ -69,7 +69,7 @@
  */
 function cacti_ldap_auth(string $username, string $password = '', string $dn = '', string $host = '', int $port = 0, int $port_ssl = 0, int $version = 0,
 	int $encryption = 0, int $referrals = 0, mixed $group_require = false, string $group_dn = '', string $group_attrib = '', int $group_member_type = 0) : array {
-	$ldap = new Ldap(0);
+	$ldap = new Ldap();
 
 	if (!empty($username)) {
 		$ldap->username = $username;
@@ -133,7 +133,7 @@ function cacti_ldap_auth(string $username, string $password = '', string $dn = '
 
 	$response = [];
 
-	foreach ($ldap_servers as $ldap_server) {
+	foreach (($ldap_servers ?: []) as $ldap_server) {
 		$ldap->host = $ldap_server;
 
 		$response = $ldap->Authenticate();
@@ -196,7 +196,7 @@ function cacti_ldap_auth(string $username, string $password = '', string $dn = '
 function cacti_ldap_search_dn(string $username, string $dn = '', string $host = '', int $port = 0, int $port_ssl = 0,
 	int $version = 0, int $encryption = 0, int $referrals = 0, int $mode = 0, string $search_base = '',
 	string $search_filter = '', string $specific_dn = '', string $specific_password = '') : array {
-	$ldap = new Ldap(0);
+	$ldap = new Ldap();
 
 	if (!empty($username)) {
 		$ldap->username = $username;
@@ -257,7 +257,7 @@ function cacti_ldap_search_dn(string $username, string $dn = '', string $host = 
 
 	$response = [];
 
-	foreach ($ldap_servers as $ldap_server) {
+	foreach (($ldap_servers ?: []) as $ldap_server) {
 		$ldap->host = $ldap_server;
 
 		$response = $ldap->Search();
@@ -322,7 +322,7 @@ function cacti_ldap_search_cn(string $username, array $cn = [], string $dn = '',
 	int $port = 0, int $port_ssl = 0, int $version = 0, int $encryption = 0,
 	int $referrals = 0, int $mode = 0, string $search_base = '', string $search_filter = '',
 	string $specific_dn = '', string $specific_password = '') : array {
-	$ldap = new Ldap(0);
+	$ldap = new Ldap();
 
 	if (!empty($username)) {
 		$ldap->username = $username;
@@ -477,57 +477,13 @@ class Ldap {
 	public string $cn_full_name;
 	public string $cn_email;
 
-	function __construct(int $domain_id) {
+	function __construct() {
+		// No DB lookup here: Cacti\Auth\LdapLoginProvider::buildLdap() is the
+		// single source of truth for mapping login_providers.parameters onto
+		// these properties, so this class stays a pure connection/protocol
+		// wrapper with no direct DB coupling.
 		$this->debug = POLLER_VERBOSITY_HIGH;
 		$this->host  = '';
-
-		if ($domain_id > 0) {
-			$domain = db_fetch_row_prepared('SELECT *
-				FROM user_domains
-				WHERE domain_id = ?',
-				[$domain_id]);
-
-			if (cacti_sizeof($domain)) {
-				$settings = db_fetch_row_prepared('SELECT *
-					FROM user_domains_ldap
-					WHERE domain_id = ?',
-					[$domain_id]);
-
-				if (!cacti_sizeof($settings)) {
-					return;
-				}
-
-				// Initialize LDAP parameters for Authenticate
-				$this->dn                = $settings['dn'];
-				$this->host              = $settings['server'];
-				$this->port              = $settings['port'];
-				$this->port_ssl          = $settings['port_ssl'];
-				$this->version           = $settings['proto_version'];
-				$this->encryption        = $settings['encryption'];
-				$this->referrals         = $settings['referrals'];
-				$this->tls_certificate   = $settings['tls_certificate'];
-				$this->network_timeout   = $settings['network_timeout'];
-				$this->bind_timeout      = $settings['bind_timeout'];
-				$this->debug             = $domain['debug'] == 'on' ? POLLER_VERBOSITY_LOW : POLLER_VERBOSITY_HIGH;
-
-				// For group membership checks
-				$this->group_require     = $settings['group_require'] == 'on' ? true : false;
-				$this->group_dn          = $settings['group_dn'];
-				$this->group_attrib      = $settings['group_attrib'];
-				$this->group_member_type = $settings['group_member_type'];
-
-				// Initialize LDAP parameters for Search
-				$this->mode              = $settings['mode'];
-				$this->search_base       = $settings['search_base'];
-				$this->search_filter     = $settings['search_filter'];
-				$this->specific_dn       = $settings['specific_dn'];
-				$this->specific_password = $settings['specific_password'];
-
-				// CN Search settings
-				$this->cn_full_name      = $settings['cn_full_name'];
-				$this->cn_email          = $settings['cn_email'];
-			}
-		}
 	}
 
 	function __destruct() {
@@ -890,6 +846,296 @@ class Ldap {
 		}
 	}
 
+	/**
+	 * Resolve which of the supplied raw group names the just-authenticated user
+	 * is a member of, for automatic User Group assignment only.
+	 *
+	 * The admin configures a plain group name (e.g. "Cacti Admins"), never a
+	 * full DN. For each name a small battery of directory-shape-specific checks
+	 * is run against the configured Search Base so the same raw name works on
+	 * Active Directory (including nested groups), FreeIPA, 389 Directory Server
+	 * and RFC2307 OpenLDAP without the admin needing to know the group's DN.
+	 * A value that is already a full DN is still accepted and matched exactly.
+	 *
+	 * The directory is searched with the service account (Specific Searching)
+	 * or anonymously (Anonymous Searching); no other mode can enumerate groups,
+	 * which is why the UI only offers this feature for those two modes.
+	 *
+	 * @param string $username   The login name of the authenticated user.
+	 * @param array  $groupNames The raw group names to test.
+	 *
+	 * @return array|null The subset of $groupNames the user belongs to, or null
+	 *                    when membership could not be determined (connect/bind
+	 *                    failure) so the caller can leave assignments untouched
+	 *                    rather than revoking them on a transient outage.
+	 */
+	function ResolveGroupMemberships(string $username, array $groupNames) : ?array {
+		if (!cacti_sizeof($groupNames)) {
+			return [];
+		}
+
+		$search_base = trim($this->search_base);
+
+		if ($search_base === '') {
+			return null;
+		}
+
+		$this->SetLdapHandler();
+
+		$connection = $this->Connect();
+
+		if (cacti_sizeof($connection['output']) || empty($connection['ldap_conn'])) {
+			$this->RestoreCactiHandler();
+
+			return null;
+		}
+
+		$ldap_conn = $connection['ldap_conn'];
+
+		// Group enumeration needs a directory-read bind that is NOT the user's
+		// own (an OTP/MFA bind cannot be reused, and the user may lack read
+		// access to group objects): the service account, or anonymous.
+		$bound = false;
+
+		if ($this->mode == 2 && $this->specific_dn !== '' && $this->specific_password !== '') {
+			$bound = @ldap_bind($ldap_conn, html_entity_decode($this->specific_dn, $this->GetMask(), 'UTF-8'), html_entity_decode($this->specific_password, $this->GetMask(), 'UTF-8'));
+		} elseif ($this->mode == 1) {
+			$bound = @ldap_bind($ldap_conn);
+		}
+
+		if (!$bound) {
+			ldap_close($ldap_conn);
+			$this->RestoreCactiHandler();
+
+			return null;
+		}
+
+		$username_esc = ldap_escape($username, '', LDAP_ESCAPE_FILTER);
+		$user_dn      = $this->ResolveUserDnForGroups($ldap_conn, $username_esc, $search_base);
+		$user_dn_esc  = $user_dn !== '' ? ldap_escape($user_dn, '', LDAP_ESCAPE_FILTER) : '';
+		$is_ad        = $this->IsActiveDirectory($ldap_conn);
+
+		$matched = [];
+
+		foreach ($groupNames as $group) {
+			$in = $this->UserInGroupByName($ldap_conn, $search_base, $username_esc, $user_dn, $user_dn_esc, (string) $group, $is_ad);
+
+			if ($in === null) {
+				// Membership for at least one rule could not be determined (a
+				// probe errored); fail safe for the whole set so the caller
+				// leaves every assignment untouched rather than revoking
+				// memberships on a transient directory error.
+				ldap_close($ldap_conn);
+				$this->RestoreCactiHandler();
+
+				return null;
+			}
+
+			if ($in === true) {
+				$matched[] = $group;
+			}
+		}
+
+		ldap_close($ldap_conn);
+		$this->RestoreCactiHandler();
+
+		return $matched;
+	}
+
+	/**
+	 * Resolve a user's DN under the search base, constrained to user object
+	 * classes and user-naming attributes. Fails closed on ambiguity (more than
+	 * one match) so a colliding account cannot supply the DN used by the
+	 * member/uniqueMember checks.
+	 *
+	 * @param mixed  $ldap_conn    The bound LDAP connection.
+	 * @param string $username_esc The filter-escaped username.
+	 * @param string $search_base  The base DN to search under.
+	 *
+	 * @return string The user's DN, or '' when it cannot be unambiguously resolved.
+	 */
+	protected function ResolveUserDnForGroups($ldap_conn, string $username_esc, string $search_base) : string {
+		// memberUid is deliberately excluded: it is a posixGroup attribute, so
+		// including it could resolve a group entry as the user.
+		$filter = "(&(|(objectClass=person)(objectClass=posixAccount)(objectClass=user)(objectClass=account))(|(uid=$username_esc)(sAMAccountName=$username_esc)(userPrincipalName=$username_esc)(cn=$username_esc)))";
+		$search = @ldap_search($ldap_conn, $search_base, $filter, ['1.1']);
+
+		if ($search === false) {
+			return '';
+		}
+
+		$entries = @ldap_get_entries($ldap_conn, $search);
+
+		if (is_array($entries) && isset($entries['count']) && (int) $entries['count'] === 1 && isset($entries[0]['dn'])) {
+			return (string) $entries[0]['dn'];
+		}
+
+		return '';
+	}
+
+	/**
+	 * Whether the connected directory is Active Directory, probed once via the
+	 * rootDSE capability OID 1.2.840.113556.1.4.800. Used to gate the AD-only
+	 * nested-group matching rule so non-AD servers are not sent an OID they
+	 * reject once per group checked.
+	 *
+	 * @param mixed $ldap_conn The bound LDAP connection.
+	 *
+	 * @return bool True when the server is Active Directory.
+	 */
+	protected function IsActiveDirectory($ldap_conn) : bool {
+		$result = @ldap_read($ldap_conn, '', '(objectClass=*)', ['supportedCapabilities']);
+
+		if ($result !== false) {
+			$entries = @ldap_get_entries($ldap_conn, $result);
+
+			if (is_array($entries) && isset($entries[0]['supportedcapabilities'])
+				&& in_array('1.2.840.113556.1.4.800', (array) $entries[0]['supportedcapabilities'], true)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Test whether a user belongs to a single group identified by a raw name
+	 * (or, for back-compat, a full DN). Runs a battery of shape-specific checks
+	 * so one plain name matches across AD/FreeIPA/389DS/RFC2307.
+	 *
+	 * @param mixed  $ldap_conn    The bound LDAP connection.
+	 * @param string $search_base  The base DN to search under.
+	 * @param string $username_esc The filter-escaped username.
+	 * @param string $user_dn      The resolved user DN ('' when unresolved).
+	 * @param string $user_dn_esc  The filter-escaped user DN ('' when unresolved).
+	 * @param string $group        The configured group name or DN.
+	 * @param bool   $is_ad        Whether the directory is Active Directory.
+	 *
+	 * @return bool|null True when the user is a member, false when confirmed not
+	 *                   a member, and null when membership could not be
+	 *                   determined (every probe errored) so the caller can
+	 *                   preserve existing assignments rather than revoke them.
+	 */
+	protected function UserInGroupByName($ldap_conn, string $search_base, string $username_esc, string $user_dn, string $user_dn_esc, string $group, bool $is_ad) : ?bool {
+		$queries = $this->BuildGroupMembershipQueries($search_base, $username_esc, $user_dn, $user_dn_esc, $group, $is_ad);
+
+		if (!cacti_sizeof($queries)) {
+			return false;
+		}
+
+		$errored = false;
+
+		foreach ($queries as $query) {
+			if ($query['read']) {
+				$search = @ldap_read($ldap_conn, $query['base'], $query['filter'], $query['return']);
+			} else {
+				$search = @ldap_search($ldap_conn, $query['base'], $query['filter'], $query['return']);
+			}
+
+			if ($search === false) {
+				// A failed search (timeout, dropped connection, bad base) is not
+				// a confirmed non-membership; remember it so an all-errored,
+				// no-match outcome is reported as undetermined (null) below.
+				$errored = true;
+
+				continue;
+			}
+
+			$results = @ldap_get_entries($ldap_conn, $search);
+
+			if ($results === false) {
+				$errored = true;
+
+				continue;
+			}
+
+			if (is_array($results) && isset($results['count']) && $results['count'] > 0) {
+				return true;
+			}
+		}
+
+		return $errored ? null : false;
+	}
+
+	/**
+	 * Build the shape-specific membership probes for one group, keyed by the
+	 * directory type. Separated from execution so the query construction (in
+	 * particular the Active Directory handling) is unit-testable without a live
+	 * directory.
+	 *
+	 * @param string $search_base  The base DN to search under.
+	 * @param string $username_esc The filter-escaped username.
+	 * @param string $user_dn      The resolved user DN ('' when unresolved).
+	 * @param string $user_dn_esc  The filter-escaped user DN ('' when unresolved).
+	 * @param string $group        The configured group name or DN.
+	 * @param bool   $is_ad        Whether the directory is Active Directory.
+	 *
+	 * @return array List of ['base','read','filter','return'] probe descriptors.
+	 */
+	protected function BuildGroupMembershipQueries(string $search_base, string $username_esc, string $user_dn, string $user_dn_esc, string $group, bool $is_ad) : array {
+		if ($group === '') {
+			return [];
+		}
+
+		$group_esc = ldap_escape($group, '', LDAP_ESCAPE_FILTER);
+
+		// Detect whether the stored value is a full DN, deriving its CN only for
+		// the bare-CN fallback case below.
+		$group_cn    = $group;
+		$rdn         = ldap_explode_dn($group, 1);
+		$group_is_dn = is_array($rdn) && isset($rdn['count']) && $rdn['count'] > 0;
+
+		if ($group_is_dn && isset($rdn[0]) && $rdn[0] !== '') {
+			$group_cn = (string) $rdn[0];
+		}
+
+		$group_cn_esc = ldap_escape($group_cn, '', LDAP_ESCAPE_FILTER);
+
+		$queries = [];
+
+		if ($group_is_dn) {
+			// The configured group is a DN, so every check is a base-scope read
+			// against an exact entry - no subtree/cn ambiguity.
+			if ($user_dn !== '') {
+				// memberOf on the exact user entry (portable across AD, FreeIPA,
+				// and any memberOf-plugin directory incl. 389 DS).
+				$queries[] = ['base' => $user_dn, 'read' => true, 'filter' => "(memberOf=$group_esc)", 'return' => ['1.1']];
+
+				// AD nested groups via LDAP_MATCHING_RULE_IN_CHAIN.
+				if ($is_ad) {
+					$queries[] = ['base' => $user_dn, 'read' => true, 'filter' => "(memberOf:1.2.840.113556.1.4.1941:=$group_esc)", 'return' => ['1.1']];
+				}
+			}
+
+			// OpenLDAP RFC2307 posixGroup (memberUid holds the bare username).
+			$queries[] = ['base' => $group, 'read' => true, 'filter' => "(&(objectClass=posixGroup)(memberUid=$username_esc))", 'return' => ['1.1']];
+
+			// RFC2307bis groupOfNames/groupOfUniqueNames at the exact group DN.
+			if ($user_dn !== '') {
+				$queries[] = ['base' => $group, 'read' => true, 'filter' => "(&(|(objectClass=groupOfNames)(objectClass=groupOfUniqueNames))(|(member=$user_dn_esc)(uniqueMember=$user_dn_esc)))", 'return' => ['1.1']];
+			}
+		} else {
+			// Active Directory group objects are objectClass=group, matched by
+			// neither posixGroup nor groupOfNames, so AD needs its own cn-scoped
+			// subtree search. member:1.2.840.113556.1.4.1941
+			// (LDAP_MATCHING_RULE_IN_CHAIN) matches direct AND nested membership
+			// in a single query.
+			if ($is_ad && $user_dn !== '') {
+				$queries[] = ['base' => $search_base, 'read' => false, 'filter' => "(&(objectClass=group)(cn=$group_cn_esc)(member:1.2.840.113556.1.4.1941:=$user_dn_esc))", 'return' => ['cn']];
+			}
+
+			// Bare group name: fall back to a cn subtree search. memberOf cannot
+			// be used here because it stores DNs, not names.
+			$queries[] = ['base' => $search_base, 'read' => false, 'filter' => "(&(objectClass=posixGroup)(cn=$group_cn_esc)(memberUid=$username_esc))", 'return' => ['memberUid']];
+
+			if ($user_dn !== '') {
+				$queries[] = ['base' => $search_base, 'read' => false, 'filter' => "(&(|(objectClass=groupOfNames)(objectClass=groupOfUniqueNames))(cn=$group_cn_esc)(|(member=$user_dn_esc)(uniqueMember=$user_dn_esc)))", 'return' => ['cn']];
+			}
+		}
+
+		return $queries;
+	}
+
 	function Search() : array {
 		$output = [];
 
@@ -1083,16 +1329,25 @@ class Ldap {
 				if ($ldap_entries !== false && isset($ldap_entries['count']) && $ldap_entries['count'] === 1) {
 					$output = LdapError::GetErrorDetails(LdapError::Success);
 
+					// ldap_get_entries() always lowercases attribute keys
+					// regardless of the case requested (e.g. AD's
+					// "displayName" comes back as "displayname"); look the
+					// value up case-insensitively but keep it under the
+					// originally-requested key so callers reading
+					// $cn[$this->cn[0]] still match what they asked for.
+					$attr0 = strtolower($this->cn[0]);
+					$attr1 = strtolower($this->cn[1]);
+
 					// check if we got an full username entry
-					if (array_key_exists($this->cn[0], $ldap_entries[0])) {
-						$output['cn'][$this->cn[0]] = $ldap_entries[0][$this->cn[0]][0];
+					if (array_key_exists($attr0, $ldap_entries[0])) {
+						$output['cn'][$this->cn[0]] = $ldap_entries[0][$attr0][0];
 					} else {
 						$output['cn'][$this->cn[0]] = '';
 					}
 
 					// check if we got an email entry
-					if (array_key_exists($this->cn[1], $ldap_entries[0])) {
-						$output['cn'][$this->cn[1]] = $ldap_entries[0][$this->cn[1]][0];
+					if (array_key_exists($attr1, $ldap_entries[0])) {
+						$output['cn'][$this->cn[1]] = $ldap_entries[0][$attr1][0];
 					} else {
 						$output['cn'][$this->cn[1]] = '';
 					}

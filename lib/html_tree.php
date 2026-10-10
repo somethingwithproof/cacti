@@ -322,40 +322,43 @@ function grow_dhtml_trees() : void {
 			.jstree({
 				'types' : {
 					'tree' : {
-						icon : urlPath+'images/tree.png',
+						icon : 'ti ti-sitemap',
 						max_children : 0
 					},
 					'device' : {
-						icon : urlPath+'images/server.png',
+						icon : 'ti ti-server',
 						max_children : 0
 					},
 					'graph' : {
-						icon : urlPath+'images/server_chart_curve.png',
+						icon : 'ti ti-chart-line',
 						max_children : 0
 					},
 					'graph_template' : {
-						icon : urlPath+'images/server_chart.png',
+						icon : 'ti ti-chart-histogram',
 						max_children : 0
 					},
 					'data_query' : {
-						icon : urlPath+'images/server_dataquery.png',
+						icon : 'ti ti-list-search',
 						max_children : 0
 					},
 					'site' : {
-						icon : urlPath+'images/site.png',
+						icon : 'ti ti-building',
 						max_children : 0
 					},
 					'location' : {
-						icon : urlPath+'images/location.png',
+						icon : 'ti ti-map-pin',
 						max_children : 0
 					},
 					'host_template' : {
-						icon : urlPath+'images/server_device_template.png',
+						icon : 'ti ti-server-cog',
 						max_children : 0
 					},
 					'graph_templates' : {
-						icon : urlPath+'images/server_graph_template.png',
+						icon : 'ti ti-chart-infographic',
 						max_children : 0
+					},
+					'default' : {
+						icon : 'ti ti-folder'
 					}
 				},
 				'core' : {
@@ -1014,16 +1017,20 @@ function create_tree_filter() : array {
 			],
 			[
 				'graph_template_id' => [
-					'method'         => 'drop_multi',
-					'friendly_name'  => __('Template'),
-					'filter'         => FILTER_VALIDATE_REGEXP,
-					'filter_options' => ['options' => ['regexp' => '/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)(,(cg_[0-9]+|dq_[0-9]+|-?[0-9]+))*$/']],
-					'default'        => '-1',
-					'dynamic'        => false,
-					'class'          => 'graph-multiselect',
-					'pageset'        => true,
-					'array'          => $normalized_templates,
-					'value'          => gnrv('graph_template_id')
+					'method'            => 'drop_multi',
+					'bar'               => true,
+					'friendly_name'     => __('Template'),
+					'filter'            => FILTER_VALIDATE_REGEXP,
+					'filter_options'    => ['options' => ['regexp' => '/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)(,(cg_[0-9]+|dq_[0-9]+|-?[0-9]+))*$/']],
+					'default'           => '-1',
+					'dynamic'           => false,
+					'class'             => 'select2-multi-count',
+					'select_all_text'   => __('All Graph Templates'),
+					'select_count_text' => __('Templates Selected'),
+					'select_all_value'  => '-1',
+					'pageset'           => true,
+					'array'             => $normalized_templates,
+					'value'             => gnrv('graph_template_id')
 				],
 			],
 			[
@@ -1574,14 +1581,14 @@ function grow_right_pane_tree(int $tree_id, int $leaf_id, string $host_group_dat
  * Retrieves a list of graphs for a given host, graph template, and data query.
  *
  * @param int    $host_id            The ID of the host.
- * @param int    $graph_template_id  The ID of the graph template.
+ * @param string $graph_template_id  The ID(s) of the graph template(s).
  * @param int    $data_query_id      The ID of the data query.
  * @param string $host_grouping_type The type of host grouping (optional).
  * @param string $data_query_index   The index of the data query (optional).
  *
  * @return array An array of graphs for the specified host, graph template, and data query.
  */
-function get_host_graph_list(int $host_id, int $graph_template_id, int $data_query_id, string $host_grouping_type = '', string $data_query_index = '') : array {
+function get_host_graph_list(int $host_id, string $graph_template_id, int $data_query_id, string $host_grouping_type = '', string $data_query_index = '') : array {
 	$graph_list = [];
 	$sql_where  = '';
 

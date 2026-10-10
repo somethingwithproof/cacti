@@ -77,7 +77,7 @@ function exec_poll_php(string $command, bool $using_proc_function, array $pipes,
 
 			$output = fgets($pipes[1], 8192);
 
-			if (substr_count($output, 'ERROR') > 0) {
+			if (substr_count((string) $output, 'ERROR') > 0) {
 				$output = 'U';
 			}
 		}
@@ -150,9 +150,16 @@ function exec_background(string $filename, string|array $args = '', string|array
 					pclose(popen('start "Cactiplus" /I ' . $filename . ' ' . $args . ' ' . $redirect_args, 'r'));
 				}
 			} elseif ($redirect_args == '') {
-				exec($filename . ' ' . $args . ' > /dev/null 2>&1 &');
+				// filename is user-influenced (e.g. a configured PHP/script binary
+				// path) and was passed to the shell unescaped on non-win32; escape
+				// it like every other argument here.
+				$safe_filename = cacti_escapeshellarg($filename);
+
+				exec($safe_filename . ' ' . $args . ' > /dev/null 2>&1 &');
 			} else {
-				exec($filename . ' ' . $args . ' ' . $redirect_args . ' &');
+				$safe_filename = cacti_escapeshellarg($filename);
+
+				exec($safe_filename . ' ' . $args . ' ' . $redirect_args . ' &');
 			}
 		}
 	} else {
@@ -286,7 +293,7 @@ function exec_with_timeout(string $cmd, array &$output, int &$return_code, int $
 	$setsid = '';
 
 	if (CACTI_SERVER_OS != 'win32') {
-		$setsid_path = trim(shell_exec('which setsid 2>/dev/null') ?? '');
+		$setsid_path = trim((string) shell_exec('which setsid 2>/dev/null'));
 
 		if ($setsid_path !== '') {
 			$setsid = 'setsid -- ';
@@ -453,7 +460,11 @@ function update_reindex_cache(int $host_id, int $data_query_id) : void {
 						if ($oid_uptime == '.1.3.6.1.2.1.1.3.0') {
 							$engine_time   = cacti_snmp_session_get($session, '.1.3.6.1.6.3.10.2.1.3.0');
 							$system_uptime = cacti_snmp_session_get($session, $oid_uptime);
-							$assert_value  = cacti_snmp_select_uptime($system_uptime, $engine_time);
+
+							// spine always prefers a numeric, non-wall-clock engine time when
+							// re-checking this assert; match that here so the stored baseline
+							// can't permanently disagree with spine's own live comparison
+							$assert_value = cacti_snmp_select_uptime($system_uptime, $engine_time, null, true);
 
 							if ($assert_value === false) {
 								$assert_value = '';
@@ -616,89 +627,95 @@ function poller_update_poller_reindex_from_buffer(int $host_id, int $data_query_
 }
 
 /**
- * poller_prefetch_rrd_field_names - batch-prefetches the per-data-source RRD
- * field-name metadata process_poller_output() and boost_process_local_data_ids()
- * need while walking a poller_output/poller_output_boost result set, keyed by
- * local_data_id.
+ * WARNING - CALLED FROM THE BULK POLLER/BOOST HOT PATH. READ BEFORE MODIFYING.
  *
- * Both callers used to run one of these queries per local_data_id boundary
- * (or, in process_poller_output()'s case, per matching row with no boundary
- * check at all). This replaces that with a single IN()-batched query per
- * metadata type, chunked at 1000 ids to stay clear of max_allowed_packet,
- * matching the array_chunk(..., 1000) convention used elsewhere
- * (lib/api_data_source.php, lib/api_graph.php).
+ * Resolves the "unused" (orphaned-from-graph) data source names for a single
+ * templated data source, caching the result by local_data_id in the caller's
+ * static $cache so each data source is queried at most once per poller process.
+ * Keep this a single indexed per-data-source query - never batch it into a large
+ * IN() list (those have crashed some MariaDB/MySQL releases) and never call it
+ * from a per-row loop without the cache guard. Templated field names themselves
+ * come from the static poller_data_template_field_mappings cache and need no query
+ * here; this orphan lookup is the only per-source hit for a templated source.
  *
- * @param array $local_data_ids         Distinct local_data_ids in this batch
- * @param array $data_template_id_by_id local_data_id => data_template_id map,
- *                                      used to pick the templated vs
- *                                      non-templated nt_rrd_field_names query
+ * @param int   $local_data_id The data source to resolve.
+ * @param array $cache         By reference. local_data_id => [ds_name => ds_name].
  *
- * @return array{unused: array, nt: array} Two maps keyed by local_data_id;
- *                                         each value matches the shape the
- *                                         old per-call array_rekey() produced
+ * @return array data_source_name => data_source_name for orphaned fields.
  */
-function poller_prefetch_rrd_field_names(array $local_data_ids, array $data_template_id_by_id) : array {
-	$unused_by_id = [];
-	$nt_by_id     = [];
+function poller_get_unused_data_source_names(int $local_data_id, array &$cache) : array {
+	if (!array_key_exists($local_data_id, $cache)) {
+		$cache[$local_data_id] = [];
 
-	if (!cacti_sizeof($local_data_ids)) {
-		return ['unused' => $unused_by_id, 'nt' => $nt_by_id];
-	}
-
-	$templated_ids     = [];
-	$non_templated_ids = [];
-
-	foreach ($local_data_ids as $local_data_id) {
-		if (($data_template_id_by_id[$local_data_id] ?? 0) > 0) {
-			$templated_ids[] = $local_data_id;
-		} else {
-			$non_templated_ids[] = $local_data_id;
-		}
-	}
-
-	foreach (array_chunk($local_data_ids, 1000) as $chunk) {
-		$rows = db_fetch_assoc('SELECT DISTINCT dtr.local_data_id, dtr.data_source_name
+		$rows = db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name
 			FROM data_template_rrd AS dtr
 			LEFT JOIN graph_templates_item AS gti
 			ON dtr.id = gti.task_item_id
-			WHERE ' . db_in_clause('dtr.local_data_id', $chunk) . '
-			AND gti.task_item_id IS NULL');
+			WHERE dtr.local_data_id = ?
+			AND gti.task_item_id IS NULL',
+			[$local_data_id]);
 
 		foreach ($rows as $row) {
-			$unused_by_id[$row['local_data_id']][$row['data_source_name']] = $row['data_source_name'];
+			$cache[$local_data_id][$row['data_source_name']] = $row['data_source_name'];
 		}
 	}
 
-	foreach (array_chunk($templated_ids, 1000) as $chunk) {
-		$rows = db_fetch_assoc('SELECT DISTINCT dtr.local_data_id, dtr.data_source_name, dif.data_name
-			FROM graph_templates_item AS gti
-			INNER JOIN data_template_rrd AS dtr
-			ON gti.task_item_id = dtr.id
-			INNER JOIN data_input_fields AS dif
-			ON dtr.data_input_field_id = dif.id
-			WHERE ' . db_in_clause('dtr.local_data_id', $chunk));
-
-		foreach ($rows as $row) {
-			$nt_by_id[$row['local_data_id']][$row['data_name']] = $row['data_source_name'];
-		}
-	}
-
-	foreach (array_chunk($non_templated_ids, 1000) as $chunk) {
-		$rows = db_fetch_assoc('SELECT DISTINCT dtr.local_data_id, dtr.data_source_name, dif.data_name
-			FROM data_template_rrd AS dtr
-			INNER JOIN data_input_fields AS dif
-			ON dtr.data_input_field_id = dif.id
-			WHERE ' . db_in_clause('dtr.local_data_id', $chunk));
-
-		foreach ($rows as $row) {
-			$nt_by_id[$row['local_data_id']][$row['data_name']] = $row['data_source_name'];
-		}
-	}
-
-	return ['unused' => $unused_by_id, 'nt' => $nt_by_id];
+	return $cache[$local_data_id];
 }
 
 /**
+ * WARNING - CALLED FROM THE BULK POLLER/BOOST HOT PATH. READ BEFORE MODIFYING.
+ *
+ * Resolves the data_name => data_source_name map for a single NON-templated
+ * (data_template_id == 0) manually created data source - a rare exception, since
+ * the Data Template dictates field names for the overwhelming majority of data
+ * sources (resolved from the static poller_data_template_field_mappings cache with
+ * no query). The result is cached by local_data_id in the caller's static $cache
+ * so each such source is queried at most once per poller process. Keep this a
+ * single indexed per-data-source query; never batch it into a large IN() list.
+ *
+ * @param int   $local_data_id The manually created data source to resolve.
+ * @param array $cache         By reference. local_data_id => [data_name => ds_name].
+ *
+ * @return array data_name => data_source_name.
+ */
+function poller_get_nt_rrd_field_names(int $local_data_id, array &$cache) : array {
+	if (!array_key_exists($local_data_id, $cache)) {
+		$cache[$local_data_id] = [];
+
+		$rows = db_fetch_assoc_prepared('SELECT DISTINCT dtr.data_source_name, dif.data_name
+			FROM data_template_rrd AS dtr
+			INNER JOIN data_input_fields AS dif
+			ON dtr.data_input_field_id = dif.id
+			WHERE dtr.local_data_id = ?',
+			[$local_data_id]);
+
+		foreach ($rows as $row) {
+			$cache[$local_data_id][$row['data_name']] = $row['data_source_name'];
+		}
+	}
+
+	return $cache[$local_data_id];
+}
+
+/**
+ * WARNING - BULK POLLER HOT PATH. READ BEFORE MODIFYING.
+ *
+ * This function runs every poll cycle over the entire poller_output set. Large
+ * installations exceed 2.5M poller_items and several million data sources, so any
+ * inefficiency here scales directly into poller slowdowns and database thrash.
+ * Future maintainers and AI assistants MUST, when changing this function:
+ *   - Perform the minimum number of database queries in this pass, and NEVER add
+ *     a query inside the per-row loop over the result set.
+ *   - Be cognizant of query shape: avoid large IN() lists (they have crashed some
+ *     MariaDB/MySQL releases) and full-table scans in this path.
+ *   - Avoid adding further loops over the poller_output result set; a single pass
+ *     is the goal.
+ *   - Cache field-name mappings statically, assuming the Data Template dictates
+ *     the field names for every instance (data_template_id > 0). Non-templated
+ *     (data_template_id == 0) manually created data sources are a rare exception,
+ *     resolved per data source and cached.
+ *
  * process_poller_output - grabs data from the 'poller_output' table and feeds the *completed*
  * results to RRDtool for processing
  *
@@ -712,6 +729,13 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 
 	static $rrd_field_names = [];
 	static $checked_bad     = false;
+
+	// per-data-source metadata caches, keyed by local_data_id and held static so each data
+	// source is queried at most once per poller process (not once per row or per re-entry):
+	//   $unused_cache - local_data_id => orphaned (not-on-graph) data source names (templated only)
+	//   $nt_cache     - local_data_id => data_name => data_source_name (non-templated, dt == 0)
+	static $unused_cache = [];
+	static $nt_cache     = [];
 
 	include_once(CACTI_PATH_LIBRARY . '/rrd.php');
 
@@ -753,17 +777,6 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 	}
 
 	if (cacti_sizeof($results)) {
-		// batch-prefetch the RRD field-name metadata the loop below needs,
-		// rather than re-querying it per row whenever the output contains a
-		// ':' (previously not even gated by a local_data_id-change check).
-		$prefetch_field_names = poller_prefetch_rrd_field_names(
-			array_values(array_unique(array_map('intval', array_column($results, 'local_data_id')))),
-			array_column($results, 'data_template_id', 'local_data_id')
-		);
-
-		$unused_data_source_names_by_id = $prefetch_field_names['unused'];
-		$nt_rrd_field_names_by_id       = $prefetch_field_names['nt'];
-
 		// create an array keyed off of each .rrd file
 		foreach ($results as $item) {
 			// trim the default characters, but add single and double quotes
@@ -805,74 +818,74 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 				// multiple value output
 				$values = preg_split('/\s+/', $value);
 
-				if ($data_template_id > 0) {
-					$unused_data_source_names = $unused_data_source_names_by_id[$local_data_id] ?? [];
-				} else {
-					$unused_data_source_names = [];
-				}
+				// orphan filter applies to templated sources only; cached per data source
+				$unused_data_source_names = $data_template_id > 0 ? poller_get_unused_data_source_names($local_data_id, $unused_cache) : [];
 
-				foreach ($values as $value) {
+				// the Data Template dictates field names; only non-templated (dt == 0) sources
+				// need a per-instance lookup (rare exception), cached per data source
+				$nt_rrd_field_names = $data_template_id == 0 ? poller_get_nt_rrd_field_names($local_data_id, $nt_cache) : [];
+
+				foreach (($values ?: []) as $value) {
 					$matches = explode(':', $value);
 
 					if (cacti_sizeof($matches) == 2) {
-						if (isset($rrd_field_names[$item['data_template_id'] . '_' . $matches[0]])) {
-							$field = $rrd_field_names[$item['data_template_id'] . '_' . $matches[0]]['data_source_name'];
+						$field = '';
 
-							if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
-								continue;
+						if ($data_template_id > 0) {
+							if (isset($rrd_field_names[$data_template_id . '_' . $matches[0]])) {
+								$field = $rrd_field_names[$data_template_id . '_' . $matches[0]]['data_source_name'];
 							}
-
-							cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_HIGH));
-
-							if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
-								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
-							} elseif ((function_exists('is_hexadecimal')) && (is_hexadecimal($matches[1]))) {
-								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = hexdec($matches[1]);
-							} else {
-								$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
-							}
-
-							$rrd_tmpl .= ($rrd_tmpl != '' ? ':' : '') . $field;
-
-							$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
-						} else {
-							// Handle data source without a data template
-							$nt_rrd_field_names = $nt_rrd_field_names_by_id[$local_data_id] ?? [];
-
-							if (cacti_sizeof($nt_rrd_field_names)) {
-								if (isset($nt_rrd_field_names[$matches[0]])) {
-									$field = $nt_rrd_field_names[$matches[0]];
-
-									if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
-										continue;
-									}
-
-									cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_HIGH));
-
-									if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
-									} elseif ((function_exists('is_hexadecimal')) && (is_hexadecimal($matches[1]))) {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = hexdec($matches[1]);
-									} else {
-										$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
-									}
-
-									$rrd_tmpl .= ($rrd_tmpl != '' ? ':' : '') . $field;
-								}
-							}
-
-							$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
+						} elseif (isset($nt_rrd_field_names[$matches[0]])) {
+							$field = $nt_rrd_field_names[$matches[0]];
 						}
+
+						if ($field === '') {
+							continue;
+						}
+
+						if (cacti_sizeof($unused_data_source_names) && isset($unused_data_source_names[$field])) {
+							continue;
+						}
+
+						cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_HIGH));
+
+						if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
+							$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
+						} elseif ((function_exists('is_hexadecimal')) && (is_hexadecimal($matches[1]))) {
+							$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = hexdec($matches[1]);
+						} else {
+							$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = 'U';
+						}
+
+						$rrd_tmpl .= ($rrd_tmpl != '' ? ':' : '') . $field;
+
+						$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
 					}
 				}
 			} else {
-				// note: the $data_template_id == 0 branch here previously ran a
-				// query referencing gti.task_item_id without joining
-				// graph_templates_item, which threw an unknown-column SQL error
-				// whenever a non-templated data source hit this path. The
-				// prefetched map always uses the correct (joined) query.
-				$unused_data_source_names = $unused_data_source_names_by_id[$local_data_id] ?? [];
-				$nt_rrd_field_names       = $nt_rrd_field_names_by_id[$local_data_id] ?? [];
+				// orphan filter applies to templated sources only; cached per data source
+				$unused_data_source_names = $data_template_id > 0 ? poller_get_unused_data_source_names($local_data_id, $unused_cache) : [];
+
+				if ($data_template_id > 0) {
+					// expected field names for this template come from the static template cache
+					$nt_rrd_field_names = [];
+					$prefix             = $data_template_id . '_';
+
+					foreach ($rrd_field_names as $keyname => $mapping) {
+						if (str_starts_with($keyname, $prefix)) {
+							// data_source_names is GROUP_CONCAT'd, so a multi-source template yields e.g. 'in,out'
+							foreach (explode(',', $mapping['data_source_name']) as $field) {
+								$field = trim($field);
+
+								if ($field !== '') {
+									$nt_rrd_field_names[$field] = $field;
+								}
+							}
+						}
+					}
+				} else {
+					$nt_rrd_field_names = poller_get_nt_rrd_field_names($local_data_id, $nt_cache);
+				}
 
 				$expected = '';
 
@@ -1084,7 +1097,7 @@ function update_resource_cache($poller_id = 1) : bool {
 				if (is_dir($mpath . '/plugins/' . $path)) {
 					if (file_exists($mpath . '/plugins/' . $path . '/INFO')) {
 						$info            = parse_ini_file($mpath . '/plugins/' . $path . '/INFO', true);
-						$dir_exclusions  = ['..', '.', '.git', '.github', '.gitattributes'];
+						$dir_exclusions  = ['..', '.', '.git', '.github', '.gitattributes', 'tests'];
 						$file_exclusions = $excluded_extensions;
 
 						if (isset($info['info']['nosync'])) {
@@ -1140,12 +1153,14 @@ function update_resource_cache($poller_id = 1) : bool {
 			}
 		}
 
-		// purge old entries
+		// purge old entries, including any that predate an exclusion rule (for
+		// example a plugin's tests/ tree cached before it was excluded) whose
+		// source files still exist on disk and would otherwise never be dropped
 		$cache = db_fetch_assoc('SELECT path FROM poller_resource_cache');
 
 		if (cacti_sizeof($cache)) {
 			foreach ($cache as $item) {
-				if (!file_exists($item['path'])) {
+				if (!file_exists($item['path']) || should_ignore_from_replication($item['path'])) {
 					db_execute_prepared('DELETE FROM poller_resource_cache
 						WHERE `path` = ?',
 						[$item['path']]);
@@ -1166,6 +1181,13 @@ function update_resource_cache($poller_id = 1) : bool {
 
 		if (cacti_sizeof($plugin_paths)) {
 			foreach ($plugin_paths as $path) {
+				// Skip excluded rows (e.g. plugins/foo/tests/Bar.php) so the
+				// collector never materializes their parent directories before
+				// resource_cache_out() declines to write the files themselves.
+				if (should_ignore_from_replication($path['path'])) {
+					continue;
+				}
+
 				$paths[$path['resource_type']] = ['recursive' => false, 'path' => dirname($mpath . '/' . $path['path'])];
 			}
 		}
@@ -1198,6 +1220,14 @@ function update_resource_cache($poller_id = 1) : bool {
  * @return void
  */
 function cache_in_path(string $path, string $type, bool $recursive = true) : void {
+	// Skip tooling/dev artifacts (.gitignore, .mdlrc, tests/, ...) up front.
+	// update_db_from_path() never caches them, so without this a poll would
+	// re-log and re-process each one every cycle (its md5 is never stored, so
+	// it is always re-detected as "changed").
+	if (should_ignore_from_replication($path)) {
+		return;
+	}
+
 	if (is_dir($path)) {
 		$curr_md5      = md5sum_path($path, $recursive);
 		$settings_path = "md5dirsum_$type";
@@ -1277,6 +1307,10 @@ function update_db_from_path(string $path, string $type, bool $recursive = true)
 	if (is_dir($path)) {
 		$pobject = dir($path);
 
+		if ($pobject === false) {
+			return;
+		}
+
 		while (($entry = $pobject->read()) !== false) {
 			if (!should_ignore_from_replication($entry)) {
 				$spath = ltrim(trim(str_replace(CACTI_PATH_BASE, '', $path), '/ \\') . '/' . $entry, '/ \\');
@@ -1319,7 +1353,7 @@ function update_db_from_path(string $path, string $type, bool $recursive = true)
 					$save['md5sum']        = md5_file($entry_path);
 					$save['update_time']   = date('Y-m-d H:i:s');
 					$save['attributes']    = $attributes;
-					$save['contents']      = base64_encode(file_get_contents($entry_path));
+					$save['contents']      = base64_encode((string) file_get_contents($entry_path));
 
 					sql_save($save, 'poller_resource_cache');
 				}
@@ -1356,7 +1390,7 @@ function update_db_from_path(string $path, string $type, bool $recursive = true)
 				$save['md5sum']        = md5_file($path);
 				$save['update_time']   = date('Y-m-d H:i:s');
 				$save['attributes']    = $attributes;
-				$save['contents']      = base64_encode(file_get_contents($path));
+				$save['contents']      = base64_encode((string) file_get_contents($path));
 
 				sql_save($save, 'poller_resource_cache');
 			}
@@ -1378,7 +1412,8 @@ function resource_cache_out(string $type, array $path) : void {
 	global $remote_db_cnn_id;
 
 	$settings_path = "md5dirsum_$type";
-	$php_path      = read_config_option('path_php_binary');
+	// Cast before it reaches cacti_escapeshellcmd()'s string parameter; read_config_option() can return null on a fresh install.
+	$php_path      = (string) read_config_option('path_php_binary');
 	$last_md5      = read_config_option($settings_path);
 	$curr_md5      = md5sum_path($path['path'], $path['recursive']);
 
@@ -1412,7 +1447,7 @@ function resource_cache_out(string $type, array $path) : void {
 						// If for some reason, the attributes are empty, assume 0644
 						$attributes = empty($e['attributes']) ? 33188 : $e['attributes'];
 
-						$extension = substr(strrchr($e['path'], '.'), 1);
+						$extension = substr((string) strrchr($e['path'], '.'), 1);
 						$exit      = -1;
 						$contents  = base64_decode(db_fetch_cell_prepared('SELECT contents
 							FROM poller_resource_cache
@@ -1437,7 +1472,8 @@ function resource_cache_out(string $type, array $path) : void {
 
 							if ((is_writable($tmpdir) && !file_exists($tmpfile)) || (file_exists($tmpfile) && is_writable($tmpfile))) {
 								if (file_put_contents($tmpfile, $contents) !== false) {
-									$output = system($php_path . ' -l ' . $tmpfile, $exit);
+									// GHSA-4p7f-qcc2-vmx7: path_php_binary is an admin-set value that reaches this shell; escape it like every other consumer.
+									$output = system(cacti_escapeshellcmd($php_path) . ' -l ' . cacti_escapeshellarg($tmpfile), $exit);
 
 									if ($exit == 0) {
 										cacti_log("INFO: Updating '$mypath' from Cache!", false, 'REPLICATE');
@@ -1508,6 +1544,10 @@ function md5sum_path(string $path, bool $recursive = true) : mixed {
 
 	$filemd5s = [];
 	$pobject  = dir($path);
+
+	if ($pobject === false) {
+		return false;
+	}
 
 	$excluded_extensions = ['tar', 'gz', 'zip', 'tgz', 'ttf', 'z', 'exe', 'pack', 'swp', 'swo'];
 
@@ -1862,11 +1902,8 @@ function replicate_out(int $remote_poller_id = 1, string $class = 'all') : bool 
 		$data = db_fetch_assoc('SELECT * FROM user_auth_row_cache');
 		replicate_out_table($rcnn_id, $data, 'user_auth_row_cache', $remote_poller_id);
 
-		$data = db_fetch_assoc('SELECT * FROM user_domains');
-		replicate_out_table($rcnn_id, $data, 'user_domains', $remote_poller_id);
-
-		$data = db_fetch_assoc('SELECT * FROM user_domains_ldap');
-		replicate_out_table($rcnn_id, $data, 'user_domains_ldap', $remote_poller_id);
+		$data = db_fetch_assoc('SELECT * FROM login_providers');
+		replicate_out_table($rcnn_id, $data, 'login_providers', $remote_poller_id);
 	}
 
 	if ($class == 'all' || $class == 'data') {
@@ -2566,7 +2603,46 @@ function remote_poller_up(int $poller_id) : bool {
 function should_ignore_from_replication(string $path) : bool {
 	$entry = basename($path);
 
-	return ($entry == '.' || $entry == '..' || $entry == '.git' || $entry == '');
+	if ($entry == '.' || $entry == '..' || $entry == '.git' || $entry == '') {
+		return true;
+	}
+
+	// Never replicate repository and tooling metadata files that may live in
+	// Cacti's base directory or any other cached directory (scripts, resource,
+	// plugins, etc.). These are development artifacts with no runtime purpose
+	// on a remote data collector.
+	if (in_array($entry, ['.gitignore', '.htaccess.dist', '.mdl_style.rb', '.mdlrc'], true)) {
+		return true;
+	}
+
+	$normalized = str_replace('\\', '/', $path);
+
+	// update_db_from_path() consults this helper with absolute file paths, so
+	// strip the installation root first. Otherwise an ancestor directory that
+	// merely happens to be named 'tests' (e.g. Cacti installed under
+	// /srv/tests/cacti) would reject every ordinary file. Cache-relative
+	// paths (plugins/foo/tests/Bar.php) do not start with the root and are
+	// left unchanged.
+	if (defined('CACTI_PATH_BASE') && CACTI_PATH_BASE != '') {
+		$base = rtrim(str_replace('\\', '/', CACTI_PATH_BASE), '/');
+
+		if ($base != '' && str_starts_with($normalized, $base . '/')) {
+			$normalized = substr($normalized, strlen($base) + 1);
+		}
+	}
+
+	// Never replicate 'tests' directories - Cacti's own tests/ or any
+	// plugin's tests/ - or anything beneath them, in either direction. The
+	// argument may be a bare entry name (change detection / cache-in) or a
+	// cache-relative path such as plugins/foo/tests/Bar.php (cache-out), so
+	// match a 'tests' segment anywhere in the path.
+	$segments = explode('/', $normalized);
+
+	if (in_array('tests', $segments, true)) {
+		return true;
+	}
+
+	return false;
 }
 
 function get_remote_poller_ids_from_graphs(mixed $graphs) : array {
@@ -2964,7 +3040,7 @@ function register_process_start_locked(string $tasktype, string $taskname, int $
 	if (!cacti_sizeof($r)) {
 		cacti_log(sprintf('NOTE: Registering process! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $pid), false, 'POLLER', POLLER_VERBOSITY_MEDIUM);
 
-		register_process($tasktype, $taskname, $taskid, $pid, $timeout);
+		register_process($tasktype, $taskname, $taskid, (int) $pid, $timeout);
 	} elseif ($r['timeout_exceeded']) {
 		if ($r['pid'] > 0) {
 			if (cacti_process_still_running((int) $r['pid'])) {
@@ -2974,7 +3050,7 @@ function register_process_start_locked(string $tasktype, string $taskname, int $
 			}
 
 			unregister_process($tasktype, $taskname, $taskid);
-			register_process($tasktype, $taskname, $taskid, $pid, $timeout);
+			register_process($tasktype, $taskname, $taskid, (int) $pid, $timeout);
 		} else {
 			// Should never be reached
 			cacti_log(sprintf('ERROR: Failed registering process.  Invalid pid found.  Unable to kill! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $r['pid']), false, 'POLLER');
@@ -2989,7 +3065,7 @@ function register_process_start_locked(string $tasktype, string $taskname, int $
 		cacti_log(sprintf('WARNING: Detected process that is exited and did not unregister first! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $pid), false, 'POLLER');
 
 		unregister_process($tasktype, $taskname, $taskid);
-		register_process($tasktype, $taskname, $taskid, $pid, $timeout);
+		register_process($tasktype, $taskname, $taskid, (int) $pid, $timeout);
 	}
 
 	return true;

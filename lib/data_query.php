@@ -555,10 +555,10 @@ function data_query_remove_disabled_items(array $orphaned_ids) : void {
 						if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
 							poller_item_delete_for_data_source($orphaned_ids, $rcnn_id, false);
 						} else {
-							raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+							raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 						}
 					} else {
-						raise_message('poller_down_' . $poller_id, __('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+						raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
 					}
 				}
 			}
@@ -1330,7 +1330,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 					} elseif (str_starts_with($field_array['source'], 'OID2HEX/REGEXP:')) {
 						$value = preg_replace('/' . str_replace('OID2HEX/REGEXP:', '', $field_array['source']) . '/', '\\1', $oid);
 
-						$parts    = explode('.', $value);
+						$parts    = explode('.', (string) $value);
 						$ip_value = '';
 
 						foreach ($parts as $idx => $part) {
@@ -1350,7 +1350,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 
 						// Check for ip address and shorten
 						if (is_ipaddress($ip_value)) {
-							$value = inet_ntop(inet_pton($ip_value));
+							$value = inet_ntop((string) inet_pton($ip_value));
 						}
 					}
 
@@ -1412,7 +1412,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 
 						foreach ($values as $key => $value) {
 							if (str_starts_with($field_array['source'], 'VALUE/REGEXP:')) {
-								$values[$key]['value'] = preg_replace('/' . str_replace('VALUE/REGEXP:', '', $field_array['source']) . '/', '\\1', $values[$key]['value']);
+								$values[$key]['value'] = preg_replace('/' . str_replace('VALUE/REGEXP:', '', $field_array['source']) . '/', '\\1', (string) $values[$key]['value']);
 							}
 						}
 					}
@@ -1662,7 +1662,7 @@ function query_snmp_host(int $host_id, int $snmp_query_id) : bool {
 
 						// Check for ip address and shorten
 						if (is_ipaddress($ip_value)) {
-							$parse_value = inet_ntop(inet_pton($ip_value));
+							$parse_value = inet_ntop((string) inet_pton($ip_value));
 						}
 
 						debug_log_insert('data_query', __esc('Found item [%s=\'%s\'] index: %s [from regexp oid parse]', $field_name, $parse_value, $snmp_index));
@@ -1747,8 +1747,8 @@ function data_query_format_record(int $host_id, int $snmp_query_id, string $fiel
 
 	$data_query_rewrite_indexes_cache[$hash][$snmp_index] = $value;
 
-	if (mb_detect_encoding($value, mb_detect_order(), true) === false) {
-		$value = bin2hex($value);
+	if (mb_detect_encoding((string) $value, mb_detect_order(), true) === false) {
+		$value = bin2hex((string) $value);
 	}
 
 	return "($host_id, $snmp_query_id, " . db_qstr($field_name) . ', ' . db_qstr($value) . ', ' . db_qstr($snmp_index) . ', ' . db_qstr($oid) . ', 1)';
@@ -2023,7 +2023,7 @@ function rewrite_snmp_enum_value(string|null $field_name, string|null $value = n
 
 	foreach ($mapcache[$field_name] as $src => $dst) {
 		if (preg_match($src, $value)) {
-			$nvalue = preg_replace($src, $dst, $value);
+			$nvalue = preg_replace($src, $dst, (string) $value);
 			debug_log_insert('data_query', __esc("rewrite_value: '%s' => '%s'", $value, $nvalue));
 			$value = $nvalue;
 
@@ -2799,7 +2799,7 @@ function get_script_query_path(string $args, string $script_path, int $host_id) 
 
 		$extra_arguments = '';
 
-		foreach ($parts as $index => $part) {
+		foreach (($parts ?: []) as $index => $part) {
 			/* only the hostname/IP placeholders are stripped of '%'; SNMP
 			 * community and credential substitutions may legitimately
 			 * contain one, so they keep their value unmodified. */
@@ -2953,7 +2953,7 @@ function api_data_query_errors(int $snmp_query_graph_id, array $post) : bool {
 	if (cacti_sizeof($data_sources)) {
 		foreach ($data_sources as $ds) {
 			if (!isset($post['dsdt_' . $ds['data_template_id'] . '_' . $ds['id'] . '_check'])) {
-				raise_message('mapping_error', __('You must select an XML output column for Data Source \'%s\' and toggle the checkbox to its right', $ds['data_source_name']), MESSAGE_LEVEL_ERROR);
+				raise_message('mapping_error', __esc('You must select an XML output column for Data Source \'%s\' and toggle the checkbox to its right', $ds['data_source_name']), MESSAGE_LEVEL_ERROR);
 
 				$errors = true;
 			}

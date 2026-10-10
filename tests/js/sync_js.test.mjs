@@ -64,9 +64,9 @@ test('DOMPurify is pinned and generated from the matching npm release', () => {
 	const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
 	const source = 'node_modules/dompurify/dist/purify.js';
 
-	assert.equal(packageJson.dependencies.dompurify, '3.4.15');
+	assert.equal(packageJson.dependencies.dompurify, '3.4.16');
 	assert.equal(assetMap[source], 'include/js/purify.js');
-	assert.match(readFileSync(source, 'utf8'), /DOMPurify 3\.4\.15/);
+	assert.match(readFileSync(source, 'utf8'), /DOMPurify 3\.4\.16/);
 });
 
 test("screenfull's ESM export is rewritten to a global assignment", () => {
@@ -89,4 +89,57 @@ test('syncAssets fails loudly if screenfull stops shipping the expected ESM expo
 		() => syncAssets(root, () => {}),
 		/expected 'export default screenfull;'/,
 	);
+});
+
+test('the tablesorter transform replaces every removed jQuery API with native equivalents', () => {
+	const root = fixture();
+
+	const transformed = [
+		'node_modules/tablesorter/dist/js/jquery.tablesorter.js',
+		'node_modules/tablesorter/dist/js/jquery.tablesorter.widgets.js',
+	];
+
+	const source = [
+		'if ( $.isFunction( fn ) ) { call(); }',
+		'var trimmed = $.trim( raw );',
+		"if ( $.type( val ) === 'string' ) { ok(); }",
+		"if ( $.type( obj ) === 'object' ) { ok(); }",
+		'var scoped = $.isWindow( scope );',
+		'var arr = $.isArray( list );',
+		'var parsed = $.parseJSON( text );',
+		'if ($.parseJSON) { load(); }',
+		'return str ? ( str && table.config.ignoreCase ? str.toLocaleLowerCase() : str ).trim() : str;',
+		'',
+	].join('\n');
+
+	for (const asset of transformed) {
+		writeFileSync(join(root, asset), source);
+	}
+
+	syncAssets(root, () => {});
+
+	for (const asset of transformed) {
+		const output = readFileSync(join(root, assetMap[asset]), 'utf8');
+
+		// every removed jQuery 4 utility is rewritten to its native equivalent
+		assert.match(output, /typeof fn === 'function'/);
+		assert.match(output, /String\(\( raw \) \?\? ''\)\.trim\(\)/);
+		assert.match(output, /typeof val === 'string'/);
+		assert.match(output, /\$\.isPlainObject\(obj\)/);
+		assert.match(output, /scope != null && scope === scope\.window/);
+		assert.match(output, /Array\.isArray\(/);
+		assert.match(output, /JSON\.parse\(/);
+		assert.match(output, /if \(window\.JSON && window\.JSON\.parse\)/);
+		// the CodeQL useless-conditional simplification is applied too
+		assert.match(output, /\( table\.config\.ignoreCase \?/);
+
+		// none of the removed APIs (nor the redundant guard) survive
+		assert.doesNotMatch(output, /\$\.isFunction/);
+		assert.doesNotMatch(output, /\$\.trim\(/);
+		assert.doesNotMatch(output, /\$\.type\(/);
+		assert.doesNotMatch(output, /\$\.isWindow/);
+		assert.doesNotMatch(output, /\$\.isArray/);
+		assert.doesNotMatch(output, /\$\.parseJSON/);
+		assert.doesNotMatch(output, /str && table\.config\.ignoreCase/);
+	}
 });

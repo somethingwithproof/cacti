@@ -30,8 +30,8 @@
 
 /* Cacti core */
 @import 'css/media/hint.css';
-@import 'css/media/core.css?ad4ed321bb6b1a387743e4af1388207f' all;
-@import 'css/media/print.css?f8c80271650344f45629199331592924' print;
+@import 'css/media/core.css?afd5bc6f4d45884846ab715f1583123c' all;
+@import 'css/media/print.css?128a573aaa8b4140be2a13afc092db2a' print;
 
 /* compact mode */
 @import 'css/media/compact.css?0bda9f47e7be64d1c2709f24cd70ba00' screen;
@@ -52,59 +52,324 @@
    .ui-state-hover / .ui-state-active) to match its look and feel. */
 .select2-container--default .select2-selection--single,
 .select2-container--default .select2-selection--multiple {
-	border: 1px solid #aaaaaa;
-	border-radius: 4px;
-	background: #ffffff;
-	color: #222222;
+	border: 1px solid var(--border-color);
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text-color-normal);
+}
+
+/* match jQuery UI's shorter button height */
+.select2-container--default .select2-selection--single {
+	height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	line-height: 24px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+	height: 22px;
+}
+
+/* match the multi-select (e.g. Templates) control to the single-select height;
+   flexbox centers content vertically regardless of font metrics */
+.select2-container--default .select2-selection--multiple {
+	min-height: 24px;
+	padding: 0 20px 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+	display: block;
+	flex: 1;
+	margin: 0;
+	padding-left: 8px;
+	overflow: hidden;
+	line-height: 24px;
+}
+
+/* select2-multi-count always replaces the rendered area with "N Selected" text;
+   only hide the inline search-while-typing box while closed (it doesn't fit
+   that display and was inflating the control's height) - let it reappear once
+   the dropdown opens, since that's the only place multi-selects can search from */
+select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.select2-container--open) .select2-search--inline {
+	display: none;
+}
+
+.select2-selection--multiple .select2-count-label {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* once open, let the search box sit on its own row below the current
+   selection instead of overlapping it */
+.select2-container--default .select2-selection--multiple .select2-search--inline {
+	display: block;
+	width: 100%;
+	margin: 4px 0 0;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+	width: 100% !important;
+	box-sizing: border-box;
+	margin: 0 !important;
+}
+
+/* select2 doesn't draw a dropdown arrow for multi-selects by default; add one to match */
+.select2-container--default .select2-selection--multiple::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	margin-top: -2px;
+	border-color: currentColor transparent transparent transparent;
+	border-style: solid;
+	border-width: 5px 4px 0 4px;
+	height: 0;
+	width: 0;
+	pointer-events: none;
+}
+
+.select2-container--default.select2-container--open .select2-selection--multiple::after {
+	border-color: transparent transparent currentColor transparent;
+	border-width: 0 4px 5px 4px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.select2-results__option {
+	white-space: nowrap;
+	min-height: 24px;
+	box-sizing: border-box;
+}
+
+/* keep the first 15 results visible before the list needs to scroll */
+.select2-container--default .select2-results > .select2-results__options {
+	max-height: 360px;
+}
+
+/* checkbox-style indicator for select2-multi-count option rows */
+.select2-results__option .select2-checkbox-option {
+	position: relative;
+	display: block;
+	padding-left: 20px;
+}
+
+.select2-results__option .select2-checkbox-option::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 13px;
+	height: 13px;
+	margin-top: -7px;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+	box-sizing: border-box;
+}
+
+/* select2 also (re)uses aria-selected for mouse-hover/keyboard highlight
+ * tracking, unrelated to actual selection - key off the --selected class
+ * instead, which setClasses() only ever sets from the real selected data */
+.select2-results__option.select2-results__option--selected .select2-checkbox-option::after {
+	content: '\2713';
+	position: absolute;
+	left: 2px;
+	top: 50%;
+	margin-top: -7px;
+	font-size: 11px;
+	line-height: 13px;
 }
 
 .select2-container--default .select2-selection--single .select2-selection__rendered,
 .select2-container--default .select2-selection--single .select2-selection__placeholder {
-	color: #222222;
+	color: var(--text-color-normal);
 }
 
-.select2-container--default.select2-container--focus .select2-selection--single,
-.select2-container--default.select2-container--focus .select2-selection--multiple,
+/* select2 keeps --focus set after the dropdown closes; only --open should get the active look */
 .select2-container--default.select2-container--open .select2-selection--single,
 .select2-container--default.select2-container--open .select2-selection--multiple {
-	border-color: #999999;
-	background: #dadada;
-	color: #212121;
+	border-color: var(--border-color);
+	background: var(--background-lowlight);
+	color: var(--text-color-highlight-a);
 }
 
 .select2-container--default .select2-selection--single .select2-selection__arrow b {
-	border-top-color: #222222;
+	border-top-color: var(--text-color-normal);
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
-	background: #dadada;
-	border: 1px solid #aaaaaa;
-	color: #212121;
+	background: var(--background-lowlight);
+	border: 1px solid var(--border-color-superlowlight);
+	color: var(--text-color-lighter);
 }
 
 .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-	color: #212121;
+	color: var(--text-color-lighter);
 }
 
 .select2-dropdown {
-	border: 1px solid #aaaaaa;
-	background: #ffffff;
-	color: #222222;
+	border: 1px solid var(--border-color-superlowlight);
+	background: var(--background-content);
+	color: var(--text-color-lighter);
 }
 
 .select2-container--default .select2-search--dropdown .select2-search__field,
 .select2-container--default .select2-search--inline .select2-search__field {
-	border: 1px solid #aaaaaa;
-	background: #ffffff;
-	color: #222222;
+	border: 1px solid var(--border-color-superlowlight);
+	background: var(--background-content);
+	color: var(--text-color-lighter);
 }
 
 .select2-container--default .select2-results__option--selected {
-	background: #dadada;
-	color: #212121;
+	background: var(--background-lowlight);
+	color: var(--text-color-highlight-a);
 }
 
 .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
-	background: #dadada;
-	color: #212121;
+	background: var(--background-lowlight);
+	color: var(--text-color-highlight-a);
+}
+/* ======================================================================== */
+/* jsTree glyph icons - node type colors, sizing, and open/close carets     */
+/* Dark theme palette (lighter, higher-contrast on dark backgrounds)        */
+/* ======================================================================== */
+
+/* remove the indent/connector dotted lines (also disabled via dots:false)  */
+.jstree-default .jstree-node { background: transparent !important; }
+
+/* node type glyphs, centered in the 20px node row */
+.jstree-default .jstree-anchor > .jstree-themeicon {
+	background-image: none !important;
+	font-size: 14px;
+	line-height: 20px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-folder { color: #FFCA28; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-sitemap { color: #B0BEC5; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-building { color: #4DB6AC; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-map-pin { color: #EF5350; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-server { color: #64B5F6; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-server-cog { color: #CE93D8; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-list-search { color: #4DD0E1; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-chart-line { color: #81C784; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-chart-histogram { color: #FFB74D; }
+.jstree-default .jstree-anchor > .jstree-themeicon.ti-chart-infographic { color: #F06292; }
+
+/* open/close carets as glyphs, centered to match the node glyphs        */
+/* scoped to non-loading nodes so the AJAX loading throbber is preserved  */
+.jstree-default .jstree-node:not(.jstree-loading) > .jstree-ocl {
+	background: none !important;
+	font-family: "tabler-icons";
+	font-size: 14px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 20px;
+	color: #90A4AE;
+}
+.jstree-default .jstree-closed:not(.jstree-loading) > .jstree-ocl::before { content: "\ea61"; }
+.jstree-default .jstree-open:not(.jstree-loading) > .jstree-ocl::before { content: "\ea5f"; }
+.jstree-default .jstree-leaf:not(.jstree-loading) > .jstree-ocl::before { content: ""; }
+
+.icon-rotate {
+	display: inline-block;
+	animation: fa-spin 1.5s linear infinite;
+}
+
+/* ======================================================================== */
+/* Billboard charts - billboard.css is not loaded on the AJAX overload path, */
+/* so the required .bb rules are carried here (moved out of the plugins).    */
+/* ======================================================================== */
+
+.bb-axis-x text, .bb-axis-y text, .bb-axis-y2 text, .bb-legend-item text {
+	fill: #7e818f;
+}
+
+.bb .bb-axis path, .bb .bb-axis line {
+	stroke: #7e818f;
+}
+
+.bb-chart-arc text {
+	fill: white;
+}
+
+.bb-chart-arc path {
+	stroke: #7e818f;
+}
+
+/*
+ * Filter-table toggle switches (1.2.x). Render the raw filter checkboxes
+ * (<input type='checkbox'> directly inside a .filterTable wrapper) as on/off
+ * toggle switches styled to match this theme's form checkboxSlider, with the
+ * label text first and the switch second. form_checkbox() sliders (class
+ * 'formCheckbox') already render this way and are left untouched.
+ */
+.filterTable span:has(> input[type='checkbox']:not(.formCheckbox)),
+.filterTable div:has(> input[type='checkbox']:not(.formCheckbox)) {
+	display: inline-flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 6px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) {
+	-webkit-appearance: none;
+	appearance: none;
+	box-sizing: border-box;
+	position: relative;
+	flex: 0 0 auto;
+	width: 45px;
+	height: 24px;
+	margin: 0;
+	padding: 0;
+	border-radius: 24px !important;
+	background: #555555;
+	cursor: pointer;
+	vertical-align: middle;
+	transition: background 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox)::before {
+	content: '';
+	position: absolute;
+	top: 4px;
+	left: 4px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #cbccd2;
+	transition: transform 0.4s;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked {
+	background: var(--background-progress);
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):checked::before {
+	transform: translateX(20px);
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):focus-visible {
+	outline: 2px solid var(--background-progress);
+	outline-offset: 1px;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox):disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.filterTable input[type='checkbox']:not(.formCheckbox) + label {
+	cursor: pointer;
 }

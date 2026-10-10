@@ -280,12 +280,18 @@ function form_save() : void {
 				}
 
 				if ($save_me || $items_changed) {
-					push_out_aggregates(0, $local_graph_id);
+					if (!push_out_aggregates(0, $local_graph_id)) {
+						raise_message(2);
+					}
 				}
 			}
 		}
 
-		raise_message(1);
+		// Save helpers mutate the global message registry; PHPStan cannot observe that side effect.
+		/** @phpstan-ignore booleanNot.alwaysTrue */
+		if (!is_error_message()) {
+			raise_message(1);
+		}
 
 		header('Location: aggregate_graphs.php?action=edit&id=' . $local_graph_id);
 	} elseif (isrv('save_component_item')) {
@@ -339,7 +345,7 @@ function form_save() : void {
 			// generate a new sequence if needed
 			if (ierv('sequence')) {
 				$sequence = gfrv('sequence');
-				srv('sequence', get_sequence($sequence, 'sequence', 'graph_templates_item', 'local_graph_id=' . grv('local_graph_id')));
+				srv('sequence', get_sequence($sequence, 'sequence', 'graph_templates_item', ['local_graph_id' => gfrv('local_graph_id')]));
 			}
 
 			$save['id']                           = gfrv('graph_template_item_id');
@@ -448,9 +454,13 @@ function form_save_aggregate() : mixed {
 
 		// update existing graphs with the changes to this item
 		if ($save_to == 'aggregate_graphs_graph_item') {
-			push_out_aggregates(0, gfrv('local_graph_id'));
+			if (!push_out_aggregates(0, gfrv('local_graph_id'))) {
+				raise_message(2);
+			}
 		} elseif ($save_to == 'aggregate_graph_templates_item') {
-			push_out_aggregates(gfrv('aggregate_template_id'));
+			if (!push_out_aggregates(gfrv('aggregate_template_id'))) {
+				raise_message(2);
+			}
 		}
 	}
 
@@ -1829,7 +1839,7 @@ function aggregate_make_sql_where(string $sql_where, array $items, string $field
 				} elseif (cacti_strtolower($i) == 'or') {
 					$sql_where .= ' OR ';
 				} else {
-					$sql_where .= ($termcount > 0 ? ' OR ' : '') . $field . " LIKE '%" . trim($i) . "%'";
+					$sql_where .= ($termcount > 0 ? ' OR ' : '') . $field . ' LIKE ' . db_qstr('%' . trim($i) . '%');
 					$termcount++;
 				}
 			}
@@ -1992,10 +2002,17 @@ function aggregate_graph() : void {
 
 	// form the 'where' clause for our main sql query
 	if (grv('filter') != '') {
-		$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . '(gtg.title_cache LIKE ? OR ag.title_format LIKE ?)';
+		$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . '(gtg.title_cache LIKE ? OR ag.title_format LIKE ?';
 
 		$sql_params[] = '%' . grv('filter') . '%';
 		$sql_params[] = '%' . grv('filter') . '%';
+
+		if (ctype_digit(grv('filter'))) {
+			$sql_where .= ' OR gl.id = ?';
+			$sql_params[] = (int) grv('filter');
+		}
+
+		$sql_where .= ')';
 	}
 
 	if (grv('template_id') == '0') {

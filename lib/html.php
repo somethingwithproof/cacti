@@ -766,7 +766,7 @@ function html_header_sort(array $header_items, string $sort_column, string $sort
 		'columns'  => $header_items
 	];
 
-	print "<thead><tr class='tableHeader' data-columns='" . base64_encode(json_encode($table_visibility)) . "'>";
+	print "<thead><tr class='tableHeader' data-columns='" . base64_encode((string) json_encode($table_visibility)) . "'>";
 
 	$i = 1;
 
@@ -964,7 +964,7 @@ function html_header_sort_checkbox(array $header_items, string $sort_column, str
 		'columns'  => $header_items
 	];
 
-	print "<thead><tr class='tableHeader' data-columns='" . base64_encode(json_encode($table_visibility)) . "'>";
+	print "<thead><tr class='tableHeader' data-columns='" . base64_encode((string) json_encode($table_visibility)) . "'>";
 
 	foreach ($header_items as $db_column => $display_array) {
 		// if the column is not visible, don't display it
@@ -1113,7 +1113,7 @@ function html_header(array $header_items, int $last_item_colspan = 1, bool $resi
 		'columns'  => $header_items
 	];
 
-	print "<thead><tr class='tableHeader " . ($last_item_colspan > 1 || !$resizable ? 'tableFixed' : '') . "' data-columns='" . base64_encode(json_encode($table_visibility)) . "'>";
+	print "<thead><tr class='tableHeader " . ($last_item_colspan > 1 || !$resizable ? 'tableFixed' : '') . "' data-columns='" . base64_encode((string) json_encode($table_visibility)) . "'>";
 
 	$i = 0;
 
@@ -1205,7 +1205,7 @@ function html_header_checkbox(array $header_items, bool $include_form = true, st
 		'columns'  => $header_items
 	];
 
-	print "<thead><tr class='tableHeader " . (!$resizable ? 'tableFixed' : '') . "' data-columns='" . base64_encode(json_encode($table_visibility)) . "'>";
+	print "<thead><tr class='tableHeader " . (!$resizable ? 'tableFixed' : '') . "' data-columns='" . base64_encode((string) json_encode($table_visibility)) . "'>";
 
 	foreach ($header_items as $item) {
 		if (is_array($item)) {
@@ -2109,7 +2109,6 @@ function draw_actions_dropdown(array $actions_array, int $delete_action = 1) : v
 	?>
 	<div class='actionsDropdown'>
 		<div>
-			<span class='actionsDropdownArrow'><img src='<?php print get_theme_paths('%s', 'images/arrow.gif') ?>' alt=''></span>
 			<?php form_dropdown('drp_action', $actions_array, '', '', '0', '', ''); ?>
 			<span class='actionsDropdownButton'><button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' id='submit' value='<?php print __esc('Go'); ?>' title='<?php print __esc('Execute Action'); ?>' form='<?php print $form_id; ?>'><?php print __esc('Go'); ?></button></span>
 		</div>
@@ -2327,7 +2326,7 @@ function html_show_tabs_left() : void {
 	ob_start();
 	api_plugin_hook('top_graph_header_tabs');
 
-	$tab_text = trim(ob_get_clean());
+	$tab_text = trim((string) ob_get_clean());
 	$tab_text = str_replace('<a', '', $tab_text);
 	$tab_text = str_replace('</a>', '|', $tab_text);
 	$tab_text = str_replace('<img', '', $tab_text);
@@ -2756,20 +2755,32 @@ function html_graph_order_filter_array() : array {
 		}
 	}
 
+	foreach (array_keys($return) as $return_key) {
+		$return[$return_key]['bar'] = true;
+	}
+
 	return $return;
 }
 
 function html_thumbnails_filter(string $callBack = 'applyGraphFilter') : string {
-	$output  = "<input id='thumbnails' type='checkbox' onClick='$callBack()' " . (grv('thumbnails') == 'true' ? 'checked' : '') . '>';
-	$output .= "<label for='thumbnails'>" . __('Thumbnails') . '</label>';
+	$checked = (grv('thumbnails') == 'true' ? ' checked' : '');
+
+	$output  = "<span class='nowrap'>";
+	$output .= "<label class='checkboxSwitch'><input class='formCheckbox' id='thumbnails' name='thumbnails' type='checkbox' onClick='$callBack()'$checked><span class='checkboxSlider checkboxRound'></span></label>";
+	$output .= "<label class='checkboxLabelWanted' for='thumbnails'>" . __('Thumbnails') . '</label>';
+	$output .= '</span>';
 
 	return $output;
 }
 
 function html_business_hours_filter(string $callBack = 'applyGraphFilter') : string {
 	if (read_config_option('business_hours_enable') == 'on') {
-		$output  = "<input id='business_hours' type='checkbox' onClick='$callBack()' " . (grv('business_hours') == 'true' ? 'checked' : '') . '>';
-		$output .= "<label for='business_hours'>" . __('Business Hours') . '</label>';
+		$checked = (grv('business_hours') == 'true' ? ' checked' : '');
+
+		$output  = "<span class='nowrap'>";
+		$output .= "<label class='checkboxSwitch'><input class='formCheckbox' id='business_hours' name='business_hours' type='checkbox' onClick='$callBack()'$checked><span class='checkboxSlider checkboxRound'></span></label>";
+		$output .= "<label class='checkboxLabelWanted' for='business_hours'>" . __('Business Hours') . '</label>';
+		$output .= '</span>';
 
 		return $output;
 	}
@@ -2782,15 +2793,17 @@ function html_business_hours_filter(string $callBack = 'applyGraphFilter') : str
  *
  * @param mixed  $host_id   - The ID of the host to be selected by default. Defaults to '-1'.
  * @param string $call_back - The JavaScript function to call when the selection changes. Defaults to 'applyFilter'.
- * @param string $sql_where - Additional SQL WHERE clause to filter the devices. Defaults to an empty string.
+ * @param string $sql_where - Not applied: the option list is populated via the shared
+ *                          'ajax_hosts' action, which is not safe to pass caller-supplied
+ *                          raw SQL to over the client/server boundary. Callers that need to
+ *                          constrain the device list must add their own SQL-safe filtering
+ *                          (e.g. by request var) inside their page's own 'ajax_hosts' handler.
  * @param bool   $noany     - Whether to exclude the 'Any' option from the dropdown. Defaults to false.
  * @param bool   $nonone    - Whether to exclude the 'None' option from the dropdown. Defaults to false.
  *
  * @return void
  */
 function html_host_filter(mixed $host_id = -1, string $call_back = 'applyFilter', string $sql_where = '', bool $noany = false, bool $nonone = false) : void {
-	$theme = get_selected_theme();
-
 	if (!str_contains($call_back, '()')) {
 		$call_back .= '()';
 	}
@@ -2799,49 +2812,27 @@ function html_host_filter(mixed $host_id = -1, string $call_back = 'applyFilter'
 		$host_id = gfrv('host_id');
 	}
 
-	if (!read_config_option('autocomplete_enabled')) {
-		?>
-		<td>
-			<?php print __('Device'); ?>
-		</td>
-		<td>
-			<select id='host_id' name='host_id' onChange='<?php print $call_back; ?>' data-defaultLabel='<?php print __('Device'); ?>'>
-				<?php if (!$noany) {?><option value='-1'<?php if ($host_id == '-1') {?> selected<?php }?>><?php print __('Any'); ?></option><?php }?>
-				<?php if (!$nonone) {?><option value='0'<?php if ($host_id == '0') {?> selected<?php }?>><?php print __('None'); ?></option><?php }?>
-				<?php
-
-				$devices = get_allowed_devices($sql_where);
-
-		if (cacti_sizeof($devices)) {
-			foreach ($devices as $device) {
-				print "<option value='{$device['id']}'" . ($host_id == $device['id'] ? ' selected' : '') . '>' . htmle(strip_domain($device['description'])) . '</option>';
-			}
-		}
-		?>
-			</select>
-		</td>
-		<?php
+	if ($host_id > 0) {
+		$hostname = db_fetch_cell_prepared('SELECT description
+			FROM host
+			WHERE id = ?',
+			[$host_id]);
+	} elseif ($host_id == 0) {
+		$hostname = __('None');
 	} else {
-		if ($host_id > 0) {
-			$hostname = db_fetch_cell_prepared('SELECT description
-				FROM host
-				WHERE id = ?',
-				[$host_id]);
-		} elseif ($host_id == 0) {
-			$hostname = __('None');
-		} else {
-			$hostname = __('Any');
-		}
-
-		?>
-		<td>
-			<?php print __('Device'); ?>
-		</td>
-		<td>
-			<?php print "<input id='host_id' name='host_id' type='text' class='drop-callback ui-state-default ui-corner-all' data-action='ajax_hosts' data-callback='$call_back' data-callback-id='host_id' data-value='" . htmle($hostname) . "' value='" . htmle($host_id) . "'>"; ?>
-		</td>
-	<?php
+		$hostname = __('Any');
 	}
+
+	?>
+	<td>
+		<?php print __('Device'); ?>
+	</td>
+	<td>
+		<select id='host_id' name='host_id' class='select2-callback' data-action='ajax_hosts' data-variables='site_id' data-noany='<?php print $noany ? '1' : '0'; ?>' data-nonone='<?php print $nonone ? '1' : '0'; ?>' data-callback='<?php print html_escape_attr($call_back); ?>'>
+			<option value='<?php print html_escape_attr($host_id); ?>' selected><?php print htmle($hostname); ?></option>
+		</select>
+	</td>
+	<?php
 }
 
 /**
@@ -3285,7 +3276,7 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 	<meta http-equiv="Content-Security-Policy" content="default-src *; img-src 'self' https://api.qrserver.com <?php print $alternates; ?> data: blob:; style-src 'self' 'unsafe-inline' <?php print $alternates; ?>; <?php print $script_src; ?>; worker-src 'self' <?php print $alternates; ?>;">
 
 
-	<title><?php print $title; ?></title>
+	<title><?php print html_escape($title); ?></title>
 	<meta http-equiv='Content-Type' content='text/html;charset=utf-8'>
 	<link rel='manifest' href='/manifest.json'>
 	<script type='text/javascript' <?php print CactiSecureHeaders::getNonceAttribute(); ?>>
@@ -3383,6 +3374,8 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 		var allSelectedText = '<?php print __('All Graph Templates'); ?>';
 		var templatesSelected = '<?php print __esc('Templates Selected'); ?>';
 		var notTemplated = '<?php print __esc('Not Templated'); ?>';
+		var multiSelectAllText = <?php print cacti_js_encode(__('All Selected')); ?>;
+		var multiSelectCountText = <?php print cacti_js_encode(__('Selected')); ?>;
 		var allText = '<?php __esc('All'); ?>';
 		var noneText = '<?php print __esc('None'); ?>';
 		var zoom_i18n_3rd_button = '<?php print __esc('3rd Mouse Button'); ?>';
@@ -3444,6 +3437,7 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 
 	// Global styles
 	print get_md5_include_css('include/themes/' . $selectedTheme . '/main.css');
+	print get_md5_include_css('include/themes/print.css');
 
 	// Global scripts
 	print get_md5_include_js('include/js/screenfull.js', true);
@@ -3572,7 +3566,7 @@ function html_help_page(string $page) : mixed {
 		'sites.php'                   => 'Sites.html',
 		'automation_tree_rules.php'   => 'Tree-Rules.html',
 		'tree.php'                    => 'Trees.html',
-		'user_domains.php'            => 'User-Domains.html',
+		'login_providers.php'         => 'Login-Providers.html',
 		'user_group_admin.php'        => 'User-Group-Management.html',
 		'user_admin.php'              => 'User-Management.html',
 		'vdef.php'                    => 'VDEFs.html',

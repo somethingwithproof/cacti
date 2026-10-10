@@ -112,7 +112,7 @@ detailed_checks();
 snmp_repairs();
 snmp_index_repairs();
 
-if (cacti_sizeof($repaired_hosts) && $total_repairs > 0) { // @phpstan-ignore booleanAnd.alwaysFalse
+if (cacti_sizeof($repaired_hosts) && $total_repairs > 0) {
 	print_separator(true);
 
 	printf('NOTE: Pushing out %s Devices after repairs!' . PHP_EOL . PHP_EOL, cacti_sizeof($repaired_hosts));
@@ -462,6 +462,51 @@ function detailed_checks() : void {
 		printf('NOTE: Found ' . ($force ? 'and repaired ' : '') . "$fixes of $rows invalid CDEFs in Graph Templates." . PHP_EOL);
 	} else {
 		printf('NOTE: Found 0 invalid Cacti CDEFs.' . PHP_EOL);
+	}
+
+	printf('NOTE: Searching for graph items that reference missing CDEFs.' . PHP_EOL);
+
+	$cdef_references = [
+		[
+			'rows' => db_fetch_cell('SELECT COUNT(*) FROM graph_templates_item AS source LEFT JOIN cdef ON source.cdef_id = cdef.id WHERE source.cdef_id > 0 AND cdef.id IS NULL'),
+			'fix'  => static function (): void {
+				db_execute('UPDATE graph_templates_item SET cdef_id = 0 WHERE cdef_id > 0 AND cdef_id NOT IN (SELECT id FROM cdef)');
+			},
+		],
+		[
+			'rows' => db_fetch_cell('SELECT COUNT(*) FROM aggregate_graph_templates_item AS source LEFT JOIN cdef ON source.cdef_id = cdef.id WHERE source.cdef_id > 0 AND cdef.id IS NULL'),
+			'fix'  => static function (): void {
+				db_execute("UPDATE aggregate_graph_templates_item SET cdef_id = 0, t_cdef_id = '' WHERE cdef_id > 0 AND cdef_id NOT IN (SELECT id FROM cdef)");
+			},
+		],
+		[
+			'rows' => db_fetch_cell('SELECT COUNT(*) FROM aggregate_graphs_graph_item AS source LEFT JOIN cdef ON source.cdef_id = cdef.id WHERE source.cdef_id > 0 AND cdef.id IS NULL'),
+			'fix'  => static function (): void {
+				db_execute("UPDATE aggregate_graphs_graph_item SET cdef_id = 0, t_cdef_id = '' WHERE cdef_id > 0 AND cdef_id NOT IN (SELECT id FROM cdef)");
+			},
+		],
+	];
+	$invalid_references = 0;
+	$fixed_references   = 0;
+
+	foreach ($cdef_references as $queries) {
+		$rows = $queries['rows'];
+
+		$invalid_references += (int) $rows;
+
+		if ($force && $rows > 0) {
+			$queries['fix']();
+			$fixed_references += db_affected_rows();
+		}
+	}
+
+	$total_errors  += $invalid_references;
+	$total_repairs += $fixed_references;
+
+	if ($force) {
+		printf("NOTE: Found and repaired $fixed_references of $invalid_references graph item references to missing CDEFs." . PHP_EOL);
+	} else {
+		printf("NOTE: Found $invalid_references graph item references to missing CDEFs." . PHP_EOL);
 	}
 
 	printf('NOTE: Searching for invalid Cacti Data Inputs.' . PHP_EOL);

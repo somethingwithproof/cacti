@@ -3078,6 +3078,7 @@ CREATE TABLE `user_auth_group` (
   `policy_hosts` tinyint(3) unsigned NOT NULL default '1',
   `policy_graph_templates` tinyint(3) unsigned NOT NULL default '1',
   `enabled` char(2) NOT NULL default 'on',
+  `auto_assignments` longtext,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB ROW_FORMAT=Dynamic COMMENT='Table that Contains User Groups';
 
@@ -3228,6 +3229,25 @@ CREATE TABLE `user_auth_row_cache` (
 --
 
 --
+-- Table structure for table `user_layouts`
+--
+
+CREATE TABLE `user_layouts` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL default '0',
+  `page` varchar(64) NOT NULL default '',
+  `name` varchar(128) NOT NULL default '',
+  `data` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `page` (`page`)
+) ENGINE=InnoDB ROW_FORMAT=Dynamic COMMENT='Stores user defined and published filter layouts';
+
+--
+-- Dumping data for table `user_layouts`
+--
+
+--
 -- Table structure for table `user_log`
 --
 
@@ -3246,56 +3266,26 @@ CREATE TABLE `user_log` (
 --
 
 --
--- Table structure for table `user_domains`
+-- Table structure for table `login_providers`
 --
 
-CREATE TABLE `user_domains` (
-  `domain_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `domain_name` varchar(20) NOT NULL,
-  `type` int(10) unsigned NOT NULL default '0',
+CREATE TABLE `login_providers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) NOT NULL default '',
+  `description` varchar(255) NOT NULL default '',
+  `type` tinyint(3) unsigned NOT NULL default '1',
+  `button_label` varchar(50) NOT NULL default '',
   `enabled` char(2) NOT NULL default 'on',
   `debug` char(2) NOT NULL default '',
-  `defdomain` tinyint(3) unsigned NOT NULL default '0',
+  `is_default` tinyint(3) unsigned NOT NULL default '0',
+  `allow_auth_cookies` char(2) NOT NULL default 'on',
   `user_id` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY (`domain_id`)
-) ENGINE=InnoDB ROW_FORMAT=Dynamic COMMENT='Table to Hold Login Domains';
+  `parameters` longtext,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB ROW_FORMAT=Dynamic COMMENT='Table to Hold Login Providers (LDAP/AD/SAML2/OpenID)';
 
 --
--- Dumping data for table `user_domains`
---
-
---
--- Table structure for table `user_domains_ldap`
---
-
-CREATE TABLE `user_domains_ldap` (
-  `domain_id` int(10) unsigned NOT NULL,
-  `server` varchar(128) NOT NULL,
-  `port` int(10) unsigned NOT NULL,
-  `port_ssl` int(10) unsigned NOT NULL,
-  `proto_version` tinyint(3) unsigned NOT NULL,
-  `network_timeout` int unsigned NOT NULL default 2,
-  `bind_timeout` int unsigned NOT NULL default 2,
-  `encryption` tinyint(3) unsigned NOT NULL,
-  `tls_certificate` tinyint(3) unsigned NOT NULL default '3',
-  `referrals` tinyint(3) unsigned NOT NULL,
-  `mode` tinyint(3) unsigned NOT NULL,
-  `dn` varchar(128) NOT NULL default '',
-  `group_require` char(2) NOT NULL default '',
-  `group_dn` varchar(128) NOT NULL default '',
-  `group_attrib` varchar(128) NOT NULL default '',
-  `group_member_type` tinyint(3) unsigned NOT NULL,
-  `search_base` varchar(128) NOT NULL default '',
-  `search_filter` varchar(512) NOT NULL default '',
-  `specific_dn` varchar(128) NOT NULL default '',
-  `specific_password` varchar(128) NOT NULL default '',
-  `cn_full_name` varchar(50) NULL default '',
-  `cn_email` varchar (50) NULL default '',
-  PRIMARY KEY (`domain_id`)
-) ENGINE=InnoDB ROW_FORMAT=Dynamic COMMENT='Table to Hold Login Domains for LDAP';
-
---
--- Dumping data for table `user_domains_ldap`
+-- Dumping data for table `login_providers`
 --
 
 --

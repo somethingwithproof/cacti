@@ -322,96 +322,6 @@ function display_settings() : void {
 			$('#i18n_default_language, #i18n_auto_detection, #i18n_language_support').change(function() {
 				langDetectionChanger();
 			});
-		} else if (currentTab == 'logging') {
-			$('#selective_plugin_debug').multiselect({
-				menuHeight: $(window).height()*.7,
-				menuWidth: 230,
-				linkInfo: faIcons,
-				noneSelectedText: '<?php print __('Select Plugin(s)'); ?>',
-				selectedText: function(numChecked, numTotal, checkedItems) {
-					myReturn = numChecked + ' <?php print __('Plugins Selected'); ?>';
-					return myReturn;
-				},
-				checkAllText: '<?php print __('All'); ?>',
-				uncheckAllText: '<?php print __('None'); ?>',
-				uncheckall: function() {
-					$(this).multiselect('widget').find(':checkbox:first').each(function() {
-						$(this).prop('checked', true);
-					});
-				}
-			}).multiselectfilter( {
-				label: '<?php print __('Search'); ?>',
-				placeholder: '<?php print __('Enter keyword'); ?>',
-				width: '150'
-			});
-
-			$('#selective_debug').multiselect({
-				menuHeight: $(window).height()*.7,
-				menuWidth: 230,
-				linkInfo: faIcons,
-				noneSelectedText: '<?php print __('Select File(s)'); ?>',
-				selectedText: function(numChecked, numTotal, checkedItems) {
-					myReturn = numChecked + ' <?php print __('Files Selected'); ?>';
-					return myReturn;
-				},
-				checkAllText: '<?php print __('All'); ?>',
-				uncheckAllText: '<?php print __('None'); ?>',
-			}).multiselectfilter( {
-				label: '<?php print __('Search'); ?>',
-				placeholder: '<?php print __('Enter keyword'); ?>',
-				width: '150'
-			});
-		} else if (currentTab == 'spikes') {
-			$('#spikekill_templates').multiselect({
-				menuHeight: $(window).height()*.7,
-				menuWidth: 'auto',
-				linkInfo: faIcons,
-				noneSelectedText: '<?php print __('Select Template(s)'); ?>',
-				selectedText: function(numChecked, numTotal, checkedItems) {
-					myReturn = numChecked + ' <?php print __('Templates Selected'); ?>';
-					$.each(checkedItems, function(index, value) {
-						if (value.value == '0') {
-							myReturn='<?php print __('All Templates Selected'); ?>';
-							return false;
-						}
-					});
-					return myReturn;
-				},
-				checkAllText: '<?php print __('All'); ?>',
-				uncheckAllText: '<?php print __('None'); ?>',
-				uncheckAll: function() {
-					$(this).multiselect('widget').find(':checkbox:first').each(function() {
-						$(this).prop('checked', true);
-					});
-				},
-				click: function(event, ui) {
-					checked=$(this).multiselect('widget').find('input:checked').length;
-
-					if (ui.value == '0') {
-						if (ui.checked == true) {
-							$('#host').multiselect('uncheckAll');
-							$(this).multiselect('widget').find(':checkbox:first').each(function() {
-								$(this).prop('checked', true);
-							});
-						}
-					}else if (checked == 0) {
-						$(this).multiselect('widget').find(':checkbox:first').each(function() {
-							$(this).click();
-						});
-					}else if ($(this).multiselect('widget').find('input:checked:first').val() == '0') {
-						if (checked > 0) {
-							$(this).multiselect('widget').find(':checkbox:first').each(function() {
-								$(this).click();
-								$(this).prop('disable', true);
-							});
-						}
-					}
-				}
-			}).multiselectfilter( {
-				label: '<?php print __('Search'); ?>',
-				placeholder: '<?php print __('Enter keyword'); ?>',
-				width: '150'
-			});
 		} else if (currentTab == 'data') {
 			$('#storage_location').change(function() {
 				if ($(this).val() == '0') {
@@ -1457,7 +1367,7 @@ function save_settings() : void {
 			} else {
 				$continue = true;
 
-				if ($field_name == 'path_cactilog' || $field_name == 'path_stderrlog') {
+				if ($field_name == 'path_cactilog' || $field_name == 'path_stderrlog' || $field_name == 'path_boost_log') {
 					$extension = pathinfo(gnrv($field_name), PATHINFO_EXTENSION);
 
 					if ($extension != 'log') {
@@ -1630,7 +1540,7 @@ function save_settings() : void {
 
 			foreach ($pollers as $p => $t) {
 				if ($t > $gone_time) {
-					raise_message('poller_' . $p, __('Settings save to Data Collector %d skipped due to heartbeat.', $p), MESSAGE_LEVEL_WARN);
+					raise_message('poller_' . $p, __esc('Settings save to Data Collector %d skipped due to heartbeat.', $p), MESSAGE_LEVEL_WARN);
 				} else {
 					$rcnn_id = poller_connect_to_remote($p);
 
@@ -1642,7 +1552,7 @@ function save_settings() : void {
 
 					// check if we still have rcnn_id, if it's now become false, we had a problem
 					if (!$rcnn_id) {
-						raise_message('poller_' . $p, __('Settings save to Data Collector %d Failed.', $p), MESSAGE_LEVEL_ERROR);
+						raise_message('poller_' . $p, __esc('Settings save to Data Collector %d Failed.', $p), MESSAGE_LEVEL_ERROR);
 					}
 				}
 			}
