@@ -97,6 +97,16 @@ RUN set -eux; if [ "${CACTI_E2E_COVERAGE}" = "1" ]; then \
             > /usr/local/etc/php/conf.d/cacti-e2e-coverage.ini; \
     fi
 
+# Match the checkout owner so the bind-mounted fixture remains writable without
+# a root entrypoint or world-writable application directories.
+ARG CACTI_E2E_UID=1001
+RUN test "$CACTI_E2E_UID" -gt 0 \
+ && addgroup -S cacti \
+ && adduser -S -D -H -u "$CACTI_E2E_UID" -G cacti cacti \
+ && sed -i '/^user =/d; /^group =/d' /usr/local/etc/php-fpm.d/www.conf
+
+USER cacti
+
 WORKDIR /var/www/html/cacti
 
 EXPOSE 9000
