@@ -744,12 +744,7 @@ function template() {
 		<form id='form_graph_template' action='graph_templates.php'>
 			<table role='presentation' class='filterTable'>
 				<tr>
-					<td>
-						<label for='filter'><?php print __('Search');?></label>
-					</td>
-					<td>
-						<input type='text' class='ui-state-default' id='filter' name='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
-					</td>
+					<?php html_search_filter(true, false);?>
 					<?php html_rows_filter(__('Graph Templates'), true);?>
 					<td>
 						<span>

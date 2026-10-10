@@ -536,12 +536,7 @@ function sites() {
 			<form id='form_site' action='sites.php'>
 			<table role='presentation' class='filterTable'>
 				<tr>
-					<td>
-						<label for='filter'><?php print __('Search');?></label>
-					</td>
-					<td>
-						<input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
-					</td>
+					<?php html_search_filter();?>
 					<?php html_rows_filter(__('Sites'));?>
 					<td>
 						<span>

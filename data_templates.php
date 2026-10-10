@@ -1075,12 +1075,7 @@ function template() {
 		<form id='form_data_template' action='data_templates.php'>
 			<table role='presentation' class='filterTable'>
 				<tr>
-					<td>
-						<label for='filter'><?php print __('Search');?></label>
-					</td>
-					<td>
-						<input type='text' class='ui-state-default ui-corner-all' id='filter' name='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
-					</td>
+					<?php html_search_filter(true);?>
 					<td>
 						<label for='profile'><?php print __('Profile');?></label>
 					</td>
