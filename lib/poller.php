@@ -691,6 +691,7 @@ function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 	global $config, $debug;
 
 	static $rrd_field_names = array();
+	static $rrd_field_names_loaded = false;
 	static $checked_bad     = false;
 
 	/* per-data-source metadata caches, keyed by local_data_id and held static so each data
@@ -727,12 +728,13 @@ function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 		ORDER BY po.local_data_id
 		$limit");
 
-	if (!cacti_sizeof($rrd_field_names)) {
+	if (!$rrd_field_names_loaded) {
 		$rrd_field_names = array_rekey(
 			db_fetch_assoc_prepared('SELECT ' . SQL_NO_CACHE . '
 				CONCAT(data_template_id, "_", data_name) AS keyname, data_source_names AS data_source_name
 				FROM poller_data_template_field_mappings'),
 			'keyname', array('data_source_name'));
+		$rrd_field_names_loaded = true;
 	}
 
 	if (cacti_sizeof($results)) {
