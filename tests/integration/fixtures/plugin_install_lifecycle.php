@@ -104,6 +104,29 @@ try {
 		}
 	}
 
+	// Malformed schema definitions must leave an actionable diagnostic without
+	// dumping the definition. Use the real logger, validators and DDL helpers.
+	$logfile = cacti_log_file();
+	$before = (string) file_get_contents($logfile);
+	$invalid = ['columns' => [['name' => 'event', 'type' => 'invalid_type', 'default' => 'definition-marker']], 'type' => 'InnoDB'];
+	$assert(db_table_create('pinstall_bad_schema', $invalid) === false, 'Malformed definition must fail');
+	$assert(db_table_create('invalid table name', $invalid) === false, 'Invalid identifier must fail');
+	api_plugin_db_table_create('pinstall_schema', 'pinstall_bad_schema', $invalid);
+	api_plugin_db_table_create('pinstall_schema', 'invalid table name', $invalid);
+	api_plugin_db_table_create('pinstall_a_null', 'pinstall_a_null_data', ['columns' => [], 'type' => 'invalid engine']);
+	$logged = substr((string) file_get_contents($logfile), strlen($before));
+	$assert(str_contains($logged, "Cannot create table 'pinstall_bad_schema': invalid table definition"), 'Missing schema validation diagnostic');
+	$assert(str_contains($logged, 'Table creation rejected an invalid table identifier'), 'Missing identifier diagnostic');
+	$assert(str_contains($logged, "Plugin 'pinstall_schema' could not create table 'pinstall_bad_schema'"), 'Missing plugin create diagnostic');
+	$assert(str_contains($logged, 'Plugin table creation rejected an invalid table identifier'), 'Missing plugin identifier diagnostic');
+	$assert(str_contains($logged, "Plugin 'pinstall_a_null' could not update table 'pinstall_a_null_data'"), 'Missing plugin update diagnostic');
+	$assert(!str_contains($logged, 'definition-marker'), 'Diagnostic must not dump column defaults');
+	$before = (string) file_get_contents($logfile);
+	$assert(db_table_create('pinstall_quiet_schema', $invalid, false) === false, 'Quiet validation still fails');
+	$assert((string) file_get_contents($logfile) === $before, 'Explicit log=false must remain quiet');
+	$assert(!db_table_exists('pinstall_bad_schema', false), 'Malformed definition created a table');
+	$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_db_changes WHERE plugin = ?', ['pinstall_schema']) === 0, 'Failed schema creation recorded ownership');
+
 	foreach (['false', 'null', 'true', 'throw', 'error'] as $outcome) {
 		$name = 'pinstall_c_' . $outcome;
 		$case = $cases[$outcome];

@@ -5,6 +5,7 @@ on:
     branches: [1.2.x]
     paths:
       - 'lib/plugins.php'
+      - 'lib/database.php'
       - 'cli/plugin_manage.php'
       - 'tests/integration/PluginInstallLifecycleTest.php'
       - 'tests/integration/fixtures/plugin_install_*.php'
@@ -13,6 +14,7 @@ on:
     branches: [1.2.x]
     paths:
       - 'lib/plugins.php'
+      - 'lib/database.php'
       - 'cli/plugin_manage.php'
       - 'tests/integration/fixtures/plugin_install_*.php'
       - '.github/workflows/plugin-install-lifecycle.yml'

@@ -584,6 +584,8 @@ function api_plugin_db_table_create($plugin, $table, $data) {
 	include_once($config['library_path'] . '/database.php');
 
 	if (!db_is_safe_identifier($table)) {
+		cacti_log('ERROR: Plugin table creation rejected an invalid table identifier.', false, 'PLUGIN');
+
 		return;
 	}
 
@@ -593,6 +595,8 @@ function api_plugin_db_table_create($plugin, $table, $data) {
 				(plugin, `table`, `column`, `method`)
 				VALUES (?, ?, '', 'create')",
 				[$plugin, $table]);
+		} else {
+			cacti_log(sprintf("ERROR: Plugin '%s' could not create table '%s'. Review the table definition and database errors.", $plugin, $table), false, 'PLUGIN');
 		}
 	} else {
 		// Table already exists: refresh its schema to match the definition.
@@ -600,7 +604,9 @@ function api_plugin_db_table_create($plugin, $table, $data) {
 		// unique key, so a REPLACE here would duplicate the ownership record
 		// on every call and could mark a pre-existing/shared table as
 		// plugin-created, causing it to be dropped on uninstall.
-		db_update_table($table, $data, true);
+		if (!db_update_table($table, $data, true)) {
+			cacti_log(sprintf("ERROR: Plugin '%s' could not update table '%s'. Review the table definition and database errors.", $plugin, $table), false, 'PLUGIN');
+		}
 	}
 }
 
