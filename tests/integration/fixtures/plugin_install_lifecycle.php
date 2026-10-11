@@ -90,6 +90,10 @@ $cli = function ($names) use ($root) {
 	return [proc_close($process), $output];
 };
 
+function plugin_realm_filename_setup($plugin, $file) {
+	return api_plugin_register_realm($plugin, $file, 'Filename fixture', false);
+}
+
 try {
 	foreach ($cases as $outcome => $case) {
 		$name = 'pinstall_a_' . $outcome;
@@ -199,6 +203,26 @@ try {
 		rmdir($outside . '/plugins/thold');
 		rmdir($outside . '/plugins');
 		rmdir($outside);
+	}
+
+	set_error_handler(function ($level, $message) {
+		throw new RuntimeException($message);
+	});
+	try {
+		$assert(api_plugin_register_realm('pinstall_scope', 'index.php', 'Fixture', false) === false, 'File-scope realm registration must be rejected without warnings');
+		$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_realms WHERE plugin = ?', ['pinstall_scope']) === 0, 'Rejected file-scope registration must not create a realm');
+	} finally {
+		restore_error_handler();
+	}
+
+	$create('pinstall_realm', $cases['null']);
+	foreach (['index.php', 'quote"file.php', "quote'file.php", 'quote"file.php,other.php'] as $file) {
+		plugin_realm_filename_setup('pinstall_realm', $file);
+		$id = db_fetch_cell_prepared('SELECT id FROM plugin_realms WHERE plugin = ? AND file = ?', ['pinstall_realm', $file]);
+		$assert($id !== false && $id !== null, 'Register quoted realm filename');
+		$assert(plugin_realm_filename_setup('pinstall_realm', $file) !== false, 'Re-register quoted realm filename');
+		$assert(db_fetch_cell_prepared('SELECT id FROM plugin_realms WHERE plugin = ? AND file = ?', ['pinstall_realm', $file]) === $id, 'Re-registering must retain realm ID');
+		$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_realms WHERE plugin = ? AND file = ?', ['pinstall_realm', $file]) === 1, 'Re-registering must not duplicate realm');
 	}
 
 	print json_encode(['assertions' => $assertions, 'result' => 'passed']) . PHP_EOL;

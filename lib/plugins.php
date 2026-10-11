@@ -1344,13 +1344,14 @@ function api_plugin_disable_hooks_all($plugin) {
  * @return bool True on success, false otherwise.
  */
 function api_plugin_valid_entrypoint($plugin, $function) {
-	// Check for invalid entrypoint install/upgrade
-	$backtrace = debug_backtrace();
-	if (cacti_sizeof($backtrace)) {
-		if (!preg_match('/(install|upgrade|setup)/i', $backtrace[2]['function'])) {
-			cacti_log(sprintf('WARNING: Plugin \'%s\' is attempting to call \'%s\' improperly in function \'%s\'', $plugin, $function, $backtrace[2]['function']), false, 'PLUGIN');
-			return false;
-		}
+	// File-scope calls have no third frame and are not install entrypoints.
+	$backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 3);
+	$caller    = $backtrace[2]['function'] ?? '';
+
+	if (!preg_match('/(install|upgrade|setup)/i', $caller)) {
+		cacti_log(sprintf('WARNING: Plugin \'%s\' is attempting to call \'%s\' improperly in function \'%s\'', $plugin, $function, $caller !== '' ? $caller : 'file scope'), false, 'PLUGIN');
+
+		return false;
 	}
 
 	return true;
@@ -1373,11 +1374,12 @@ function api_plugin_register_realm($plugin, $file, $display, $admin = true) {
 		return false;
 	}
 
-	$i = 0;
+	$params = array($plugin);
 	$sql_where = '(';
 	foreach($files as $tfile) {
 		$sql_where .= ($sql_where != '(' ? ' OR ':'') .
-			' (file = "' . $tfile . '" OR file LIKE "' . $tfile . ',%" OR file LIKE "%,' . $tfile . ',%" OR file LIKE "%,' . $tfile . '")';
+			' (file = ? OR file LIKE ? OR file LIKE ? OR file LIKE ?)';
+		array_push($params, $tfile, $tfile . ',%', '%,' . $tfile . ',%', '%,' . $tfile);
 	}
 	$sql_where .= ')';
 
@@ -1385,7 +1387,7 @@ function api_plugin_register_realm($plugin, $file, $display, $admin = true) {
 		FROM plugin_realms
 		WHERE plugin = ?
 		AND $sql_where",
-		array($plugin));
+		$params);
 
 	if (cacti_sizeof($realm_ids) == 1) {
 		$realm_id = $realm_ids[0]['id'];
