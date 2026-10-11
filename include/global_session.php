@@ -78,9 +78,7 @@ if (isset($_SESSION['refresh'])) {
 	$myrefresh['seconds'] = $refresh;
 	$myrefresh['page']    = sanitize_uri($request_uri);
 	$refreshIsLogout      = 'false';
-} elseif (read_config_option('auth_cache_enabled') == 'on' &&
-	isset($_SESSION['cacti_remembers']) &&
-	$_SESSION['cacti_remembers'] == true) {
+} elseif (read_config_option('auth_cache_enabled') == 'on' && isset($_SESSION['cacti_remembers']) && $_SESSION['cacti_remembers'] == true) {
 	$myrefresh['seconds'] = 99999999;
 	$myrefresh['page']    = sanitize_uri($request_uri);
 	$refreshIsLogout      = 'false';
@@ -126,9 +124,7 @@ if ($graphs) {
 <script type='text/javascript' <?php print CactiSecureHeaders::getNonceAttribute(); ?>>
 	var cactiVersion='<?php print $config['cacti_version']; ?>';
 	var cactiServerOS='<?php print CACTI_SERVER_OS; ?>';
-	var cactiAction='<?php print gfrv('action',
-		FILTER_VALIDATE_REGEXP,
-		['options' => ['regexp' => '/^([-a-zA-Z0-9_\s]+)$/']]); ?>';
+	var cactiAction='<?php print gfrv('action', FILTER_VALIDATE_REGEXP, ['options' => ['regexp' => '/^([-a-zA-Z0-9_\s]+)$/']]); ?>';
 	var theme='<?php print get_selected_theme(); ?>';
 	var refreshIsLogout=<?php print $refreshIsLogout; ?>;
 	var refreshPage='<?php print $myrefresh['page']; ?>';

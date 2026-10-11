@@ -449,7 +449,7 @@ header_redirect	./host_templates.php			header('Location: host_templates.php?acti
 header_redirect	./host_templates.php			header('Location: host_templates.php?action=edit&id=' . gfrv('host_template_id'));
 header_redirect	./images/index.php	header('Location:../index.php');
 header_redirect	./include/auth.php					header('Location: ' . CACTI_PATH_URL . 'auth_2fa.php');
-header_redirect	./include/auth.php			header('Location: ' . CACTI_PATH_URL . 'auth_changepassword.php?ref=' . rawurlencode(validate_redirect_url($_SERVER['HTTP_REFERER'] ?? '', 'index.php')));
+header_redirect	./include/auth.php			header('Location: ' . CACTI_PATH_URL . 'auth_changepassword.php?ref=' . rawurlencode(validate_redirect_url($_SERVER['HTTP_REFERER'] ?? '',
 header_redirect	./include/auth.php		header('Location: ' . CACTI_PATH_URL . 'install/');
 header_redirect	./include/content/index.php	header('Location:../index.php');
 header_redirect	./include/csrf.php		header('Location: ' . $redirect_target);
@@ -668,7 +668,7 @@ header_redirect	./user_group_admin.php					header('Location: user_group_admin.ph
 header_redirect	./user_group_admin.php					header('Location: user_group_admin.php');
 header_redirect	./user_group_admin.php					header('Location: user_group_admin.php');
 header_redirect	./user_group_admin.php			header('Location: user_group_admin.php');
-header_redirect	./user_group_admin.php			header('Location: user_group_admin.php?action=edit&tab=general&id=' . (isset($group_id) && $group_id > 0 ? $group_id : gnrv('id')));
+header_redirect	./user_group_admin.php			header('Location: user_group_admin.php?action=edit&tab=general&id=' . (isset($group_id) &&
 header_redirect	./user_group_admin.php			header('Location: user_group_admin.php?action=edit&tab=members&id=' . gnrv('id'));
 header_redirect	./user_group_admin.php			header('Location: user_group_admin.php?action=edit&tab=permsd&id=' . gnrv('id'));
 header_redirect	./user_group_admin.php			header('Location: user_group_admin.php?action=edit&tab=permsg&id=' . gnrv('id'));
