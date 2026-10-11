@@ -21,3 +21,6 @@ rra/*.rrd
 
 # Local assistant state
 .omc
+
+# Coverage is mounted only into the disposable instrumentation runtime.
+/coverage/
