@@ -172,6 +172,35 @@ try {
 		set_config_option('admin_user', $admin_user);
 	}
 
+	$create('pinstall_error', $cases['null']);
+	$directory = $root . '/plugins/pinstall_error';
+	$outside = sys_get_temp_dir() . '/cacti_error_' . bin2hex(random_bytes(6));
+	mkdir($directory . '/vendor/plugins/thold', 0700, true);
+	mkdir($outside . '/plugins/thold', 0700, true);
+	try {
+		file_put_contents($directory . '/vendor/plugins/thold/Foo.php', '<?php');
+		file_put_contents($outside . '/plugins/thold/Foo.php', '<?php');
+		$assert(cacti_error_plugin($directory . '/setup.php') === 'pinstall_error', 'Actual plugin error attribution');
+		$assert(cacti_error_plugin($directory . '/vendor/plugins/thold/Foo.php') === 'pinstall_error', 'Nested vendor directory must retain owning plugin');
+		$assert(cacti_error_plugin($outside . '/plugins/thold/Foo.php') === '', 'Other application must not disable a Cacti plugin');
+		$assert(cacti_error_plugin($root . '/lib/functions.php') === '', 'Core file must not be attributed to a plugin');
+		$assert(cacti_error_plugin($directory . '/missing.php') === '', 'Missing file must not be attributed to a plugin');
+		symlink($outside . '/plugins/thold', $directory . '/external');
+		$assert(cacti_error_plugin($directory . '/external/Foo.php') === '', 'External symlink target must not be attributed to a plugin');
+	} finally {
+		if (is_link($directory . '/external')) {
+			unlink($directory . '/external');
+		}
+		unlink($directory . '/vendor/plugins/thold/Foo.php');
+		unlink($outside . '/plugins/thold/Foo.php');
+		rmdir($directory . '/vendor/plugins/thold');
+		rmdir($directory . '/vendor/plugins');
+		rmdir($directory . '/vendor');
+		rmdir($outside . '/plugins/thold');
+		rmdir($outside . '/plugins');
+		rmdir($outside);
+	}
+
 	print json_encode(['assertions' => $assertions, 'result' => 'passed']) . PHP_EOL;
 } finally {
 	foreach ($fixtures as $name) {
