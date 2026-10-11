@@ -122,7 +122,6 @@ docker-compose.override.yml
 .claude/**
 
 # Security research artifacts (never commit)
-CLAUDE.md
 reproduce_ghsa_*.php
 verify_task*.php
 .gemini_security/
