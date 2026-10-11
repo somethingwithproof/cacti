@@ -240,6 +240,19 @@ try {
 		$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_realms WHERE plugin = ? AND file = ?', ['pinstall_realm', $file]) === 1, 'Re-registering must not duplicate realm');
 	}
 
+	foreach ([['foo_bar.php', 'other.php,fooXbar.php'], ['foo%bar.php', 'other.php,fooZZbar.php'], ['bang!file.php,third.php', 'other.php,bangfile.php']] as $index => [$file, $unrelated]) {
+		$name = 'pinstall_w' . $index;
+		$create($name, $cases['null']);
+		db_execute_prepared('INSERT INTO plugin_realms (plugin, file, display) VALUES (?, ?, ?)', [$name, $unrelated, 'Unrelated']);
+		db_execute_prepared('INSERT INTO plugin_realms (plugin, file, display) VALUES (?, ?, ?)', [$name, $file, 'Original']);
+		$id = db_fetch_cell_prepared('SELECT id FROM plugin_realms WHERE plugin = ? AND file = ?', [$name, $file]);
+		plugin_realm_filename_setup($name, $file);
+		$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_realms WHERE plugin = ?', [$name]) === 2, 'Literal filename must not merge unrelated realms');
+		$assert(db_fetch_cell_prepared('SELECT id FROM plugin_realms WHERE plugin = ? AND file = ?', [$name, $file]) === $id, 'Literal filename must retain realm ID');
+		$assert(db_fetch_cell_prepared('SELECT display FROM plugin_realms WHERE plugin = ? AND file = ?', [$name, $unrelated]) === 'Unrelated', 'Unrelated realm must remain unchanged');
+		$assert(db_fetch_cell_prepared('SELECT display FROM plugin_realms WHERE plugin = ? AND file = ?', [$name, $file]) === 'Filename fixture', 'Target realm must receive its new caption');
+	}
+
 	print json_encode(['assertions' => $assertions, 'result' => 'passed']) . PHP_EOL;
 } finally {
 	foreach ($fixtures as $name) {
