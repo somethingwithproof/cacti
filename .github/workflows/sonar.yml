@@ -37,6 +37,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          set -euo pipefail
           if [[ -z "$SONAR_TOKEN" ]]; then
             echo '::error::SONAR_TOKEN must be configured in repository Actions secrets.'
             exit 1
@@ -47,8 +48,19 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          set -euo pipefail
           python3 tests/tools/test_sonar_profile_policy.py
           python3 .github/scripts/check-sonar-profile.py
+      - name: Measure profile checker coverage
+        env:
+          COVERAGE_FILE: ${{ runner.temp }}/sonar-profile.coverage
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/sonar-coverage"
+          "$RUNNER_TEMP/sonar-coverage/bin/python" -m pip install --only-binary=:all: coverage==7.16.2
+          "$RUNNER_TEMP/sonar-coverage/bin/python" -m coverage run --branch --include='.github/scripts/check-sonar-profile.py' tests/tools/test_sonar_profile_policy.py
+          "$RUNNER_TEMP/sonar-coverage/bin/python" -m coverage report --fail-under=100
+          "$RUNNER_TEMP/sonar-coverage/bin/python" -m coverage xml -o "$RUNNER_TEMP/sonar-python-coverage.xml"
       - name: Select branch or pull request context
         id: context
         env:
@@ -75,6 +87,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >-
+            -Dsonar.python.coverage.reportPaths=${{ runner.temp }}/sonar-python-coverage.xml
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=600
             ${{ steps.context.outputs.args }}
