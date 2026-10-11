@@ -115,8 +115,11 @@ jobs:
         working-directory: tests/e2e
         run: |
           set -euo pipefail
+          # Build before creating the HTTP worker's private output directory:
+          # the runner must be able to traverse the build context itself.
+          docker compose -f docker-compose.yml -f docker-compose.coverage.yml build cacti
           sudo install -d -m 0700 -o 33 -g 33 ../../coverage/php-browser
-          docker compose -f docker-compose.yml -f docker-compose.coverage.yml up -d --build
+          docker compose -f docker-compose.yml -f docker-compose.coverage.yml up -d --no-build
           ready=0
           for attempt in $(seq 1 60); do
             echo "Native runtime readiness probe $attempt/60"
