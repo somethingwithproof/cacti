@@ -73,9 +73,7 @@ $inspect = function ($name, $success, $ready, $enabled, $permissions) use ($asse
 	$realm = db_fetch_cell_prepared('SELECT id FROM plugin_realms WHERE plugin = ?', [$name]);
 	$assert($realm !== false && $realm !== null, $name . ': realm registration');
 	$grants = (int) db_fetch_cell_prepared('SELECT COUNT(*) FROM user_auth_realm WHERE realm_id = ?', [(int) $realm + 100]);
-	if (!$permissions) {
-		$assert($grants === 0, $name . ': failed install granted permissions');
-	}
+	$assert($permissions ? $grants > 0 : $grants === 0, $name . ': unexpected permission grants');
 	$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_db_changes WHERE plugin = ? AND method = \'create\'', [$name]) === 1, $name . ': table ownership retained');
 };
 
@@ -143,6 +141,12 @@ try {
 			[$retry_code, $retry_output] = $cli([$name]);
 			$assert($retry_code === 1 && str_contains($retry_output, 'needs configuration'), $name . ': retry must not report success');
 			$inspect($name, false, true, false, false);
+		} else {
+			$grants_before = db_fetch_cell_prepared('SELECT COUNT(*) FROM user_auth_realm AS uar INNER JOIN plugin_realms AS pr ON uar.realm_id = pr.id + 100 WHERE pr.plugin = ?', [$name]);
+			[$retry_code, $retry_output] = $cli([$name]);
+			$assert($retry_code === 0 && str_contains($retry_output, 'already installed'), $name . ': idempotent permission retry');
+			$assert(db_fetch_cell_prepared('SELECT COUNT(*) FROM user_auth_realm AS uar INNER JOIN plugin_realms AS pr ON uar.realm_id = pr.id + 100 WHERE pr.plugin = ?', [$name]) === $grants_before, $name . ': duplicate permission grants');
+			$inspect($name, true, true, true, true);
 		}
 	}
 
@@ -156,6 +160,17 @@ try {
 
 	[$code, $output] = $cli(['pinstall_missing']);
 	$assert($code === 1 && str_contains($output, 'missing plugin directory'), 'Missing directory must report failure');
+
+	$admin_user = read_config_option('admin_user');
+	try {
+		set_config_option('admin_user', '9999999');
+		$create('pinstall_admin', $cases['null']);
+		[$code, $output] = $cli(['pinstall_admin']);
+		$assert($code === 1 && str_contains($output, 'administrative account not found'), 'Invalid administrative account must report permission failure');
+		$inspect('pinstall_admin', true, true, true, false);
+	} finally {
+		set_config_option('admin_user', $admin_user);
+	}
 
 	print json_encode(['assertions' => $assertions, 'result' => 'passed']) . PHP_EOL;
 } finally {
