@@ -25459,3 +25459,11 @@ msgstr ""
 #: layouts.php
 msgid "Click 'Continue' to make the following Layouts Local to you."
 msgstr ""
+
+#: lib/html.php:3658
+msgid "Reset password"
+msgstr ""
+
+#: lib/Auth/LocalAuthLoginProvider.php:164
+msgid "Access Denied! Login Failed."
+msgstr ""
