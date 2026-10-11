@@ -29,8 +29,14 @@ if (!(int) db_fetch_cell('SELECT COUNT(*) FROM user_auth_group')) {
 	cacti_accessibility_fixture_command('add_group.php', ['--type=add_group', '--name=Sonar browser fixture', '--description=Disposable browser regression fixture']);
 }
 
-if (!is_dir(CACTI_PATH_PKI) && !mkdir(CACTI_PATH_PKI, 0700, true) && !is_dir(CACTI_PATH_PKI)) {
+// Parent directories must remain traversable by the web worker. Restrict the
+// actual key directory separately; the CI caller assigns it to www-data.
+if (!is_dir(CACTI_PATH_PKI) && !mkdir(CACTI_PATH_PKI, 0755, true) && !is_dir(CACTI_PATH_PKI)) {
 	throw new RuntimeException('Unable to create the disposable key directory.');
+}
+
+if (!chmod(CACTI_PATH_PKI, 0700)) {
+	throw new RuntimeException('Unable to restrict the disposable key directory.');
 }
 
 if (!is_file(CACTI_PATH_PKI . '/package.info')) {
