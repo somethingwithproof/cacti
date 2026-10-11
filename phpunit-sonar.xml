@@ -31,6 +31,8 @@
             <directory>log</directory>
             <directory>rra</directory>
             <file>.php-cs-fixer.php</file>
+            <!-- Generated runtime configuration is untracked and not scanned. -->
+            <file>include/config.php</file>
         </exclude>
     </source>
 </phpunit>
