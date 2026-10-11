@@ -98,6 +98,53 @@
 - Do not commit Composer-installed package trees or hand-edit Composer-generated autoload metadata. Validate dependency changes with `composer validate` and a clean `composer install`.
 - If a third-party asset cannot be managed through Composer, stop and document the concrete packaging requirement before adding files. Do not silently create a vendored exception.
 
+## Polling and script-server performance
+
+Treat polling performance as an architectural constraint when changing
+`poller.php`, `cmd.php`, `script_server.php`, polling scripts, SNMP helpers,
+subprocess wrappers, `lib/poller.php` or RRD update paths. Cacti installations
+can have millions of data sources. Trace the actual call chain before adding
+work: script-server launch, script include, function call, SNMP query, process
+execution and individual SNMP requests. Preserve existing process reuse and
+avoid introducing repeated includes, launches or network requests per sample.
+
+- Resolve shared metadata at template scope and cache it once per process or
+  explicitly defined polling cycle. Cache empty results with a separate loaded
+  flag or equivalent sentinel; an empty array must not cause another query on
+  every pass. Define invalidation for long-lived workers and configuration
+  changes so the cache does not serve stale metadata indefinitely.
+- Do not query or scan individual data sources inside every loop to answer a
+  template-level question. Do not preload millions of source records as a
+  substitute. Source-specific state, ownership, graph bindings, orphan handling
+  and permissions still require correct source-specific checks; sharing a
+  template does not make those values interchangeable. Batch necessary reads
+  and keep cache cardinality and memory bounded.
+- Do not add fixed sleeps to each subprocess or SNMP call. Prefer readiness
+  waiting and monotonic deadlines where supported, while preserving active
+  output handling, silent-child timeouts, exit status and resource cleanup.
+  Measure overhead relative to direct execution. An extra 50 ms across 20,000
+  serialized calls adds approximately 1,000 seconds before useful work.
+- Confirm the implementation on the target branch. `cacti_exec()` and transport
+  implementations differ across release branches; a fix or test for one branch
+  must not be assumed applicable to another.
+- Treat credential caching as a separate optimization. Measure hit rates,
+  avoided lookups, time and memory before claiming a benefit. Preserve device,
+  poller and credential identity, invalidation and secret-handling boundaries;
+  never log secrets as performance evidence. Credential caching does not fix
+  repeated template queries or per-call process delays.
+- For changes to these paths, run applicable polling performance regressions.
+  Instrument query and call counts over repeated passes, including empty-cache
+  results. Compare subprocess wrapper overhead with direct execution and cover
+  streaming output, silent-child timeouts and exit codes. Exercise representative
+  synthetic scales, including 150k, 1M and 2.5M sources where the branch's harness
+  supports them, and record runtime, elapsed time and peak memory. Keep timings
+  from hosted runners diagnostic; use reproducible count-based regressions and
+  tests that detect reintroduced repeated queries or fixed delays.
+- Label synthetic PHP processing results as synthetic. They do not establish
+  real RTM throughput, database query plans, SNMP/Spine performance, RRD I/O,
+  remote replication or full Boost behavior. Production-scale claims require a
+  representative end-to-end benchmark, including those costs.
+
 ## Database Optimization (DBA Mode)
 - **Context**: The full schema (DDL/DML) is in `cacti.sql`. Check it for table structures and indexes.
 - **Optimize**: Proactively look for slow query patterns (e.g., missing indexes, non-sargable `WHERE` clauses).

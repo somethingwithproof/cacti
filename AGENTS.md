@@ -5,8 +5,8 @@ Applies to Claude, Codex, and any other agent working in this repository.
 directly. Read that first and follow it. This file covers the points that are
 easiest to get wrong, and does not repeat the rest.
 
-`CLAUDE.md` is gitignored on purpose (it holds local security-research notes),
-so shared agent guidance belongs here.
+`CLAUDE.md` contains shared repository guidance. Keep private security-research
+notes outside tracked instruction files and follow `SECURITY.md` for reporting.
 
 ## Where tests go
 
@@ -70,6 +70,24 @@ composer test -- --testsuite=Unit
 
 Match the PHP version declared by `composer.json` and the CI matrix rather than
 whatever is on `PATH`. Report which version produced a result.
+
+## Polling performance is an architectural constraint
+
+Read the polling performance section in
+[.github/copilot-instructions.md](.github/copilot-instructions.md) before changing
+poller, script-server, SNMP, subprocess or RRD update paths. These paths can serve
+millions of data sources; repeated work inside their loops must be justified.
+
+Cache shared template metadata once per process or explicit polling cycle,
+including empty results. Do not replace that cache with per-data-source lookups
+or load millions of source records to answer a template-level question. Preserve
+source-specific correctness and bounded memory. Avoid fixed per-call sleeps and
+repeated process launches, includes or SNMP requests introduced by wrappers.
+
+Verify query/call counts, subprocess overhead and cache lifecycle using the
+target branch's actual code. Synthetic scale tests are regression evidence,
+not proof of production RTM throughput. Credential-cache benefits require
+measurement; they do not excuse repeated metadata work or process delays.
 
 ## Never vendor dependencies
 

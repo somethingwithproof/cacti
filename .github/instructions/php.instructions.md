@@ -55,6 +55,13 @@ Use these instructions for PHP changes in Cacti organization repositories. Repos
 - Avoid `SELECT *` in production queries. Select the required columns and check the schema and indexes before changing a performance-sensitive query.
 - Make schema installation and upgrades idempotent and safe for existing installations. Preserve data unless a clearly named, authorized migration intentionally changes it.
 
+## Polling performance
+
+- For polling, script-server, SNMP, subprocess and RRD update changes, follow the detailed polling performance rules in the repository's `.github/copilot-instructions.md` and `AGENTS.md`. Inspect the actual branch's call chain before adding work to a loop.
+- Cache shared template metadata once per process or explicit cycle, including empty results, with appropriate invalidation. Avoid repeated per-source metadata reads and caches that grow to millions of entries for a template-level lookup. Preserve source-specific correctness.
+- Avoid fixed per-call sleeps and repeated launches, includes or SNMP requests introduced by wrappers. Measure wrapper overhead against direct execution and preserve streaming output, timeouts, exit status and cleanup.
+- Verify repeated query/call counts and memory at representative scales. Measure credential-cache benefits separately. Label synthetic results accurately; production throughput claims require representative end-to-end evidence.
+
 ## Files, commands, logging, and secrets
 
 - Treat file paths and archive contents as untrusted. Constrain them to the intended base directory and reject traversal or unexpected file types.
