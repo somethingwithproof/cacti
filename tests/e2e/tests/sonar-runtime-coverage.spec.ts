@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { sourcePath } from '../coverage/report.mjs';
+import { sourcePath } from '../coverage/source.cjs';
 
 const coverageDirectory = process.env.CACTI_COVERAGE_DIR;
 const root = resolve(__dirname, '../../..');

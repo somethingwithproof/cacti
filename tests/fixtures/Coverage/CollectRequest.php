@@ -39,6 +39,12 @@ namespace Cacti\Tests\Coverage;
 	$coverage = new \SebastianBergmann\CodeCoverage\CodeCoverage(
 		(new \SebastianBergmann\CodeCoverage\Driver\Selector())->forLineCoverage($filter), $filter);
 	$coverage->excludeUncoveredFiles();
+	$analysis = $directory . '/.analysis';
+
+	if (!is_dir($analysis) && !mkdir($analysis, 0700) && !is_dir($analysis)) {
+		throw new \RuntimeException('Request coverage analysis cache is unavailable.');
+	}
+	$coverage->cacheStaticAnalysis($analysis);
 	$identity = bin2hex(random_bytes(16));
 	$coverage->start($identity);
 	register_shutdown_function(static function () use ($coverage, $directory, $identity, $manifest, $verified, $root): void {

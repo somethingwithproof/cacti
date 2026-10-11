@@ -1,6 +1,6 @@
 // Copyright (C) 2004-2026 The Cacti Group. GPL-2.0-or-later.
 import { readFileSync, readdirSync } from 'node:fs';
-import { resolve, relative, isAbsolute, matchesGlob } from 'node:path';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import v8ToIstanbul from 'v8-to-istanbul';
@@ -8,18 +8,8 @@ import coverageLibrary from 'istanbul-lib-coverage';
 import reportLibrary from 'istanbul-lib-report';
 import reports from 'istanbul-reports';
 
-export function sourcePath(entry, origin, root, tracked, exclusions = []) {
-	const url = new URL(entry.url);
-	if (url.origin !== new URL(origin).origin) return null;
-	const pathname = decodeURIComponent(url.pathname).replace(/^\//, '');
-	const path = resolve(root, pathname);
-	const name = relative(root, path);
-	if (isAbsolute(name) || name.startsWith('..') || !tracked.has(name)) return null;
-	if (exclusions.some(pattern => matchesGlob(name, pattern))) return null;
-	if (!/\.(?:js|mjs)$/.test(name)) return null;
-	if (readFileSync(path, 'utf8') !== entry.source) throw new Error(`Coverage source does not match checkout: ${name}`);
-	return path;
-}
+import { sourcePath } from './source.cjs';
+export { sourcePath } from './source.cjs';
 
 export async function convert(entries, { origin, root, tracked, exclusions = [] }) {
 	const map = coverageLibrary.createCoverageMap({});
