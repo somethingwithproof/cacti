@@ -1042,14 +1042,7 @@ function template_edit() : void {
 
 				?>
 				<div class='formColumnLeft'>
-					<div class='formFieldName customDataCheckbox <?php print $disable; ?>'><?php form_checkbox('t_value_' . $field['data_name'],
-						$old_tvalue,
-						'',
-						'',
-						'',
-						grv('id'),
-						'',
-						$message); ?><?php print htmle($field['name']); ?><div class='formTooltip'><?php print display_tooltip($help); ?></div>
+					<div class='formFieldName customDataCheckbox <?php print $disable; ?>'><?php form_checkbox('t_value_' . $field['data_name'], $old_tvalue, '', '', '', grv('id'), '', $message); ?><?php print htmle($field['name']); ?><div class='formTooltip'><?php print display_tooltip($help); ?></div>
 					</div>
 				</div>
 				<div class='formColumnRight <?php print $disable; ?>'>

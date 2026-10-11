@@ -1151,9 +1151,7 @@ function host_edit() : void {
 					<?php print($item['reindex_last_duration'] == 0 ? '-' : __('%0.2f secs', $item['reindex_last_duration'])); ?>
 				</td>
 				<td>
-					<?php print (($status == 'success') ? "<span class='success'>" . __('Success') . '</span>' : "<span class='failed'>" . __('Fail')) . '</span>' . __(' [%d Items, %d Rows]',
-						$item['itemCount'],
-						$item['rowCount']); ?>
+					<?php print (($status == 'success') ? "<span class='success'>" . __('Success') . '</span>' : "<span class='failed'>" . __('Fail')) . '</span>' . __(' [%d Items, %d Rows]', $item['itemCount'], $item['rowCount']); ?>
 				</td>
 				<td class='nowrap right' style='vertical-align:middle;'>
 					<span class='reloadquery ti ti-refresh' id='reload<?php print $item['id']; ?>' title='<?php print __esc('Reload Query'); ?>' data-id='<?php print $item['id']; ?>'></span>

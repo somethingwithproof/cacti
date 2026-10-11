@@ -587,8 +587,7 @@ function automation_snmp_item_remove_confirm() : void {
 			<p><?php print __('Click \'Continue\' to delete the following SNMP Option Item.'); ?></p>
 			<p><?php print __('SNMP Option:'); ?> <?php print htmle($snmp['name']); ?><br>
 			<?php print __('SNMP Version: <b>%s</b>', $item['snmp_version']); ?><br>
-			<?php print __esc('SNMP Community/Username: <b>%s</b>',
-				($item['snmp_version'] != 3 ? $item['snmp_community'] : $item['snmp_username'])); ?></p>
+			<?php print __esc('SNMP Community/Username: <b>%s</b>', ($item['snmp_version'] != 3 ? $item['snmp_community'] : $item['snmp_username'])); ?></p>
 		</td>
 	</tr>
 	<tr>
