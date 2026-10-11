@@ -1,9 +1,15 @@
 /* Copyright (C) 2004-2026 The Cacti Group. GPL-2.0-or-later. */
 import { test, expect } from '@playwright/test';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { sourcePath } from '../coverage/report.mjs';
 
 const coverageDirectory = process.env.CACTI_COVERAGE_DIR;
+const root = resolve(__dirname, '../../..');
+const tracked = new Set(execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' }).split('\0'));
+const exclusions = readFileSync(resolve(root, 'sonar-project.properties'), 'utf8').match(/^sonar.exclusions=(.+)$/m)?.[1].split(',') ?? [];
+test.skip(!coverageDirectory, 'Native coverage requires an explicitly selected disposable fixture.');
 test.beforeEach(async ({ page, browserName }) => {
 	if (coverageDirectory) {
 		expect(browserName).toBe('chromium');
@@ -12,7 +18,11 @@ test.beforeEach(async ({ page, browserName }) => {
 });
 test.afterEach(async ({ page }, testInfo) => {
 	if (!coverageDirectory) return;
-	const entries = await page.coverage.stopJSCoverage();
+	const observations = await page.coverage.stopJSCoverage();
+	// Persist only byte-verified static repository scripts. Inline application
+	// data, session tokens and third-party scripts never enter raw artifacts.
+	const entries = observations.filter(entry => entry.url && sourcePath(entry,
+		process.env.CACTI_BASE_URL ?? 'http://127.0.0.1:8080', root, tracked, exclusions));
 	mkdirSync(coverageDirectory, { recursive: true, mode: 0o700 });
 	writeFileSync(resolve(coverageDirectory, `${testInfo.workerIndex}-${testInfo.testId}-${testInfo.retry}.json`), JSON.stringify(entries), { mode: 0o600 });
 });
