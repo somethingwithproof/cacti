@@ -19,3 +19,12 @@ category subfolders; never shadow production functions or hand-edit autoloaders.
 Do not refresh vendored packages by copying source. Preserve runtime directory
 security guards, GPL notices and the exact branch's compatibility contracts.
 No live database migration or polling is part of ordinary offline verification.
+
+For poller, script-server, SNMP, subprocess and RRD update work, follow the
+polling performance sections in AGENTS and the Copilot instructions. Cache
+template metadata once per process or defined cycle, including empty results;
+avoid repeated source lookups, launches and fixed per-call sleeps. Preserve
+source-specific correctness, cache invalidation and bounded memory. Verify
+query/call counts and subprocess overhead on the actual target branch. Measure
+credential-cache benefits separately, and never present synthetic scale tests
+as proof of production RTM throughput.
