@@ -2456,7 +2456,7 @@ function html_graph_properties() : void {
 	?>
 	<br>
 	<div class='cactiTable'>
-		<div id="data" class='cactiTable'>
+		<div class='cactiTable'>
 			<div class='cactiTable'>
 				<span class='cactiTableTitleRow'><?php print __('RRDtool Command:'); ?></span>
 				<?php

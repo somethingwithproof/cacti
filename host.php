@@ -1004,7 +1004,7 @@ function host_edit() : void {
 		?>
 		<tr class='odd'>
 			<td class='saveRow' colspan='3'>
-				<table>
+				<table role='presentation'>
 					<tr style='line-height:10px;'>
 						<td class='nowrap templateAdd' style='padding-right:15px;'>
 							<?php print __('Add Graph Template'); ?>
@@ -1038,7 +1038,7 @@ function host_edit() : void {
 						</span>
 					</div>
 				</div>
-				<table class='cactiTable' id='clipboardData<?php print $dbg_copy_uid; ?>'>
+				<table role='presentation' class='cactiTable' id='clipboardData<?php print $dbg_copy_uid; ?>'>
 					<tr class='tableRow'>
 						<td class='debug'>
 							<span><?php print debug_log_return('data_query'); ?></span>
@@ -1155,7 +1155,7 @@ function host_edit() : void {
 		?>
 		<tr class='odd'>
 			<td class='saveRow' colspan='6'>
-				<table style='width:20%'>
+				<table role='presentation' style='width:20%'>
 					<tr style='line-height:10px;'>
 						<td class='nowrap queryAdd' style='padding-right:15px;'>
 							<?php print __('Add Data Query'); ?>

@@ -2825,7 +2825,7 @@ function html_host_filter(mixed $host_id = -1, string $call_back = 'applyFilter'
 
 	?>
 	<td>
-		<?php print __('Device'); ?>
+		<label for='host_id'><?php print __('Device'); ?></label>
 	</td>
 	<td>
 		<select id='host_id' name='host_id' class='select2-callback' data-action='ajax_hosts' data-variables='site_id' data-noany='<?php print $noany ? '1' : '0'; ?>' data-nonone='<?php print $nonone ? '1' : '0'; ?>' data-callback='<?php print html_escape_attr($call_back); ?>'>
@@ -2859,7 +2859,7 @@ function html_site_filter(mixed $site_id = -1, string $call_back = 'applyFilter'
 
 	?>
 	<td>
-		<?php print __('Site'); ?>
+		<label for='site_id'><?php print __('Site'); ?></label>
 	</td>
 	<td>
 		<select id='site_id' onChange='<?php print $call_back; ?>' data-defaultLabel='<?php print __('Site'); ?>'>
