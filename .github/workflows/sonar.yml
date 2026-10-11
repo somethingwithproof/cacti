@@ -91,6 +91,8 @@ jobs:
           node --test tests/e2e/coverage/report.test.mjs
           python3 tests/tools/test_sonar_coverage.py
           python3 tests/tools/test_sonar_browser_coverage.py
+          python3 tests/tools/test_mysql_init_identifier.py
+          python3 tests/tools/test_sonar_profile_policy.py
           cd tests/e2e
           npx --no-install playwright install --with-deps chromium
       - name: Record the coverage source revision
@@ -141,6 +143,7 @@ jobs:
           cd tests/e2e
           npx --no-install playwright test tests/sonar-runtime-coverage.spec.ts --project=chromium --workers=1
           npm run coverage:report
+          docker compose -f docker-compose.yml -f docker-compose.coverage.yml stop --timeout 60 cacti
           cd ../..
           sudo chown -R "$(id -u):$(id -g)" coverage/php-browser
           python3 tests/tools/merge_sonar_browser_coverage.py --root "$GITHUB_WORKSPACE"
@@ -155,8 +158,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           set -euo pipefail
-          python3 tests/tools/test_mysql_init_identifier.py
-          python3 tests/tools/test_sonar_profile_policy.py
           python3 .github/scripts/check-sonar-profile.py
       - name: Measure profile checker coverage
         env:

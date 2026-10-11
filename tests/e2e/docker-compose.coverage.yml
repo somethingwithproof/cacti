@@ -1,6 +1,8 @@
 # Copyright (C) 2004-2026 The Cacti Group. GPL-2.0-or-later.
 services:
   cacti:
+    healthcheck:
+      disable: true
     build:
       args:
         CACTI_E2E_COVERAGE: '1'
