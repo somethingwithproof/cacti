@@ -1459,7 +1459,6 @@ legend {
 }
 
 .formData {
-	/* display: inline-block; */
 	float: left;
 	text-align: left;
 }
@@ -1479,15 +1478,11 @@ legend {
 	vertical-align: -10%;
 }
 
-.formSubCheckbox label {
-}
-
 .formCheckbox {
 	vertical-align: -15%;
 }
 
 .formFieldName {
-	/* display: inline-block; */
 	color: #000000;
 	float: left;
 	text-align: left;
@@ -1692,7 +1687,6 @@ th.sortable {
 }
 
 .graphSubHeaderColumn {
-	/* color: #white; */
 	font-size: 12px;
 	vertical-align: middle;
 	text-align: left;
@@ -2022,7 +2016,6 @@ div#gtabs {
 	float: left !important;
 	text-decoration: none;
 	font-size: 18px;
-	/* vertical-align: bottom; */
 	display: block;
 }
 
@@ -2111,14 +2104,6 @@ div.submenu span {
 	list-style: none;
 	margin: 0;
 	padding: 0;
-}
-
-tr td:last-child .checkbox {
-	margin-right: 10px !important;
-}
-
-tr th:last-child .checkbox {
-	margin-right: 10px !important;
 }
 
 /* Navigation Area */
