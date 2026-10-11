@@ -118,7 +118,11 @@ function form_save() : void {
 	}
 
 	if ($export_errors || !$success) {
-		raise_message('package_error', __('There were errors packaging your Templates.  Errors Follow. ') . str_replace("\n", '<br>', $debug), MESSAGE_LEVEL_ERROR);
+		raise_message('package_error',
+			__('There were errors packaging your Templates.  Errors Follow. ') . str_replace("\n",
+				'<br>',
+				$debug),
+			MESSAGE_LEVEL_ERROR);
 		header('Location: package.php');
 
 		exit;
@@ -311,7 +315,13 @@ function export() : void {
 
 	form_start('package.php', 'form_id');
 
-	html_start_box(__('Available Templates [%s]', $export_types[gnrv('export_type')]['name']), '100%', false, 3, 'center', '');
+	html_start_box(__('Available Templates [%s]',
+		$export_types[gnrv('export_type')]['name']),
+		'100%',
+		false,
+		3,
+		'center',
+		'');
 
 	$package_form = [
 		'spacer0' => [
@@ -340,7 +350,8 @@ function export() : void {
 			'method'        => 'textbox',
 			'friendly_name' => __('Description'),
 			'description'   => __('The Package Description.'),
-			'value'         => (isset($info['description']) ? $info['description'] : read_config_option('package_description', true)),
+			'value'         => (isset($info['description']) ? $info['description'] : read_config_option('package_description',
+				true)),
 			'max_length'    => '255',
 			'size'          => '80'
 		],
@@ -386,7 +397,8 @@ function export() : void {
 			'method'        => 'textarea',
 			'friendly_name' => __('Installation Instructions'),
 			'description'   => __('Some Packages require additional changes outside of Cacti\'s scope such as setting up an SNMP Agent Extension on the Devices to be monitored.  You should add those instructions here..'),
-			'value'         => (isset($info['installation']) ? $info['installation'] : read_config_option('package_installation', true)),
+			'value'         => (isset($info['installation']) ? $info['installation'] : read_config_option('package_installation',
+				true)),
 			'textarea_rows' => '5',
 			'textarea_cols' => '80'
 		],

@@ -69,7 +69,8 @@ if (read_config_option('hide_console') != 'on') {
 <table class='cactiTable'>
 	<tr class='tableRow'>
 		<td class='textAreaNotes top left'>
-			<?php print __('You are now logged into <a href="%s"><b>Cacti</b></a>. You can follow these basic steps to get started.', 'about.php'); ?>
+			<?php print __('You are now logged into <a href="%s"><b>Cacti</b></a>. You can follow these basic steps to get started.',
+				'about.php'); ?>
 
 			<ul>
 				<li><?php print __('<a href="%s">Create devices</a> for network', 'host.php'); ?></li>
@@ -85,7 +86,10 @@ if (read_config_option('hide_console') != 'on') {
 	<tr class='tableRow'><td colspan='2'><hr></td></tr>
 	<tr class='tableRow'><td colspan='2'><strong><?php print __('Remote Data Collector Status:'); ?></strong>  <?php print '<i>' . (CACTI_CONNECTION == 'online' ? __('Online') : (CACTI_CONNECTION == 'recovery' ? __('Recovery') : __('Offline'))) . '</i>'; ?></td></tr>
 	<?php if (CACTI_CONNECTION != 'online') {?>
-	<tr class='tableRow'><td colspan='2'><strong><?php print __('Number of Offline Records:'); ?></strong>  <?php print '<i>' . number_format_i18n(db_fetch_cell('SELECT COUNT(*) FROM poller_output_boost', '', true, $local_db_cnn_id)) . '</i>'; ?></td></tr>
+	<tr class='tableRow'><td colspan='2'><strong><?php print __('Number of Offline Records:'); ?></strong>  <?php print '<i>' . number_format_i18n(db_fetch_cell('SELECT COUNT(*) FROM poller_output_boost',
+		'',
+		true,
+		$local_db_cnn_id)) . '</i>'; ?></td></tr>
 	<?php }?>
 	<tr class='tableRow'><td colspan='2'><hr></td></tr>
 	<tr class='tableRow'>

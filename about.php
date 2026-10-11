@@ -43,7 +43,9 @@ html_start_box(__('About Cacti'), '100%', false, 3, 'center', '');
 
 		<p><?php print __('Cacti is designed to be a complete graphing solution based on the RRDtool Time Series Database (TSDB) and Graphing solution. Its goal is to make the Network Administrator\'s job easier by taking care of all the important details necessary to create meaningful Graphs.'); ?></p>
 
-		<p><?php print __('Please see the official %sCacti website%s for information on how to use Cacti, get support, and updates.', '<a href="http://www.cacti.net/?version=' . CACTI_VERSION . '" target="_blank">', '</a>'); ?></p>
+		<p><?php print __('Please see the official %sCacti website%s for information on how to use Cacti, get support, and updates.',
+			'<a href="http://www.cacti.net/?version=' . CACTI_VERSION . '" target="_blank">',
+			'</a>'); ?></p>
 
 		<div class='flexContainer'>
 		<div class='flexChild' style='min-width:300px;'>
@@ -86,7 +88,13 @@ html_start_box(__('About Cacti'), '100%', false, 3, 'center', '');
 		<p><strong><?php print __('Thanks'); ?></strong></p>
 		<ul style='list-style-type:disc'>
 			<li>
-				<?php print __('A very special thanks to %sTobi Oetiker%s, the creator of %sRRDtool%s and the very popular %sMRTG%s.', '<a href="http://tobi.oetiker.ch/" target="_blank"><strong>', '</strong></a>', '<a href="http://www.rrdtool.org/" target="_blank">', '</a>', '<a href="http://www.rrdtool.org" target="_blank">', '</a>'); ?>
+				<?php print __('A very special thanks to %sTobi Oetiker%s, the creator of %sRRDtool%s and the very popular %sMRTG%s.',
+					'<a href="http://tobi.oetiker.ch/" target="_blank"><strong>',
+					'</strong></a>',
+					'<a href="http://www.rrdtool.org/" target="_blank">',
+					'</a>',
+					'<a href="http://www.rrdtool.org" target="_blank">',
+					'</a>'); ?>
 			</li>
 			<li>
 				<strong><?php print __('The users of Cacti'); ?></strong>

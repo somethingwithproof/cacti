@@ -623,7 +623,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT ht.name FROM automation_templates AS at INNER JOIN host_template AS ht ON ht.id=at.host_template WHERE at.id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT ht.name FROM automation_templates AS at INNER JOIN host_template AS ht ON ht.id=at.host_template WHERE at.id = ?',
+					[$matches[1]])) . '</li>';
 
 				$iarray[] = $matches[1];
 			}
@@ -663,8 +664,16 @@ function form_save() : void {
 
 		$save['id']                   = gnrv('id');
 		$save['hash']                 = get_hash_automation(gnrv('id'), 'automation_templates');
-		$save['host_template']        = CactiValidator::validateInput(gnrv('host_template'), 'host_template', [new Assert\NotBlank(), new Assert\Regex('/^[0-9]+$/')], 3);
-		$save['availability_method']  = CactiValidator::validateInput(gnrv('availability_method'), 'availability_method', [new Assert\NotBlank(), new Assert\Regex('/^[0-9]+$/')], 3);
+		$save['host_template']        = CactiValidator::validateInput(gnrv('host_template'),
+			'host_template',
+			[new Assert\NotBlank(),
+			new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save['availability_method']  = CactiValidator::validateInput(gnrv('availability_method'),
+			'availability_method',
+			[new Assert\NotBlank(),
+			new Assert\Regex('/^[0-9]+$/')],
+			3);
 		$save['sysDescr']             = gnrv('sysDescr');
 		$save['sysName']              = gnrv('sysName');
 		$save['sysOid']               = gnrv('sysOid');
@@ -981,7 +990,9 @@ function automation_remove_ttr() : void {
 		AND host_template_id = ?',
 		[grv('rule_id'), grv('template_id')]);
 
-	raise_message('rule_remove', __('The Threshold Template has been removed from the Device Automation Rule'), MESSAGE_LEVEL_INFO);
+	raise_message('rule_remove',
+		__('The Threshold Template has been removed from the Device Automation Rule'),
+		MESSAGE_LEVEL_INFO);
 }
 
 function automation_get_child_branches(int $tree_id, int $id, string $spaces, array $headers) : array {
@@ -1201,7 +1212,10 @@ function template_edit() : void {
 					}
 				}
 
-				form_selectable_cell("$action<a class='delete deleteMarker ti ti-x' title='" . __esc('Delete') . "' href='" . htmle('automation_templates.php?action=item_remove_agr_confirm&template_id=' . grv('id') . '&rule_id=' . $rule['id']) . "'></a>", $id, '40', 'right');
+				form_selectable_cell("$action<a class='delete deleteMarker ti ti-x' title='" . __esc('Delete') . "' href='" . htmle('automation_templates.php?action=item_remove_agr_confirm&template_id=' . grv('id') . '&rule_id=' . $rule['id']) . "'></a>",
+					$id,
+					'40',
+					'right');
 
 				form_end_row();
 
@@ -1312,7 +1326,10 @@ function template_edit() : void {
 					}
 				}
 
-				form_selectable_cell("$action<a class='delete deleteMarker ti ti-x' title='" . __esc('Delete') . "' href='" . htmle('automation_templates.php?action=item_remove_atr_confirm&template_id=' . grv('id') . '&rule_id=' . $rule['id']) . "'></a>", $id, '40', 'right');
+				form_selectable_cell("$action<a class='delete deleteMarker ti ti-x' title='" . __esc('Delete') . "' href='" . htmle('automation_templates.php?action=item_remove_atr_confirm&template_id=' . grv('id') . '&rule_id=' . $rule['id']) . "'></a>",
+					$id,
+					'40',
+					'right');
 
 				form_end_row();
 
@@ -1387,7 +1404,10 @@ function template_edit() : void {
 
 					form_selectable_ecell($rule['name'], $id);
 
-					form_selectable_cell("$action<a class='delete deleteMarker ti ti-x' title='" . __esc('Delete') . "' href='" . htmle('automation_templates.php?action=item_remove_ttr_confirm&id=' . grv('id') . '&template_id=' . $template['host_template'] . '&rule_id=' . $rule['rule_id']) . "'></a>", $id, '40', 'right');
+					form_selectable_cell("$action<a class='delete deleteMarker ti ti-x' title='" . __esc('Delete') . "' href='" . htmle('automation_templates.php?action=item_remove_ttr_confirm&id=' . grv('id') . '&template_id=' . $template['host_template'] . '&rule_id=' . $rule['rule_id']) . "'></a>",
+						$id,
+						'40',
+						'right');
 
 					form_end_row();
 				}
@@ -1539,7 +1559,12 @@ function template_edit() : void {
 	<?php
 }
 
-function create_add_form_dropdown(string $field_label, string $field_name, array $field_array, string $button_id, string $button_label, string $button_title) : void {
+function create_add_form_dropdown(string $field_label,
+	string $field_name,
+	array $field_array,
+	string $button_id,
+	string $button_label,
+	string $button_title) : void {
 	?>
 	<tr class='odd'>
 		<td colspan='2'>
@@ -1567,7 +1592,11 @@ function template() : void {
 	automation_update_hashes();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Device Rules'), 'automation_templates.php', 'snmp_at', 'sess_autot', 'automation_templates.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('Device Rules'),
+		'automation_templates.php',
+		'snmp_at',
+		'sess_autot',
+		'automation_templates.php?action=edit');
 
 	$pageFilter->rows_label = __('Templates');
 	$pageFilter->has_import = true;
@@ -1603,7 +1632,15 @@ function template() : void {
 		ORDER BY sequence " .
 		' LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows);
 
-	$nav = html_nav_bar('automation_templates.php', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 7, __('Templates'), 'page', 'main');
+	$nav = html_nav_bar('automation_templates.php',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		7,
+		__('Templates'),
+		'page',
+		'main');
 
 	form_start('automation_templates.php', 'chk');
 
@@ -1654,7 +1691,10 @@ function template() : void {
 
 			form_alternate_row('line' . $dt['id'], true);
 
-			form_selectable_cell(filter_value($name, grv('filter'), 'automation_templates.php?action=edit&id=' . $dt['id']), $dt['id']);
+			form_selectable_cell(filter_value($name,
+				grv('filter'),
+				'automation_templates.php?action=edit&id=' . $dt['id']),
+				$dt['id']);
 			form_selectable_cell($availability_options[$dt['availability_method']], $dt['id']);
 			form_selectable_cell(filter_value($dt['sysDescr'], grv('filter')), $dt['id']);
 			form_selectable_cell(filter_value($dt['sysName'], grv('filter')), $dt['id']);

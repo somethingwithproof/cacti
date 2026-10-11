@@ -212,7 +212,11 @@ function host_reindex() : void {
 		[$host_id]
 	);
 
-	raise_message('host_reindex', __esc('Device Reindex Completed in %0.2f seconds.  There were %d items updated.', $total_time, $items), MESSAGE_LEVEL_INFO);
+	raise_message('host_reindex',
+		__esc('Device Reindex Completed in %0.2f seconds.  There were %d items updated.',
+			$total_time,
+			$items),
+		MESSAGE_LEVEL_INFO);
 }
 
 function add_tree_names_to_actions_array() : void {
@@ -356,7 +360,10 @@ function form_actions() : void {
 						[grv('report_id')]
 					);
 
-					raise_message('reports_add_error', __esc('Unable to add some Devices to Report \'%s\'', $name), MESSAGE_LEVEL_WARN);
+					raise_message('reports_add_error',
+						__esc('Unable to add some Devices to Report \'%s\'',
+							$name),
+						MESSAGE_LEVEL_WARN);
 				}
 			} elseif (grv('drp_action') == '1') { // delete
 				ini_set('max_execution_time', '-1');
@@ -371,7 +378,17 @@ function form_actions() : void {
 				gfrv('tree_item_id');
 
 				foreach ($selected_items as $selected_item) {
-					api_tree_item_save(0, gnrv('tree_id'), TREE_ITEM_TYPE_HOST, gnrv('tree_item_id'), '', 0, $selected_item, 0, 1, 1, false);
+					api_tree_item_save(0,
+						gnrv('tree_id'),
+						TREE_ITEM_TYPE_HOST,
+						gnrv('tree_item_id'),
+						'',
+						0,
+						$selected_item,
+						0,
+						1,
+						1,
+						false);
 				}
 			} elseif (grv('drp_action') == 6) { // automation
 				automation_log(__FUNCTION__ . ' called, action: ' . grv('drp_action'), AUTOMATION_LOG_HIGH);
@@ -410,7 +427,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT description FROM host WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT description FROM host WHERE id = ?',
+					[$matches[1]])) . '</li>';
 
 				$iarray[] = $matches[1];
 			}
@@ -704,7 +722,9 @@ function host_add_gt() : void {
 
 	automation_hook_graph_template(gnrv('host_id'), gnrv('graph_template_id'));
 
-	api_plugin_hook_function('add_graph_template_to_host', ['host_id' => gnrv('host_id'), 'graph_template_id' => gnrv('graph_template_id')]);
+	api_plugin_hook_function('add_graph_template_to_host',
+		['host_id'          => gnrv('host_id'),
+		'graph_template_id' => gnrv('graph_template_id')]);
 
 	if (grv('host_id') > 0) {
 		object_cache_get_totals('device_state', grv('host_id'), true);
@@ -1131,7 +1151,9 @@ function host_edit() : void {
 					<?php print($item['reindex_last_duration'] == 0 ? '-' : __('%0.2f secs', $item['reindex_last_duration'])); ?>
 				</td>
 				<td>
-					<?php print (($status == 'success') ? "<span class='success'>" . __('Success') . '</span>' : "<span class='failed'>" . __('Fail')) . '</span>' . __(' [%d Items, %d Rows]', $item['itemCount'], $item['rowCount']); ?>
+					<?php print (($status == 'success') ? "<span class='success'>" . __('Success') . '</span>' : "<span class='failed'>" . __('Fail')) . '</span>' . __(' [%d Items, %d Rows]',
+						$item['itemCount'],
+						$item['rowCount']); ?>
 				</td>
 				<td class='nowrap right' style='vertical-align:middle;'>
 					<span class='reloadquery ti ti-refresh' id='reload<?php print $item['id']; ?>' title='<?php print __esc('Reload Query'); ?>' data-id='<?php print $item['id']; ?>'></span>
@@ -1608,7 +1630,8 @@ function get_device_records(int &$total_rows, int $rows) : mixed {
 			IF(UNIX_TIMESTAMP(status_rec_date) > 943916400, UNIX_TIMESTAMP() - UNIX_TIMESTAMP(status_rec_date),
 			IF(snmp_sysUptimeInstance>0 AND snmp_version > 0, snmp_sysUptimeInstance/100, UNIX_TIMESTAMP()
 		))))) AS unsigned) AS instate, " .
-		(cacti_sizeof($maint_devices) > 0 ? 'IF(host.id in(' . implode(',', $maint_devices) . '), 1,0) as maint, ' : '0 as maint, ') .
+		(cacti_sizeof($maint_devices) > 0 ? 'IF(host.id in(' . implode(',',
+			$maint_devices) . '), 1,0) as maint, ' : '0 as maint, ') .
 		"s.name as site_name,
 		s.disabled as site_disabled
 		FROM host
@@ -1744,7 +1767,15 @@ function host() : void {
 
 	$hosts = get_device_records($total_rows, $rows);
 
-	$nav = html_nav_bar('host.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Devices'), 'page', 'main');
+	$nav = html_nav_bar('host.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Devices'),
+		'page',
+		'main');
 
 	form_start('host.php', 'chk');
 
@@ -1761,7 +1792,10 @@ function host() : void {
 			$disabled = ($host['disabled'] == 'on');
 
 			if (isset($host['thold_failure_count'])) {
-				$host_status = get_colored_device_status($disabled, $host['status'], $host['thold_failure_count'], $host['status_event_count']);
+				$host_status = get_colored_device_status($disabled,
+					$host['status'],
+					$host['thold_failure_count'],
+					$host['status_event_count']);
 			} else {
 				$host_status = get_colored_device_status($disabled, $host['status']);
 			}
@@ -1796,16 +1830,37 @@ function host() : void {
 
 			$maint = ($host['maint'] == 1 ? '<i class="ti ti-tool" title="' . __('Maintenance') . '"></i>' : '');
 
-			form_selectable_cell(filter_value($host['description'], grv('filter'), 'host.php?action=edit&id=' . $host['id']) . $maint, $host['id']);
+			form_selectable_cell(filter_value($host['description'],
+				grv('filter'),
+				'host.php?action=edit&id=' . $host['id']) . $maint,
+				$host['id']);
 			form_selectable_cell(filter_value($host['hostname'], grv('filter')), $host['id']);
 			form_selectable_cell(filter_value($host['id'], grv('filter')), $host['id'], '', 'right');
 			form_selectable_cell($host['device_threads'], $host['id'], '', 'right');
 
-			form_selectable_cell(filter_value(number_format_i18n($host['graphs'], -1), '', $graphs_url), $host['id'], '', 'right');
+			form_selectable_cell(filter_value(number_format_i18n($host['graphs'],
+				-1),
+				'',
+				$graphs_url),
+				$host['id'],
+				'',
+				'right');
 
-			form_selectable_cell(filter_value(number_format_i18n($host['data_sources'], -1), '', $data_source_url), $host['id'], '', 'right');
+			form_selectable_cell(filter_value(number_format_i18n($host['data_sources'],
+				-1),
+				'',
+				$data_source_url),
+				$host['id'],
+				'',
+				'right');
 
-			form_selectable_cell(filter_value(number_format_i18n($host['current_errors'], -1), '', $errors_url), $host['id'], '', 'right');
+			form_selectable_cell(filter_value(number_format_i18n($host['current_errors'],
+				-1),
+				'',
+				$errors_url),
+				$host['id'],
+				'',
+				'right');
 
 			form_selectable_cell($host_status, $host['id'], '', 'center');
 
@@ -1835,7 +1890,12 @@ function host() : void {
 				form_selectable_cell(__('N/A'), $host['id'], '', 'right');
 			}
 
-			form_selectable_cell($host['created'] == '' ? __('Unknown') : substr($host['created'], 0, 10), $host['id'], '', 'right');
+			form_selectable_cell($host['created'] == '' ? __('Unknown') : substr($host['created'],
+				0,
+				10),
+				$host['id'],
+				'',
+				'right');
 			form_checkbox_cell($host['description'], $host['id']);
 			form_end_row();
 		}

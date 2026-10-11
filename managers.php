@@ -76,7 +76,11 @@ function manager() : void {
 	global $actions, $item_rows;
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('SNMP Notification Receivers'), 'managers.php', 'form_snmpagent_managers', 'sess_snmp_mgr', 'managers.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('SNMP Notification Receivers'),
+		'managers.php',
+		'form_snmpagent_managers',
+		'sess_snmp_mgr',
+		'managers.php?action=edit');
 
 	$pageFilter->rows_label = __('Receivers');
 	$pageFilter->set_sort_array('hostname', 'ASC');
@@ -130,7 +134,15 @@ function manager() : void {
 	];
 
 	// generate page list
-	$nav = html_nav_bar('managers.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 11, __('Receivers'), 'page', 'main');
+	$nav = html_nav_bar('managers.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		11,
+		__('Receivers'),
+		'page',
+		'main');
 
 	form_start('managers.php', 'chk');
 
@@ -154,7 +166,8 @@ function manager() : void {
 			form_selectable_cell(filter_value($description, '', $url), $item['id']);
 			form_selectable_cell($item['id'], $item['id']);
 
-			form_selectable_cell($item['disabled'] ? '<span class="deviceDown">' . __('Disabled') . '</span>' : '<span class="deviceUp">' . __('Enabled') . '</span>', $item['id']);
+			form_selectable_cell($item['disabled'] ? '<span class="deviceDown">' . __('Disabled') . '</span>' : '<span class="deviceUp">' . __('Enabled') . '</span>',
+				$item['id']);
 
 			form_selectable_ecell($hostname, $item['id']);
 			form_selectable_cell(filter_value($item['count_notify'] ? $item['count_notify'] : 0, '', $url1), $item['id']);
@@ -351,7 +364,10 @@ function draw_manager_notification_filter(bool $render = false, string $header_l
 	$filters = create_manager_notification_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter($header_label, 'managers.php?action=edit&tab=notifications&id=' . gfrv('id'), 'form_snmpagent_managers', 'sess_snmp_cache');
+	$pageFilter = new CactiTableFilter($header_label,
+		'managers.php?action=edit&tab=notifications&id=' . gfrv('id'),
+		'form_snmpagent_managers',
+		'sess_snmp_cache');
 
 	$pageFilter->rows_label = __('OIDs');
 	$pageFilter->set_filter_array($filters);
@@ -434,7 +450,15 @@ function manager_notifications(int $id, string $header_label) : void {
 	];
 
 	// generate page list
-	$nav = html_nav_bar('managers.php?action=edit&id=' . $id . '&tab=notifications&mib=' . grv('mib') . '&filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Notifications'), 'page', 'main');
+	$nav = html_nav_bar('managers.php?action=edit&id=' . $id . '&tab=notifications&mib=' . grv('mib') . '&filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Notifications'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -461,7 +485,9 @@ function manager_notifications(int $id, string $header_label) : void {
 			form_selectable_cell($mib, $row_id);
 			form_selectable_ecell($item['kind'], $row_id);
 			form_selectable_cell($item['max-access'],$row_id);
-			form_selectable_cell(((isset($notifications[$item['mib']]) && isset($notifications[$item['mib']][$item['name']])) ? '<span class="deviceUp">' . __('Enabled') : '<span class="deviceDown">' . __('Disabled')) . '</span>', $row_id);
+			form_selectable_cell(((isset($notifications[$item['mib']]) &&
+				isset($notifications[$item['mib']][$item['name']])) ? '<span class="deviceUp">' . __('Enabled') : '<span class="deviceDown">' . __('Disabled')) . '</span>',
+				$row_id);
 			form_checkbox_cell($item['oid'], $row_id);
 
 			form_end_row();
@@ -548,7 +574,10 @@ function draw_manager_log_filter(bool $render = false, array $severity_levels = 
 	$filters = create_manager_log_filter($severity_levels);
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter($header_label, 'managers.php?action=edit&tab=logs&id=' . gfrv('id'), 'form_log', 'sess_snmp_log');
+	$pageFilter = new CactiTableFilter($header_label,
+		'managers.php?action=edit&tab=logs&id=' . gfrv('id'),
+		'form_log',
+		'sess_snmp_log');
 
 	$pageFilter->rows_label = __('Entries');
 	$pageFilter->set_filter_array($filters);
@@ -632,7 +661,15 @@ function manager_logs(int $id, string $header_label) : void {
 		__('Varbinds')
 	];
 
-	$nav = html_nav_bar('managers.php?action=exit&id=' . $id . '&tab=logs&mib=' . grv('mib') . '&filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text), __('Receivers'), 'page', 'main');
+	$nav = html_nav_bar('managers.php?action=exit&id=' . $id . '&tab=logs&mib=' . grv('mib') . '&filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text),
+		__('Receivers'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -646,7 +683,13 @@ function manager_logs(int $id, string $header_label) : void {
 
 			form_alternate_row('line' . $item['id'], true);
 
-			form_selectable_cell(filter_value('', '', '#', __esc('Severity Level') . ': ' . $severity_levels[$item['severity']]), $item['id'], '', 'width:10px;background-color:' . $severity_colors[$item['severity']] . ';border-top:1px solid white;border-bottom:1px solid white;');
+			form_selectable_cell(filter_value('',
+				'',
+				'#',
+				__esc('Severity Level') . ': ' . $severity_levels[$item['severity']]),
+				$item['id'],
+				'',
+				'width:10px;background-color:' . $severity_colors[$item['severity']] . ';border-top:1px solid white;border-bottom:1px solid white;');
 			form_selectable_cell(date('Y/m/d H:i:s', $item['time']), $item['id']);
 
 			if ($item['description']) {
@@ -657,7 +700,11 @@ function manager_logs(int $id, string $header_label) : void {
 					$description .= htmle(trim($line)) . '<br>';
 				}
 
-				form_selectable_cell(filter_value($item['notification'], '', '#', $item['notification'] . $description), $item['id']);
+				form_selectable_cell(filter_value($item['notification'],
+					'',
+					'#',
+					$item['notification'] . $description),
+					$item['id']);
 			} else {
 				form_selectable_ecell($item['notification'], $item['id']);
 			}
@@ -703,20 +750,45 @@ function form_save() : void {
 			break;
 		default:
 			$save['id']             = grv('id');
-			$save['description']    = CactiValidator::validateInput(trim(gnrv('description')), 'description', [new Assert\NotBlank()], 3);
-			$save['hostname']       = CactiValidator::validateInput(trim(gnrv('hostname')), 'hostname', [new Assert\NotBlank()], 3);
-			$save['disabled']       = CactiValidator::validateInput(gnrv('disabled'), 'disabled', [new Assert\Regex('/^(on)?$/')], 3);
+			$save['description']    = CactiValidator::validateInput(trim(gnrv('description')),
+				'description',
+				[new Assert\NotBlank()],
+				3);
+			$save['hostname']       = CactiValidator::validateInput(trim(gnrv('hostname')),
+				'hostname',
+				[new Assert\NotBlank()],
+				3);
+			$save['disabled']       = CactiValidator::validateInput(gnrv('disabled'),
+				'disabled',
+				[new Assert\Regex('/^(on)?$/')],
+				3);
 			$save['max_log_size']   = gnrv('max_log_size');
-			$save['snmp_version']   = CactiValidator::validateInput(gnrv('snmp_version'), 'snmp_version', [new Assert\NotBlank(), new Assert\Regex('/^[1-3]$/')], 3);
+			$save['snmp_version']   = CactiValidator::validateInput(gnrv('snmp_version'),
+				'snmp_version',
+				[new Assert\NotBlank(),
+				new Assert\Regex('/^[1-3]$/')],
+				3);
 			$save['snmp_community'] = CactiValidator::validateInput(gnrv('snmp_community'), 'snmp_community', [], 3);
 
 			if ($save['snmp_version'] == 3) {
 				$save['snmp_username']        = CactiValidator::validateInput(gnrv('snmp_username'), 'snmp_username', [], 3);
 				$save['snmp_password']        = CactiValidator::validateInput(gnrv('snmp_password'), 'snmp_password', [], 3);
-				$save['snmp_auth_protocol']   = CactiValidator::validateInput(gnrv('snmp_auth_protocol'), 'snmp_auth_protocol', [new Assert\Regex('/^(\[None\]|MD5|SHA|SHA224|SHA256|SHA392|SHA512)?$/')], 3);
-				$save['snmp_priv_passphrase'] = CactiValidator::validateInput(gnrv('snmp_priv_passphrase'), 'snmp_priv_passphrase', [], 3);
-				$save['snmp_priv_protocol']   = CactiValidator::validateInput(gnrv('snmp_priv_protocol'), 'snmp_priv_protocol', [new Assert\Regex('/^(\[None\]|DES|AES|AES128|AES192|AES192C|AES256|AES256C)?$/')], 3);
-				$save['snmp_engine_id']       = CactiValidator::validateInput(get_request_var_post('snmp_engine_id'), 'snmp_engine_id', [new Assert\NotBlank()], 3);
+				$save['snmp_auth_protocol']   = CactiValidator::validateInput(gnrv('snmp_auth_protocol'),
+					'snmp_auth_protocol',
+					[new Assert\Regex('/^(\[None\]|MD5|SHA|SHA224|SHA256|SHA392|SHA512)?$/')],
+					3);
+				$save['snmp_priv_passphrase'] = CactiValidator::validateInput(gnrv('snmp_priv_passphrase'),
+					'snmp_priv_passphrase',
+					[],
+					3);
+				$save['snmp_priv_protocol']   = CactiValidator::validateInput(gnrv('snmp_priv_protocol'),
+					'snmp_priv_protocol',
+					[new Assert\Regex('/^(\[None\]|DES|AES|AES128|AES192|AES192C|AES256|AES256C)?$/')],
+					3);
+				$save['snmp_engine_id']       = CactiValidator::validateInput(get_request_var_post('snmp_engine_id'),
+					'snmp_engine_id',
+					[new Assert\NotBlank()],
+					3);
 			} else {
 				$save['snmp_username']        = '';
 				$save['snmp_password']        = '';
@@ -726,8 +798,16 @@ function form_save() : void {
 				$save['snmp_engine_id']       = '';
 			}
 
-			$save['snmp_port']         = CactiValidator::validateInput(gnrv('snmp_port'), 'snmp_port', [new Assert\NotBlank(), new Assert\Regex('/^[0-9]+$/')], 3);
-			$save['snmp_message_type'] = CactiValidator::validateInput(gnrv('snmp_message_type'), 'snmp_message_type', [new Assert\NotBlank(), new Assert\Regex('/^[1-2]$/')], 3);
+			$save['snmp_port']         = CactiValidator::validateInput(gnrv('snmp_port'),
+				'snmp_port',
+				[new Assert\NotBlank(),
+				new Assert\Regex('/^[0-9]+$/')],
+				3);
+			$save['snmp_message_type'] = CactiValidator::validateInput(gnrv('snmp_message_type'),
+				'snmp_message_type',
+				[new Assert\NotBlank(),
+				new Assert\Regex('/^[1-2]$/')],
+				3);
 			$save['notes']             = CactiValidator::validateInput(gnrv('notes'), 'notes', [], 3);
 
 			if ($save['snmp_version'] == 3 && ($save['snmp_password'] != gnrv('snmp_password_confirm'))) {
@@ -822,7 +902,8 @@ function form_actions() : void {
 				input_validate_input_number($id, 'id');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT description FROM snmpagent_managers WHERE id = ?', [$id])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT description FROM snmpagent_managers WHERE id = ?',
+					[$id])) . '</li>';
 
 				$iarray[] = $id;
 			}

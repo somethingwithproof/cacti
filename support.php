@@ -63,7 +63,10 @@ function support_lockout() : void {
 	$admin = read_config_option('admin_user', true);
 
 	if ($admin != $_SESSION[SESS_USER_ID]) {
-		raise_message('lockout_user', __esc('Only the Primary Cacti Administrator \'%s\' can lockout the Cacti system.', get_username($admin)), MESSAGE_LEVEL_ERROR);
+		raise_message('lockout_user',
+			__esc('Only the Primary Cacti Administrator \'%s\' can lockout the Cacti system.',
+				get_username($admin)),
+			MESSAGE_LEVEL_ERROR);
 	} else {
 		$status    = read_config_option('cacti_lockout_status', true);
 		$is_locked = ($status != '');
@@ -75,15 +78,25 @@ function support_lockout() : void {
 		$expected = gnrv('expected');
 
 		if ($expected !== 'locked' && $expected !== 'unlocked') {
-			raise_message('lockout', __('The Cacti maintenance lockout request did not specify a valid expected state.  Please review the current status and try again.'), MESSAGE_LEVEL_INFO);
+			raise_message('lockout',
+				__('The Cacti maintenance lockout request did not specify a valid expected state.  Please review the current status and try again.'),
+				MESSAGE_LEVEL_INFO);
 		} elseif ($is_locked !== ($expected === 'locked')) {
-			raise_message('lockout', __('The Cacti maintenance lockout state was changed by another administrator since this page was loaded.  Please review the current status and try again.'), MESSAGE_LEVEL_INFO);
+			raise_message('lockout',
+				__('The Cacti maintenance lockout state was changed by another administrator since this page was loaded.  Please review the current status and try again.'),
+				MESSAGE_LEVEL_INFO);
 		} elseif (!$is_locked) {
-			raise_message('lockout', __esc('Cacti has been locked out by \'%s\'.  Press the button again after Cacti maintenance is over.', get_username($admin)), MESSAGE_LEVEL_WARN);
+			raise_message('lockout',
+				__esc('Cacti has been locked out by \'%s\'.  Press the button again after Cacti maintenance is over.',
+					get_username($admin)),
+				MESSAGE_LEVEL_WARN);
 			cacti_log('WARNING: Cacti has been locked out by the primary administrator!');
 			set_config_option('cacti_lockout_status', json_encode(['session' => session_id(), 'time' => time()]));
 		} else {
-			raise_message('lockout', __esc('Cacti maintenance lockout has been cleared by \'%s\'.  Press the button again after Cacti maintenance is over.', get_username($admin)), MESSAGE_LEVEL_INFO);
+			raise_message('lockout',
+				__esc('Cacti maintenance lockout has been cleared by \'%s\'.  Press the button again after Cacti maintenance is over.',
+					get_username($admin)),
+				MESSAGE_LEVEL_INFO);
 			cacti_log('WARNING: Cacti maintenance lockout has been cleared by the primary administrator!');
 			set_config_option('cacti_lockout_status', '');
 		}
@@ -551,7 +564,15 @@ function show_database_processes() : void {
 		]
 	];
 
-	$nav = html_nav_bar('support.php?tab=processes', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 7, __('Queries'), 'page', 'main');
+	$nav = html_nav_bar('support.php?tab=processes',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		7,
+		__('Queries'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -951,7 +972,15 @@ function show_cacti_processes() : void {
 		]
 	];
 
-	$nav = html_nav_bar('support.php?tab=background', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 8, __('Processes'), 'page', 'main');
+	$nav = html_nav_bar('support.php?tab=background',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		8,
+		__('Processes'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -1307,7 +1336,9 @@ function show_tech_summary() : void {
 	$out_array = [];
 
 	if ($storage_location == 0) {
-		if ((file_exists(read_config_option('path_rrdtool'))) && ((function_exists('is_executable')) && (is_executable(read_config_option('path_rrdtool'))))) {
+		if ((file_exists(read_config_option('path_rrdtool'))) &&
+			((function_exists('is_executable')) &&
+			(is_executable(read_config_option('path_rrdtool'))))) {
 			exec(cacti_escapeshellcmd(read_config_option('path_rrdtool')), $out_array);
 		}
 	} else {
@@ -1329,7 +1360,11 @@ function show_tech_summary() : void {
 	// (already markup, must not be escaped).
 	$snmpget_path = (string) read_config_option('path_snmpget');
 
-	if ($snmpget_path !== '' && !str_contains($snmpget_path, "\0") && is_file($snmpget_path) && is_executable($snmpget_path)) {
+	if ($snmpget_path !== '' &&
+		!str_contains($snmpget_path,
+			"\0") &&
+		is_file($snmpget_path) &&
+		is_executable($snmpget_path)) {
 		$snmp_version   = (string) shell_exec(cacti_escapeshellcmd($snmpget_path) . ' -V 2>&1');
 		$snmp_installed = true;
 	} else {
@@ -1341,19 +1376,23 @@ function show_tech_summary() : void {
 	$rrdtool_errors = [];
 
 	if (cacti_version_compare($rrdtool_version, get_rrdtool_version(), '<')) {
-		$rrdtool_errors[] = "<span class='deviceDown'>" . __('ERROR: Installed RRDtool version does not exceed configured version.<br>Please visit the %s and select the correct RRDtool Utility Version.', "<a href='" . htmle('settings.php?tab=general') . "'>" . __('Configuration Settings') . '</a>') . '</span>';
+		$rrdtool_errors[] = "<span class='deviceDown'>" . __('ERROR: Installed RRDtool version does not exceed configured version.<br>Please visit the %s and select the correct RRDtool Utility Version.',
+			"<a href='" . htmle('settings.php?tab=general') . "'>" . __('Configuration Settings') . '</a>') . '</span>';
 	}
 
 	$graph_gif_count = db_fetch_cell('SELECT COUNT(*) FROM graph_templates_graph WHERE image_format_id = 2');
 
 	if ($graph_gif_count > 0) {
-		$rrdtool_errors[] = "<span class='deviceDown'>" . __('ERROR: RRDtool 1.2.x+ does not support the GIF images format, but %d" graph(s) and/or templates have GIF set as the image format.', $graph_gif_count) . '</span>';
+		$rrdtool_errors[] = "<span class='deviceDown'>" . __('ERROR: RRDtool 1.2.x+ does not support the GIF images format, but %d" graph(s) and/or templates have GIF set as the image format.',
+			$graph_gif_count) . '</span>';
 	}
 
 	// Get spine version
 	$spine_version = 'Unknown';
 
-	if ((file_exists(read_config_option('path_spine'))) && ((function_exists('is_executable')) && (is_executable(read_config_option('path_spine'))))) {
+	if ((file_exists(read_config_option('path_spine'))) &&
+		((function_exists('is_executable')) &&
+		(is_executable(read_config_option('path_spine'))))) {
 		$out_array = [];
 		exec(cacti_escapeshellcmd(read_config_option('path_spine')) . ' --version', $out_array);
 
@@ -1384,7 +1423,8 @@ function show_tech_summary() : void {
 			$unlock_time = $lockout['time'] + (30 * 60);
 			$unlock_hms  = date('H:i', $unlock_time);
 
-			print '<td><button class="deviceDown" type="button" id="lockout" data-expected="locked" title="' . __('To Unlock, press this button again.') . '">' . __('Cacti in Maintenance Mode until approximately %s!', $unlock_hms) . '</button></td>';
+			print '<td><button class="deviceDown" type="button" id="lockout" data-expected="locked" title="' . __('To Unlock, press this button again.') . '">' . __('Cacti in Maintenance Mode until approximately %s!',
+				$unlock_hms) . '</button></td>';
 		} else {
 			print '<td><button type="button" id="lockout" data-expected="unlocked" title="' . __('Press this button to Lockout Cacti for 30 minutes for maintenance.') . '">' . __('Lockout Cacti for Maintenance') . '</button></td>';
 		}
@@ -1576,17 +1616,25 @@ function show_tech_summary() : void {
 
 	if ($recommend_mc > $max_connections) {
 		if (POLLER_ID == 1) {
-			$db_connections = '<span class="deviceDown">' . __('Main Server: Current: %s, Min Required: %s', $max_connections, $recommend_mc) . '</span>';
+			$db_connections = '<span class="deviceDown">' . __('Main Server: Current: %s, Min Required: %s',
+				$max_connections,
+				$recommend_mc) . '</span>';
 		} elseif (CACTI_CONNECTION == 'online') {
-			$db_connections = '<span class="deviceDown">' . __('Main Server: Current: %s, Min Required: %s', $max_connections, $recommend_mc) . '</span>';
+			$db_connections = '<span class="deviceDown">' . __('Main Server: Current: %s, Min Required: %s',
+				$max_connections,
+				$recommend_mc) . '</span>';
 		} else {
 			$db_connections = '';
 		}
 	} else {
 		if (POLLER_ID == 1) {
-			$db_connections = '<span class="deviceUp">' . __('Main Server: Current: %s, Min Required: %s', $max_connections, $recommend_mc) . '</span>';
+			$db_connections = '<span class="deviceUp">' . __('Main Server: Current: %s, Min Required: %s',
+				$max_connections,
+				$recommend_mc) . '</span>';
 		} elseif (CACTI_CONNECTION == 'online') {
-			$db_connections = '<span class="deviceUp">' . __('Main Server: Current: %s, Min Required: %s', $max_connections, $recommend_mc) . '</span>';
+			$db_connections = '<span class="deviceUp">' . __('Main Server: Current: %s, Min Required: %s',
+				$max_connections,
+				$recommend_mc) . '</span>';
 		} else {
 			$db_connections = '';
 		}
@@ -1594,9 +1642,13 @@ function show_tech_summary() : void {
 
 	if (POLLER_ID > 1) {
 		if ($recommend_mc > $max_local_connections) {
-			$db_connections .= '<br><span class="deviceDown">' . __('Local Server: Current: %s, Min Required: %s', $max_local_connections, $recommend_mc) . '</span>';
+			$db_connections .= '<br><span class="deviceDown">' . __('Local Server: Current: %s, Min Required: %s',
+				$max_local_connections,
+				$recommend_mc) . '</span>';
 		} else {
-			$db_connections .= '<br><span class="deviceUp">' . __('Local Server: Current: %s, Min Required: %s', $max_local_connections, $recommend_mc) . '</span>';
+			$db_connections .= '<br><span class="deviceUp">' . __('Local Server: Current: %s, Min Required: %s',
+				$max_local_connections,
+				$recommend_mc) . '</span>';
 		}
 	}
 
@@ -1819,7 +1871,10 @@ function show_tech_summary() : void {
 		if ($systemMemory > ($total_memory * 0.8)) {
 			form_alternate_row();
 			print '<td>' . __('Max Core Memory Possible') . '</td>';
-			print '<td class="deviceDown">' . __('%s GB', number_format_i18n($systemMemory, 2, 1000)) . '&nbsp;&nbsp;(' . __('Reduce Total Core Memory') . '</td>';
+			print '<td class="deviceDown">' . __('%s GB',
+				number_format_i18n($systemMemory,
+					2,
+					1000)) . '&nbsp;&nbsp;(' . __('Reduce Total Core Memory') . '</td>';
 			form_end_row();
 		} else {
 			form_alternate_row();
@@ -1836,7 +1891,10 @@ function show_tech_summary() : void {
 		if ($clientMemory > ($total_memory * 0.8)) {
 			form_alternate_row();
 			print '<td>' . __('Max Connection Memory Possible') . '</td>';
-			print '<td class="deviceDown">' . __('%s GB', number_format_i18n($clientMemory, 2, 1000)) . '&nbsp;&nbsp;(' . __('Reduce Total Client Memory') . ')</td>';
+			print '<td class="deviceDown">' . __('%s GB',
+				number_format_i18n($clientMemory,
+					2,
+					1000)) . '&nbsp;&nbsp;(' . __('Reduce Total Client Memory') . ')</td>';
 			form_end_row();
 		} else {
 			form_alternate_row();
@@ -1941,7 +1999,8 @@ function show_tech_summary() : void {
 			print __("You've set memory limit to 'unlimited'.") . '<br>';
 		}
 
-		print __('It is highly suggested that you alter you php.ini memory_limit to %s or higher.', memory_readable($memory_suggestion)) . ' <br/>' .
+		print __('It is highly suggested that you alter you php.ini memory_limit to %s or higher.',
+			memory_readable($memory_suggestion)) . ' <br/>' .
 			__('This suggested memory value is calculated based on the number of data source present and is only to be used as a suggestion, actual values may vary system to system based on requirements.');
 
 		print '</span><br>';
@@ -1998,7 +2057,9 @@ function show_tech_summary() : void {
 	$report .= '- ' . __('Last Run Statistics') . ': ' . read_config_option('stats_poller') . "\n";
 	$report .= '- ' . 'memory_limit: ' . ini_get('memory_limit') . "\n";
 	$report .= '- ' . 'max_execution_time: ' . ini_get('max_execution_time') . "\n";
-	$report .= '- ' . __('System Memory') . ': ' . ($total_memory > 0 ? number_format_i18n($total_memory, 2, 1000) . ' GB' : __('N/A')) . "\n";
+	$report .= '- ' . __('System Memory') . ': ' . ($total_memory > 0 ? number_format_i18n($total_memory,
+		2,
+		1000) . ' GB' : __('N/A')) . "\n";
 	$report .= '- ' . __('RSA Fingerprint') . ': ' . $rsa_report . "\n";
 
 	form_alternate_row();
@@ -2042,7 +2103,8 @@ function show_tech_environment() : void {
 
 		form_alternate_row();
 		print '<td>' . html_escape($name) . '</td>';
-		print '<td>' . tech_env_status($loaded ? DB_STATUS_SUCCESS : DB_STATUS_ERROR, $loaded ? __('Installed') : __('Missing')) . '</td>';
+		print '<td>' . tech_env_status($loaded ? DB_STATUS_SUCCESS : DB_STATUS_ERROR,
+			$loaded ? __('Installed') : __('Missing')) . '</td>';
 		form_end_row();
 	}
 
@@ -2057,7 +2119,8 @@ function show_tech_environment() : void {
 
 		form_alternate_row();
 		print '<td>' . html_escape($name) . '</td>';
-		print '<td>' . tech_env_status($loaded ? DB_STATUS_SUCCESS : DB_STATUS_WARNING, $loaded ? __('Installed') : __('Not installed')) . '</td>';
+		print '<td>' . tech_env_status($loaded ? DB_STATUS_SUCCESS : DB_STATUS_WARNING,
+			$loaded ? __('Installed') : __('Not installed')) . '</td>';
 		form_end_row();
 	}
 
@@ -2074,7 +2137,10 @@ function show_tech_environment() : void {
 
 		form_alternate_row();
 		print '<td>' . html_escape($recommend['name']) . '</td>';
-		print '<td>' . tech_env_status((int) $recommend['status'], __('Current: %s, Recommended: %s', $recommend['current'], $recommend['value'])) . '</td>';
+		print '<td>' . tech_env_status((int) $recommend['status'],
+			__('Current: %s, Recommended: %s',
+				$recommend['current'],
+				$recommend['value'])) . '</td>';
 		form_end_row();
 	}
 
@@ -2082,7 +2148,8 @@ function show_tech_environment() : void {
 
 	form_alternate_row();
 	print '<td>file_uploads</td>';
-	print '<td>' . tech_env_status($file_uploads ? DB_STATUS_SUCCESS : DB_STATUS_ERROR, $file_uploads ? __('On') : __('Off')) . '</td>';
+	print '<td>' . tech_env_status($file_uploads ? DB_STATUS_SUCCESS : DB_STATUS_ERROR,
+		$file_uploads ? __('On') : __('Off')) . '</td>';
 	form_end_row();
 
 	// Required binaries: existence + version.
@@ -2186,7 +2253,9 @@ function support_redact(string $value) : string {
 	// in "db01.local"), masking the node name first would strip the prefix and
 	// leave a bare suffix ("local") that no longer looks like an FQDN, leaking
 	// part of the domain.
-	$value = preg_replace('/\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b/', '<host>', (string) $value);
+	$value = preg_replace('/\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}\b/',
+		'<host>',
+		(string) $value);
 
 	// Replace this host's own node name wherever it appears (php_uname, SNMP banner, etc.).
 	$node = function_exists('php_uname') ? php_uname('n') : '';
@@ -2279,7 +2348,12 @@ function show_tech_log() : void {
 
 	html_section_header(__('Recent Log (WARN / ERROR / SECURITY)'), 2);
 
-	if ($logfile == '' || str_contains($logfile, chr(0)) || !file_exists($logfile) || !is_file($logfile) || !is_readable($logfile)) {
+	if ($logfile == '' ||
+		str_contains($logfile,
+			chr(0)) ||
+		!file_exists($logfile) ||
+		!is_file($logfile) ||
+		!is_readable($logfile)) {
 		form_alternate_row();
 		print "<td colspan='2'>" . __('Log not available.') . '</td>';
 		form_end_row();

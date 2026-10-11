@@ -110,7 +110,9 @@ switch (grv('action')) {
 			$id = sql_save($save, 'external_links');
 
 			// always give the login account access
-			db_execute_prepared('REPLACE INTO user_auth_realm (user_id, realm_id) VALUES (?, ?)', [$_SESSION[SESS_USER_ID], $id + 10000]);
+			db_execute_prepared('REPLACE INTO user_auth_realm (user_id, realm_id) VALUES (?, ?)',
+				[$_SESSION[SESS_USER_ID],
+				$id + 10000]);
 
 			raise_message(1);
 
@@ -202,7 +204,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT title FROM external_links WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT title FROM external_links WHERE id = ?',
+					[$matches[1]])) . '</li>';
 
 				$iarray[] = $matches[1];
 			}
@@ -287,7 +290,15 @@ function pages() : void {
 
 	form_start('links.php', 'chk');
 
-	$nav = html_nav_bar('links.php', MAX_DISPLAY_PAGES, get_request_var_request('page'), $rows, $total_rows, 8, __('External Links'), 'page', 'main');
+	$nav = html_nav_bar('links.php',
+		MAX_DISPLAY_PAGES,
+		get_request_var_request('page'),
+		$rows,
+		$total_rows,
+		8,
+		__('External Links'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -343,7 +354,8 @@ function pages() : void {
 			form_selectable_cell($menuicons, $page['id'], '1%');
 			form_selectable_ecell($page['contentfile'], $page['id']);
 			form_selectable_ecell($page['title'], $page['id']);
-			form_selectable_ecell($style_translate[$page['style']] . ($page['style'] == 'CONSOLE' ? ' ( ' . ($page['extendedstyle'] == '' ? __('External Links') : $page['extendedstyle']) . ' )' : ''), $page['id']);
+			form_selectable_ecell($style_translate[$page['style']] . ($page['style'] == 'CONSOLE' ? ' ( ' . ($page['extendedstyle'] == '' ? __('External Links') : $page['extendedstyle']) . ' )' : ''),
+				$page['id']);
 
 			form_selectable_cell(($page['enabled'] == 'on' ? __('Yes') : __('No')), $page['id']);
 

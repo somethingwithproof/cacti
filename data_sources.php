@@ -242,12 +242,32 @@ function form_save() : void {
 		$save2['id']                          = gfrv('data_template_data_id');
 		$save2['local_data_template_data_id'] = gfrv('local_data_template_data_id');
 		$save2['data_template_id']            = gfrv('data_template_id');
-		$save2['data_input_id']               = CactiValidator::validateInput(grv('data_input_id'), 'data_input_id', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['name']                        = CactiValidator::validateInput(gnrv('name'), 'name', [new Assert\NotBlank()], 3);
-		$save2['data_source_path']            = CactiValidator::validateInput(gnrv('data_source_path'), 'data_source_path', [], 3);
-		$save2['active']                      = CactiValidator::validateInput((isrv('active') ? gnrv('active') : ''), 'active', [], 3);
-		$save2['data_source_profile_id']      = CactiValidator::validateInput(grv('data_source_profile_id'), 'data_source_profile_id', [new Assert\NotBlank(), new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['rrd_step']                    = CactiValidator::validateInput(grv('rrd_step'), 'rrd_step', [new Assert\NotBlank(), new Assert\Regex('/^[0-9]+$/')], 3);
+		$save2['data_input_id']               = CactiValidator::validateInput(grv('data_input_id'),
+			'data_input_id',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['name']                        = CactiValidator::validateInput(gnrv('name'),
+			'name',
+			[new Assert\NotBlank()],
+			3);
+		$save2['data_source_path']            = CactiValidator::validateInput(gnrv('data_source_path'),
+			'data_source_path',
+			[],
+			3);
+		$save2['active']                      = CactiValidator::validateInput((isrv('active') ? gnrv('active') : ''),
+			'active',
+			[],
+			3);
+		$save2['data_source_profile_id']      = CactiValidator::validateInput(grv('data_source_profile_id'),
+			'data_source_profile_id',
+			[new Assert\NotBlank(),
+			new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['rrd_step']                    = CactiValidator::validateInput(grv('rrd_step'),
+			'rrd_step',
+			[new Assert\NotBlank(),
+			new Assert\Regex('/^[0-9]+$/')],
+			3);
 
 		if (is_error_message() == false) {
 			$local_data_id = sql_save($save1, 'data_local');
@@ -303,17 +323,33 @@ function form_save() : void {
 
 						$save3['data_template_id'] = gfrv('data_template_id');
 
-						$save3['rrd_maximum'] = CactiValidator::validateInput(gnrv("rrd_maximum$name_modifier"), "rrd_maximum$name_modifier", [new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\||\|query_ifHighSpeed\|)\z/')]);
+						$save3['rrd_maximum'] = CactiValidator::validateInput(gnrv("rrd_maximum$name_modifier"),
+							"rrd_maximum$name_modifier",
+							[new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\||\|query_ifHighSpeed\|)\z/')]);
 
-						$save3['rrd_minimum'] = CactiValidator::validateInput(gnrv("rrd_minimum$name_modifier"), "rrd_minimum$name_modifier", [new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\||\|query_ifHighSpeed\|)\z/')]);
+						$save3['rrd_minimum'] = CactiValidator::validateInput(gnrv("rrd_minimum$name_modifier"),
+							"rrd_minimum$name_modifier",
+							[new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\||\|query_ifHighSpeed\|)\z/')]);
 
-						$save3['rrd_heartbeat'] = CactiValidator::validateInput(gnrv("rrd_heartbeat$name_modifier"), "rrd_heartbeat$name_modifier", [new Assert\Regex('/^[0-9]+$/')], 3);
+						$save3['rrd_heartbeat'] = CactiValidator::validateInput(gnrv("rrd_heartbeat$name_modifier"),
+							"rrd_heartbeat$name_modifier",
+							[new Assert\Regex('/^[0-9]+$/')],
+							3);
 
-						$save3['data_source_type_id'] = CactiValidator::validateInput(gnrv("data_source_type_id$name_modifier"), "data_source_type_id$name_modifier", [new Assert\Regex('/^[0-9]+$/')], 3);
+						$save3['data_source_type_id'] = CactiValidator::validateInput(gnrv("data_source_type_id$name_modifier"),
+							"data_source_type_id$name_modifier",
+							[new Assert\Regex('/^[0-9]+$/')],
+							3);
 
-						$save3['data_source_name'] = CactiValidator::validateInput(gnrv("data_source_name$name_modifier"), "data_source_name$name_modifier", [new Assert\Regex('/^[a-zA-Z0-9_-]{1,19}$/')], 3);
+						$save3['data_source_name'] = CactiValidator::validateInput(gnrv("data_source_name$name_modifier"),
+							"data_source_name$name_modifier",
+							[new Assert\Regex('/^[a-zA-Z0-9_-]{1,19}$/')],
+							3);
 
-						$save3['data_input_field_id'] = CactiValidator::validateInput((isrv("data_input_field_id$name_modifier") ? gnrv("data_input_field_id$name_modifier") : '0'), "data_input_field_id$name_modifier", [], 3);
+						$save3['data_input_field_id'] = CactiValidator::validateInput((isrv("data_input_field_id$name_modifier") ? gnrv("data_input_field_id$name_modifier") : '0'),
+							"data_input_field_id$name_modifier",
+							[],
+							3);
 
 						if ($save3['rrd_minimum'] != 'U' && $save3['rrd_maximum'] != 'U') {
 							if ($save3['rrd_minimum'] >= $save3['rrd_maximum']) {
@@ -372,7 +408,10 @@ function form_save() : void {
 
 	if (isrv('save_component_data_source_new') && ierv('data_template_id')) {
 		header('Location: data_sources.php?action=ds_edit&host_id=' . grv('host_id') . '&new=1');
-	} elseif ((is_error_message()) || (gfrv('data_template_id') != gfrv('_data_template_id')) || (gfrv('data_input_id') != gfrv('_data_input_id')) || (gfrv('host_id') != gfrv('_host_id'))) {
+	} elseif ((is_error_message()) ||
+		(gfrv('data_template_id') != gfrv('_data_template_id')) ||
+		(gfrv('data_input_id') != gfrv('_data_input_id')) ||
+		(gfrv('host_id') != gfrv('_host_id'))) {
 		header('Location: data_sources.php?action=ds_edit&id=' . (empty($local_data_id) ? gfrv('local_data_id') : $local_data_id) . '&host_id=' . grv('host_id') . '&view_rrd=' . (isrv('current_rrd') ? gnrv('current_rrd') : '0'));
 	} else {
 		header('Location: data_sources.php');
@@ -588,7 +627,8 @@ function form_actions() : void {
 
 					if ($rrd_changes > 0) {
 						$_SESSION['sess_messages']['custom_info'] = [
-							'message' => sprintf(__('%d RRD files were backed up and will be recreated with new step value at next polling.'), $rrd_changes),
+							'message' => sprintf(__('%d RRD files were backed up and will be recreated with new step value at next polling.'),
+								$rrd_changes),
 							'type'    => 'info'
 						];
 					}
@@ -676,8 +716,12 @@ function form_actions() : void {
 					'scont'     => __('Delete Data Source'),
 					'pcont'     => __('Delete Data Sources'),
 					'flist'     => $flist,
-					'sfmessage' => __n('The following Graph is using this Data Source.', 'The following Graphs are using this Data Source.', cacti_sizeof($graphs)),
-					'pfmessage' => __n('The following Graph is using these Data Sources.', 'The following Graphs are using these Data Sources.', cacti_sizeof($graphs)),
+					'sfmessage' => __n('The following Graph is using this Data Source.',
+						'The following Graphs are using this Data Source.',
+						cacti_sizeof($graphs)),
+					'pfmessage' => __n('The following Graph is using these Data Sources.',
+						'The following Graphs are using these Data Sources.',
+						cacti_sizeof($graphs)),
 					'extra'     => [
 						'delete_type' => [
 							'method'  => 'radio_button',
@@ -688,11 +732,15 @@ function form_actions() : void {
 								],
 								'2' => [
 									'default' => 3,
-									'title'   => __n('Delete all Graph Items that reference this Data Source.', 'Delete all Graph Items that reference these Data Sources', cacti_sizeof($iarray))
+									'title'   => __n('Delete all Graph Items that reference this Data Source.',
+										'Delete all Graph Items that reference these Data Sources',
+										cacti_sizeof($iarray))
 								],
 								'3' => [
 									'default' => 3,
-									'title'   => __n('Delete all Graphs that reference this Data Source.', 'Delete all Graphs that reference these Data Sources', cacti_sizeof($iarray))
+									'title'   => __n('Delete all Graphs that reference this Data Source.',
+										'Delete all Graphs that reference these Data Sources',
+										cacti_sizeof($iarray))
 								]
 							]
 						]
@@ -835,7 +883,8 @@ function data_edit(bool $incform = true) : void {
 				form_alternate_row();
 
 				if ((!empty($host['id'])) && (preg_match('/^' . VALID_HOST_FIELDS . '$/i', $field['type_code']))) {
-					print "<td style='width:50%;'><strong>" . htmle($field['name']) . '</strong> ' . __('(From Device: %s)', htmle($host['hostname'])) . '</td>';
+					print "<td style='width:50%;'><strong>" . htmle($field['name']) . '</strong> ' . __('(From Device: %s)',
+						htmle($host['hostname'])) . '</td>';
 					print '<td><em>' . htmle($old_value) . '</em></td>';
 				} elseif (empty($can_template)) {
 					print "<td style='width:50%;'><strong>" . htmle($field['name']) . '</strong> ' . __('(From Data Template)') . '</td>';
@@ -1148,7 +1197,13 @@ function ds_edit() : void {
 
 	form_start('data_sources.php', 'data_source');
 
-	$pageFilter = new CactiTableFilter($header_label, 'data_sources.php?action=ds_edit&id=' . grv('id'), 'data_source', 'sess_ds_edit', '', '', false);
+	$pageFilter = new CactiTableFilter($header_label,
+		'data_sources.php?action=ds_edit&id=' . grv('id'),
+		'data_source',
+		'sess_ds_edit',
+		'',
+		'',
+		false);
 	$pageFilter->set_filter_array($filters);
 	$pageFilter->render();
 
@@ -1218,8 +1273,22 @@ function ds_edit() : void {
 
 		html_start_box(__('Supplemental Data Template Data'), '100%', true, 3, 'center', '');
 
-		draw_nontemplated_fields_data_source($data['data_template_id'], $data['local_data_id'], $data, '|field|', __('Data Source Fields'), true, true, 0);
-		draw_nontemplated_fields_data_source_item($data['data_template_id'], $template_data_rrds, '|field|_|id|', __('Data Source Item Fields'), true, true, true, 0);
+		draw_nontemplated_fields_data_source($data['data_template_id'],
+			$data['local_data_id'],
+			$data,
+			'|field|',
+			__('Data Source Fields'),
+			true,
+			true,
+			0);
+		draw_nontemplated_fields_data_source_item($data['data_template_id'],
+			$template_data_rrds,
+			'|field|_|id|',
+			__('Data Source Item Fields'),
+			true,
+			true,
+			true,
+			0);
 		draw_nontemplated_fields_custom_data($data['id'], 'value_|id|', __('Custom Data'), true, true, 0);
 
 		form_hidden_box('save_component_data','1','');
@@ -1236,14 +1305,18 @@ function ds_edit() : void {
 			$form_array += [$field_name => $struct_data_source[$field_name]];
 
 			if (($field_array['method'] != 'header') && ($field_array['method'] != 'spacer')) {
-				if (!(($use_data_template == false) || (!empty($data_template_data['t_' . $field_name])) || ($field_array['flags'] == 'NOTEMPLATE'))) {
+				if (!(($use_data_template == false) ||
+					(!empty($data_template_data['t_' . $field_name])) ||
+					($field_array['flags'] == 'NOTEMPLATE'))) {
 					$form_array[$field_name]['description'] = '';
 				}
 
 				$form_array[$field_name]['value']   = (isset($data[$field_name]) ? $data[$field_name] : '');
 				$form_array[$field_name]['form_id'] = (empty($data['id']) ? '0' : $data['id']);
 
-				if (!(($use_data_template == false) || (!empty($data_template_data['t_' . $field_name])) || ($field_array['flags'] == 'NOTEMPLATE'))) {
+				if (!(($use_data_template == false) ||
+					(!empty($data_template_data['t_' . $field_name])) ||
+					($field_array['flags'] == 'NOTEMPLATE'))) {
 					$form_array[$field_name]['method'] = 'template_' . $form_array[$field_name]['method'];
 				}
 			}
@@ -1325,12 +1398,15 @@ function ds_edit() : void {
 				" . __esc('Data Source Item %s', $header_label) . "
 			</div>
 			<div class='tableSubHeaderColumn right'>
-				" . ((!ierv('id') && (empty($data_template['id']))) ? "<a class='linkOverDark cactiPostAction' href='#' data-url='" . html_escape_url('data_sources.php?action=rrd_add&id=' . grv('id')) . "'>" . __('New') . '</a>&nbsp;' : '') . '
+				" . ((!ierv('id') &&
+					(empty($data_template['id']))) ? "<a class='linkOverDark cactiPostAction' href='#' data-url='" . html_escape_url('data_sources.php?action=rrd_add&id=' . grv('id')) . "'>" . __('New') . '</a>&nbsp;' : '') . '
 			</div>
 		</div>';
 
 		// data input fields list
-		if ((empty($data['data_input_id'])) || (db_fetch_cell_prepared('SELECT type_id FROM data_input WHERE id = ?', [$data['data_input_id']]) > '1')) {
+		if ((empty($data['data_input_id'])) ||
+			(db_fetch_cell_prepared('SELECT type_id FROM data_input WHERE id = ?',
+				[$data['data_input_id']]) > '1')) {
 			unset($struct_data_source_item['data_input_field_id']);
 		} else {
 			$struct_data_source_item['data_input_field_id']['sql'] = "SELECT id,CONCAT(data_name,' - ',name) as name FROM data_input_fields WHERE data_input_id=" . $data['data_input_id'] . " and input_output='out' and update_rra='on' order by data_name,name";
@@ -1613,7 +1689,15 @@ function data_sources() : void {
 			$sql_params1);
 	}
 
-	$nav = html_nav_bar('data_sources.php', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 7, __('Data Sources'), 'page', 'main');
+	$nav = html_nav_bar('data_sources.php',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		7,
+		__('Data Sources'),
+		'page',
+		'main');
 
 	form_start('data_sources.php', 'chk');
 
@@ -1714,8 +1798,11 @@ function data_sources() : void {
 			// Show link to Graphs and Aggregates
 			form_selectable_cell($graphs_aggregates_url, $data_source['local_data_id'], '', 'center');
 
-			form_selectable_cell(get_poller_interval($data_source['rrd_step'], $data_source['data_source_profile_id']), $data_source['local_data_id']);
-			form_selectable_cell(api_data_source_deletable($data_source['local_data_id']) ? __('Yes') : __('No'), $data_source['local_data_id']);
+			form_selectable_cell(get_poller_interval($data_source['rrd_step'],
+				$data_source['data_source_profile_id']),
+				$data_source['local_data_id']);
+			form_selectable_cell(api_data_source_deletable($data_source['local_data_id']) ? __('Yes') : __('No'),
+				$data_source['local_data_id']);
 			form_selectable_cell(($data_source['active'] == 'on' ? __('Yes') : __('No')), $data_source['local_data_id']);
 			form_selectable_cell($data_template_name, $data_source['local_data_id']);
 			form_checkbox_cell($name, $data_source['local_data_id'], $disabled);

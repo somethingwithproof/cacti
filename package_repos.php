@@ -78,12 +78,34 @@ function form_save() : void {
 
 	if (isrv('save_component_repo')) {
 		// ================= input validation =================
-		$save['id']            = CactiValidator::validateInput(gnrv('id'), 'id', [new Assert\NotBlank(), new Assert\Regex('/^[0-9]+$/')], 3);
-		$save['repo_type']     = CactiValidator::validateInput(gnrv('repo_type'), 'repo_type', [new Assert\NotBlank(), new Assert\Regex('/^[0-2]$/')], 3);
-		$save['name']          = CactiValidator::validateInput(gnrv('name'), 'name', [new Assert\NotBlank(), new Assert\Length(max: 32)], 3);
-		$save['repo_location'] = CactiValidator::validateInput(gnrv('repo_location'), 'repo_location', [new Assert\NotBlank(), new Assert\Length(max: 128)], 3);
-		$save['repo_branch']   = CactiValidator::validateInput(gnrv('repo_branch'), 'repo_branch', [new Assert\Length(max: 128)], 3);
-		$save['repo_api_key']  = CactiValidator::validateInput(gnrv('repo_api_key'), 'repo_api_key', [new Assert\Length(max: 128)], 3);
+		$save['id']            = CactiValidator::validateInput(gnrv('id'),
+			'id',
+			[new Assert\NotBlank(),
+			new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save['repo_type']     = CactiValidator::validateInput(gnrv('repo_type'),
+			'repo_type',
+			[new Assert\NotBlank(),
+			new Assert\Regex('/^[0-2]$/')],
+			3);
+		$save['name']          = CactiValidator::validateInput(gnrv('name'),
+			'name',
+			[new Assert\NotBlank(),
+			new Assert\Length(max: 32)],
+			3);
+		$save['repo_location'] = CactiValidator::validateInput(gnrv('repo_location'),
+			'repo_location',
+			[new Assert\NotBlank(),
+			new Assert\Length(max: 128)],
+			3);
+		$save['repo_branch']   = CactiValidator::validateInput(gnrv('repo_branch'),
+			'repo_branch',
+			[new Assert\Length(max: 128)],
+			3);
+		$save['repo_api_key']  = CactiValidator::validateInput(gnrv('repo_api_key'),
+			'repo_api_key',
+			[new Assert\Length(max: 128)],
+			3);
 		$save['enabled']       = (isrv('enabled') ? 'on' : '');
 		$save['default']       = (isrv('default') ? 'on' : '');
 		// ====================================================
@@ -121,7 +143,10 @@ function form_save() : void {
 					if ($data != '') {
 						raise_message('repo_exists', __esc('The Repo \'%s\' is Reachable on GitHub.', $save['name']), MESSAGE_LEVEL_INFO);
 					} else {
-						raise_message('repo_missing', __esc('The Repo \'%s\' is NOT Reachable on GitHub or the package.manifest file is missing or it could be an invalid branch.  Valid Package Locations are normally: https://github.com/Author/RepoName/.', $save['name']), MESSAGE_LEVEL_WARN);
+						raise_message('repo_missing',
+							__esc('The Repo \'%s\' is NOT Reachable on GitHub or the package.manifest file is missing or it could be an invalid branch.  Valid Package Locations are normally: https://github.com/Author/RepoName/.',
+								$save['name']),
+							MESSAGE_LEVEL_WARN);
 					}
 				} elseif ($save['repo_type'] == 2) {
 					$file = $save['repo_location'] . '/package.manifest';
@@ -136,17 +161,29 @@ function form_save() : void {
 					$data = file_get_contents($file, false, stream_context_create($context));
 
 					if ($data != '') {
-						raise_message('repo_exists', __esc('The Repo \'%s\' is Reachable at the URL Location.', $save['name']), MESSAGE_LEVEL_INFO);
+						raise_message('repo_exists',
+							__esc('The Repo \'%s\' is Reachable at the URL Location.',
+								$save['name']),
+							MESSAGE_LEVEL_INFO);
 					} else {
-						raise_message('repo_missing', __esc('The Repo \'%s\' is NOT Reachable at the URL Location or the package.manifest file is missing.', $save['name']), MESSAGE_LEVEL_WARN);
+						raise_message('repo_missing',
+							__esc('The Repo \'%s\' is NOT Reachable at the URL Location or the package.manifest file is missing.',
+								$save['name']),
+							MESSAGE_LEVEL_WARN);
 					}
 				} else {
 					$file = $save['repo_location'] . '/package.manifest';
 
 					if (file_exists($file)) {
-						raise_message('repo_exists', __esc('The Repo \'%s\' is Reachable on the Local Cacti Server.', $save['name']), MESSAGE_LEVEL_INFO);
+						raise_message('repo_exists',
+							__esc('The Repo \'%s\' is Reachable on the Local Cacti Server.',
+								$save['name']),
+							MESSAGE_LEVEL_INFO);
 					} else {
-						raise_message('repo_missing', __esc('The Repo \'%s\' is NOT Reachable on the Local Cacti Server or the package.manifest file is missing.', $save['name']), MESSAGE_LEVEL_WARN);
+						raise_message('repo_missing',
+							__esc('The Repo \'%s\' is NOT Reachable on the Local Cacti Server or the package.manifest file is missing.',
+								$save['name']),
+							MESSAGE_LEVEL_WARN);
 					}
 				}
 
@@ -201,7 +238,8 @@ function form_actions() : void {
 	$p_array = [];
 
 	foreach (PackageListFilter::selectedIdsFromPost() as $id) {
-		$p_list .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM package_repositories WHERE id = ?', [$id])) . '</li>';
+		$p_list .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM package_repositories WHERE id = ?',
+			[$id])) . '</li>';
 		$p_array[] = $id;
 	}
 
@@ -217,33 +255,45 @@ function form_actions() : void {
 		if (gnrv('drp_action') == '1') { // delete
 			print "<tr>
 				<td class='textArea'>
-					<p>" . __n('Click \'Continue\' to delete the following .', 'Click \'Continue\' to delete following Package Repositories.', cacti_sizeof($p_array)) . "</p>
+					<p>" . __n('Click \'Continue\' to delete the following .',
+				'Click \'Continue\' to delete following Package Repositories.',
+				cacti_sizeof($p_array)) . "</p>
 					<div class='itemlist'><ul>$p_list</ul></div>
 				</td>
 			</tr>";
 
 			$save_html = "<button type='button' class='ui-button ui-corner-all ui-widget' onClick='cactiReturnTo()'>" . __esc('Cancel') . "</button>
-				<button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Delete Package Repository', 'Delete Package Repositories', cacti_sizeof($p_array)) . "'>" . __esc('Continue') . '</button>';
+				<button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Delete Package Repository',
+				'Delete Package Repositories',
+				cacti_sizeof($p_array)) . "'>" . __esc('Continue') . '</button>';
 		} elseif (gnrv('drp_action') == '2') { // disable
 			print "<tr>
 				<td class='textArea'>
-					<p>" . __n('Click \'Continue\' to disable the following Package Repository.', 'Click \'Continue\' to disable following Package Repositories.', cacti_sizeof($p_array)) . "</p>
+					<p>" . __n('Click \'Continue\' to disable the following Package Repository.',
+				'Click \'Continue\' to disable following Package Repositories.',
+				cacti_sizeof($p_array)) . "</p>
 					<div class='itemlist'><ul>$p_list</ul></div>
 				</td>
 			</tr>";
 
 			$save_html = "<button type='button' class='ui-button ui-corner-all ui-widget' onClick='cactiReturnTo()'>" . __esc('Cancel') . "</button>
-				<button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Disable Package Repository', 'Disable Package Repositories', cacti_sizeof($p_array)) . "'>" . __esc('Continue') . '</button>';
+				<button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Disable Package Repository',
+				'Disable Package Repositories',
+				cacti_sizeof($p_array)) . "'>" . __esc('Continue') . '</button>';
 		} elseif (gnrv('drp_action') == '3') { // enable
 			print "<tr>
 				<td class='textArea'>
-					<p>" . __('Click \'Continue\' to enable the following Package Repository.', 'Click \'Continue\' to enable following Package Repositories.', cacti_sizeof($p_array)) . "</p>
+					<p>" . __('Click \'Continue\' to enable the following Package Repository.',
+				'Click \'Continue\' to enable following Package Repositories.',
+				cacti_sizeof($p_array)) . "</p>
 					<div class='itemlist'><ul>$p_list</ul></div>
 				</td>
 			</tr>";
 
 			$save_html = "<button type='button' class='ui-button ui-corner-all ui-widget' onClick='cactiReturnTo()'>" . __esc('Cancel') . "</button>
-				<button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Enabled Package Repository', 'Enable Package Repositories', cacti_sizeof($p_array)) . "'>" . __esc('Continue') . '</button>';
+				<button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Enabled Package Repository',
+				'Enable Package Repositories',
+				cacti_sizeof($p_array)) . "'>" . __esc('Continue') . '</button>';
 		} elseif (gnrv('drp_action') == '4') { // default
 			print "<tr>
 				<td class='textArea'>
@@ -427,7 +477,11 @@ function repos() : void {
 	global $actions, $item_rows, $types;
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Package Repositories'), 'package_repos.php', 'fors', 'sess_package_repos', 'package_repos.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('Package Repositories'),
+		'package_repos.php',
+		'fors',
+		'sess_package_repos',
+		'package_repos.php?action=edit');
 
 	$pageFilter->rows_label = __('Repos');
 	$pageFilter->render();
@@ -492,7 +546,15 @@ function repos() : void {
 		],
 	];
 
-	$nav = html_nav_bar($filter->paginationUrl('package_repos.php'), MAX_DISPLAY_PAGES, $filter->page(), $filter->rows(), $total_rows, cacti_sizeof($display_text) + 1, __('Package Repositories'), 'page', 'main');
+	$nav = html_nav_bar($filter->paginationUrl('package_repos.php'),
+		MAX_DISPLAY_PAGES,
+		$filter->page(),
+		$filter->rows(),
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Package Repositories'),
+		'page',
+		'main');
 
 	form_start('package_repos.php', 'chk');
 
@@ -506,10 +568,16 @@ function repos() : void {
 		foreach ($repos as $repo) {
 			form_alternate_row('line' . $repo['id'], true);
 
-			form_selectable_cell(filter_value($repo['name'], $filter->filter(), 'package_repos.php?action=edit&id=' . $repo['id']), $repo['id']);
+			form_selectable_cell(filter_value($repo['name'],
+				$filter->filter(),
+				'package_repos.php?action=edit&id=' . $repo['id']),
+				$repo['id']);
 			form_selectable_cell($types[$repo['repo_type']], $repo['id']);
 			form_selectable_cell(filter_value($repo['repo_location'], $filter->filter()), $repo['id']);
-			form_selectable_ecell($repo['repo_type'] == 0 ? ($repo['repo_branch'] != '' ? $repo['repo_branch'] : __('default')) : __('N/A'), $repo['id'], '', 'center');
+			form_selectable_ecell($repo['repo_type'] == 0 ? ($repo['repo_branch'] != '' ? $repo['repo_branch'] : __('default')) : __('N/A'),
+				$repo['id'],
+				'',
+				'center');
 			form_selectable_cell($repo['enabled'] == 'on' ? __('Yes') : __('No'), $repo['id'], '', 'center');
 			form_selectable_cell($repo['default'] == 'on' ? __('Yes') : __('No'), $repo['id'], '', 'center');
 

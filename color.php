@@ -245,7 +245,8 @@ function color_import_processor(array &$colors) : array {
 				if ($required >= 2) {
 					array_push($return_array, '<b>HEADER LINE PROCESSED OK</b>:  <br>Columns found where: ' . $save_order . '<br>');
 				} else {
-					array_push($return_array, '<b>HEADER LINE PROCESSING ERROR</b>: Missing required field <br>Columns found where:' . $save_order . '<br>');
+					array_push($return_array,
+						'<b>HEADER LINE PROCESSING ERROR</b>: Missing required field <br>Columns found where:' . $save_order . '<br>');
 
 					break;
 				}
@@ -492,7 +493,15 @@ function color() : void {
 		$sql_order
 		$sql_limit");
 
-	$nav = html_nav_bar('color.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 8, __('Colors'), 'page', 'main');
+	$nav = html_nav_bar('color.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		8,
+		__('Colors'),
+		'page',
+		'main');
 
 	form_start('color.php', 'chk');
 

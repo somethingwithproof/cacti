@@ -206,7 +206,9 @@ function host_new_graphs_save(int $host_id) : void {
 			} else { // this is a data query field
 				$values['sg'][$matches[1]][$matches[2]]['graph_template'][$matches[3]] = $val;
 			}
-		} elseif (preg_match('/^gi_(\d+)_(\d+)_(\d+)_(\w+)/', $var, $matches)) { // 1: snmp_query_id, 2: graph_template_id, 3: graph_template_input_id, 4:field_name
+		} elseif (preg_match('/^gi_(\d+)_(\d+)_(\d+)_(\w+)/',
+			$var,
+			$matches)) { // 1: snmp_query_id, 2: graph_template_id, 3: graph_template_input_id, 4:field_name
 			// ================= input validation =================
 			input_validate_input_number($matches[3], 'gi[3]');
 			// ====================================================
@@ -228,7 +230,9 @@ function host_new_graphs_save(int $host_id) : void {
 					}
 				}
 			}
-		} elseif (preg_match('/^d_(\d+)_(\d+)_(\d+)_(\w+)/', $var, $matches)) { // 1: snmp_query_id, 2: graph_template_id, 3: data_template_id, 4:field_name
+		} elseif (preg_match('/^d_(\d+)_(\d+)_(\d+)_(\w+)/',
+			$var,
+			$matches)) { // 1: snmp_query_id, 2: graph_template_id, 3: data_template_id, 4:field_name
 			if (empty($matches[1])) { // this is a new graph from template field
 				$values['cg'][$matches[2]]['data_template'][$matches[3]][$matches[4]] = $val;
 			} else { // this is a data query field
@@ -264,7 +268,9 @@ function host_new_graphs_save(int $host_id) : void {
 			} else { // this is a data query field
 				$values['sg'][$matches[1]][$matches[2]]['custom_data'][$matches[3]][$matches[4]] = $val;
 			}
-		} elseif (preg_match('/^di_(\d+)_(\d+)_(\d+)_(\d+)_(\w+)/', $var, $matches)) { // 1: snmp_query_id, 2: graph_template_id, 3: data_template_id, 4:local_data_template_rrd_id, 5:field_name
+		} elseif (preg_match('/^di_(\d+)_(\d+)_(\d+)_(\d+)_(\w+)/',
+			$var,
+			$matches)) { // 1: snmp_query_id, 2: graph_template_id, 3: data_template_id, 4:local_data_template_rrd_id, 5:field_name
 			if (empty($matches[1])) { // this is a new graph from template field
 				$values['cg'][$matches[2]]['data_template_item'][$matches[4]][$matches[5]] = $val;
 			} else { // this is a data query field
@@ -442,7 +448,10 @@ function create_graphs_new_filter(array $host, array $snmp_queries) : array {
 	return $filters;
 }
 
-function draw_graphs_new_filter(bool $render = false, string $header_label = '', array $host = [], array $snmp_queries = []) : void {
+function draw_graphs_new_filter(bool $render = false,
+	string $header_label = '',
+	array $host = [],
+	array $snmp_queries = []) : void {
 	$filters = create_graphs_new_filter($host, $snmp_queries);
 
 	// create the page filter
@@ -484,7 +493,10 @@ function graphs() : void {
 			WHERE id = ?',
 			[$host['host_template_id']]);
 
-		$header_label = __esc('New Graphs [ %s - %s ] [ %s ]', $host['description'], $host['hostname'], (!empty($host['host_template_id']) ? $name : ''));
+		$header_label = __esc('New Graphs [ %s - %s ] [ %s ]',
+			$host['description'],
+			$host['hostname'],
+			(!empty($host['host_template_id']) ? $name : ''));
 	} else {
 		$header_label = __('New Graphs [ Search for a Device First ]');
 	}
@@ -564,7 +576,14 @@ function graphs() : void {
 		print "<tr class='even'>
 			<td class='left' style='width:1%'>";
 
-		form_dropdown('cg_g', $available_graph_templates, 'name', 'id', '', __('(Select a graph type to create)'), '', 'textArea');
+		form_dropdown('cg_g',
+			$available_graph_templates,
+			'name',
+			'id',
+			'',
+			__('(Select a graph type to create)'),
+			'',
+			'textArea');
 
 		print '</td>
 			<td class="left">
@@ -638,7 +657,8 @@ function graphs() : void {
 				$i++;
 
 				print "<td>
-					<span id='gt_text$query_row" . "_0'>" . filter_value($graph_template['graph_template_name'], grv('filter')) . "</span>
+					<span id='gt_text$query_row" . "_0'>" . filter_value($graph_template['graph_template_name'],
+					grv('filter')) . "</span>
 					</td>
 					<td class='checkbox' style='width:1%;'>
 						<input class='checkbox' type='checkbox' name='cg_$query_row' id='cg_$query_row'>
@@ -693,7 +713,10 @@ function graphs() : void {
 						foreach ($xml_array['fields'] as $field_name => $field_array) {
 							if (!is_array($field_array)) {
 								if (!$message_raised) {
-									raise_message('xmlerror', __('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id of \'%s\'', $snmp_query['id']), MESSAGE_LEVEL_ERROR);
+									raise_message('xmlerror',
+										__('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id of \'%s\'',
+											$snmp_query['id']),
+										MESSAGE_LEVEL_ERROR);
 									$message_raised = true;
 								}
 							} elseif (isset($field_array['direction'])) {
@@ -710,11 +733,20 @@ function graphs() : void {
 									}
 								}
 							} else {
-								raise_message('xmlfielderr' . $field_name, __esc('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'.  Field Name \'%s\' missing a \'direction\' attribute', $snmp_query['name'], $snmp_query['id'], $field_name), MESSAGE_LEVEL_ERROR);
+								raise_message('xmlfielderr' . $field_name,
+									__esc('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'.  Field Name \'%s\' missing a \'direction\' attribute',
+										$snmp_query['name'],
+										$snmp_query['id'],
+										$field_name),
+									MESSAGE_LEVEL_ERROR);
 							}
 						}
 					} elseif (!$message_raised) {
-						raise_message('xmlerror', __esc('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'', $snmp_query['name'], $snmp_query['id']), MESSAGE_LEVEL_ERROR);
+						raise_message('xmlerror',
+							__esc('Error Parsing Data Query Resource XML file for Data Query \'%s\' with id \'%s\'',
+								$snmp_query['name'],
+								$snmp_query['id']),
+							MESSAGE_LEVEL_ERROR);
 						$message_raised = true;
 					}
 				}
@@ -867,14 +899,23 @@ function graphs() : void {
 							load_current_session_value('page' . $snmp_query['id'], 'sess_grn_page' . $snmp_query['id'], '1');
 						}
 
-						$nav = html_nav_bar('graphs_new.php?host_id=' . grv('host_id'), MAX_DISPLAY_PAGES, $page, $rows, $total_rows, 15, __('Items'), 'page' . $snmp_query['id']);
+						$nav = html_nav_bar('graphs_new.php?host_id=' . grv('host_id'),
+							MAX_DISPLAY_PAGES,
+							$page,
+							$rows,
+							$total_rows,
+							15,
+							__('Items'),
+							'page' . $snmp_query['id']);
 
 						print $nav;
 
 						html_start_box('', '100%', false, 3, 'center', '');
 
 						foreach ($xml_array['fields'] as $field_name => $field_array) {
-							if (($field_array['direction'] == 'input' || $field_array['direction'] == 'input-output') && cacti_sizeof($field_names)) {
+							if (($field_array['direction'] == 'input' ||
+								$field_array['direction'] == 'input-output') &&
+								cacti_sizeof($field_names)) {
 								foreach ($field_names as $row) {
 									if ($row['field_name'] == $field_name) {
 										$html_dq_header .= "<th class='tableSubHeaderColumn'>" . $field_array['name'] . '</th>';
@@ -928,7 +969,8 @@ function graphs() : void {
 									if ($field_array['direction'] == 'input' || $field_array['direction'] == 'input-output') {
 										if (in_array($field_name, $fields, true)) {
 											if (isset($row[$field_name])) {
-												print "<td><span class='textOverflow' id='text$query_row" . '_' . $column_counter . "'>" . filter_value($row[$field_name], grv('filter')) . '</span></td>';
+												print "<td><span class='textOverflow' id='text$query_row" . '_' . $column_counter . "'>" . filter_value($row[$field_name],
+													grv('filter')) . '</span></td>';
 											} else {
 												print "<td><span class='textOverflow' id='text$query_row" . '_' . $column_counter . "'></span></td>";
 											}

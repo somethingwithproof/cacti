@@ -58,35 +58,74 @@ switch (grv('action')) {
 
 		switch (grv('action')) {
 			case 'init':
-				load_current_session_value('ds_step',        'sess_realtime_ds_step',     read_user_setting('realtime_interval', 10));
-				load_current_session_value('graph_start',    'sess_realtime_graph_start', read_user_setting('realtime_gwindow', 60));
+				load_current_session_value('ds_step',
+					'sess_realtime_ds_step',
+					read_user_setting('realtime_interval',
+						10));
+				load_current_session_value('graph_start',
+					'sess_realtime_graph_start',
+					read_user_setting('realtime_gwindow',
+						60));
 				load_current_session_value('size',           'sess_realtime_size',        read_user_setting('realtime_size', 100));
-				load_current_session_value('graph_nolegend', 'sess_realtime_nolegend',    read_user_setting('realtime_nolegend', 'false'));
+				load_current_session_value('graph_nolegend',
+					'sess_realtime_nolegend',
+					read_user_setting('realtime_nolegend',
+						'false'));
 
 				break;
 			case 'timespan':
-				load_current_session_value('graph_start',    'sess_realtime_graph_start', read_user_setting('realtime_gwindow', 60));
+				load_current_session_value('graph_start',
+					'sess_realtime_graph_start',
+					read_user_setting('realtime_gwindow',
+						60));
 
 				break;
 			case 'interval':
-				load_current_session_value('ds_step',        'sess_realtime_ds_step',     read_user_setting('realtime_interval', 10));
-				load_current_session_value('graph_start',    'sess_realtime_graph_start', read_user_setting('realtime_gwindow', 60));
+				load_current_session_value('ds_step',
+					'sess_realtime_ds_step',
+					read_user_setting('realtime_interval',
+						10));
+				load_current_session_value('graph_start',
+					'sess_realtime_graph_start',
+					read_user_setting('realtime_gwindow',
+						60));
 				load_current_session_value('size',           'sess_realtime_size',        read_user_setting('realtime_size', 100));
-				load_current_session_value('graph_nolegend', 'sess_realtime_nolegend',    read_user_setting('realtime_nolegend', 'false'));
+				load_current_session_value('graph_nolegend',
+					'sess_realtime_nolegend',
+					read_user_setting('realtime_nolegend',
+						'false'));
 
 				break;
 			case 'countdown':
-				load_current_session_value('ds_step',        'sess_realtime_ds_step',     read_user_setting('realtime_interval', 10));
-				load_current_session_value('graph_start',    'sess_realtime_graph_start', read_user_setting('realtime_gwindow', 60));
+				load_current_session_value('ds_step',
+					'sess_realtime_ds_step',
+					read_user_setting('realtime_interval',
+						10));
+				load_current_session_value('graph_start',
+					'sess_realtime_graph_start',
+					read_user_setting('realtime_gwindow',
+						60));
 				load_current_session_value('size',           'sess_realtime_size',        read_user_setting('realtime_size', 100));
-				load_current_session_value('graph_nolegend', 'sess_realtime_nolegend',    read_user_setting('realtime_nolegend', 'false'));
+				load_current_session_value('graph_nolegend',
+					'sess_realtime_nolegend',
+					read_user_setting('realtime_nolegend',
+						'false'));
 
 				break;
 			default:
-				load_current_session_value('ds_step',        'sess_realtime_ds_step',     read_user_setting('realtime_interval', 10));
-				load_current_session_value('graph_start',    'sess_realtime_graph_start', read_user_setting('realtime_gwindow', 60));
+				load_current_session_value('ds_step',
+					'sess_realtime_ds_step',
+					read_user_setting('realtime_interval',
+						10));
+				load_current_session_value('graph_start',
+					'sess_realtime_graph_start',
+					read_user_setting('realtime_gwindow',
+						60));
 				load_current_session_value('size',           'sess_realtime_size',        read_user_setting('realtime_size', 100));
-				load_current_session_value('graph_nolegend', 'sess_realtime_nolegend',    read_user_setting('realtime_nolegend', 'false'));
+				load_current_session_value('graph_nolegend',
+					'sess_realtime_nolegend',
+					read_user_setting('realtime_nolegend',
+						'false'));
 
 				break;
 		}
@@ -230,7 +269,12 @@ switch (grv('action')) {
 		$graph_data_array['output_flag']     = RRDTOOL_OUTPUT_GRAPH_DATA;
 		$null_param                          = [];
 
-		$output = rrdtool_function_graph(grv('local_graph_id'), '', $graph_data_array, '', $null_param, $_SESSION[SESS_USER_ID]);
+		$output = rrdtool_function_graph(grv('local_graph_id'),
+			'',
+			$graph_data_array,
+			'',
+			$null_param,
+			$_SESSION[SESS_USER_ID]);
 
 		$error          = '';
 		$graph_contents = false;
@@ -272,7 +316,9 @@ switch (grv('action')) {
 			$graph_data_array['get_error'] = true;
 
 			if (isset($graph_data_array['graph_width']) && isset($graph_data_array['graph_height'])) {
-				$graph_contents = rrdtool_create_error_image($error, $graph_data_array['graph_width'], $graph_data_array['graph_height']);
+				$graph_contents = rrdtool_create_error_image($error,
+					$graph_data_array['graph_width'],
+					$graph_data_array['graph_height']);
 			} else {
 				$graph_contents = rrdtool_create_error_image($error);
 			}
@@ -308,7 +354,8 @@ switch (grv('action')) {
 			'left'           => grv('left'),
 			'ds_step'        => htmle(isset($_SESSION['sess_realtime_ds_step']) ? $_SESSION['sess_realtime_ds_step'] : $graph_data_array['ds_step']),
 			'graph_start'    => htmle(isset($_SESSION['sess_realtime_graph_start']) ? $_SESSION['sess_realtime_graph_start'] : $graph_data_array['graph_start']),
-			'size'           => htmle(isset($_SESSION['sess_realtime_size']) ? $_SESSION['sess_realtime_size'] : read_user_setting('realtime_size', 100)),
+			'size'           => htmle(isset($_SESSION['sess_realtime_size']) ? $_SESSION['sess_realtime_size'] : read_user_setting('realtime_size',
+				100)),
 			'thumbnails'     => htmle(isset($_SESSION['sess_realtime_nolegend']) ? $_SESSION['sess_realtime_nolegend'] : 'false'),
 			'data'           => $data,
 			'image_format'   => $graph_data_array['image_format']
@@ -329,7 +376,10 @@ switch (grv('action')) {
 		load_current_session_value('ds_step',        'sess_realtime_ds_step',     read_user_setting('realtime_interval', 10));
 		load_current_session_value('graph_start',    'sess_realtime_graph_start', read_user_setting('realtime_gwindow', 60));
 		load_current_session_value('size',           'sess_realtime_size',        read_user_setting('realtime_size', 100));
-		load_current_session_value('graph_nolegend', 'sess_realtime_nolegend',    read_user_setting('realtime_nolegend', 'false'));
+		load_current_session_value('graph_nolegend',
+			'sess_realtime_nolegend',
+			read_user_setting('realtime_nolegend',
+				'false'));
 
 		break;
 }

@@ -200,7 +200,10 @@ $settings['path'] = [
 		'default'       => '',
 		'max_length'    => '255',
 		'constraints'   => [
-			fn () => new Assert\Length(min: 1, max: 255, minMessage: __('must not be empty.'), maxMessage: __('must be 255 characters or fewer.')),
+			fn () => new Assert\Length(min: 1,
+				max: 255,
+				minMessage: __('must not be empty.'),
+				maxMessage: __('must be 255 characters or fewer.')),
 		],
 	],
 	'path_snmpget' => [
@@ -211,7 +214,10 @@ $settings['path'] = [
 		'default'       => '',
 		'max_length'    => '255',
 		'constraints'   => [
-			fn () => new Assert\Length(min: 1, max: 255, minMessage: __('must not be empty.'), maxMessage: __('must be 255 characters or fewer.')),
+			fn () => new Assert\Length(min: 1,
+				max: 255,
+				minMessage: __('must not be empty.'),
+				maxMessage: __('must be 255 characters or fewer.')),
 		],
 	],
 	'path_snmpbulkwalk' => [
@@ -245,7 +251,10 @@ $settings['path'] = [
 		'max_length'    => '255',
 		'constraints'   => [
 			fn () => new Assert\NotBlank(message: __('must not be empty.')),
-			fn () => new Assert\Length(min: 1, max: 255, minMessage: __('must not be empty.'), maxMessage: __('must be 255 characters or fewer.')),
+			fn () => new Assert\Length(min: 1,
+				max: 255,
+				minMessage: __('must not be empty.'),
+				maxMessage: __('must be 255 characters or fewer.')),
 		],
 	],
 	'path_php_binary' => [
@@ -257,7 +266,10 @@ $settings['path'] = [
 		'max_length'    => '255',
 		'constraints'   => [
 			fn () => new Assert\NotBlank(message: __('must not be empty.')),
-			fn () => new Assert\Length(min: 1, max: 255, minMessage: __('must not be empty.'), maxMessage: __('must be 255 characters or fewer.')),
+			fn () => new Assert\Length(min: 1,
+				max: 255,
+				minMessage: __('must not be empty.'),
+				maxMessage: __('must be 255 characters or fewer.')),
 		],
 	],
 	'path_composer' => [
@@ -3521,7 +3533,10 @@ if (!$config['is_web'] || is_realm_allowed(25)) {
 }
 
 if (!$config['is_web'] || is_realm_allowed(8)) {
-	if (read_config_option('auth_method') != 2 && !(read_config_option('auth_cache_enabled') == 'on' && isset($_SESSION['cacti_remembers']) && $_SESSION['cacti_remembers'] == true)) {
+	if (read_config_option('auth_method') != 2 &&
+		!(read_config_option('auth_cache_enabled') == 'on' &&
+		isset($_SESSION['cacti_remembers']) &&
+		$_SESSION['cacti_remembers'] == true)) {
 		if (ini_get('session.gc_maxlifetime') > '2147483') {
 			$max_life = '2147483';
 		} else {

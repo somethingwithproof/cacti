@@ -44,6 +44,8 @@ function cacti_test_cookie_sources() : array {
 	return $sources;
 }
 
+require_once dirname(__DIR__, 3) . '/Helpers/PhpSource.php';
+
 test('server cookie writers enforce path domain secure httponly and SameSite policy', function () : void {
 	$cookie_sources = cacti_test_cookie_sources();
 
@@ -101,7 +103,7 @@ test('2FA cookie binds user time user-agent and secret and has bounded parsing',
 	$cookie_sources = cacti_test_cookie_sources();
 	expect($cookie_sources['tfa'])->toContain("explode(':', \$_COOKIE[session_name() . '_otp'], 2)")
 		->toContain('cacti_count($tfaCookie) == 2')
-		->toContain("hash_hmac('sha1', \$user['username'] . ':' . \$tfaMins . ':' . \$tfaCookieTime . ':' . \$_SERVER['HTTP_USER_AGENT'], \$user['tfa_secret'])")
+		->toContainPhp("hash_hmac('sha1', \$user['username'] . ':' . \$tfaMins . ':' . \$tfaCookieTime . ':' . \$_SERVER['HTTP_USER_AGENT'], \$user['tfa_secret'])")
 		->toContain("cacti_cookie_set(session_name() . '_otp', \$cookie, time() + (\$cookie_lifetime))");
 });
 

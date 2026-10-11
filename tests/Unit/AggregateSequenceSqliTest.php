@@ -26,17 +26,19 @@ require_once CACTI_PATH_LIBRARY . '/functions.php';
 
 $src = file_get_contents(CACTI_PATH_BASE . '/aggregate_graphs.php');
 
+require_once dirname(__DIR__, 1) . '/Helpers/PhpSource.php';
+
 test('the aggregate new-sequence branch binds local_graph_id instead of concatenating it', function () use ($src) {
 	// the sequence query must receive a validated, bound array filter ...
-	expect($src)->toContain("get_sequence(\$sequence, 'sequence', 'graph_templates_item', ['local_graph_id' => gfrv('local_graph_id')])")
+	expect($src)->toContainPhp("get_sequence(\$sequence, 'sequence', 'graph_templates_item', ['local_graph_id' => gfrv('local_graph_id')])")
 		// ... and must never rebuild that filter by concatenating a request value
-		->and($src)->not->toContain("get_sequence(\$sequence, 'sequence', 'graph_templates_item', 'local_graph_id=' . grv('local_graph_id'))")
-		->and($src)->not->toContain("get_sequence(\$sequence, 'sequence', 'graph_templates_item', 'local_graph_id=' . gfrv('local_graph_id'))");
+		->and(\Cacti\Tests\Helpers\PhpSource::position($src, "get_sequence(\$sequence, 'sequence', 'graph_templates_item', 'local_graph_id=' . grv('local_graph_id'))"))->toBeFalse()
+		->and(\Cacti\Tests\Helpers\PhpSource::position($src, "get_sequence(\$sequence, 'sequence', 'graph_templates_item', 'local_graph_id=' . gfrv('local_graph_id'))"))->toBeFalse();
 });
 
 test('build_where_from_array binds an injection payload as a parameter rather than inlining it', function () {
 	$params  = [];
-	$payload = "1) UNION SELECT username, password FROM user_auth -- ";
+	$payload = '1) UNION SELECT username, password FROM user_auth -- ';
 
 	$where = build_where_from_array(['local_graph_id' => $payload], $params);
 

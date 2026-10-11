@@ -88,7 +88,11 @@ function form_save() : void {
 		// no-validation: checkbox values are constrained to 'on'/'' by the isrv() guard, not a text field
 		$save['debug']              = (isrv('debug') ? form_input_validate(gnrv('debug'), 'debug', '', true, 3) : '');
 		// no-validation: checkbox values are constrained to 'on'/'' by the isrv() guard, not a text field
-		$save['allow_auth_cookies'] = (isrv('allow_auth_cookies') ? form_input_validate(gnrv('allow_auth_cookies'), 'allow_auth_cookies', '', true, 3) : '');
+		$save['allow_auth_cookies'] = (isrv('allow_auth_cookies') ? form_input_validate(gnrv('allow_auth_cookies'),
+			'allow_auth_cookies',
+			'',
+			true,
+			3) : '');
 
 		$parameters = LoginProviderFactory::collectParameters((int) $save['type']);
 
@@ -155,7 +159,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM login_providers WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM login_providers WHERE id = ?',
+					[$matches[1]])) . '</li>';
 				$iarray[] = $matches[1];
 			}
 		}
@@ -491,8 +496,12 @@ function provider_edit() : void {
 		'sp_entity_id' => [
 			'friendly_name' => __('SP Entity ID'),
 			'description'   => __('Uniquely identifies this Cacti installation to the Identity Provider. Leave blank to default to the Metadata URL below.') . ' ' .
-				__('Assertion Consumer Service (ACS) URL: %s', rtrim((string) read_config_option('base_url'), '/') . '/login_sso.php?action=acs&realm={realm}') . ' ' .
-				__('Metadata URL: %s', rtrim((string) read_config_option('base_url'), '/') . '/login_sso.php?action=metadata&realm={realm}'),
+				__('Assertion Consumer Service (ACS) URL: %s',
+					rtrim((string) read_config_option('base_url'),
+						'/') . '/login_sso.php?action=acs&realm={realm}') . ' ' .
+				__('Metadata URL: %s',
+					rtrim((string) read_config_option('base_url'),
+						'/') . '/login_sso.php?action=metadata&realm={realm}'),
 			'method'        => 'textbox',
 			'value'         => '|arg1:sp_entity_id|',
 			'max_length'    => '255',
@@ -632,7 +641,9 @@ function provider_edit() : void {
 		],
 		'oidc_redirect_uri' => [
 			'friendly_name' => __('Redirect URI'),
-			'description'   => __('Register this callback URL with your Identity Provider: %s', rtrim((string) read_config_option('base_url'), '/') . '/login_sso.php?action=callback&realm={realm}'),
+			'description'   => __('Register this callback URL with your Identity Provider: %s',
+				rtrim((string) read_config_option('base_url'),
+					'/') . '/login_sso.php?action=callback&realm={realm}'),
 			'method'        => 'spacer'
 		],
 		'client_id' => [
@@ -812,7 +823,11 @@ function login_providers() : void {
 	global $provider_types, $actions;
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Login Providers'), 'login_providers.php', 'form_provider', 'sess_provider', 'login_providers.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('Login Providers'),
+		'login_providers.php',
+		'form_provider',
+		'sess_provider',
+		'login_providers.php?action=edit');
 
 	$pageFilter->rows_label = __('Providers');
 	$pageFilter->set_sort_array('name', 'ASC');
@@ -843,7 +858,8 @@ function login_providers() : void {
 	$providers = db_fetch_assoc_prepared("SELECT *
 		FROM login_providers
 		$sql_where
-		ORDER BY " . sanitize_sql_column(grv('sort_column'), 'name') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') . '
+		ORDER BY " . sanitize_sql_column(grv('sort_column'),
+		'name') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') . '
 		LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows,
 		$sql_params);
 
@@ -870,7 +886,15 @@ function login_providers() : void {
 		]
 	];
 
-	$nav = html_nav_bar('login_providers.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 6, __('Login Providers'), 'page', 'main');
+	$nav = html_nav_bar('login_providers.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		6,
+		__('Login Providers'),
+		'page',
+		'main');
 
 	form_start('login_providers.php', 'chk');
 
@@ -889,7 +913,10 @@ function login_providers() : void {
 				WHERE id = ?',
 				[$provider['user_id']]);
 
-			form_selectable_cell(filter_value($provider['name'], grv('filter'), 'login_providers.php?action=edit&id=' . $provider['id']), $provider['id']);
+			form_selectable_cell(filter_value($provider['name'],
+				grv('filter'),
+				'login_providers.php?action=edit&id=' . $provider['id']),
+				$provider['id']);
 			form_selectable_cell($provider_types[$provider['type']] ?? __('Unknown'), $provider['id']);
 			form_selectable_cell(($provider['is_default'] == '0' ? '--' : __('Yes')), $provider['id']);
 			form_selectable_ecell(($provider['user_id'] == '0' ? __('None Selected') : $effective_id), $provider['id']);

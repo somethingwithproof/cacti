@@ -739,7 +739,9 @@ $poller_options = [
 	2 => 'spine'
 ];
 
-if (read_config_option('path_spine') != '' && (!file_exists(read_config_option('path_spine')) || !is_executable(read_config_option('path_spine')))) {
+if (read_config_option('path_spine') != '' &&
+	(!file_exists(read_config_option('path_spine')) ||
+	!is_executable(read_config_option('path_spine')))) {
 	unset($poller_options[2]);
 }
 
@@ -1256,7 +1258,8 @@ if ((isset($_SESSION[SESS_USER_ID]))) {
 		if (cacti_sizeof($consoles)) {
 			foreach ($consoles as $page) {
 				if (!CACTI_WEB || is_realm_allowed($page['id'] + 10000)) {
-					$menuname = (isset($page['extendedstyle']) && $page['extendedstyle'] != '' ? htmle($page['extendedstyle']) : __('External Links'));
+					$menuname = (isset($page['extendedstyle']) &&
+						$page['extendedstyle'] != '' ? htmle($page['extendedstyle']) : __('External Links'));
 
 					$menu[$menuname]['link.php?id=' . $page['id']] = htmle($page['title']);
 				}

@@ -159,7 +159,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT CONCAT(IF(hostname!="", hostname, "unknown"), " (", ip, ")") FROM automation_devices WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT CONCAT(IF(hostname!="", hostname, "unknown"), " (", ip, ")") FROM automation_devices WHERE id = ?',
+					[$matches[1]])) . '</li>';
 
 				$iarray[] = $matches[1];
 			}
@@ -284,7 +285,15 @@ function display_discovery_page() : void {
 	$results = get_discovery_results($total_rows, $rows);
 
 	// generate page list
-	$nav = html_nav_bar('automation_devices.php', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 12, __('Devices'), 'page', 'main');
+	$nav = html_nav_bar('automation_devices.php',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		12,
+		__('Devices'),
+		'page',
+		'main');
 
 	form_start('automation_devices.php', 'chk');
 
@@ -389,9 +398,21 @@ function display_discovery_page() : void {
 			form_selectable_cell(filter_value($host['ip'], grv('filter')), $host['id']);
 			form_selectable_cell(filter_value($network, ''), $host['id']);
 			form_selectable_cell(filter_value(snmp_data($host['sysName']), grv('filter')), $host['id'], '', 'text-align:left');
-			form_selectable_cell(filter_value(snmp_data($host['sysLocation']), grv('filter')), $host['id'], '', 'text-align:left');
-			form_selectable_cell(filter_value(snmp_data($host['sysContact']), grv('filter')), $host['id'], '', 'text-align:left');
-			form_selectable_cell(filter_value(snmp_data($host['sysDescr']), grv('filter')), $host['id'], '', 'text-align:left;white-space:normal;');
+			form_selectable_cell(filter_value(snmp_data($host['sysLocation']),
+				grv('filter')),
+				$host['id'],
+				'',
+				'text-align:left');
+			form_selectable_cell(filter_value(snmp_data($host['sysContact']),
+				grv('filter')),
+				$host['id'],
+				'',
+				'text-align:left');
+			form_selectable_cell(filter_value(snmp_data($host['sysDescr']),
+				grv('filter')),
+				$host['id'],
+				'',
+				'text-align:left;white-space:normal;');
 			form_selectable_cell(filter_value(snmp_data($host['os']), grv('filter')), $host['id'], '', 'text-align:left');
 			form_selectable_cell(snmp_data(get_uptime($host)), $host['id'], '', 'text-align:right');
 			form_selectable_cell($status[$host['snmp']], $host['id'], '', 'text-align:right');
@@ -629,7 +650,10 @@ function draw_automation_devices_filter(bool $render = false) : void {
 	$filters = create_automation_devices_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Discovered Devices'), 'automation_devices.php', 'form_devices', 'sess_autom_device');
+	$pageFilter = new CactiTableFilter(__('Discovered Devices'),
+		'automation_devices.php',
+		'form_devices',
+		'sess_autom_device');
 
 	$pageFilter->rows_label = __('Devices');
 	$pageFilter->set_filter_array($filters);

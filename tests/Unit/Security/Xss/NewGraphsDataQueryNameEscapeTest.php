@@ -17,12 +17,14 @@
 
 $root = dirname(__DIR__, 4);
 
+require_once dirname(__DIR__, 3) . '/Helpers/PhpSource.php';
+
 test('New Graphs escapes the data-query and field names in every name-bearing parse error', function () use ($root) {
 	$source = file_get_contents($root . '/graphs_new.php');
 
 	// the two name-bearing messages escape; the id-only message does not
 	expect(substr_count($source, "__esc('Error Parsing Data Query Resource XML file"))->toBe(2)
 		->and(substr_count($source, "__('Error Parsing Data Query Resource XML file"))->toBe(1)
-		->and($source)->toContain("raise_message('xmlfielderr' . \$field_name, __esc(")
+		->and($source)->toContainPhp("raise_message('xmlfielderr' . \$field_name, __esc(")
 		->and($source)->not->toContain("raise_message('xmlfielderr' . \$field_name, __(");
 });

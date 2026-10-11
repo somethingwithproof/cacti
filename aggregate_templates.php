@@ -120,7 +120,10 @@ function aggregate_form_save() : void {
 		exit;
 	}
 
-	cacti_log('AGGREGATE GRAPH TEMPLATE Saved ID: ' . $save1['id'] . ' Name: ' . $save1['name'], false, 'AGGREGATE', POLLER_VERBOSITY_DEBUG);
+	cacti_log('AGGREGATE GRAPH TEMPLATE Saved ID: ' . $save1['id'] . ' Name: ' . $save1['name'],
+		false,
+		'AGGREGATE',
+		POLLER_VERBOSITY_DEBUG);
 
 	// do a quick comparison to see if anything changed
 	if ($is_new == false) {
@@ -295,9 +298,12 @@ function aggregate_form_actions() : void {
 		if ($selected_items != false) {
 			if (gnrv('drp_action') == '1') { // delete
 				db_execute('DELETE FROM aggregate_graph_templates WHERE ' . array_to_sql_or($selected_items, 'id'));
-				db_execute('DELETE FROM aggregate_graph_templates_item WHERE ' . array_to_sql_or($selected_items, 'aggregate_template_id'));
-				db_execute('DELETE FROM aggregate_graph_templates_graph WHERE ' . array_to_sql_or($selected_items, 'aggregate_template_id'));
-				db_execute("UPDATE aggregate_graphs SET aggregate_template_id=0, template_propogation='' WHERE " . array_to_sql_or($selected_items, 'aggregate_template_id'));
+				db_execute('DELETE FROM aggregate_graph_templates_item WHERE ' . array_to_sql_or($selected_items,
+					'aggregate_template_id'));
+				db_execute('DELETE FROM aggregate_graph_templates_graph WHERE ' . array_to_sql_or($selected_items,
+					'aggregate_template_id'));
+				db_execute("UPDATE aggregate_graphs SET aggregate_template_id=0, template_propogation='' WHERE " . array_to_sql_or($selected_items,
+					'aggregate_template_id'));
 			}
 		}
 
@@ -315,7 +321,8 @@ function aggregate_form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM aggregate_graph_templates WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM aggregate_graph_templates WHERE id = ?',
+					[$matches[1]])) . '</li>';
 
 				$iarray[] = $matches[1];
 			}
@@ -540,7 +547,11 @@ function aggregate_template() : void {
 	global $actions, $item_rows;
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Aggregate Templates'), 'aggregate_templates.php', 'forms', 'sess_agg_tmp', 'aggregate_templates.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('Aggregate Templates'),
+		'aggregate_templates.php',
+		'forms',
+		'sess_agg_tmp',
+		'aggregate_templates.php?action=edit');
 
 	$pageFilter->rows_label = __('Templates');
 	$pageFilter->set_sort_array('pgt.name', 'ASC');
@@ -580,7 +591,15 @@ function aggregate_template() : void {
 		$sql_order
 		$sql_limit");
 
-	$nav = html_nav_bar('aggregate_templates.php', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 5, __('Aggregate Templates'), 'page', 'main');
+	$nav = html_nav_bar('aggregate_templates.php',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		5,
+		__('Aggregate Templates'),
+		'page',
+		'main');
 
 	form_start('aggregate_templates.php', 'chk');
 
@@ -623,12 +642,21 @@ function aggregate_template() : void {
 
 			form_alternate_row('line' . $template['id'], true, $disabled);
 
-			form_selectable_cell(filter_value($template['name'], grv('filter'), 'aggregate_templates.php?action=edit&id=' . $template['id'] . '&page=1'), $template['id']);
+			form_selectable_cell(filter_value($template['name'],
+				grv('filter'),
+				'aggregate_templates.php?action=edit&id=' . $template['id'] . '&page=1'),
+				$template['id']);
 			form_selectable_cell($disabled ? __('No') : __('Yes'), $template['id'], '', 'right');
 
 			$url = 'aggregate_graphs.php?reset=true&template_id=' . $template['id'];
 
-			form_selectable_cell(filter_value(number_format_i18n($template['graphs'], -1), '', $url), $template['id'], '', 'right');
+			form_selectable_cell(filter_value(number_format_i18n($template['graphs'],
+				-1),
+				'',
+				$url),
+				$template['id'],
+				'',
+				'right');
 
 			form_selectable_cell(filter_value($template['graph_template_name'], grv('filter')), $template['id']);
 

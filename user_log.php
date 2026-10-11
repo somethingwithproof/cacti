@@ -103,7 +103,8 @@ function view_user_log() : void {
 		ON ua.username = ul.username
 		AND ua.id = ul.user_id
 		$sql_where
-		ORDER BY " . sanitize_sql_column(grv('sort_column'), 'time') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') . '
+		ORDER BY " . sanitize_sql_column(grv('sort_column'),
+		'time') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') . '
 		LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows;
 
 	$user_log = db_fetch_assoc_prepared($user_log_sql, $sql_params);
@@ -117,7 +118,15 @@ function view_user_log() : void {
 		'ip'        => [__('IP Address'), 'DESC']
 	];
 
-	$nav = html_nav_bar('user_log.php?user_id=' . grv('user_id') . '&filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 6, __('Login Attempts'), 'page', 'main');
+	$nav = html_nav_bar('user_log.php?user_id=' . grv('user_id') . '&filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		6,
+		__('Login Attempts'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -147,7 +156,8 @@ function view_user_log() : void {
 
 			form_selectable_cell(filter_value($item['time'], grv('filter')), $i);
 
-			form_selectable_cell(($item['result'] == 0 ? __('Failed') : ($item['result'] == 1 ? __('Success - Password') : ($item['result'] == 3 ? __('Success - Password Change') : __('Success - Token')))), $i);
+			form_selectable_cell(($item['result'] == 0 ? __('Failed') : ($item['result'] == 1 ? __('Success - Password') : ($item['result'] == 3 ? __('Success - Password Change') : __('Success - Token')))),
+				$i);
 
 			form_selectable_cell(filter_value($item['ip'], grv('filter')), $i);
 

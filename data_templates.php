@@ -95,10 +95,19 @@ function form_save() : void {
 		$save2['local_data_template_data_id'] = 0;
 		$save2['local_data_id']               = 0;
 
-		$save2['data_input_id'] = CactiValidator::validateInput(grv('data_input_id'), 'data_input_id', [new Assert\Regex('/^[0-9]+$/')], 3);
+		$save2['data_input_id'] = CactiValidator::validateInput(grv('data_input_id'),
+			'data_input_id',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
 		$save2['t_name']        = CactiValidator::validateInput((isrv('t_name') ? gnrv('t_name') : ''), 't_name', [], 3);
-		$save2['name']          = CactiValidator::validateInput(gnrv('name'), 'name', (isrv('t_name') ? [] : [new Assert\NotBlank()]), 3);
-		$save2['t_active']      = CactiValidator::validateInput((isrv('t_active') ? gnrv('t_active') : ''), 't_active', [], 3);
+		$save2['name']          = CactiValidator::validateInput(gnrv('name'),
+			'name',
+			(isrv('t_name') ? [] : [new Assert\NotBlank()]),
+			3);
+		$save2['t_active']      = CactiValidator::validateInput((isrv('t_active') ? gnrv('t_active') : ''),
+			't_active',
+			[],
+			3);
 		$save2['active']        = CactiValidator::validateInput((isrv('active') ? gnrv('active') : ''), 'active', [], 3);
 
 		$rrd_step = db_fetch_cell_prepared('SELECT step
@@ -113,8 +122,14 @@ function form_save() : void {
 
 		$save2['rrd_step'] = $rrd_step;
 
-		$save2['t_data_source_profile_id'] = CactiValidator::validateInput((isrv('t_data_source_profile_id') ? gnrv('t_data_source_profile_id') : ''), 't_data_source_profile_id', [], 3);
-		$save2['data_source_profile_id']   = CactiValidator::validateInput(grv('data_source_profile_id'), 'data_source_profile_id', [new Assert\Regex('/^[0-9]+$/')], 3);
+		$save2['t_data_source_profile_id'] = CactiValidator::validateInput((isrv('t_data_source_profile_id') ? gnrv('t_data_source_profile_id') : ''),
+			't_data_source_profile_id',
+			[],
+			3);
+		$save2['data_source_profile_id']   = CactiValidator::validateInput(grv('data_source_profile_id'),
+			'data_source_profile_id',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
 
 		// save: data_template_rrd
 		$save3['id']                         = grv('data_template_rrd_id');
@@ -122,27 +137,57 @@ function form_save() : void {
 		$save3['local_data_template_rrd_id'] = 0;
 		$save3['local_data_id']              = 0;
 
-		$save3['t_rrd_maximum']         = CactiValidator::validateInput((isrv('t_rrd_maximum') ? gnrv('t_rrd_maximum') : ''), 't_rrd_maximum', [], 3);
+		$save3['t_rrd_maximum']         = CactiValidator::validateInput((isrv('t_rrd_maximum') ? gnrv('t_rrd_maximum') : ''),
+			't_rrd_maximum',
+			[],
+			3);
 
-		$save3['rrd_maximum']           = CactiValidator::validateInput(gnrv('rrd_maximum'), 'rrd_maximum', [new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\|)\z/')], 3);
+		$save3['rrd_maximum']           = CactiValidator::validateInput(gnrv('rrd_maximum'),
+			'rrd_maximum',
+			[new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\|)\z/')],
+			3);
 
-		$save3['t_rrd_minimum']         = CactiValidator::validateInput((isrv('t_rrd_minimum') ? gnrv('t_rrd_minimum') : ''), 't_rrd_minimum', [], 3);
+		$save3['t_rrd_minimum']         = CactiValidator::validateInput((isrv('t_rrd_minimum') ? gnrv('t_rrd_minimum') : ''),
+			't_rrd_minimum',
+			[],
+			3);
 
-		$save3['rrd_minimum']           = CactiValidator::validateInput(gnrv('rrd_minimum'), 'rrd_minimum', [new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U)\z/')], 3);
+		$save3['rrd_minimum']           = CactiValidator::validateInput(gnrv('rrd_minimum'),
+			'rrd_minimum',
+			[new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U)\z/')],
+			3);
 
 		$save3['rrd_heartbeat']         = $rrd_heartbeat;
 
-		$save3['t_data_source_type_id'] = CactiValidator::validateInput((isrv('t_data_source_type_id') ? gnrv('t_data_source_type_id') : ''), 't_data_source_type_id', [], 3);
+		$save3['t_data_source_type_id'] = CactiValidator::validateInput((isrv('t_data_source_type_id') ? gnrv('t_data_source_type_id') : ''),
+			't_data_source_type_id',
+			[],
+			3);
 
-		$save3['data_source_type_id']   = CactiValidator::validateInput(grv('data_source_type_id'), 'data_source_type_id', [new Assert\Regex('/^[0-9]+$/')], 3);
+		$save3['data_source_type_id']   = CactiValidator::validateInput(grv('data_source_type_id'),
+			'data_source_type_id',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
 
-		$save3['t_data_source_name']    = CactiValidator::validateInput((isrv('t_data_source_name') ? gnrv('t_data_source_name') : ''), 't_data_source_name', [], 3);
+		$save3['t_data_source_name']    = CactiValidator::validateInput((isrv('t_data_source_name') ? gnrv('t_data_source_name') : ''),
+			't_data_source_name',
+			[],
+			3);
 
-		$save3['data_source_name']      = CactiValidator::validateInput(gnrv('data_source_name'), 'data_source_name', [new Assert\Regex('/^[a-zA-Z0-9_]{1,19}$/')], 3);
+		$save3['data_source_name']      = CactiValidator::validateInput(gnrv('data_source_name'),
+			'data_source_name',
+			[new Assert\Regex('/^[a-zA-Z0-9_]{1,19}$/')],
+			3);
 
-		$save3['t_data_input_field_id'] = CactiValidator::validateInput((isrv('t_data_input_field_id') ? gnrv('t_data_input_field_id') : ''), 't_data_input_field_id', [], 3);
+		$save3['t_data_input_field_id'] = CactiValidator::validateInput((isrv('t_data_input_field_id') ? gnrv('t_data_input_field_id') : ''),
+			't_data_input_field_id',
+			[],
+			3);
 
-		$save3['data_input_field_id']   = CactiValidator::validateInput((isrv('data_input_field_id') ? gnrv('data_input_field_id') : '0'), 'data_input_field_id', [], 3);
+		$save3['data_input_field_id']   = CactiValidator::validateInput((isrv('data_input_field_id') ? gnrv('data_input_field_id') : '0'),
+			'data_input_field_id',
+			[],
+			3);
 
 		if ($save3['rrd_minimum'] != 'U' && $save3['rrd_maximum'] != 'U') {
 			if ($save3['rrd_minimum'] >= $save3['rrd_maximum']) {
@@ -274,7 +319,10 @@ function form_save() : void {
 
 			if (cacti_sizeof($data_template_fields)) {
 				foreach ($data_template_fields as $data_template_field) {
-					raise_message('data_template_rrd_' . $data_template_field['dtr_id'], __esc('Field "%s" is missing an Output Field.  Select the Output Field associated with this Data Source, and press Save again.', $data_template_field['data_source_name']), MESSAGE_LEVEL_WARN);
+					raise_message('data_template_rrd_' . $data_template_field['dtr_id'],
+						__esc('Field "%s" is missing an Output Field.  Select the Output Field associated with this Data Source, and press Save again.',
+							$data_template_field['data_source_name']),
+						MESSAGE_LEVEL_WARN);
 				}
 			}
 		}
@@ -397,8 +445,10 @@ function form_actions() : void {
 					WHERE ' . array_to_sql_or($selected_items, 'data_template_id') . '
 					AND local_data_id=0');
 
-				db_execute('DELETE FROM data_template_data WHERE ' . array_to_sql_or($selected_items, 'data_template_id') . ' AND local_data_id=0');
-				db_execute('DELETE FROM data_template_rrd WHERE ' . array_to_sql_or($selected_items, 'data_template_id') . ' AND local_data_id=0');
+				db_execute('DELETE FROM data_template_data WHERE ' . array_to_sql_or($selected_items,
+					'data_template_id') . ' AND local_data_id=0');
+				db_execute('DELETE FROM data_template_rrd WHERE ' . array_to_sql_or($selected_items,
+					'data_template_id') . ' AND local_data_id=0');
 				db_execute('DELETE FROM snmp_query_graph_rrd WHERE ' . array_to_sql_or($selected_items, 'data_template_id'));
 				db_execute('DELETE FROM snmp_query_graph_rrd_sv WHERE ' . array_to_sql_or($selected_items, 'data_template_id'));
 				db_execute('DELETE FROM data_template WHERE ' . array_to_sql_or($selected_items, 'id'));
@@ -461,9 +511,13 @@ function form_actions() : void {
 
 						if ($push_out) {
 							$php_binary = read_config_option('path_php_binary');
-							exec_background($php_binary, CACTI_PATH_CLI . '/rebuild_poller_cache.php --data-template-id=' . $selected_items[$i]);
+							exec_background($php_binary,
+								CACTI_PATH_CLI . '/rebuild_poller_cache.php --data-template-id=' . $selected_items[$i]);
 
-							raise_message('repopulate_' . $i, __esc('The Poller Cache operation has been launched in background for Data Template ID %d.', $selected_items[$i]), MESSAGE_LEVEL_INFO);
+							raise_message('repopulate_' . $i,
+								__esc('The Poller Cache operation has been launched in background for Data Template ID %d.',
+									$selected_items[$i]),
+								MESSAGE_LEVEL_INFO);
 						}
 					}
 				}
@@ -484,7 +538,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM data_template WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM data_template WHERE id = ?',
+					[$matches[1]])) . '</li>';
 				$iarray[] = $matches[1];
 			}
 		}
@@ -833,9 +888,23 @@ function template_edit() : void {
 			'title'    => __('New')
 		]] : '';
 
-		html_start_box(__('Data Source Item [%s]', (isset($template_rrd) ? htmle($template_rrd['data_source_name']) : '')), '100%', true, 3, 'center', $add_button, __('New'));
+		html_start_box(__('Data Source Item [%s]',
+			(isset($template_rrd) ? htmle($template_rrd['data_source_name']) : '')),
+			'100%',
+			true,
+			3,
+			'center',
+			$add_button,
+			__('New'));
 	} else {
-		html_start_box(__('Data Source Item [%s]', (isset($template_rrd) ? htmle($template_rrd['data_source_name']) : '')), '100%', true, 3, 'center', '', '');
+		html_start_box(__('Data Source Item [%s]',
+			(isset($template_rrd) ? htmle($template_rrd['data_source_name']) : '')),
+			'100%',
+			true,
+			3,
+			'center',
+			'',
+			'');
 	}
 
 	// data input fields list
@@ -973,7 +1042,14 @@ function template_edit() : void {
 
 				?>
 				<div class='formColumnLeft'>
-					<div class='formFieldName customDataCheckbox <?php print $disable; ?>'><?php form_checkbox('t_value_' . $field['data_name'], $old_tvalue, '', '', '', grv('id'), '', $message); ?><?php print htmle($field['name']); ?><div class='formTooltip'><?php print display_tooltip($help); ?></div>
+					<div class='formFieldName customDataCheckbox <?php print $disable; ?>'><?php form_checkbox('t_value_' . $field['data_name'],
+						$old_tvalue,
+						'',
+						'',
+						'',
+						grv('id'),
+						'',
+						$message); ?><?php print htmle($field['name']); ?><div class='formTooltip'><?php print display_tooltip($help); ?></div>
 					</div>
 				</div>
 				<div class='formColumnRight <?php print $disable; ?>'>
@@ -1164,7 +1240,15 @@ function data_templates() : void {
 		]
 	];
 
-	$nav = html_nav_bar('data_templates.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Data Templates'), 'page', 'main');
+	$nav = html_nav_bar('data_templates.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Data Templates'),
+		'page',
+		'main');
 
 	form_start('data_templates.php', 'chk');
 
@@ -1190,14 +1274,24 @@ function data_templates() : void {
 
 			form_alternate_row('line' . $template['id'], true, $disabled);
 
-			form_selectable_cell(filter_value($template['name'], grv('filter'), 'data_templates.php?action=template_edit&id=' . $template['id']), $template['id']);
+			form_selectable_cell(filter_value($template['name'],
+				grv('filter'),
+				'data_templates.php?action=template_edit&id=' . $template['id']),
+				$template['id']);
 			form_selectable_cell($template['id'], $template['id'], '', 'right');
 			form_selectable_cell($disabled ? __('No') : __('Yes'), $template['id'], '', 'right');
 
-			form_selectable_cell(filter_value(number_format_i18n($template['data_sources']), '', $ds_url), $template['id'], '', 'right');
+			form_selectable_cell(filter_value(number_format_i18n($template['data_sources']),
+				'',
+				$ds_url),
+				$template['id'],
+				'',
+				'right');
 
-			form_selectable_cell((empty($template['data_input_method']) ? '<em>' . __('None') . '</em>' : htmle($template['data_input_method'])), $template['id']);
-			form_selectable_cell((empty($template['profile_name']) ? __('External') : htmle($template['profile_name'])), $template['id']);
+			form_selectable_cell((empty($template['data_input_method']) ? '<em>' . __('None') . '</em>' : htmle($template['data_input_method'])),
+				$template['id']);
+			form_selectable_cell((empty($template['profile_name']) ? __('External') : htmle($template['profile_name'])),
+				$template['id']);
 			form_selectable_cell((($template['active'] == 'on') ? __('Active') : __('Disabled')), $template['id']);
 			form_selectable_cell($template['last_updated'], $template['id'], '', 'right');
 
@@ -1328,7 +1422,11 @@ function draw_data_template_filter(bool $render = false) : void {
 	$filters = create_data_template_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Data Templates'), 'data_templates.php', 'form_data', 'sess_dt', 'data_templates.php?action=template_edit');
+	$pageFilter = new CactiTableFilter(__('Data Templates'),
+		'data_templates.php',
+		'form_data',
+		'sess_dt',
+		'data_templates.php?action=template_edit');
 
 	$pageFilter->rows_label = __('Data Templates');
 	$pageFilter->set_filter_array($filters);

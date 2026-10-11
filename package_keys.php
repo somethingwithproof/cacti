@@ -74,7 +74,8 @@ function form_actions() : void {
 	$p_array = [];
 
 	foreach (PackageListFilter::selectedIdsFromPost() as $id) {
-		$p_list .= '<li>' . htmle(db_fetch_cell_prepared('SELECT author FROM package_public_keys WHERE id = ?', [$id])) . '</li>';
+		$p_list .= '<li>' . htmle(db_fetch_cell_prepared('SELECT author FROM package_public_keys WHERE id = ?',
+			[$id])) . '</li>';
 		$p_array[] = $id;
 	}
 
@@ -90,12 +91,16 @@ function form_actions() : void {
 		if (gnrv('drp_action') == '1') { // delete
 			print "<tr>
 				<td class='textArea'>
-					<p>" . __n('Click \'Continue\' to delete the following .', 'Click \'Continue\' to delete following Package Repositories.', cacti_sizeof($p_array)) . "</p>
+					<p>" . __n('Click \'Continue\' to delete the following .',
+				'Click \'Continue\' to delete following Package Repositories.',
+				cacti_sizeof($p_array)) . "</p>
 					<div class='itemlist'><ul>$p_list</ul></div>
 				</td>
 			</tr>";
 
-			$save_html = "<button type='button' class='ui-button ui-corner-all ui-widget' value='cancel' onClick='cactiReturnTo()'>" . __esc('Cancel') . "</button><button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Delete Public Key', 'Delete Public Keys', cacti_sizeof($p_array)) . "' value='continue'>" . __esc('Continue') . '</button>';
+			$save_html = "<button type='button' class='ui-button ui-corner-all ui-widget' value='cancel' onClick='cactiReturnTo()'>" . __esc('Cancel') . "</button><button type='submit' class='ui-button ui-corner-all ui-widget ui-state-active' title='" . __n('Delete Public Key',
+				'Delete Public Keys',
+				cacti_sizeof($p_array)) . "' value='continue'>" . __esc('Continue') . '</button>';
 		}
 	} else {
 		raise_message(40);
@@ -187,7 +192,15 @@ function public_keys() : void {
 		],
 	];
 
-	$nav = html_nav_bar($filter->paginationUrl('package_keys.php'), MAX_DISPLAY_PAGES, $filter->page(), $filter->rows(), $total_rows, cacti_sizeof($display_text) + 1, __('Package Public Keys'), 'page', 'main');
+	$nav = html_nav_bar($filter->paginationUrl('package_keys.php'),
+		MAX_DISPLAY_PAGES,
+		$filter->page(),
+		$filter->rows(),
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Package Public Keys'),
+		'page',
+		'main');
 
 	form_start('package_keys.php', 'chk');
 

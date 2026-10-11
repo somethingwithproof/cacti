@@ -124,7 +124,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM graph_templates_gprint WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM graph_templates_gprint WHERE id = ?',
+					[$matches[1]])) . '</li>';
 
 				$iarray[] = $matches[1];
 			}
@@ -186,7 +187,11 @@ function gprint_presets() : void {
 	global $actions, $item_rows;
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('GRPRINT Presets'), 'gprint_presets.php', 'form_gprint', 'sess_gp', 'gprint_presets.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('GRPRINT Presets'),
+		'gprint_presets.php',
+		'form_gprint',
+		'sess_gp',
+		'gprint_presets.php?action=edit');
 
 	$pageFilter->rows_label = __('GPRINTs');
 	$pageFilter->has_graphs = true;
@@ -254,7 +259,15 @@ function gprint_presets() : void {
 		]
 	];
 
-	$nav = html_nav_bar('gprint_presets.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('GPRINTs'), 'page', 'main');
+	$nav = html_nav_bar('gprint_presets.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('GPRINTs'),
+		'page',
+		'main');
 
 	form_start('gprint_presets.php', 'chk');
 
@@ -276,7 +289,10 @@ function gprint_presets() : void {
 
 			form_alternate_row('line' . $gp['id'], false, $disabled);
 
-			form_selectable_cell(filter_value($gp['name'], grv('filter'), 'gprint_presets.php?action=edit&id=' . $gp['id']), $gp['id']);
+			form_selectable_cell(filter_value($gp['name'],
+				grv('filter'),
+				'gprint_presets.php?action=edit&id=' . $gp['id']),
+				$gp['id']);
 			form_selectable_ecell($gp['gprint_text'], $gp['id'], '', 'right');
 			form_selectable_cell($disabled ? __('No') : __('Yes'), $gp['id'], '', 'right');
 			form_selectable_cell(number_format_i18n($gp['graphs'], -1), $gp['id'], '', 'right');

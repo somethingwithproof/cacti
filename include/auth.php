@@ -64,7 +64,10 @@ if (is_install_needed() && !defined('IN_CACTI_INSTALL')) {
  * redirect+callback endpoint: every request to it is, by definition, still
  * unauthenticated, so it must never hit the login-page redirect below.
  */
-if (get_current_page() == 'logout.php' || get_current_page() == 'auth_changepassword.php' || get_current_page() == 'auth_resetpassword.php' || get_current_page() == 'login_sso.php') {
+if (get_current_page() == 'logout.php' ||
+	get_current_page() == 'auth_changepassword.php' ||
+	get_current_page() == 'auth_resetpassword.php' ||
+	get_current_page() == 'login_sso.php') {
 	return true;
 }
 
@@ -76,7 +79,8 @@ api_plugin_hook_function('auth_alternate_realms');
  */
 if ($auth_method != AUTH_METHOD_BASIC) {
 	if (isset($_SESSION[SESS_CHANGE_PASSWORD])) {
-		header('Location: ' . CACTI_PATH_URL . 'auth_changepassword.php?ref=' . rawurlencode(validate_redirect_url($_SERVER['HTTP_REFERER'] ?? '', 'index.php')));
+		header('Location: ' . CACTI_PATH_URL . 'auth_changepassword.php?ref=' . rawurlencode(validate_redirect_url($_SERVER['HTTP_REFERER'] ?? '',
+			'index.php')));
 		exit;
 	}
 
@@ -137,7 +141,9 @@ if ($auth_method == AUTH_METHOD_BASIC && !isset($_SESSION[SESS_USER_ID])) {
 
 			$client_addr = get_client_addr();
 
-			cacti_log("LOGIN: User '" . $current_user['username'] . "' authenticated via Basic Authentication from IP Address '" . $client_addr . "'", false, 'AUTH');
+			cacti_log("LOGIN: User '" . $current_user['username'] . "' authenticated via Basic Authentication from IP Address '" . $client_addr . "'",
+				false,
+				'AUTH');
 
 			db_execute_prepared('INSERT IGNORE INTO user_log
 				(username, user_id, result, ip, time)
@@ -350,7 +356,8 @@ if (empty($_SESSION[SESS_USER_ID])) {
 		}
 
 		if (isset($_SERVER['HTTP_REFERER'])) {
-			$goBack = "<td colspan='2' class='center'>[<a href='" . validate_redirect_url($_SERVER['HTTP_REFERER'], $_SERVER['SCRIPT_NAME']) . "'>" . __('Return') . "</a> | <a href='" . CACTI_PATH_URL . "logout.php'>" . __('Login Again') . '</a>]</td>';
+			$goBack = "<td colspan='2' class='center'>[<a href='" . validate_redirect_url($_SERVER['HTTP_REFERER'],
+				$_SERVER['SCRIPT_NAME']) . "'>" . __('Return') . "</a> | <a href='" . CACTI_PATH_URL . "logout.php'>" . __('Login Again') . '</a>]</td>';
 		} elseif ($auth_method != AUTH_METHOD_BASIC) {
 			$goBack = "<td colspan='2' class='center'>[<a href='" . CACTI_PATH_URL . "logout.php'>" . __('Login Again') . '</a>]</td>';
 		} else {

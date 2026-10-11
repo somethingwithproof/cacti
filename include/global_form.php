@@ -39,7 +39,8 @@ global $tree_sort_types;
 // Workaround End
 
 if (!defined('VALID_HOST_FIELDS')) {
-	$string = api_plugin_hook_function('valid_host_fields', '(hostname|host_id|location|snmp_community|snmp_username|snmp_password|snmp_auth_protocol|snmp_priv_passphrase|snmp_priv_protocol|snmp_context|snmp_engine_id|snmp_version|snmp_port|snmp_timeout|snmp_retries|external_id)');
+	$string = api_plugin_hook_function('valid_host_fields',
+		'(hostname|host_id|location|snmp_community|snmp_username|snmp_password|snmp_auth_protocol|snmp_priv_passphrase|snmp_priv_protocol|snmp_context|snmp_engine_id|snmp_version|snmp_port|snmp_timeout|snmp_retries|external_id)');
 	define('VALID_HOST_FIELDS', $string);
 }
 $valid_host_fields = VALID_HOST_FIELDS;
@@ -477,7 +478,8 @@ $fields_data_input_field_edit_2 = [
 	'data_name' => [
 		'method'        => 'textbox',
 		'friendly_name' => __('Field [%s]', '|arg1:|'),
-		'description'   => __('Enter a name for this %s field.  Note: If using name value pairs in your script, for example: NAME:VALUE, it is important that the name matches your output field name identically to the script output name or names.', '|arg1:|'),
+		'description'   => __('Enter a name for this %s field.  Note: If using name value pairs in your script, for example: NAME:VALUE, it is important that the name matches your output field name identically to the script output name or names.',
+			'|arg1:|'),
 		'value'         => '|arg2:data_name|',
 		'max_length'    => '50',
 		'size'          => '40'
@@ -521,7 +523,14 @@ $fields_data_input_field_edit = [
 	'type_code' => [
 		'method'        => 'textbox',
 		'friendly_name' => __('Special Type Code'),
-		'description'   => __('If this field should be treated specially by host templates, indicate so here. Valid keywords for this field are %s', str_replace(')', "'", str_replace('(', "'", str_replace('|', ', ', $valid_host_fields)))),
+		'description'   => __('If this field should be treated specially by host templates, indicate so here. Valid keywords for this field are %s',
+			str_replace(')',
+				"'",
+				str_replace('(',
+					"'",
+					str_replace('|',
+						', ',
+						$valid_host_fields)))),
 		'value'         => '|arg1:type_code|',
 		'max_length'    => '40',
 		'size'          => '20'

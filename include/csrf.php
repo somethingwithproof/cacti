@@ -61,7 +61,9 @@ function csrf_guard() : CactiCsrfGuard {
 			exit(1);
 		}
 
-		cacti_log('WARNING: symfony/security-csrf is not yet available during installation, so CSRF validation is disabled for this request', false, 'CSRF');
+		cacti_log('WARNING: symfony/security-csrf is not yet available during installation, so CSRF validation is disabled for this request',
+			false,
+			'CSRF');
 
 		$guard = new CactiCsrfGuard(null, false);
 
@@ -229,7 +231,10 @@ function csrf_deprecated(string $function) : void {
 
 	$seen[$function] = true;
 
-	cacti_log($function . '() is deprecated and will be removed; use csrf_guard() instead', false, 'CSRF', POLLER_VERBOSITY_DEBUG);
+	cacti_log($function . '() is deprecated and will be removed; use csrf_guard() instead',
+		false,
+		'CSRF',
+		POLLER_VERBOSITY_DEBUG);
 }
 
 /**

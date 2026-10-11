@@ -343,7 +343,8 @@ function api_networks_discover(int $network_id, bool $discover_debug, bool $disc
 			if ($poller_id == POLLER_ID) {
 				$args_debug  = ($discover_debug) ? ' --debug' : '';
 				$args_debug .= ($discover_dryrun) ? ' --dryrun' : '';
-				exec_background(read_config_option('path_php_binary'), '-q ' . read_config_option('path_webroot') . "/poller_automation.php --network=$network_id --force" . $args_debug);
+				exec_background(read_config_option('path_php_binary'),
+					'-q ' . read_config_option('path_webroot') . "/poller_automation.php --network=$network_id --force" . $args_debug);
 			} else {
 				$args_debug = ($discover_debug) ? '&debug=true' : '';
 
@@ -352,10 +353,16 @@ function api_networks_discover(int $network_id, bool $discover_debug, bool $disc
 				$response = call_remote_data_collector($poller_id, $url, 'AUTOM8');
 			}
 		} else {
-			raise_message('automation_message', __esc('Can Not Restart Discovery for Discovery in Progress for Network \'%s\'', $name), MESSAGE_LEVEL_ERROR);
+			raise_message('automation_message',
+				__esc('Can Not Restart Discovery for Discovery in Progress for Network \'%s\'',
+					$name),
+				MESSAGE_LEVEL_ERROR);
 		}
 	} else {
-		raise_message('automation_message', __esc('Can Not Perform Discovery for Disabled Network \'%s\'', $name), MESSAGE_LEVEL_ERROR);
+		raise_message('automation_message',
+			__esc('Can Not Perform Discovery for Disabled Network \'%s\'',
+				$name),
+			MESSAGE_LEVEL_ERROR);
 	}
 
 	force_session_data();
@@ -942,7 +949,11 @@ function networks() : void {
 	global $actions, $networks, $item_rows, $sched_types;
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Network Rules'), 'automation_networks.php', 'networks', 'sess_networks', 'automation_networks.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('Network Rules'),
+		'automation_networks.php',
+		'networks',
+		'sess_networks',
+		'automation_networks.php?action=edit');
 
 	$pageFilter->rows_label  = __('Networks');
 	$pageFilter->has_refresh = true;
@@ -963,7 +974,15 @@ function networks() : void {
 
 	$total_rows = db_fetch_cell('SELECT COUNT(*) FROM automation_networks ' . $sql_where);
 
-	$nav = html_nav_bar('automation_networks.php', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 14, __('Networks'), 'page', 'main');
+	$nav = html_nav_bar('automation_networks.php',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		14,
+		__('Networks'),
+		'page',
+		'main');
 
 	form_start('automation_networks.php', 'chk');
 
@@ -1090,17 +1109,34 @@ function networks() : void {
 
 			form_alternate_row('line' . $network['id'], true);
 
-			form_selectable_cell('<a class="linkEditMain" href="' . htmle('automation_networks.php?action=edit&id=' . $network['id']) . '">' . htmle($network['name']) . '</a>', $network['id']);
+			form_selectable_cell('<a class="linkEditMain" href="' . htmle('automation_networks.php?action=edit&id=' . $network['id']) . '">' . htmle($network['name']) . '</a>',
+				$network['id']);
 			form_selectable_ecell($network['data_collector'], $network['id']);
 			form_selectable_cell($sched_types[$network['sched_type']], $network['id']);
 			form_selectable_cell(number_format_i18n($network['total_ips']), $network['id'], '', 'right');
 			form_selectable_cell($mystat, $network['id'], '', 'right');
 			form_selectable_cell($progress, $network['id'], '', 'right');
-			form_selectable_cell(number_format_i18n($updown['up']) . '/' . number_format_i18n($updown['snmp']), $network['id'], '', 'right');
+			form_selectable_cell(number_format_i18n($updown['up']) . '/' . number_format_i18n($updown['snmp']),
+				$network['id'],
+				'',
+				'right');
 			form_selectable_cell(number_format_i18n($network['threads']), $network['id'], '', 'right');
 			form_selectable_cell(round($network['last_runtime'], 2), $network['id'], '', 'right');
-			form_selectable_cell($network['enabled'] == '' || $network['sched_type'] == SCHEDULE_MANUAL ? __('N/A') : ($network['next_start'] == '0000-00-00 00:00:00' ? substr($network['start_at'], 0, 16) : substr($network['next_start'], 0, 16)), $network['id'], '', 'right');
-			form_selectable_cell($network['last_started'] == '0000-00-00 00:00:00' ? __('Never') : substr($network['last_started'], 0, 16), $network['id'], '', 'right');
+			form_selectable_cell($network['enabled'] == '' ||
+				$network['sched_type'] == SCHEDULE_MANUAL ? __('N/A') : ($network['next_start'] == '0000-00-00 00:00:00' ? substr($network['start_at'],
+					0,
+					16) : substr($network['next_start'],
+						0,
+						16)),
+				$network['id'],
+				'',
+				'right');
+			form_selectable_cell($network['last_started'] == '0000-00-00 00:00:00' ? __('Never') : substr($network['last_started'],
+				0,
+				16),
+				$network['id'],
+				'',
+				'right');
 			form_checkbox_cell($network['name'], $network['id']);
 
 			form_end_row();

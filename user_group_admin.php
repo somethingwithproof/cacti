@@ -456,7 +456,8 @@ function form_actions() : void {
 				// ====================================================
 
 				if (gnrv('drp_action') != '2') {
-					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM user_auth_group WHERE id = ?', [$matches[1]])) . '</li>';
+					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM user_auth_group WHERE id = ?',
+						[$matches[1]])) . '</li>';
 				}
 
 				$iarray[] = $matches[1];
@@ -521,7 +522,9 @@ function form_save() : void {
 		// ====================================================
 
 		// check duplicate group
-		if (cacti_sizeof(db_fetch_row_prepared('SELECT * FROM user_auth_group WHERE name = ? AND id != ?', [gnrv('name'), gnrv('id')]))) {
+		if (cacti_sizeof(db_fetch_row_prepared('SELECT * FROM user_auth_group WHERE name = ? AND id != ?',
+			[gnrv('name'),
+			gnrv('id')]))) {
 			raise_message(12);
 		}
 
@@ -545,7 +548,11 @@ function form_save() : void {
 
 		foreach ($providers as $provider) {
 			// no-validation: free-text IdP/directory group name; escaped at every sink (ldap_escape in group lookups, prepared statements / json_encode on store)
-			$group_name = trim((string) CactiValidator::validateInput(gnrv('auto_assign_' . $provider['id'], ''), 'auto_assign_' . $provider['id'], [], 3));
+			$group_name = trim((string) CactiValidator::validateInput(gnrv('auto_assign_' . $provider['id'],
+				''),
+				'auto_assign_' . $provider['id'],
+				[],
+				3));
 
 			if ($group_name !== '') {
 				$auto_assignments[(string) $provider['id']] = $group_name;
@@ -567,7 +574,8 @@ function form_save() : void {
 			}
 		}
 
-		header('Location: user_group_admin.php?action=edit&tab=general&id=' . (isset($group_id) && $group_id > 0 ? $group_id : gnrv('id')));
+		header('Location: user_group_admin.php?action=edit&tab=general&id=' . (isset($group_id) &&
+			$group_id > 0 ? $group_id : gnrv('id')));
 
 		exit;
 	}
@@ -578,7 +586,10 @@ function form_save() : void {
 		foreach ($_POST as $var => $val) {
 			if (preg_match('/^[section]/i', $var)) {
 				if (substr($var, 0, 7) == 'section') {
-					db_execute_prepared('REPLACE INTO user_auth_group_realm (group_id, realm_id) VALUES (?, ?)', [grv('id'), substr($var, 7)]);
+					db_execute_prepared('REPLACE INTO user_auth_group_realm (group_id, realm_id) VALUES (?, ?)',
+						[grv('id'),
+						substr($var,
+							7)]);
 				}
 			}
 		}
@@ -597,10 +608,17 @@ function form_save() : void {
 			foreach ($tab_fields as $field_name => $field_array) {
 				if ((isset($field_array['items'])) && (is_array($field_array['items']))) {
 					foreach ($field_array['items'] as $sub_field_name => $sub_field_array) {
-						db_execute_prepared('REPLACE INTO settings_user_group (group_id, name, value) VALUES (?, ?, ?)', [gfrv('id'), $sub_field_name, gnrv($sub_field_name, '')]);
+						db_execute_prepared('REPLACE INTO settings_user_group (group_id, name, value) VALUES (?, ?, ?)',
+							[gfrv('id'),
+							$sub_field_name,
+							gnrv($sub_field_name,
+								'')]);
 					}
 				} else {
-					db_execute_prepared('REPLACE INTO settings_user_group (group_id, name, value) VALUES (?, ?, ?)', [grv('id'), $field_name, gnrv($field_name)]);
+					db_execute_prepared('REPLACE INTO settings_user_group (group_id, name, value) VALUES (?, ?, ?)',
+						[grv('id'),
+						$field_name,
+						gnrv($field_name)]);
 				}
 			}
 		}
@@ -629,13 +647,21 @@ function perm_remove() : void {
 	// ====================================================
 
 	if (grv('type') == 'graph') {
-		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=1 AND group_id = ? AND item_id = ?', [grv('group_id'), grv('id')]);
+		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=1 AND group_id = ? AND item_id = ?',
+			[grv('group_id'),
+			grv('id')]);
 	} elseif (grv('type') == 'tree') {
-		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=2 AND group_id = ? AND item_id = ?', [grv('group_id'), grv('id')]);
+		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=2 AND group_id = ? AND item_id = ?',
+			[grv('group_id'),
+			grv('id')]);
 	} elseif (grv('type') == 'host') {
-		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=3 AND group_id = ? AND item_id = ?', [grv('group_id'), grv('id')]);
+		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=3 AND group_id = ? AND item_id = ?',
+			[grv('group_id'),
+			grv('id')]);
 	} elseif (grv('type') == 'graph_template') {
-		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=4 AND group_id = ? AND item_id = ?', [grv('group_id'), grv('id')]);
+		db_execute_prepared('DELETE FROM user_auth_group_perms WHERE type=4 AND group_id = ? AND item_id = ?',
+			[grv('group_id'),
+			grv('id')]);
 	}
 
 	header('Location: user_group_admin.php?action=edit&tab=gperms&id=' . grv('group_id'));
@@ -695,7 +721,15 @@ function user_group_members_edit(string $header_label) : void {
 		__('Realm')
 	];
 
-	$nav = html_nav_bar('user_group_admin.php?action=edit&tab=members&id=' . grv('id'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Users'), 'page', 'main');
+	$nav = html_nav_bar('user_group_admin.php?action=edit&tab=members&id=' . grv('id'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Users'),
+		'page',
+		'main');
 
 	form_start('user_group_admin.php?tab=members&id=' . grv('id'), 'chk');
 
@@ -717,7 +751,10 @@ function user_group_members_edit(string $header_label) : void {
 
 			form_alternate_row('line' . $g['id'], true);
 
-			form_selectable_cell(filter_value($g['username'], grv('filter'), 'user_admin.php?action=user_edit&id=' . $g['id']), $g['id']);
+			form_selectable_cell(filter_value($g['username'],
+				grv('filter'),
+				'user_admin.php?action=user_edit&id=' . $g['id']),
+				$g['id']);
 			form_selectable_cell(filter_value($g['full_name'], grv('filter')), $g['id']);
 			form_selectable_cell($g['id'], $g['id']);
 
@@ -907,7 +944,15 @@ function user_group_graph_perms_edit(string $tab, string $header_label) : void {
 				ON h.id = gl.host_id
 				$sql_where");
 
-			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permsg&id=' . grv('id'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 7, __('Graphs'), 'page', 'main');
+			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permsg&id=' . grv('id'),
+				MAX_DISPLAY_PAGES,
+				grv('page'),
+				$rows,
+				$total_rows,
+				7,
+				__('Graphs'),
+				'page',
+				'main');
 
 			form_start('user_group_admin.php?tab=permsg&id=' . grv('id'), 'chk');
 
@@ -1085,7 +1130,15 @@ function user_group_graph_perms_edit(string $tab, string $header_label) : void {
 				__('Hostname')
 			];
 
-			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permsd&id=' . grv('id'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Devices'), 'page', 'main');
+			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permsd&id=' . grv('id'),
+				MAX_DISPLAY_PAGES,
+				grv('page'),
+				$rows,
+				$total_rows,
+				cacti_sizeof($display_text) + 1,
+				__('Devices'),
+				'page',
+				'main');
 
 			form_start('user_group_admin.php?tab=permsd&id=' . grv('id'), 'chk');
 
@@ -1117,7 +1170,9 @@ function user_group_graph_perms_edit(string $tab, string $header_label) : void {
 					}
 					form_selectable_cell((isset($host_graphs[$host['id']]) ? $host_graphs[$host['id']] : 0), $host['id']);
 					form_selectable_cell((isset($host_data_sources[$host['id']]) ? $host_data_sources[$host['id']] : 0), $host['id']);
-					form_selectable_cell(get_colored_device_status(($host['disabled'] == 'on' ? true : false), $host['status']), $host['id']);
+					form_selectable_cell(get_colored_device_status(($host['disabled'] == 'on' ? true : false),
+						$host['status']),
+						$host['id']);
 					form_selectable_cell(filter_value($host['hostname'], grv('filter')), $host['id']);
 
 					form_checkbox_cell($host['description'], $host['id']);
@@ -1201,7 +1256,8 @@ function user_group_graph_perms_edit(string $tab, string $header_label) : void {
 			}
 
 			if (grv('associated') != 'false') {
-				$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . ' (user_auth_group_perms.type = 4 AND user_auth_group_perms.group_id=' . grv('id', 0) . ')';
+				$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . ' (user_auth_group_perms.type = 4 AND user_auth_group_perms.group_id=' . grv('id',
+					0) . ')';
 			}
 
 			$total_rows = db_fetch_cell_prepared("SELECT
@@ -1231,7 +1287,15 @@ function user_group_graph_perms_edit(string $tab, string $header_label) : void {
 
 			$graphs = db_fetch_assoc_prepared($sql_query, [grv('id')]);
 
-			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permste&id=' . grv('id'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 11, __('Graph Templates'), 'page', 'main');
+			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permste&id=' . grv('id'),
+				MAX_DISPLAY_PAGES,
+				grv('page'),
+				$rows,
+				$total_rows,
+				11,
+				__('Graph Templates'),
+				'page',
+				'main');
 
 			form_start('user_group_admin.php?tab=permste&id=' . grv('id'), 'chk');
 
@@ -1345,7 +1409,8 @@ function user_group_graph_perms_edit(string $tab, string $header_label) : void {
 			}
 
 			if (grv('associated') != 'false') {
-				$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . ' (user_auth_group_perms.type = 2 AND user_auth_group_perms.group_id=' . grv('id', 0) . ')';
+				$sql_where .= ($sql_where != '' ? ' AND ' : 'WHERE ') . ' (user_auth_group_perms.type = 2 AND user_auth_group_perms.group_id=' . grv('id',
+					0) . ')';
 			}
 
 			$total_rows = db_fetch_cell('SELECT
@@ -1365,7 +1430,15 @@ function user_group_graph_perms_edit(string $tab, string $header_label) : void {
 
 			$trees = db_fetch_assoc($sql_query);
 
-			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permstr&id=' . grv('id'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 11, __('Trees'), 'page', 'main');
+			$nav = html_nav_bar('user_group_admin.php?action=edit&tab=permstr&id=' . grv('id'),
+				MAX_DISPLAY_PAGES,
+				grv('page'),
+				$rows,
+				$total_rows,
+				11,
+				__('Trees'),
+				'page',
+				'main');
 
 			form_start('user_group_admin.php?tab=permstr&id=' . grv('id'), 'chk');
 
@@ -1598,7 +1671,16 @@ function user_group_realms_edit(string $header_label) : void {
 			}
 
 			print '<div class="flexChild">';
-			form_checkbox('section' . $realm, $old_value, substr($user_auth_realms[$realm], $pos), '', '', '', '', $r['display'], true);
+			form_checkbox('section' . $realm,
+				$old_value,
+				substr($user_auth_realms[$realm],
+					$pos),
+				'',
+				'',
+				'',
+				'',
+				$r['display'],
+				true);
 			print '</div>';
 		}
 
@@ -1688,14 +1770,18 @@ function user_group_settings_edit(string $header_label) : void {
 						$form_array[$field_name]['items'][$sub_field_name]['form_id'] = 1;
 					}
 
-					$form_array[$field_name]['items'][$sub_field_name]['value'] =  db_fetch_cell_prepared('SELECT value FROM settings_user_group WHERE name = ? AND group_id = ?', [$sub_field_name, grv('id')]);
+					$form_array[$field_name]['items'][$sub_field_name]['value'] =  db_fetch_cell_prepared('SELECT value FROM settings_user_group WHERE name = ? AND group_id = ?',
+						[$sub_field_name,
+						grv('id')]);
 				}
 			} else {
 				if (graph_config_value_exists($field_name, grv('id'))) {
 					$form_array[$field_name]['form_id'] = 1;
 				}
 
-				$form_array[$field_name]['value'] = db_fetch_cell_prepared('SELECT value FROM settings_user_group WHERE name = ? AND group_id = ?', [$field_name, grv('id')]);
+				$form_array[$field_name]['value'] = db_fetch_cell_prepared('SELECT value FROM settings_user_group WHERE name = ? AND group_id = ?',
+					[$field_name,
+					grv('id')]);
 			}
 		}
 
@@ -1891,7 +1977,8 @@ function group_edit() : void {
 
 			?>
 			<script type='text/javascript'>
-			var consoleAllowed=<?php print is_user_group_realm_allowed(8, (isset($group) ? $group['id'] : 0)) ? 'true' : 'false'; ?>;
+			var consoleAllowed=<?php print is_user_group_realm_allowed(8,
+				(isset($group) ? $group['id'] : 0)) ? 'true' : 'false'; ?>;
 
 			$(function() {
 				if (!consoleAllowed) {
@@ -1963,7 +2050,11 @@ function user_group() : void {
 	global $group_actions, $item_rows;
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('User Group Management'), 'user_group_admin.php', 'forms', 'sess_ugad', 'user_group_admin.php?action=edit&tab=general');
+	$pageFilter = new CactiTableFilter(__('User Group Management'),
+		'user_group_admin.php',
+		'forms',
+		'sess_ugad',
+		'user_group_admin.php?action=edit&tab=general');
 
 	$pageFilter->rows_label = __('Groups');
 	$pageFilter->render();
@@ -2000,7 +2091,8 @@ function user_group() : void {
 		ON uag.id = uagm.group_id
 		$sql_where
 		GROUP BY uag.id
-		ORDER BY " . sanitize_sql_column(grv('sort_column'), 'name') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
+		ORDER BY " . sanitize_sql_column(grv('sort_column'),
+		'name') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') .
 		' LIMIT ' . ($rows * (grv('page') - 1) . ',' . $rows),
 		$sql_params);
 
@@ -2035,7 +2127,15 @@ function user_group() : void {
 		]
 	];
 
-	$nav = html_nav_bar('user_group_admin.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Groups'), 'page', 'main');
+	$nav = html_nav_bar('user_group_admin.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Groups'),
+		'page',
+		'main');
 
 	form_start('user_group_admin.php', 'chk');
 
@@ -2055,7 +2155,10 @@ function user_group() : void {
 
 			form_alternate_row('line' . $group['id'], true);
 
-			form_selectable_cell(filter_value($group['name'], grv('filter'), 'user_group_admin.php?action=edit&tab=general&id=' . $group['id']), $group['id']);
+			form_selectable_cell(filter_value($group['name'],
+				grv('filter'),
+				'user_group_admin.php?action=edit&tab=general&id=' . $group['id']),
+				$group['id']);
 			form_selectable_cell(($group['members'] > 0 ? number_format_i18n($group['members'], 0) : 'None'), $group['id']);
 			form_selectable_cell(filter_value($group['description'], grv('filter')), $group['id']);
 			form_selectable_cell(($group['policy_graphs'] == 1 ? __('ALLOW') : __('DENY')), $group['id']);
@@ -2152,7 +2255,11 @@ function graph_filter(string $header_label) : void {
 	$filters = create_uggraphs_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Graph Permissions %s', $header_label), 'user_group_admin.php?action=edit&tab=permsg&id=' . grv('id'), 'form_template', 'sess_ua_d');
+	$pageFilter = new CactiTableFilter(__('Graph Permissions %s',
+		$header_label),
+		'user_group_admin.php?action=edit&tab=permsg&id=' . grv('id'),
+		'form_template',
+		'sess_ua_d');
 
 	$pageFilter->rows_label       = __('Graphs');
 	$pageFilter->has_associated   = true;
@@ -2234,7 +2341,11 @@ function device_filter(string $header_label) : void {
 	$filters = create_device_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Device Permissions %s', $header_label), 'user_group_admin.php?action=edit&tab=permsd&id=' . grv('id'), 'form_template', 'sess_ug_d');
+	$pageFilter = new CactiTableFilter(__('Device Permissions %s',
+		$header_label),
+		'user_group_admin.php?action=edit&tab=permsd&id=' . grv('id'),
+		'form_template',
+		'sess_ug_d');
 
 	$pageFilter->rows_label       = __('Devices');
 	$pageFilter->has_associated   = true;
@@ -2250,7 +2361,11 @@ function device_filter(string $header_label) : void {
 
 function template_filter(string $header_label) : void {
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Template Permissions %s', $header_label), 'user_group_admin.php?action=edit&tab=permste&id=' . grv('id'), 'form_template', 'sess_ug_te');
+	$pageFilter = new CactiTableFilter(__('Template Permissions %s',
+		$header_label),
+		'user_group_admin.php?action=edit&tab=permste&id=' . grv('id'),
+		'form_template',
+		'sess_ug_te');
 
 	$pageFilter->rows_label       = __('Templatee');
 	$pageFilter->has_associated   = true;
@@ -2264,7 +2379,11 @@ function template_filter(string $header_label) : void {
 
 function tree_filter(string $header_label) : void {
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Tree Permissions %s', $header_label), 'user_group_admin.php?action=edit&tab=permstr&id=' . grv('id'), 'form_tree', 'sess_ug_tr');
+	$pageFilter = new CactiTableFilter(__('Tree Permissions %s',
+		$header_label),
+		'user_group_admin.php?action=edit&tab=permstr&id=' . grv('id'),
+		'form_tree',
+		'sess_ug_tr');
 
 	$pageFilter->rows_label       = __('Trees');
 	$pageFilter->has_associated   = true;
@@ -2278,7 +2397,10 @@ function tree_filter(string $header_label) : void {
 
 function member_filter(string $header_label) : void {
 	// create the page filter
-	$pageFilter = new CactiTableFilter($header_label, 'user_group_admin.php?action=edit&tab=members&id=' . grv('id'), 'forms', 'sess_ug_g');
+	$pageFilter = new CactiTableFilter($header_label,
+		'user_group_admin.php?action=edit&tab=members&id=' . grv('id'),
+		'forms',
+		'sess_ug_g');
 
 	$pageFilter->rows_label       = __('Users');
 	$pageFilter->has_associated   = true;

@@ -232,67 +232,247 @@ function form_save() : void {
 		$save2['local_graph_template_graph_id'] = 0;
 		$save2['local_graph_id']                = 0;
 		$save2['t_image_format_id']             = (isrv('t_image_format_id') ? gnrv('t_image_format_id') : '');
-		$save2['image_format_id']               = CactiValidator::validateInput(gnrv('image_format_id'), 'image_format_id', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['t_title']                       = CactiValidator::validateInput((isrv('t_title') ? gnrv('t_title') : ''), 't_title', [], 3);
-		$save2['title']                         = CactiValidator::validateInput(gnrv('title'), 'title', (isrv('t_title') ? [] : [new Assert\NotBlank()]), 3);
-		$save2['t_height']                      = CactiValidator::validateInput((isrv('t_height') ? gnrv('t_height') : ''), 't_height', [], 3);
-		$save2['height']                        = CactiValidator::validateInput(gnrv('height'), 'height', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['t_width']                       = CactiValidator::validateInput((isrv('t_width') ? gnrv('t_width') : ''), 't_width', [], 3);
-		$save2['width']                         = CactiValidator::validateInput(gnrv('width'), 'width', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['t_upper_limit']                 = CactiValidator::validateInput((isrv('t_upper_limit') ? gnrv('t_upper_limit') : ''), 't_upper_limit', [], 3);
-		$save2['upper_limit']                   = CactiValidator::validateInput(gnrv('upper_limit'), 'upper_limit', [new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U)\z/')], 3);
-		$save2['t_lower_limit']                 = CactiValidator::validateInput((isrv('t_lower_limit') ? gnrv('t_lower_limit') : ''), 't_lower_limit', [], 3);
-		$save2['lower_limit']                   = CactiValidator::validateInput(gnrv('lower_limit'), 'lower_limit', [new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U)\z/')], 3);
-		$save2['t_vertical_label']              = CactiValidator::validateInput((isrv('t_vertical_label') ? gnrv('t_vertical_label') : ''), 't_vertical_label', [], 3);
-		$save2['vertical_label']                = CactiValidator::validateInput(gnrv('vertical_label'), 'vertical_label', [], 3);
-		$save2['t_slope_mode']                  = CactiValidator::validateInput((isrv('t_slope_mode') ? gnrv('t_slope_mode') : ''), 't_slope_mode', [], 3);
-		$save2['slope_mode']                    = CactiValidator::validateInput((isrv('slope_mode') ? gnrv('slope_mode') : ''), 'slope_mode', [], 3);
-		$save2['t_auto_scale']                  = CactiValidator::validateInput((isrv('t_auto_scale') ? gnrv('t_auto_scale') : ''), 't_auto_scale', [], 3);
-		$save2['auto_scale']                    = CactiValidator::validateInput((isrv('auto_scale') ? gnrv('auto_scale') : ''), 'auto_scale', [], 3);
-		$save2['t_auto_scale_opts']             = CactiValidator::validateInput((isrv('t_auto_scale_opts') ? gnrv('t_auto_scale_opts') : ''), 't_auto_scale_opts', [], 3);
-		$save2['auto_scale_opts']               = CactiValidator::validateInput(gnrv('auto_scale_opts'), 'auto_scale_opts', [], 3);
-		$save2['t_auto_scale_log']              = CactiValidator::validateInput((isrv('t_auto_scale_log') ? gnrv('t_auto_scale_log') : ''), 't_auto_scale_log', [], 3);
-		$save2['auto_scale_log']                = CactiValidator::validateInput((isrv('auto_scale_log') ? gnrv('auto_scale_log') : ''), 'auto_scale_log', [], 3);
-		$save2['t_scale_log_units']             = CactiValidator::validateInput((isrv('t_scale_log_units') ? gnrv('t_scale_log_units') : ''), 't_scale_log_units', [], 3);
-		$save2['scale_log_units']               = CactiValidator::validateInput((isrv('scale_log_units') ? gnrv('scale_log_units') : ''), 'scale_log_units', [], 3);
-		$save2['t_auto_scale_rigid']            = CactiValidator::validateInput((isrv('t_auto_scale_rigid') ? gnrv('t_auto_scale_rigid') : ''), 't_auto_scale_rigid', [], 3);
-		$save2['auto_scale_rigid']              = CactiValidator::validateInput((isrv('auto_scale_rigid') ? gnrv('auto_scale_rigid') : ''), 'auto_scale_rigid', [], 3);
-		$save2['t_auto_padding']                = CactiValidator::validateInput((isrv('t_auto_padding') ? gnrv('t_auto_padding') : ''), 't_auto_padding', [], 3);
-		$save2['auto_padding']                  = CactiValidator::validateInput((isrv('auto_padding') ? gnrv('auto_padding') : ''), 'auto_padding', [], 3);
-		$save2['t_base_value']                  = CactiValidator::validateInput((isrv('t_base_value') ? gnrv('t_base_value') : ''), 't_base_value', [], 3);
-		$save2['base_value']                    = CactiValidator::validateInput(gnrv('base_value'), 'base_value', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['t_unit_value']                  = CactiValidator::validateInput((isrv('t_unit_value') ? gnrv('t_unit_value') : ''), 't_unit_value', [], 3);
+		$save2['image_format_id']               = CactiValidator::validateInput(gnrv('image_format_id'),
+			'image_format_id',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['t_title']                       = CactiValidator::validateInput((isrv('t_title') ? gnrv('t_title') : ''),
+			't_title',
+			[],
+			3);
+		$save2['title']                         = CactiValidator::validateInput(gnrv('title'),
+			'title',
+			(isrv('t_title') ? [] : [new Assert\NotBlank()]),
+			3);
+		$save2['t_height']                      = CactiValidator::validateInput((isrv('t_height') ? gnrv('t_height') : ''),
+			't_height',
+			[],
+			3);
+		$save2['height']                        = CactiValidator::validateInput(gnrv('height'),
+			'height',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['t_width']                       = CactiValidator::validateInput((isrv('t_width') ? gnrv('t_width') : ''),
+			't_width',
+			[],
+			3);
+		$save2['width']                         = CactiValidator::validateInput(gnrv('width'),
+			'width',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['t_upper_limit']                 = CactiValidator::validateInput((isrv('t_upper_limit') ? gnrv('t_upper_limit') : ''),
+			't_upper_limit',
+			[],
+			3);
+		$save2['upper_limit']                   = CactiValidator::validateInput(gnrv('upper_limit'),
+			'upper_limit',
+			[new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U)\z/')],
+			3);
+		$save2['t_lower_limit']                 = CactiValidator::validateInput((isrv('t_lower_limit') ? gnrv('t_lower_limit') : ''),
+			't_lower_limit',
+			[],
+			3);
+		$save2['lower_limit']                   = CactiValidator::validateInput(gnrv('lower_limit'),
+			'lower_limit',
+			[new Assert\Regex('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U)\z/')],
+			3);
+		$save2['t_vertical_label']              = CactiValidator::validateInput((isrv('t_vertical_label') ? gnrv('t_vertical_label') : ''),
+			't_vertical_label',
+			[],
+			3);
+		$save2['vertical_label']                = CactiValidator::validateInput(gnrv('vertical_label'),
+			'vertical_label',
+			[],
+			3);
+		$save2['t_slope_mode']                  = CactiValidator::validateInput((isrv('t_slope_mode') ? gnrv('t_slope_mode') : ''),
+			't_slope_mode',
+			[],
+			3);
+		$save2['slope_mode']                    = CactiValidator::validateInput((isrv('slope_mode') ? gnrv('slope_mode') : ''),
+			'slope_mode',
+			[],
+			3);
+		$save2['t_auto_scale']                  = CactiValidator::validateInput((isrv('t_auto_scale') ? gnrv('t_auto_scale') : ''),
+			't_auto_scale',
+			[],
+			3);
+		$save2['auto_scale']                    = CactiValidator::validateInput((isrv('auto_scale') ? gnrv('auto_scale') : ''),
+			'auto_scale',
+			[],
+			3);
+		$save2['t_auto_scale_opts']             = CactiValidator::validateInput((isrv('t_auto_scale_opts') ? gnrv('t_auto_scale_opts') : ''),
+			't_auto_scale_opts',
+			[],
+			3);
+		$save2['auto_scale_opts']               = CactiValidator::validateInput(gnrv('auto_scale_opts'),
+			'auto_scale_opts',
+			[],
+			3);
+		$save2['t_auto_scale_log']              = CactiValidator::validateInput((isrv('t_auto_scale_log') ? gnrv('t_auto_scale_log') : ''),
+			't_auto_scale_log',
+			[],
+			3);
+		$save2['auto_scale_log']                = CactiValidator::validateInput((isrv('auto_scale_log') ? gnrv('auto_scale_log') : ''),
+			'auto_scale_log',
+			[],
+			3);
+		$save2['t_scale_log_units']             = CactiValidator::validateInput((isrv('t_scale_log_units') ? gnrv('t_scale_log_units') : ''),
+			't_scale_log_units',
+			[],
+			3);
+		$save2['scale_log_units']               = CactiValidator::validateInput((isrv('scale_log_units') ? gnrv('scale_log_units') : ''),
+			'scale_log_units',
+			[],
+			3);
+		$save2['t_auto_scale_rigid']            = CactiValidator::validateInput((isrv('t_auto_scale_rigid') ? gnrv('t_auto_scale_rigid') : ''),
+			't_auto_scale_rigid',
+			[],
+			3);
+		$save2['auto_scale_rigid']              = CactiValidator::validateInput((isrv('auto_scale_rigid') ? gnrv('auto_scale_rigid') : ''),
+			'auto_scale_rigid',
+			[],
+			3);
+		$save2['t_auto_padding']                = CactiValidator::validateInput((isrv('t_auto_padding') ? gnrv('t_auto_padding') : ''),
+			't_auto_padding',
+			[],
+			3);
+		$save2['auto_padding']                  = CactiValidator::validateInput((isrv('auto_padding') ? gnrv('auto_padding') : ''),
+			'auto_padding',
+			[],
+			3);
+		$save2['t_base_value']                  = CactiValidator::validateInput((isrv('t_base_value') ? gnrv('t_base_value') : ''),
+			't_base_value',
+			[],
+			3);
+		$save2['base_value']                    = CactiValidator::validateInput(gnrv('base_value'),
+			'base_value',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['t_unit_value']                  = CactiValidator::validateInput((isrv('t_unit_value') ? gnrv('t_unit_value') : ''),
+			't_unit_value',
+			[],
+			3);
 		$save2['unit_value']                    = CactiValidator::validateInput(gnrv('unit_value'), 'unit_value', [], 3);
-		$save2['t_unit_exponent_value']         = CactiValidator::validateInput((isrv('t_unit_exponent_value') ? gnrv('t_unit_exponent_value') : ''), 't_unit_exponent_value', [], 3);
-		$save2['unit_exponent_value']           = CactiValidator::validateInput(gnrv('unit_exponent_value'), 'unit_exponent_value', [new Assert\Regex('/^-?[0-9]+$/')], 3);
-		$save2['t_alt_y_grid']                  = CactiValidator::validateInput((isrv('t_alt_y_grid') ? gnrv('t_alt_y_grid') : ''), 't_alt_y_grid', [], 3);
-		$save2['alt_y_grid']                    = CactiValidator::validateInput((isrv('alt_y_grid') ? gnrv('alt_y_grid') : ''), 'alt_y_grid', [], 3);
-		$save2['t_right_axis']                  = CactiValidator::validateInput((isrv('t_right_axis') ? gnrv('t_right_axis') : ''), 't_right_axis', [], 3);
-		$save2['right_axis']                    = CactiValidator::validateInput((isrv('right_axis') ? gnrv('right_axis') : ''), 'right_axis', [new Assert\Regex('/^-?([0-9]+(\.[0-9]*)?|\.[0-9]+):-?([0-9]+(\.[0-9]*)?|\.[0-9]+)$/')], 3);
-		$save2['t_right_axis_label']            = CactiValidator::validateInput((isrv('t_right_axis_label') ? gnrv('t_right_axis_label') : ''), 't_right_axis_label', [], 3);
-		$save2['right_axis_label']              = CactiValidator::validateInput((isrv('right_axis_label') ? gnrv('right_axis_label') : ''), 'right_axis_label', [], 3);
-		$save2['t_right_axis_format']           = CactiValidator::validateInput((isrv('t_right_axis_format') ? gnrv('t_right_axis_format') : ''), 't_right_axis_format', [], 3);
-		$save2['right_axis_format']             = CactiValidator::validateInput((isrv('right_axis_format') ? gnrv('right_axis_format') : ''), 'right_axis_format', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['t_no_gridfit']                  = CactiValidator::validateInput((isrv('t_no_gridfit') ? gnrv('t_no_gridfit') : ''), 't_no_gridfit', [], 3);
-		$save2['no_gridfit']                    = CactiValidator::validateInput((isrv('no_gridfit') ? gnrv('no_gridfit') : ''), 'no_gridfit', [], 3);
-		$save2['t_unit_length']                 = CactiValidator::validateInput((isrv('t_unit_length') ? gnrv('t_unit_length') : ''), 't_unit_length', [], 3);
-		$save2['unit_length']                   = CactiValidator::validateInput((isrv('unit_length') ? gnrv('unit_length') : ''), 'unit_length', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['t_tab_width']                   = CactiValidator::validateInput((isrv('t_tab_width') ? gnrv('t_tab_width') : ''), 't_tab_width', [], 3);
-		$save2['tab_width']                     = CactiValidator::validateInput((isrv('tab_width') ? gnrv('tab_width') : ''), 'tab_width', [new Assert\Regex('/^[0-9]*$/')], 3);
-		$save2['t_dynamic_labels']              = CactiValidator::validateInput((isrv('t_dynamic_labels') ? gnrv('t_dynamic_labels') : ''), 't_dynamic_labels', [], 3);
-		$save2['dynamic_labels']                = CactiValidator::validateInput((isrv('dynamic_labels') ? gnrv('dynamic_labels') : ''), 'dynamic_labels', [], 3);
-		$save2['t_force_rules_legend']          = CactiValidator::validateInput((isrv('t_force_rules_legend') ? gnrv('t_force_rules_legend') : ''), 't_force_rules_legend', [], 3);
-		$save2['force_rules_legend']            = CactiValidator::validateInput((isrv('force_rules_legend') ? gnrv('force_rules_legend') : ''), 'force_rules_legend', [], 3);
-		$save2['t_legend_position']             = CactiValidator::validateInput((isrv('t_legend_position') ? gnrv('t_legend_position') : ''), 't_legend_position', [], 3);
-		$save2['legend_position']               = CactiValidator::validateInput((isrv('legend_position') ? gnrv('legend_position') : ''), 'legend_position', [], 3);
-		$save2['t_legend_direction']            = CactiValidator::validateInput((isrv('t_legend_direction') ? gnrv('t_legend_direction') : ''), 't_legend_direction', [], 3);
-		$save2['legend_direction']              = CactiValidator::validateInput((isrv('legend_direction') ? gnrv('legend_direction') : ''), 'legend_direction', [], 3);
-		$save2['t_right_axis_formatter']        = CactiValidator::validateInput((isrv('t_right_axis_formatter') ? gnrv('t_right_axis_formatter') : ''), 't_right_axis_formatter', [], 3);
-		$save2['right_axis_formatter']          = CactiValidator::validateInput((isrv('right_axis_formatter') ? gnrv('right_axis_formatter') : ''), 'right_axis_formatter', [], 3);
-		$save2['t_left_axis_format']            = CactiValidator::validateInput((isrv('t_left_axis_format') ? gnrv('t_left_axis_format') : ''), 't_left_axis_format', [], 3);
-		$save2['left_axis_format']              = CactiValidator::validateInput((isrv('left_axis_format') ? gnrv('left_axis_format') : ''), 'left_axis_format', [new Assert\Regex('/^[0-9]+$/')], 3);
-		$save2['t_left_axis_formatter']         = CactiValidator::validateInput((isrv('t_left_axis_formatter') ? gnrv('t_left_axis_formatter') : ''), 't_left_axis_formatter', [], 3);
-		$save2['left_axis_formatter']           = CactiValidator::validateInput((isrv('left_axis_formatter') ? gnrv('left_axis_formatter') : ''), 'left_axis_formatter', [], 3);
+		$save2['t_unit_exponent_value']         = CactiValidator::validateInput((isrv('t_unit_exponent_value') ? gnrv('t_unit_exponent_value') : ''),
+			't_unit_exponent_value',
+			[],
+			3);
+		$save2['unit_exponent_value']           = CactiValidator::validateInput(gnrv('unit_exponent_value'),
+			'unit_exponent_value',
+			[new Assert\Regex('/^-?[0-9]+$/')],
+			3);
+		$save2['t_alt_y_grid']                  = CactiValidator::validateInput((isrv('t_alt_y_grid') ? gnrv('t_alt_y_grid') : ''),
+			't_alt_y_grid',
+			[],
+			3);
+		$save2['alt_y_grid']                    = CactiValidator::validateInput((isrv('alt_y_grid') ? gnrv('alt_y_grid') : ''),
+			'alt_y_grid',
+			[],
+			3);
+		$save2['t_right_axis']                  = CactiValidator::validateInput((isrv('t_right_axis') ? gnrv('t_right_axis') : ''),
+			't_right_axis',
+			[],
+			3);
+		$save2['right_axis']                    = CactiValidator::validateInput((isrv('right_axis') ? gnrv('right_axis') : ''),
+			'right_axis',
+			[new Assert\Regex('/^-?([0-9]+(\.[0-9]*)?|\.[0-9]+):-?([0-9]+(\.[0-9]*)?|\.[0-9]+)$/')],
+			3);
+		$save2['t_right_axis_label']            = CactiValidator::validateInput((isrv('t_right_axis_label') ? gnrv('t_right_axis_label') : ''),
+			't_right_axis_label',
+			[],
+			3);
+		$save2['right_axis_label']              = CactiValidator::validateInput((isrv('right_axis_label') ? gnrv('right_axis_label') : ''),
+			'right_axis_label',
+			[],
+			3);
+		$save2['t_right_axis_format']           = CactiValidator::validateInput((isrv('t_right_axis_format') ? gnrv('t_right_axis_format') : ''),
+			't_right_axis_format',
+			[],
+			3);
+		$save2['right_axis_format']             = CactiValidator::validateInput((isrv('right_axis_format') ? gnrv('right_axis_format') : ''),
+			'right_axis_format',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['t_no_gridfit']                  = CactiValidator::validateInput((isrv('t_no_gridfit') ? gnrv('t_no_gridfit') : ''),
+			't_no_gridfit',
+			[],
+			3);
+		$save2['no_gridfit']                    = CactiValidator::validateInput((isrv('no_gridfit') ? gnrv('no_gridfit') : ''),
+			'no_gridfit',
+			[],
+			3);
+		$save2['t_unit_length']                 = CactiValidator::validateInput((isrv('t_unit_length') ? gnrv('t_unit_length') : ''),
+			't_unit_length',
+			[],
+			3);
+		$save2['unit_length']                   = CactiValidator::validateInput((isrv('unit_length') ? gnrv('unit_length') : ''),
+			'unit_length',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['t_tab_width']                   = CactiValidator::validateInput((isrv('t_tab_width') ? gnrv('t_tab_width') : ''),
+			't_tab_width',
+			[],
+			3);
+		$save2['tab_width']                     = CactiValidator::validateInput((isrv('tab_width') ? gnrv('tab_width') : ''),
+			'tab_width',
+			[new Assert\Regex('/^[0-9]*$/')],
+			3);
+		$save2['t_dynamic_labels']              = CactiValidator::validateInput((isrv('t_dynamic_labels') ? gnrv('t_dynamic_labels') : ''),
+			't_dynamic_labels',
+			[],
+			3);
+		$save2['dynamic_labels']                = CactiValidator::validateInput((isrv('dynamic_labels') ? gnrv('dynamic_labels') : ''),
+			'dynamic_labels',
+			[],
+			3);
+		$save2['t_force_rules_legend']          = CactiValidator::validateInput((isrv('t_force_rules_legend') ? gnrv('t_force_rules_legend') : ''),
+			't_force_rules_legend',
+			[],
+			3);
+		$save2['force_rules_legend']            = CactiValidator::validateInput((isrv('force_rules_legend') ? gnrv('force_rules_legend') : ''),
+			'force_rules_legend',
+			[],
+			3);
+		$save2['t_legend_position']             = CactiValidator::validateInput((isrv('t_legend_position') ? gnrv('t_legend_position') : ''),
+			't_legend_position',
+			[],
+			3);
+		$save2['legend_position']               = CactiValidator::validateInput((isrv('legend_position') ? gnrv('legend_position') : ''),
+			'legend_position',
+			[],
+			3);
+		$save2['t_legend_direction']            = CactiValidator::validateInput((isrv('t_legend_direction') ? gnrv('t_legend_direction') : ''),
+			't_legend_direction',
+			[],
+			3);
+		$save2['legend_direction']              = CactiValidator::validateInput((isrv('legend_direction') ? gnrv('legend_direction') : ''),
+			'legend_direction',
+			[],
+			3);
+		$save2['t_right_axis_formatter']        = CactiValidator::validateInput((isrv('t_right_axis_formatter') ? gnrv('t_right_axis_formatter') : ''),
+			't_right_axis_formatter',
+			[],
+			3);
+		$save2['right_axis_formatter']          = CactiValidator::validateInput((isrv('right_axis_formatter') ? gnrv('right_axis_formatter') : ''),
+			'right_axis_formatter',
+			[],
+			3);
+		$save2['t_left_axis_format']            = CactiValidator::validateInput((isrv('t_left_axis_format') ? gnrv('t_left_axis_format') : ''),
+			't_left_axis_format',
+			[],
+			3);
+		$save2['left_axis_format']              = CactiValidator::validateInput((isrv('left_axis_format') ? gnrv('left_axis_format') : ''),
+			'left_axis_format',
+			[new Assert\Regex('/^[0-9]+$/')],
+			3);
+		$save2['t_left_axis_formatter']         = CactiValidator::validateInput((isrv('t_left_axis_formatter') ? gnrv('t_left_axis_formatter') : ''),
+			't_left_axis_formatter',
+			[],
+			3);
+		$save2['left_axis_formatter']           = CactiValidator::validateInput((isrv('left_axis_formatter') ? gnrv('left_axis_formatter') : ''),
+			'left_axis_formatter',
+			[],
+			3);
 
 		if (!is_error_message()) {
 			$save1['last_updated'] = date('Y-m-d H:i:s');
@@ -443,7 +623,10 @@ function form_save() : void {
 		foreach ($items as $item) {
 			// generate a new sequence if needed
 			if (empty($sequence)) {
-				$sequence = get_sequence(0, 'sequence', 'graph_templates_item', 'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0');
+				$sequence = get_sequence(0,
+					'sequence',
+					'graph_templates_item',
+					'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0');
 			}
 
 			$task_item_changed = true;
@@ -464,9 +647,18 @@ function form_save() : void {
 			$save['hash']              = get_hash_graph_template(grv('graph_template_item_id'), 'graph_template_item');
 			$save['graph_template_id'] = grv('graph_template_id');
 			$save['local_graph_id']    = 0;
-			$save['task_item_id']      = CactiValidator::validateInput(grv('task_item_id'), 'task_item_id', [new Assert\Regex('/^[0-9]+$/')], 3);
-			$save['color_id']          = CactiValidator::validateInput((isset($item['color_id']) ? $item['color_id'] : grv('color_id')), 'color_id', [], 3);
-			$save['color2_id']         = CactiValidator::validateInput((isset($item['color2_id']) ? $item['color2_id'] : grv('color2_id')), 'color2_id', [], 3);
+			$save['task_item_id']      = CactiValidator::validateInput(grv('task_item_id'),
+				'task_item_id',
+				[new Assert\Regex('/^[0-9]+$/')],
+				3);
+			$save['color_id']          = CactiValidator::validateInput((isset($item['color_id']) ? $item['color_id'] : grv('color_id')),
+				'color_id',
+				[],
+				3);
+			$save['color2_id']         = CactiValidator::validateInput((isset($item['color2_id']) ? $item['color2_id'] : grv('color2_id')),
+				'color2_id',
+				[],
+				3);
 
 			// if alpha is disabled, use invisible_alpha instead
 			if (!isrv('alpha')) {
@@ -477,14 +669,29 @@ function form_save() : void {
 				srv('alpha2', gnrv('invisible_alpha'));
 			}
 
-			$save['alpha']             = CactiValidator::validateInput((isset($item['alpha']) ? $item['alpha'] : gnrv('alpha')), 'alpha', [], 3);
-			$save['alpha2']            = CactiValidator::validateInput((isset($item['alpha2']) ? $item['alpha2'] : gnrv('alpha2')), 'alpha2', [], 3);
-			$save['gradheight']        = CactiValidator::validateInput((isset($item['gradheight']) ? $item['gradheight'] : gnrv('gradheight')), 'gradheight', [], 3);
+			$save['alpha']             = CactiValidator::validateInput((isset($item['alpha']) ? $item['alpha'] : gnrv('alpha')),
+				'alpha',
+				[],
+				3);
+			$save['alpha2']            = CactiValidator::validateInput((isset($item['alpha2']) ? $item['alpha2'] : gnrv('alpha2')),
+				'alpha2',
+				[],
+				3);
+			$save['gradheight']        = CactiValidator::validateInput((isset($item['gradheight']) ? $item['gradheight'] : gnrv('gradheight')),
+				'gradheight',
+				[],
+				3);
 
-			$save['graph_type_id']     = CactiValidator::validateInput((isset($item['graph_type_id']) ? $item['graph_type_id'] : gfrv('graph_type_id')), 'graph_type_id', [new Assert\Regex('/^[0-9]+$/')], 3);
+			$save['graph_type_id']     = CactiValidator::validateInput((isset($item['graph_type_id']) ? $item['graph_type_id'] : gfrv('graph_type_id')),
+				'graph_type_id',
+				[new Assert\Regex('/^[0-9]+$/')],
+				3);
 
 			if (isrv('line_width') || isset($item['line_width'])) {
-				$save['line_width']    = CactiValidator::validateInput((isset($item['line_width']) ? $item['line_width'] : gnrv('line_width')), 'line_width', [new Assert\Regex('/(^[0-9]+[\.,0-9]+$|^[0-9]+$)/')], 3);
+				$save['line_width']    = CactiValidator::validateInput((isset($item['line_width']) ? $item['line_width'] : gnrv('line_width')),
+					'line_width',
+					[new Assert\Regex('/(^[0-9]+[\.,0-9]+$|^[0-9]+$)/')],
+					3);
 			} else {
 				// make sure to transfer old LINEx style into line_width on save
 				switch ($save['graph_type_id']) {
@@ -505,23 +712,56 @@ function form_save() : void {
 				}
 			}
 
-			$save['dashes']                    = CactiValidator::validateInput((isrv('dashes') ? gnrv('dashes') : ''), 'dashes', [new Assert\Regex('/^[0-9]+[,0-9]*$/')], 3);
-			$save['dash_offset']               = CactiValidator::validateInput((isrv('dash_offset') ? gnrv('dash_offset') : ''), 'dash_offset', [new Assert\Regex('/^[0-9]+$/')], 3);
-			$save['cdef_id']                   = CactiValidator::validateInput(gnrv('cdef_id'), 'cdef_id', [new Assert\Regex('/^[0-9]+$/')], 3);
-			$save['vdef_id']                   = CactiValidator::validateInput(gnrv('vdef_id'), 'vdef_id', [new Assert\Regex('/^[0-9]+$/')], 3);
-			$save['shift']                     = CactiValidator::validateInput((isrv('shift') ? gnrv('shift') : ''), 'shift', [new Assert\Regex('/^((on)|)$/')], 3);
-			$save['consolidation_function_id'] = CactiValidator::validateInput((isset($item['consolidation_function_id']) ? $item['consolidation_function_id'] : gnrv('consolidation_function_id')), 'consolidation_function_id', [new Assert\Regex('/^[0-9]+$/')], 3);
+			$save['dashes']                    = CactiValidator::validateInput((isrv('dashes') ? gnrv('dashes') : ''),
+				'dashes',
+				[new Assert\Regex('/^[0-9]+[,0-9]*$/')],
+				3);
+			$save['dash_offset']               = CactiValidator::validateInput((isrv('dash_offset') ? gnrv('dash_offset') : ''),
+				'dash_offset',
+				[new Assert\Regex('/^[0-9]+$/')],
+				3);
+			$save['cdef_id']                   = CactiValidator::validateInput(gnrv('cdef_id'),
+				'cdef_id',
+				[new Assert\Regex('/^[0-9]+$/')],
+				3);
+			$save['vdef_id']                   = CactiValidator::validateInput(gnrv('vdef_id'),
+				'vdef_id',
+				[new Assert\Regex('/^[0-9]+$/')],
+				3);
+			$save['shift']                     = CactiValidator::validateInput((isrv('shift') ? gnrv('shift') : ''),
+				'shift',
+				[new Assert\Regex('/^((on)|)$/')],
+				3);
+			$save['consolidation_function_id'] = CactiValidator::validateInput((isset($item['consolidation_function_id']) ? $item['consolidation_function_id'] : gnrv('consolidation_function_id')),
+				'consolidation_function_id',
+				[new Assert\Regex('/^[0-9]+$/')],
+				3);
 
-			$save['textalign']                 = CactiValidator::validateInput((isrv('textalign') ? gnrv('textalign') : ''), 'textalign', [new Assert\Regex('/^[a-z]+$/')], 3);
+			$save['textalign']                 = CactiValidator::validateInput((isrv('textalign') ? gnrv('textalign') : ''),
+				'textalign',
+				[new Assert\Regex('/^[a-z]+$/')],
+				3);
 
-			$save['text_format']               = CactiValidator::validateInput((isset($item['text_format']) ? $item['text_format'] : gnrv('text_format')), 'text_format', [], 3);
-			$save['legend']                    = CactiValidator::validateInput((isset($item['legend']) ? $item['legend'] : gnrv('legend')), 'legend', [], 3);
+			$save['text_format']               = CactiValidator::validateInput((isset($item['text_format']) ? $item['text_format'] : gnrv('text_format')),
+				'text_format',
+				[],
+				3);
+			$save['legend']                    = CactiValidator::validateInput((isset($item['legend']) ? $item['legend'] : gnrv('legend')),
+				'legend',
+				[],
+				3);
 
 			$save['value']                     = CactiValidator::validateInput(gnrv('value'), 'value', [], 3);
 
-			$save['hard_return']               = CactiValidator::validateInput(((isset($item['hard_return']) ? $item['hard_return'] : (isrv('hard_return') ? gnrv('hard_return') : ''))), 'hard_return', [], 3);
+			$save['hard_return']               = CactiValidator::validateInput(((isset($item['hard_return']) ? $item['hard_return'] : (isrv('hard_return') ? gnrv('hard_return') : ''))),
+				'hard_return',
+				[],
+				3);
 
-			$save['gprint_id']                 = CactiValidator::validateInput(gnrv('gprint_id'), 'gprint_id', [new Assert\Regex('/^[0-9]+$/')], 3);
+			$save['gprint_id']                 = CactiValidator::validateInput(gnrv('gprint_id'),
+				'gprint_id',
+				[new Assert\Regex('/^[0-9]+$/')],
+				3);
 			$save['sequence']                  = $sequence;
 
 			if (!is_error_message()) {
@@ -602,7 +842,9 @@ function form_save() : void {
 
 					if (isset($orig_data_source_to_input[gnrv('task_item_id')])) {
 						// make sure all current graphs using this graph input are aware of this change
-						push_out_graph_input($orig_data_source_to_input[gnrv('task_item_id')], $graph_template_item_id, [$graph_template_item_id => $graph_template_item_id]);
+						push_out_graph_input($orig_data_source_to_input[gnrv('task_item_id')],
+							$graph_template_item_id,
+							[$graph_template_item_id => $graph_template_item_id]);
 					}
 				} else {
 					raise_message(2);
@@ -646,7 +888,9 @@ function form_save() : void {
 		$save['column_name']       = CactiValidator::validateInput(gnrv('column_name'), 'column_name', [], 3);
 
 		if (!graph_template_input_column_is_allowed($save['column_name'])) {
-			raise_message('column_name_invalid', __('The selected Field Type is not a valid Graph Item field.'), MESSAGE_LEVEL_ERROR);
+			raise_message('column_name_invalid',
+				__('The selected Field Type is not a valid Graph Item field.'),
+				MESSAGE_LEVEL_ERROR);
 			$_SESSION['sess_error_fields']['column_name'] = 'column_name';
 		}
 
@@ -657,9 +901,13 @@ function form_save() : void {
 			}
 		}
 
-		if (!graph_template_input_relationships_are_valid((int) $save['id'], (int) $save['graph_template_id'], array_values($selected_graph_items))) {
+		if (!graph_template_input_relationships_are_valid((int) $save['id'],
+			(int) $save['graph_template_id'],
+			array_values($selected_graph_items))) {
 			cacti_log('ERROR: Graph input save refused a cross-template relationship', false, 'SECURITY');
-			raise_message('graph_input_relationship_invalid', __('The Graph Item Input relationship is invalid.'), MESSAGE_LEVEL_ERROR);
+			raise_message('graph_input_relationship_invalid',
+				__('The Graph Item Input relationship is invalid.'),
+				MESSAGE_LEVEL_ERROR);
 		}
 
 		if (is_error_message() === false) {
@@ -689,11 +937,14 @@ function form_save() : void {
 					}
 				}
 
-				$mutation_failed = !db_execute_prepared('DELETE FROM graph_template_input_defs WHERE graph_template_input_id = ?', [$graph_template_input_id]);
+				$mutation_failed = !db_execute_prepared('DELETE FROM graph_template_input_defs WHERE graph_template_input_id = ?',
+					[$graph_template_input_id]);
 
 				if (!$mutation_failed && cacti_sizeof($selected_graph_items) > 0) {
 					foreach ($selected_graph_items as $graph_template_item_id) {
-						if (!db_execute_prepared('INSERT INTO graph_template_input_defs (graph_template_input_id, graph_template_item_id) VALUES (?, ?)', [$graph_template_input_id, $graph_template_item_id])) {
+						if (!db_execute_prepared('INSERT INTO graph_template_input_defs (graph_template_input_id, graph_template_item_id) VALUES (?, ?)',
+							[$graph_template_input_id,
+							$graph_template_item_id])) {
 							$mutation_failed = true;
 
 							break;
@@ -764,9 +1015,15 @@ function item_movedown() : void {
 		move_graph_group(grv('id'), $arr, $next_id, 'next');
 	} elseif (!preg_match('/(AREA|STACK|LINE)/', $text_type)) {
 		// this is so we know the "other" graph item to propagate the changes to
-		$next_item = get_item('graph_templates_item', 'sequence', grv('id'), 'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0', 'next');
+		$next_item = get_item('graph_templates_item',
+			'sequence',
+			grv('id'),
+			'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0',
+			'next');
 
-		move_item_down('graph_templates_item', grv('id'), 'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0');
+		move_item_down('graph_templates_item',
+			grv('id'),
+			'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0');
 	}
 
 	if (!ierv('graph_template_id')) {
@@ -797,9 +1054,15 @@ function item_moveup() : void {
 		move_graph_group(grv('id'), $arr, $next_id, 'previous');
 	} elseif (!preg_match('/(AREA|STACK|LINE)/', $text_type)) {
 		// this is so we know the "other" graph item to propagate the changes to
-		$last_item = get_item('graph_templates_item', 'sequence', grv('id'), 'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0', 'previous');
+		$last_item = get_item('graph_templates_item',
+			'sequence',
+			grv('id'),
+			'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0',
+			'previous');
 
-		move_item_up('graph_templates_item', grv('id'), 'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0');
+		move_item_up('graph_templates_item',
+			grv('id'),
+			'graph_template_id=' . grv('graph_template_id') . ' AND local_graph_id=0');
 	}
 
 	if (!ierv('graph_template_id')) {
@@ -826,7 +1089,8 @@ function item_remove() : void {
 
 	if (cacti_sizeof($graph_item_inputs) > 0) {
 		foreach ($graph_item_inputs as $graph_item_input) {
-			if (cacti_sizeof(db_fetch_assoc_prepared('SELECT graph_template_input_id FROM graph_template_input_defs WHERE graph_template_input_id = ?', [$graph_item_input['id']])) == 1) {
+			if (cacti_sizeof(db_fetch_assoc_prepared('SELECT graph_template_input_id FROM graph_template_input_defs WHERE graph_template_input_id = ?',
+				[$graph_item_input['id']])) == 1) {
 				db_execute_prepared('DELETE FROM graph_template_input WHERE id = ?', [$graph_item_input['id']]);
 			}
 		}
@@ -897,7 +1161,9 @@ function item_edit() : void {
 
 	form_start('graph_templates.php', 'graph_items');
 
-	$header_label = __esc('Graph Template Items [edit graph: %s]', db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?', [grv('graph_template_id')]));
+	$header_label = __esc('Graph Template Items [edit graph: %s]',
+		db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?',
+			[grv('graph_template_id')]));
 
 	html_start_box($header_label, '100%', true, 3, 'center', '');
 
@@ -1246,9 +1512,16 @@ function form_actions() : void {
 						[$selected_items[$i]]);
 
 					if (isset($_SESSION['sess_gt_repairs']) && $_SESSION['sess_gt_repairs'] > 0) {
-						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in %s Repairs!', $graph_template_name, $_SESSION['sess_gt_repairs']), MESSAGE_LEVEL_WARN);
+						raise_message('gt_repair' . $selected_items[$i],
+							__esc('Sync of Graph Template \'%s\' Resulted in %s Repairs!',
+								$graph_template_name,
+								$_SESSION['sess_gt_repairs']),
+							MESSAGE_LEVEL_WARN);
 					} else {
-						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in no Repairs.', $graph_template_name), MESSAGE_LEVEL_INFO);
+						raise_message('gt_repair' . $selected_items[$i],
+							__esc('Sync of Graph Template \'%s\' Resulted in no Repairs.',
+								$graph_template_name),
+							MESSAGE_LEVEL_INFO);
 					}
 				}
 			} elseif (grv('drp_action') == '5') { // resequence graphs with sequences off
@@ -1261,9 +1534,16 @@ function form_actions() : void {
 						[$selected_items[$i]]);
 
 					if (isset($_SESSION['sess_gt_repairs']) && $_SESSION['sess_gt_repairs'] > 0) {
-						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in %s Repairs!', $graph_template_name, $_SESSION['sess_gt_repairs']), MESSAGE_LEVEL_WARN);
+						raise_message('gt_repair' . $selected_items[$i],
+							__esc('Sync of Graph Template \'%s\' Resulted in %s Repairs!',
+								$graph_template_name,
+								$_SESSION['sess_gt_repairs']),
+							MESSAGE_LEVEL_WARN);
 					} else {
-						raise_message('gt_repair' . $selected_items[$i], __esc('Sync of Graph Template \'%s\' Resulted in no Repairs.', $graph_template_name), MESSAGE_LEVEL_INFO);
+						raise_message('gt_repair' . $selected_items[$i],
+							__esc('Sync of Graph Template \'%s\' Resulted in no Repairs.',
+								$graph_template_name),
+							MESSAGE_LEVEL_INFO);
 					}
 				}
 			}
@@ -1283,7 +1563,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?',
+					[$matches[1]])) . '</li>';
 				$iarray[] = $matches[1];
 			}
 		}
@@ -1414,14 +1695,26 @@ function item() : void {
 			ORDER BY gti.sequence",
 			[grv('id')]);
 
-		$header_label = __esc('Graph Template Items [edit: %s]', db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?', [grv('id')]));
+		$header_label = __esc('Graph Template Items [edit: %s]',
+			db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?',
+				[grv('id')]));
 	}
 
-	html_start_box($header_label, '100%', false, 3, 'center', 'graph_templates.php?action=item_edit&graph_template_id=' . grv('id'));
+	html_start_box($header_label,
+		'100%',
+		false,
+		3,
+		'center',
+		'graph_templates.php?action=item_edit&graph_template_id=' . grv('id'));
 	draw_graph_items_list($template_item_list, 'graph_templates.php', 'graph_template_id=' . grv('id'), false);
 	html_end_box();
 
-	html_start_box(__('Graph Item Inputs'), '100%', false, 3, 'center', 'graph_templates.php?action=input_edit&graph_template_id=' . grv('id'));
+	html_start_box(__('Graph Item Inputs'),
+		'100%',
+		false,
+		3,
+		'center',
+		'graph_templates.php?action=input_edit&graph_template_id=' . grv('id'));
 
 	print "<tr class='tableHeader'>";
 	DrawMatrixHeaderItem(__('Name'),'',2);
@@ -1524,7 +1817,9 @@ function template_edit() : void {
 	draw_edit_form(
 		[
 			'config' => ['no_form_tag' => true],
-			'fields' => inject_form_variables($fields_graph_template_template_edit, (isset($template) ? $template : []), (isset($template_graph) ? $template_graph : []))
+			'fields' => inject_form_variables($fields_graph_template_template_edit,
+				(isset($template) ? $template : []),
+				(isset($template_graph) ? $template_graph : []))
 		]
 	);
 
@@ -1737,7 +2032,15 @@ function graph_templates() : void {
 		]
 	];
 
-	$nav = html_nav_bar('graph_templates.php?filter=' . rawurlencode(grv('filter')), MAX_DISPLAY_PAGES, (int) grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Graph Templates'), 'page', 'main');
+	$nav = html_nav_bar('graph_templates.php?filter=' . rawurlencode(grv('filter')),
+		MAX_DISPLAY_PAGES,
+		(int) grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Graph Templates'),
+		'page',
+		'main');
 
 	form_start('graph_templates.php', 'chk');
 
@@ -1759,7 +2062,10 @@ function graph_templates() : void {
 
 			form_alternate_row('line' . $template['id'], true, $disabled);
 
-			form_selectable_cell(filter_value($template['name'], grv('filter'), 'graph_templates.php?action=template_edit&id=' . $template['id']), $template['id']);
+			form_selectable_cell(filter_value($template['name'],
+				grv('filter'),
+				'graph_templates.php?action=template_edit&id=' . $template['id']),
+				$template['id']);
 			form_selectable_cell($template['id'], $template['id'], '', 'right');
 			form_selectable_cell($graph_template_classes[$template['class']], $template['id'], '', 'right');
 			form_selectable_ecell($template['version'], $template['id'], '', 'right');
@@ -1804,8 +2110,11 @@ function input_remove() : void {
 	}
 
 	if (db_begin_transaction()) {
-		$deleted_defs  = db_execute_prepared('DELETE FROM graph_template_input_defs WHERE graph_template_input_id = ?', [grv('id')]);
-		$deleted_input = $deleted_defs && db_execute_prepared('DELETE FROM graph_template_input WHERE id = ? AND graph_template_id = ?', [grv('id'), grv('graph_template_id')]);
+		$deleted_defs  = db_execute_prepared('DELETE FROM graph_template_input_defs WHERE graph_template_input_id = ?',
+			[grv('id')]);
+		$deleted_input = $deleted_defs && db_execute_prepared('DELETE FROM graph_template_input WHERE id = ? AND graph_template_id = ?',
+			[grv('id'),
+			grv('graph_template_id')]);
 
 		if ($deleted_input) {
 			db_commit_transaction();
@@ -1826,7 +2135,9 @@ function input_edit() : void {
 	gfrv('graph_template_id');
 	// ====================================================
 
-	$header_label = __esc('Graph Item Inputs [edit graph: %s]', db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?', [grv('graph_template_id')]));
+	$header_label = __esc('Graph Item Inputs [edit graph: %s]',
+		db_fetch_cell_prepared('SELECT name FROM graph_templates WHERE id = ?',
+			[grv('graph_template_id')]));
 
 	// get a list of all graph item field names and populate an array for user display
 	foreach ($struct_graph_item as $field_name => $field_array) {
@@ -1846,7 +2157,10 @@ function input_edit() : void {
 	draw_edit_form(
 		[
 			'config' => ['no_form_tag' => true],
-			'fields' => inject_form_variables($fields_graph_template_input_edit, (isset($graph_template_input) ? $graph_template_input : []), (isset($graph_template_items) ? $graph_template_items : []), $_REQUEST)
+			'fields' => inject_form_variables($fields_graph_template_input_edit,
+				(isset($graph_template_input) ? $graph_template_input : []),
+				(isset($graph_template_items) ? $graph_template_items : []),
+				$_REQUEST)
 		]
 	);
 
@@ -1902,7 +2216,8 @@ function input_edit() : void {
 
 			print '<td>';
 
-			$name = $start_bold . __esc('Item #%s', $i + 1) . ': ' . htmle($graph_item_types[$item['graph_type_id']]) . ' (' . htmle($consolidation_functions[$item['consolidation_function_id']]) . ')' . $end_bold;
+			$name = $start_bold . __esc('Item #%s',
+				$i + 1) . ': ' . htmle($graph_item_types[$item['graph_type_id']]) . ' (' . htmle($consolidation_functions[$item['consolidation_function_id']]) . ')' . $end_bold;
 
 			form_checkbox('i_' . $item['graph_templates_item_id'], $old_value, '', '', '', grv('graph_template_id'));
 			print "<label for='i_" . (int) $item['graph_templates_item_id'] . "'>" . $name . '</label>';
@@ -2071,7 +2386,11 @@ function draw_graph_templates_filter(bool $render = false) : void {
 	$filters = create_graph_templates_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Graph Templates'), 'graph_templates.php', 'form_graphs', 'sess_gt', 'graph_templates.php?action=template_edit');
+	$pageFilter = new CactiTableFilter(__('Graph Templates'),
+		'graph_templates.php',
+		'form_graphs',
+		'sess_gt',
+		'graph_templates.php?action=template_edit');
 
 	$pageFilter->rows_label = __('Graph Templates');
 	$pageFilter->set_filter_array($filters);

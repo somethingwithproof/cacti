@@ -164,14 +164,22 @@ if (isrv('plugin')) {
 	$display_action = ucwords(str_replace('_', ' ', $action));
 
 	if (!in_array($plugin, $pluginslist, true) && !in_array($action, $safe_actions, true)) {
-		raise_message('invalid_plugin', __esc('The action \'%s\' on Plugin \'%s\' can not be performed due to the Plugin in it\'s current state.', $display_action, $plugin), MESSAGE_LEVEL_ERROR);
+		raise_message('invalid_plugin',
+			__esc('The action \'%s\' on Plugin \'%s\' can not be performed due to the Plugin in it\'s current state.',
+				$display_action,
+				$plugin),
+			MESSAGE_LEVEL_ERROR);
 		header('Location: plugins.php');
 
 		exit;
 	}
 
 	if (in_array($plugin, $plugins_integrated, true)) {
-		raise_message('invalid_plugin_action', __esc('The action \'%s\' on Plugin \'%s\' can not be taken as the Plugin is integrated.', $display_action, $plugin), MESSAGE_LEVEL_ERROR);
+		raise_message('invalid_plugin_action',
+			__esc('The action \'%s\' on Plugin \'%s\' can not be taken as the Plugin is integrated.',
+				$display_action,
+				$plugin),
+			MESSAGE_LEVEL_ERROR);
 		header('Location: plugins.php');
 
 		exit;
@@ -221,14 +229,20 @@ switch($action) {
 
 				usleep(300000);
 
-				raise_message('fetch_background', __('The fetch latest plugins process has been launched into background.'), MESSAGE_LEVEL_INFO);
+				raise_message('fetch_background',
+					__('The fetch latest plugins process has been launched into background.'),
+					MESSAGE_LEVEL_INFO);
 			} elseif ($running === true) {
-				raise_message('fetch_background', __('The fetch latest plugins process has already been started.'), MESSAGE_LEVEL_WARN);
+				raise_message('fetch_background',
+					__('The fetch latest plugins process has already been started.'),
+					MESSAGE_LEVEL_WARN);
 			}
 
 			header('Location: plugins.php');
 		} else {
-			raise_message('get_latest1', __('You must enter your GitHub user, repo and personal access token before you can refresh the plugins.  You can set the GitHub defaults under Console > Configuration > Settings > General.'), MESSAGE_LEVEL_ERROR);
+			raise_message('get_latest1',
+				__('You must enter your GitHub user, repo and personal access token before you can refresh the plugins.  You can set the GitHub defaults under Console > Configuration > Settings > General.'),
+				MESSAGE_LEVEL_ERROR);
 
 			header('Location: plugins.php');
 		}
@@ -267,7 +281,10 @@ switch($action) {
 		   depended-upon plugin (which would run its uninstall hook and drop its
 		   tables without the intended confirmation). */
 		if (is_dir(CACTI_PATH_PLUGINS . '/' . $plugin)) {
-			raise_message('force_remove_present', __esc('Plugin \'%s\' can not be Force Uninstalled because its directory is still present.  Use the normal Uninstall action instead.', $plugin), MESSAGE_LEVEL_ERROR);
+			raise_message('force_remove_present',
+				__esc('Plugin \'%s\' can not be Force Uninstalled because its directory is still present.  Use the normal Uninstall action instead.',
+					$plugin),
+				MESSAGE_LEVEL_ERROR);
 
 			header('Location: plugins.php');
 
@@ -281,7 +298,11 @@ switch($action) {
 			['%' . $plugin . '%']);
 
 		if ($required != '') {
-			raise_message('force_remove_required', __esc('Plugin \'%s\' can not be Force Uninstalled because it is still required by: \'%s\'', $plugin, ucfirst($required)), MESSAGE_LEVEL_ERROR);
+			raise_message('force_remove_required',
+				__esc('Plugin \'%s\' can not be Force Uninstalled because it is still required by: \'%s\'',
+					$plugin,
+					ucfirst($required)),
+				MESSAGE_LEVEL_ERROR);
 
 			header('Location: plugins.php');
 
@@ -330,9 +351,15 @@ switch($action) {
 				WHERE directory = ?',
 				[$plugin]);
 
-			raise_message('plugin_good', __esc('Plugin \'%s\' has passed it\'s Configuration Check test and can not be Installed', $plugin), MESSAGE_LEVEL_INFO);
+			raise_message('plugin_good',
+				__esc('Plugin \'%s\' has passed it\'s Configuration Check test and can not be Installed',
+					$plugin),
+				MESSAGE_LEVEL_INFO);
 		} elseif ($response === null) {
-			raise_message('plugin_good', __esc('Plugin \'%s\' Check Configuration function returned a null response which is invalid.  Please check with Plugin Developer for an update.', $plugin), MESSAGE_LEVEL_WARN);
+			raise_message('plugin_good',
+				__esc('Plugin \'%s\' Check Configuration function returned a null response which is invalid.  Please check with Plugin Developer for an update.',
+					$plugin),
+				MESSAGE_LEVEL_WARN);
 		}
 
 		header('Location: plugins.php');
@@ -1187,7 +1214,15 @@ function update_show_current() : void {
 
 	$plugins = db_fetch_assoc_prepared($sql, $where_params);
 
-	$nav = html_nav_bar('plugins.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 8, __('Plugins'), 'page', 'main');
+	$nav = html_nav_bar('plugins.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		8,
+		__('Plugins'),
+		'page',
+		'main');
 
 	form_start('plugins.php', 'chk');
 
@@ -1489,7 +1524,8 @@ function format_plugin_row(array $plugin, bool $last_plugin, bool $include_order
 		$plugin_name = ucfirst($plugin['plugin']);
 	}
 
-	$row .= "<td><a href='" . htmle($plugin['webpage']) . "' target='_blank' rel='noopener'>" . filter_value($plugin_name, grv('filter')) . '</a></td>';
+	$row .= "<td><a href='" . htmle($plugin['webpage']) . "' target='_blank' rel='noopener'>" . filter_value($plugin_name,
+		grv('filter')) . '</a></td>';
 
 	$row .= "<td class='nowrap'>" . filter_value($plugin['description'], grv('filter')) . '</td>';
 
@@ -1526,7 +1562,11 @@ function format_plugin_row(array $plugin, bool $last_plugin, bool $include_order
 	}
 
 	if (POLLER_ID > 1) {
-		if (isset($plugin['capabilities']) && (str_contains($plugin['capabilities'], 'remote_collect:1') || str_contains($plugin['capabilities'], 'remote_poller:1'))) {
+		if (isset($plugin['capabilities']) &&
+			(str_contains($plugin['capabilities'],
+				'remote_collect:1') ||
+			str_contains($plugin['capabilities'],
+				'remote_poller:1'))) {
 			if ($plugin['remote_status'] == '-1') {
 				$status = plugin_is_compatible($plugin['plugin']);
 				$row .= ' / ' . __('Not Compatible, \'%s\'', $status['requires']);
@@ -1664,7 +1704,8 @@ function format_available_plugin_row(array $plugin, string $table) : string {
 		$plugin_name = ucfirst($plugin['plugin']);
 	}
 
-	$row .= "<td><a href='" . htmle($plugin['webpage']) . "' target='_blank' rel='noopener'>" . filter_value($plugin_name, grv('filter')) . '</a></td>';
+	$row .= "<td><a href='" . htmle($plugin['webpage']) . "' target='_blank' rel='noopener'>" . filter_value($plugin_name,
+		grv('filter')) . '</a></td>';
 
 	$row .= "<td class='nowrap'>" . filter_value($plugin['avail_description'], grv('filter')) . '</td>';
 
@@ -1773,7 +1814,8 @@ function format_archive_plugin_row(array $plugin, string $table) : string {
 		$plugin_name = ucfirst($plugin['plugin']);
 	}
 
-	$row .= "<td><a href='" . htmle($plugin['webpage']) . "' target='_blank' rel='noopener'>" . filter_value($plugin_name, grv('filter')) . '</a></td>';
+	$row .= "<td><a href='" . htmle($plugin['webpage']) . "' target='_blank' rel='noopener'>" . filter_value($plugin_name,
+		grv('filter')) . '</a></td>';
 
 	$row .= "<td class='nowrap'>" . filter_value($plugin['description'], grv('filter')) . '</td>';
 
@@ -1899,14 +1941,16 @@ function plugin_get_install_links(array $plugin, string $table) : string {
 
 	if ($plugin['status'] == 0) {
 		if (!file_exists("$path/setup.php")) {
-			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php', $plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php',
+				$plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 		} elseif (!file_exists("$path/INFO")) {
 			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is lacking an INFO file') . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 		} else {
 			$not_installed = plugin_required_installed($plugin, $table);
 
 			if ($not_installed != '') {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Install Plugin!  %s', $not_installed) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceDisabled'></i></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Install Plugin!  %s',
+					$not_installed) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceDisabled'></i></a>";
 			} else {
 				$link .= "<a href='" . htmle(CACTI_PATH_URL . 'plugins.php?action=install&plugin=' . $plugin['plugin']) . "' title='" . __esc('Install Plugin') . "' class='piinstall linkEditMain'><i class='ti ti-settings-filled deviceUp'></i></a>";
 			}
@@ -1914,7 +1958,8 @@ function plugin_get_install_links(array $plugin, string $table) : string {
 			$link .= "<a href='#' class='pidisable'><i class='ti ti-settings-filled' style='color:transparent'></i></a>";
 		}
 
-		$link .= "<a href='#' title='" . __esc('Plugin \'%s\' can not be archived before it\'s been Installed.', $plugin['plugin']) . "' class='piarchive linkEditMain'><i class='ti ti-package-export deviceDisabled'></i></a>";
+		$link .= "<a href='#' title='" . __esc('Plugin \'%s\' can not be archived before it\'s been Installed.',
+			$plugin['plugin']) . "' class='piarchive linkEditMain'><i class='ti ti-package-export deviceDisabled'></i></a>";
 
 		$setup_file = CACTI_PATH_BASE . '/plugins/' . $plugin['plugin'] . '/setup.php';
 
@@ -1953,7 +1998,8 @@ function plugin_actions(array $plugin, string $table) : string {
 			$required = plugin_required_for_others($plugin, $table);
 
 			if ($required != '') {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall.  This Plugin is required by: \'%s\'', ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall.  This Plugin is required by: \'%s\'',
+					ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 			} else {
 				$link .= "<a class='piuninstall' href='" . htmle(CACTI_PATH_URL . 'plugins.php?action=uninstall&plugin=' . $plugin['plugin']) . "' title='" . __esc('Uninstall Plugin') . "'><i class='ti ti-settings-filled deviceDown'></i></a>";
 			}
@@ -1979,7 +2025,8 @@ function plugin_actions(array $plugin, string $table) : string {
 			$required = plugin_required_for_others($plugin, $table);
 
 			if ($required != '') {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall as this Plugin is required by: \'%s\'', ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall as this Plugin is required by: \'%s\'',
+					ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 			} else {
 				$link .= "<a class='piuninstall' href='" . htmle(CACTI_PATH_URL . 'plugins.php?action=uninstall&plugin=' . $plugin['plugin']) . "' title='" . __esc('Uninstall Plugin') . "'><i class='ti ti-settings-filled deviceDown'></i></a>";
 			}
@@ -1997,7 +2044,8 @@ function plugin_actions(array $plugin, string $table) : string {
 			$required = plugin_required_for_others($plugin, $table);
 
 			if ($required != '') {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall as this Plugin is required by: \'%s\'', ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Uninstall as this Plugin is required by: \'%s\'',
+					ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 			} else {
 				$link .= "<a class='piuninstall' href='" . htmle(CACTI_PATH_URL . 'plugins.php?action=uninstall&plugin=' . $plugin['plugin']) . "' title='" . __esc('Uninstall Plugin') . "'><i class='ti ti-settings-filled deviceDown'></i></a>";
 			}
@@ -2015,12 +2063,14 @@ function plugin_actions(array $plugin, string $table) : string {
 			if (is_dir(CACTI_PATH_PLUGINS . '/' . $plugin['plugin'])) {
 				/* Directory still present but not loadable (e.g. missing setup.php);
 				   withhold Force Uninstall and report the underlying error instead. */
-				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php', $plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php',
+					$plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 			} else {
 				$required = plugin_required_for_others($plugin, $table);
 
 				if ($required != '') {
-					$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Force Uninstall.  This Plugin is required by: \'%s\'', ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+					$link .= "<a class='pierror' href='#' title='" . __esc('Unable to Force Uninstall.  This Plugin is required by: \'%s\'',
+						ucfirst($required)) . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 				} else {
 					$link .= "<a class='piforceremove' href='#' data-plugin='" . htmle($plugin['plugin']) . "' title='" . __esc('Plugin directory is missing.  Click to Force Uninstall and remove all of its entries from the Cacti plugin tables.') . "'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 				}
@@ -2036,14 +2086,17 @@ function plugin_actions(array $plugin, string $table) : string {
 
 			break;
 		case '-2': // Naming issues
-			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory is not correct.  Should be \'%s\' but is \'%s\'', cacti_strtolower($plugin['plugin']), $plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+			$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory is not correct.  Should be \'%s\' but is \'%s\'',
+				cacti_strtolower($plugin['plugin']),
+				$plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 
 			break;
 		default: // Old PIA
 			$path = CACTI_PATH_PLUGINS . '/' . $plugin['plugin'];
 
 			if (!file_exists("$path/setup.php")) {
-				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php', $plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
+				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin directory \'%s\' is missing setup.php',
+					$plugin['plugin']) . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 			} elseif (!file_exists("$path/INFO")) {
 				$link .= "<a class='pierror' href='#' title='" . __esc('Plugin is lacking an INFO file') . "' class='linkEditMain'><i class='ti ti-settings-filled deviceUnknown'></i></a>";
 			} elseif (in_array($plugin['plugin'], $plugins_integrated, true)) {
@@ -2056,7 +2109,11 @@ function plugin_actions(array $plugin, string $table) : string {
 	}
 
 	if (POLLER_ID > 1) {
-		if (isset($plugin['capabilities']) && (str_contains($plugin['capabilities'], 'remote_collect:1') || str_contains($plugin['capabilities'], 'remote_poller:1'))) {
+		if (isset($plugin['capabilities']) &&
+			(str_contains($plugin['capabilities'],
+				'remote_collect:1') ||
+			str_contains($plugin['capabilities'],
+				'remote_poller:1'))) {
 			if ($plugin['remote_status'] == 1) { // Installed and Active
 				// ToDo: Disabling here does not make much sense as the main will be replicated
 				// with any change of any other plugin thus undoing.  Fix that moving forward

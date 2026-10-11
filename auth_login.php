@@ -69,7 +69,10 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 		$realm = $frv_realm;
 	}
 
-	cacti_log("DEBUG: User '" . $username . "' attempting to login with realm " . $frv_realm . ', using method ' . $auth_method, false, 'AUTH', POLLER_VERBOSITY_DEBUG);
+	cacti_log("DEBUG: User '" . $username . "' attempting to login with realm " . $frv_realm . ', using method ' . $auth_method,
+		false,
+		'AUTH',
+		POLLER_VERBOSITY_DEBUG);
 
 	switch ($auth_method) {
 		case AUTH_METHOD_NONE: // No authentication, should not be reachable
@@ -127,17 +130,22 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 		$user = is_array($guestRow) ? $guestRow : [];
 
 		if ($user) {
-			cacti_log("LOGIN: Authenticated user '" . $username . "' using guest account '" . $user['username'] . "'", false, 'AUTH');
+			cacti_log("LOGIN: Authenticated user '" . $username . "' using guest account '" . $user['username'] . "'",
+				false,
+				'AUTH');
 
 			if ($username != '' && get_template_account($username) == 0) {
-				raise_message('template_disabled', __('User was Authenticated, but the Template Account is disabled. Using Guest Account'), MESSAGE_LEVEL_WARN);
+				raise_message('template_disabled',
+					__('User was Authenticated, but the Template Account is disabled. Using Guest Account'),
+					MESSAGE_LEVEL_WARN);
 			}
 
 			$guest_user = true;
 		} else {
 			// error
 			$error     = true;
-			$error_msg = __('Access Denied!  Guest user id %s does not exist.  Please contact your Administrator.', read_config_option('guest_user'));
+			$error_msg = __('Access Denied!  Guest user id %s does not exist.  Please contact your Administrator.',
+				read_config_option('guest_user'));
 
 			cacti_log("LOGIN FAILED: Unable to locate guest user '" . read_config_option('guest_user') . "'", false, 'AUTH');
 
@@ -154,9 +162,13 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 		$client_addr = get_client_addr();
 
 		if (!$guest_user) {
-			cacti_log("LOGIN: User '" . $user['username'] . "' authenticated from IP Address '" . $client_addr . "'", false, 'AUTH');
+			cacti_log("LOGIN: User '" . $user['username'] . "' authenticated from IP Address '" . $client_addr . "'",
+				false,
+				'AUTH');
 		} else {
-			cacti_log("LOGIN: Guest User '" . $user['username'] . "' in use from IP Address '" . $client_addr . "'", false, 'AUTH');
+			cacti_log("LOGIN: Guest User '" . $user['username'] . "' in use from IP Address '" . $client_addr . "'",
+				false,
+				'AUTH');
 		}
 
 		db_execute_prepared('INSERT IGNORE INTO user_log
@@ -189,7 +201,11 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 			$error     = true;
 			$error_msg = __('You do not have access to any area of Cacti.  Contact your administrator.');
 
-			cacti_log(sprintf('LOGIN FAILED: User %s with id %s does not have access to any area of Cacti.', $user['username'], $user['id']), false, 'AUTH');
+			cacti_log(sprintf('LOGIN FAILED: User %s with id %s does not have access to any area of Cacti.',
+				$user['username'],
+				$user['id']),
+				false,
+				'AUTH');
 
 			if ($auth_method == AUTH_METHOD_BASIC) {
 				auth_display_custom_error_message($error_msg);
@@ -206,7 +222,10 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 		// remember me support.  Not for guest of basic auth. The transition
 		// gate must pass first so a locked or missing account cannot mint a token.
 		if ($auth_method != AUTH_METHOD_BASIC && $user['id'] !== get_guest_account()) {
-			if (!$error && isrv('remember_me') && read_config_option('auth_cache_enabled') == 'on' && auth_realm_allows_cookies((int) $realm)) {
+			if (!$error &&
+				isrv('remember_me') &&
+				read_config_option('auth_cache_enabled') == 'on' &&
+				auth_realm_allows_cookies((int) $realm)) {
 				set_auth_cookie($user);
 			}
 		}
@@ -228,7 +247,10 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 				$_SESSION[SESS_USER_LANGUAGE] = read_user_setting('user_language');
 			}
 
-			cacti_log("DEBUG: User '" . $username . "' about to re-direct to preferred login page", false, 'AUTH', POLLER_VERBOSITY_DEBUG);
+			cacti_log("DEBUG: User '" . $username . "' about to re-direct to preferred login page",
+				false,
+				'AUTH',
+				POLLER_VERBOSITY_DEBUG);
 
 			auth_login_redirect($user['login_opts']);
 		}
@@ -263,7 +285,9 @@ if (gnrv('action') == 'login' || $auth_method == AUTH_METHOD_BASIC) {
 			[$username, !empty($id) ? $id : 0, get_client_addr()]
 		);
 
-		cacti_log('LOGIN FAILED: ' . $realm_name . " login failed for user '" . $username . "' from IP address '" . get_client_addr() . "'.", false, 'AUTH');
+		cacti_log('LOGIN FAILED: ' . $realm_name . " login failed for user '" . $username . "' from IP address '" . get_client_addr() . "'.",
+			false,
+			'AUTH');
 
 		// Single machine-parseable failure line for fail2ban. This is the universal
 		// choke point for a failed login across every realm, so it fires exactly once
@@ -310,7 +334,8 @@ html_auth_header(
 	</td>
 </tr>
 <?php
-if (read_config_option('auth_method') == AUTH_METHOD_LDAP || read_config_option('auth_method') == AUTH_METHOD_PROVIDERS) {
+if (read_config_option('auth_method') == AUTH_METHOD_LDAP ||
+	read_config_option('auth_method') == AUTH_METHOD_PROVIDERS) {
 	$realms = get_auth_realms(true);
 
 	// try and remember previously selected realm
@@ -344,7 +369,8 @@ $is_https = cacti_is_https();
 if (read_config_option('auth_cache_enabled') == 'on' && $is_https) { ?>
 	<tr>
 		<td colspan='2'>
-			<input style='vertical-align:-3px;' type='checkbox' id='remember_me' name='remember_me' <?php print(isset($_COOKIE['cacti_remembers']) || !ierv('remember_me') ? 'checked' : ''); ?>>
+			<input style='vertical-align:-3px;' type='checkbox' id='remember_me' name='remember_me' <?php print(isset($_COOKIE['cacti_remembers']) ||
+				!ierv('remember_me') ? 'checked' : ''); ?>>
 			<label for='remember_me'><?php print __('Keep me signed in'); ?></label>
 		</td>
 	</tr>
@@ -362,7 +388,8 @@ if (cacti_sizeof($sso_providers)) {
 	foreach ($sso_providers as $sso_provider) { ?>
 	<tr>
 		<td colspan='2'>
-			<a class='ui-button ui-corner-all ui-widget sso-login-link' data-realm='<?php print $sso_provider['realm']; ?>' href='login_sso.php?action=login&realm=<?php print $sso_provider['realm']; ?>'><?php print __esc('Login with %s', $sso_provider['label']); ?></a>
+			<a class='ui-button ui-corner-all ui-widget sso-login-link' data-realm='<?php print $sso_provider['realm']; ?>' href='login_sso.php?action=login&realm=<?php print $sso_provider['realm']; ?>'><?php print __esc('Login with %s',
+				$sso_provider['label']); ?></a>
 		</td>
 	</tr>
 <?php

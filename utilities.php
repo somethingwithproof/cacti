@@ -45,9 +45,13 @@ switch (grv('action')) {
 
 			usleep(300000);
 
-			raise_message('repopulate_background', __('The Poller Cache Rebuild Operation has been started in background'), MESSAGE_LEVEL_INFO);
+			raise_message('repopulate_background',
+				__('The Poller Cache Rebuild Operation has been started in background'),
+				MESSAGE_LEVEL_INFO);
 		} elseif ($running === true) {
-			raise_message('repopulate_background', __('The Poller Cache Rebuild Operation has already been started.'), MESSAGE_LEVEL_INFO);
+			raise_message('repopulate_background',
+				__('The Poller Cache Rebuild Operation has already been started.'),
+				MESSAGE_LEVEL_INFO);
 		}
 
 		header('Location: utilities.php?action=view_poller_cache');
@@ -153,7 +157,9 @@ function rebuild_resource_cache() : void {
 
 	raise_message('resource_cache_rebuild');
 
-	cacti_log('NOTE: Poller Resource Cache scheduled for rebuild by user ' . get_username($_SESSION[SESS_USER_ID]), false, 'WEBUI');
+	cacti_log('NOTE: Poller Resource Cache scheduled for rebuild by user ' . get_username($_SESSION[SESS_USER_ID]),
+		false,
+		'WEBUI');
 }
 
 function utilities_view_logfile() : void {
@@ -375,7 +381,10 @@ function draw_data_query_filter(bool $render = false) : void {
 	$filters = create_data_query_filter('sess_usnmp');
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Data Query Cache Items'), 'utilities.php?action=view_snmp_cache', 'form_snmpcache', 'sess_usnmp');
+	$pageFilter = new CactiTableFilter(__('Data Query Cache Items'),
+		'utilities.php?action=view_snmp_cache',
+		'form_snmpcache',
+		'sess_usnmp');
 
 	$pageFilter->rows_label = __('Entries');
 	$pageFilter->set_filter_array($filters);
@@ -468,7 +477,15 @@ function utilities_view_snmp_cache() : void {
 		__('OID')
 	];
 
-	$nav = html_nav_bar('utilities.php?action=view_snmp_cache&host_id=' . grv('host_id') . '&filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 6, __('Entries'), 'page', 'main');
+	$nav = html_nav_bar('utilities.php?action=view_snmp_cache&host_id=' . grv('host_id') . '&filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		6,
+		__('Entries'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -598,7 +615,8 @@ function utilities_view_poller_cache() : void {
 		LEFT JOIN host AS h
 		ON pi.host_id = h.id
 		$sql_where
-		ORDER BY " . sanitize_sql_column(grv('sort_column'), 'dtd.name_cache') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') . ', action ASC
+		ORDER BY " . sanitize_sql_column(grv('sort_column'),
+		'dtd.name_cache') . ' ' . (strtoupper(grv('sort_direction')) === 'DESC' ? 'DESC' : 'ASC') . ', action ASC
 		LIMIT ' . ($rows * (grv('page') - 1)) . ',' . $rows;
 
 	$items = db_fetch_assoc_prepared($poller_sql, $sql_params);
@@ -609,13 +627,25 @@ function utilities_view_poller_cache() : void {
 		'nosort'         => [__('Details'), 'ASC']
 	];
 
-	$nav = html_nav_bar('utilities.php?action=view_poller_cache&filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 3, __('Entries'), 'page', 'main');
+	$nav = html_nav_bar('utilities.php?action=view_poller_cache&filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		3,
+		__('Entries'),
+		'page',
+		'main');
 
 	print $nav;
 
 	html_start_box('', '100%', false, 3, 'center', '');
 
-	html_header_sort($display_text, grv('sort_column'), grv('sort_direction'), 1, 'utilities.php?action=view_poller_cache');
+	html_header_sort($display_text,
+		grv('sort_column'),
+		grv('sort_direction'),
+		1,
+		'utilities.php?action=view_poller_cache');
 
 	$i = 0;
 
@@ -965,7 +995,10 @@ function utilities() : void {
 		$i = 0;
 
 		foreach ($content as $title => $details) {
-			if ((isset($details['mode']) && $details['mode'] == 'online' && CACTI_CONNECTION == 'online') || !isset($details['mode'])) {
+			if ((isset($details['mode']) &&
+				$details['mode'] == 'online' &&
+				CACTI_CONNECTION == 'online') ||
+				!isset($details['mode'])) {
 				if ($i == 0) {
 					html_section_header($header, 2);
 				}
@@ -1342,7 +1375,8 @@ function boost_display_run_status() : void {
 		form_alternate_row();
 
 		if (is_numeric($last_run_time)) {
-			print '<td class="utilityPick">' . __('Last Start Time:') . '</td><td>' . date('Y-m-d H:i:s', (int) $last_run_time) . '</td>';
+			print '<td class="utilityPick">' . __('Last Start Time:') . '</td><td>' . date('Y-m-d H:i:s',
+				(int) $last_run_time) . '</td>';
 		} else {
 			print '<td class="utilityPick">' . __('Last Start Time:') . '</td><td>' . $last_run_time . '</td>';
 		}
@@ -1351,16 +1385,20 @@ function boost_display_run_status() : void {
 		$last_end_time = read_config_option('boost_last_end_time', true);
 
 		form_alternate_row();
-		print '<td class="utilityPick">' . __('Last End Time:') . '</td><td>' . ($last_end_time != '' ? date('Y-m-d H:i:s', (int) $last_end_time) : __('Never Run')) . '</td>';
+		print '<td class="utilityPick">' . __('Last End Time:') . '</td><td>' . ($last_end_time != '' ? date('Y-m-d H:i:s',
+			(int) $last_end_time) : __('Never Run')) . '</td>';
 
 		form_alternate_row();
 		print '<td class="utilityPick">' . __('Last Run Duration:') . '</td><td>';
 
 		if (is_numeric($boost_last_run_duration)) {
-			print ($boost_last_run_duration > 60 ? __('%d minutes', (int)$boost_last_run_duration / 60) . ', ' : '') . __('%d seconds', (int) $boost_last_run_duration % 60);
+			print ($boost_last_run_duration > 60 ? __('%d minutes',
+				(int)$boost_last_run_duration / 60) . ', ' : '') . __('%d seconds',
+					(int) $boost_last_run_duration % 60);
 
 			if ($rrd_updates != '') {
-				print ' (' . __('%0.2f percent of update frequency)', round(100 * (float) $boost_last_run_duration / (float) $update_interval / 60));
+				print ' (' . __('%0.2f percent of update frequency)',
+					round(100 * (float) $boost_last_run_duration / (float) $update_interval / 60));
 			}
 		} else {
 			print __('N/A');
@@ -1371,7 +1409,8 @@ function boost_display_run_status() : void {
 		print '<td class="utilityPick">' . __('RRD Updates:') . '</td><td>' . ($boost_rrds_updated != '' ? number_format_i18n($boost_rrds_updated) : '-') . '</td>';
 
 		form_alternate_row();
-		print '<td class="utilityPick">' . __('Peak Poller Memory:') . '</td><td>' . ((read_config_option('boost_peak_memory') != '' && is_numeric(read_config_option('boost_peak_memory'))) ? (round(read_config_option('boost_peak_memory') / 1024 / 1024,2)) . ' ' . __('MBytes') : __('N/A')) . '</td>';
+		print '<td class="utilityPick">' . __('Peak Poller Memory:') . '</td><td>' . ((read_config_option('boost_peak_memory') != '' &&
+			is_numeric(read_config_option('boost_peak_memory'))) ? (round(read_config_option('boost_peak_memory') / 1024 / 1024,2)) . ' ' . __('MBytes') : __('N/A')) . '</td>';
 
 		form_alternate_row();
 
@@ -1451,9 +1490,17 @@ function boost_display_run_status() : void {
 				form_alternate_row();
 
 				if ($rows_to_process > 0) {
-					print '<td class="utilityPick">' . __esc('Process: %d', $process) . '</td><td>' . __('Status: <span class="deviceUp"><b>Running</b></span>, Remaining: %s (dses), CurrentRuntime: %s (secs), PrevRuntime: %s (secs), PrevProcessed: %10s (ds rows)', number_format_i18n((int) $rows_to_process), number_format_i18n((float) $runtime), number_format_i18n((float) $time), number_format_i18n((int) $rrds)) . '</td>';
+					print '<td class="utilityPick">' . __esc('Process: %d',
+						$process) . '</td><td>' . __('Status: <span class="deviceUp"><b>Running</b></span>, Remaining: %s (dses), CurrentRuntime: %s (secs), PrevRuntime: %s (secs), PrevProcessed: %10s (ds rows)',
+							number_format_i18n((int) $rows_to_process),
+							number_format_i18n((float) $runtime),
+							number_format_i18n((float) $time),
+							number_format_i18n((int) $rrds)) . '</td>';
 				} else {
-					print '<td class="utilityPick">' . __esc('Process: %d', $process) . '</td><td>' . __('Status: <span class="deviceRecovering"><b>Idle</b></span>, PrevRuntime: %s (secs), PrevProcessed: %10s (ds rows)', number_format_i18n((float) $time), number_format_i18n((int) $rrds)) . '</td>';
+					print '<td class="utilityPick">' . __esc('Process: %d',
+						$process) . '</td><td>' . __('Status: <span class="deviceRecovering"><b>Idle</b></span>, PrevRuntime: %s (secs), PrevProcessed: %10s (ds rows)',
+							number_format_i18n((float) $time),
+							number_format_i18n((int) $rrds)) . '</td>';
 				}
 			}
 		}
@@ -1468,7 +1515,8 @@ function boost_display_run_status() : void {
 		print '<td class="utilityPick">' . __('Concurrent Processes:') . '</td><td>' . read_config_option('boost_parallel') . '</td>';
 
 		form_alternate_row();
-		print '<td class="utilityPick">' . __('Next Start Time:') . '</td><td>' . (is_numeric($next_run_time) ? date('Y-m-d H:i:s', (int) $next_run_time) : $next_run_time) . '</td>';
+		print '<td class="utilityPick">' . __('Next Start Time:') . '</td><td>' . (is_numeric($next_run_time) ? date('Y-m-d H:i:s',
+			(int) $next_run_time) : $next_run_time) . '</td>';
 
 		form_alternate_row();
 		print '<td class="utilityPick">' . __('Maximum Records:') . '</td><td>' . number_format_i18n($max_records) . ' ' . __('Records') . '</td>';
@@ -1557,7 +1605,10 @@ function draw_snmp_agent_cache_filter(bool $render = false) : void {
 	$filters = create_snmp_agent_cache_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('SNMP Agent Cache'), 'utilities.php?action=view_snmpagent_cache', 'form_agent', 'sess_snmpc');
+	$pageFilter = new CactiTableFilter(__('SNMP Agent Cache'),
+		'utilities.php?action=view_snmpagent_cache',
+		'form_agent',
+		'sess_snmpc');
 
 	$pageFilter->rows_label = __('OIDs');
 	$pageFilter->set_filter_array($filters);
@@ -1637,7 +1688,15 @@ function snmpagent_utilities_run_cache() : void {
 	];
 
 	// generate page list
-	$nav = html_nav_bar('utilities.php?action=view_snmpagent_cache&mib=' . grv('mib') . '&filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 11, __('Entries'), 'page', 'main');
+	$nav = html_nav_bar('utilities.php?action=view_snmpagent_cache&mib=' . grv('mib') . '&filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		11,
+		__('Entries'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -1665,7 +1724,11 @@ function snmpagent_utilities_run_cache() : void {
 			form_selectable_cell($mib, $item['oid']);
 			form_selectable_ecell($item['kind'], $item['oid']);
 			form_selectable_cell($max_access, $item['oid']);
-			form_selectable_ecell((in_array($item['kind'], [__('Scalar'), __('Column Data')], true) ? $item['value'] : __('N/A')), $item['oid']);
+			form_selectable_ecell((in_array($item['kind'],
+				[__('Scalar'),
+				__('Column Data')],
+				true) ? $item['value'] : __('N/A')),
+				$item['oid']);
 
 			form_end_row();
 		}
@@ -1762,7 +1825,10 @@ function draw_snmp_agent_events_filter(bool $render = false) : void {
 	$filters = create_snmp_agent_events_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('SNMP Agent Notification Log'), 'utilities.php?action=view_snmpagent_events', 'form_agent', 'sess_snmpae');
+	$pageFilter = new CactiTableFilter(__('SNMP Agent Notification Log'),
+		'utilities.php?action=view_snmpagent_events',
+		'form_agent',
+		'sess_snmpae');
 
 	$pageFilter->rows_label = __('Events');
 	$pageFilter->set_filter_array($filters);
@@ -1853,7 +1919,15 @@ function snmpagent_utilities_run_eventlog() : void {
 
 	$logs = db_fetch_assoc_prepared($sql_query, $sql_params);
 
-	$nav = html_nav_bar('utilities.php?action=view_snmpagent_events&severity=' . grv('severity') . '&receiver=' . grv('receiver') . '&filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 11, __('Log Entries'), 'page', 'main');
+	$nav = html_nav_bar('utilities.php?action=view_snmpagent_events&severity=' . grv('severity') . '&receiver=' . grv('receiver') . '&filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		11,
+		__('Log Entries'),
+		'page',
+		'main');
 
 	form_start('managers.php', 'chk');
 
@@ -1869,7 +1943,11 @@ function snmpagent_utilities_run_eventlog() : void {
 
 			form_alternate_row('line' . $item['id'], false);
 
-			form_selectable_cell(__esc('Severity Level: %s', $severity_levels[$item['severity']]), $item['id'], '', 'background-color:' . $severity_colors[$item['severity']]);
+			form_selectable_cell(__esc('Severity Level: %s',
+				$severity_levels[$item['severity']]),
+				$item['id'],
+				'',
+				'background-color:' . $severity_colors[$item['severity']]);
 
 			form_selectable_cell(date('Y-m-d H:i:s', $item['time']), $item['id']);
 			form_selectable_ecell($item['hostname'], $item['id']);

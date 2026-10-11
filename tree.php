@@ -743,7 +743,8 @@ function form_actions() : void {
 				input_validate_input_number($matches[1], 'chk[1]');
 				// ====================================================
 
-				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM graph_tree WHERE id = ?', [$matches[1]])) . '</li>';
+				$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM graph_tree WHERE id = ?',
+					[$matches[1]])) . '</li>';
 
 				$iarray[] = $matches[1];
 			}
@@ -857,7 +858,9 @@ function tree_edit(bool $partial = false) : void {
 		$lockdiv = "<div style='padding:5px 5px 5px 0px'><table><tr>
 			<td><button type='button' class='ui-button ui-corner-all ui-widget' id='unlock'>" . __esc('Finish Editing Tree') . "</button></td>
 			<td><button type='button' class='ui-button ui-corner-all ui-widget' id='addbranch' onClick='createNode()'>" . __esc('Add Root Branch') . "</button></td>
-			<td style='font-weight:bold;'>" . __('This tree has been locked for Editing on %s by %s.', $tree['locked_date'], get_username($tree['modified_by']));
+			<td style='font-weight:bold;'>" . __('This tree has been locked for Editing on %s by %s.',
+			$tree['locked_date'],
+			get_username($tree['modified_by']));
 
 		if ($tree['modified_by'] == $_SESSION[SESS_USER_ID]) {
 			$lockdiv .= '</td></tr></table></div>';
@@ -2109,7 +2112,11 @@ function tree() : void {
 	];
 
 	// create the page filter
-	$pageFilter             = new CactiTableFilter(__('Trees'), 'tree.php', 'form_tree', 'sess_tree', 'tree.php?action=edit');
+	$pageFilter             = new CactiTableFilter(__('Trees'),
+		'tree.php',
+		'form_tree',
+		'sess_tree',
+		'tree.php?action=edit');
 	$pageFilter->rows_label = __('Trees');
 	$pageFilter->set_sort_array('sequence', 'ASC');
 	$pageFilter->add_button('sortasc', $button1);
@@ -2160,7 +2167,15 @@ function tree() : void {
 
 	$total_rows = get_total_row_data($_SESSION[SESS_USER_ID], $sql, $sql_params, 'tree');
 
-	$nav = html_nav_bar('tree.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 11, __('Trees'), 'page', 'main');
+	$nav = html_nav_bar('tree.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		11,
+		__('Trees'),
+		'page',
+		'main');
 
 	form_start('tree.php', 'chk');
 
@@ -2269,7 +2284,10 @@ function tree() : void {
 
 			form_alternate_row('line' . $tree['id'], true);
 
-			form_selectable_cell(filter_value($tree['name'], grv('filter'), 'tree.php?action=edit&id=' . $tree['id']), $tree['id']);
+			form_selectable_cell(filter_value($tree['name'],
+				grv('filter'),
+				'tree.php?action=edit&id=' . $tree['id']),
+				$tree['id']);
 			form_selectable_cell($tree['id'], $tree['id'], '', 'right');
 			form_selectable_cell($tree['enabled'] == 'on' ? __('Yes') : __('No'), $tree['id']);
 			form_selectable_cell($tree['locked'] == '1' ? __('Yes') : __('No'), $tree['id']);
@@ -2278,7 +2296,11 @@ function tree() : void {
 			form_selectable_cell(substr($tree['last_modified'],0,16), $tree['id'], '', 'right');
 			form_selectable_cell(get_username($tree['modified_by']), $tree['id'], '', 'right');
 			form_selectable_cell($tree['sites'] > 0 ? number_format_i18n($tree['sites'], -1) : '-', $tree['id'], '', 'right');
-			form_selectable_cell($tree['branches'] > 0 ? number_format_i18n($tree['branches'], -1) : '-', $tree['id'], '', 'right');
+			form_selectable_cell($tree['branches'] > 0 ? number_format_i18n($tree['branches'],
+				-1) : '-',
+				$tree['id'],
+				'',
+				'right');
 			form_selectable_cell($tree['hosts'] > 0 ? number_format_i18n($tree['hosts'], -1) : '-', $tree['id'], '', 'right');
 			form_selectable_cell($tree['graphs'] > 0 ? number_format_i18n($tree['graphs'], -1) : '-', $tree['id'], '', 'right');
 

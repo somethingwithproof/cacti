@@ -52,7 +52,9 @@ function form_save() : void {
 
 	if (isrv('save_component_export')) {
 		$export_errors = 0;
-		$xml_data      = get_item_xml(gnrv('export_type'), gnrv('export_item_id'), (((isrv('include_deps') ? gnrv('include_deps') : '') == '') ? false : true));
+		$xml_data      = get_item_xml(gnrv('export_type'),
+			gnrv('export_item_id'),
+			(((isrv('include_deps') ? gnrv('include_deps') : '') == '') ? false : true));
 
 		if (gnrv('output_format') == '1') {
 			top_header();
@@ -72,7 +74,9 @@ function form_save() : void {
 				header('Location: templates_export.php');
 			} else {
 				header('Content-type: application/xml');
-				header('Content-Disposition: attachment; filename=cacti_' . gnrv('export_type') . '_' . cacti_strtolower(clean_up_file_name(db_fetch_cell(str_replace('|id|', gnrv('export_item_id'), $export_types[gnrv('export_type')]['title_sql'])))) . '.xml');
+				header('Content-Disposition: attachment; filename=cacti_' . gnrv('export_type') . '_' . cacti_strtolower(clean_up_file_name(db_fetch_cell(str_replace('|id|',
+					gnrv('export_item_id'),
+					$export_types[gnrv('export_type')]['title_sql'])))) . '.xml');
 				print $xml_data;
 			}
 		}
@@ -165,7 +169,13 @@ function export() : void {
 
 	html_end_box();
 
-	html_start_box(__('Available Templates [%s]', $export_types[gnrv('export_type')]['name']), '100%', false, 3, 'center', '');
+	html_start_box(__('Available Templates [%s]',
+		$export_types[gnrv('export_type')]['name']),
+		'100%',
+		false,
+		3,
+		'center',
+		'');
 
 	draw_edit_form(
 		[

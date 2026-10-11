@@ -160,7 +160,10 @@ switch ($action) {
 		}
 
 		// Compare current password with stored password
-		if ((!empty($user['password']) || !empty($current_password)) && !compat_password_verify($current_password, $user['password'])) {
+		if ((!empty($user['password']) ||
+			!empty($current_password)) &&
+			!compat_password_verify($current_password,
+				$user['password'])) {
 			$bad_password = true;
 			$errorMessage = "<span class='badpassword_message'>" . __('Your current password is not correct. Please try again.') . '</span>';
 
@@ -280,7 +283,8 @@ if (read_config_option('secpass_reqspec') == 'on') {
 }
 
 if (read_config_option('secpass_history') != '0') {
-	$secpass_body .= ($secpass_body != '' ? '<br>' : '') . __('Cannot be reused for %d password changes', read_config_option('secpass_history') + 1);
+	$secpass_body .= ($secpass_body != '' ? '<br>' : '') . __('Cannot be reused for %d password changes',
+		read_config_option('secpass_history') + 1);
 }
 
 $secpass_tooltip .= $secpass_body;
@@ -355,7 +359,9 @@ if (isrv('ref')) {
 	if (!$valid) {
 		cacti_log('WARNING: User attempted to access Cacti from unknown URL', false, 'AUTH');
 
-		raise_message('problems_with_page', __('There are problems with the Change Password page.  Contact your Cacti administrator right away.'), MESSAGE_LEVEL_ERROR);
+		raise_message('problems_with_page',
+			__('There are problems with the Change Password page.  Contact your Cacti administrator right away.'),
+			MESSAGE_LEVEL_ERROR);
 
 		header('Location:index.php');
 

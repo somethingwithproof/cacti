@@ -58,7 +58,10 @@ if (empty($_SESSION[SESS_USER_2FA]) && isset($_COOKIE[session_name() . '_otp']))
 		$tfaCookeHash  = false;
 	}
 
-	if ($tfaCookieTime && $tfaCookeHash === hash_hmac('sha1', $user['username'] . ':' . $tfaMins . ':' . $tfaCookieTime . ':' . $_SERVER['HTTP_USER_AGENT'], $user['tfa_secret'])) {
+	if ($tfaCookieTime &&
+		$tfaCookeHash === hash_hmac('sha1',
+			$user['username'] . ':' . $tfaMins . ':' . $tfaCookieTime . ':' . $_SERVER['HTTP_USER_AGENT'],
+			$user['tfa_secret'])) {
 		$_SESSION[SESS_USER_2FA] = $tfaCookieTime;
 	}
 }
@@ -76,10 +79,16 @@ if (gnrv('action') == 'login_2fa') {
 
 	if (cacti_sizeof($user)) {
 		if (empty($user['tfa_enabled'])) {
-			cacti_log("DEBUG: User '" . $user['username'] . "' attempting to verify 2fa token, but not 2fa enabled", false, 'AUTH', POLLER_VERBOSITY_DEBUG);
+			cacti_log("DEBUG: User '" . $user['username'] . "' attempting to verify 2fa token, but not 2fa enabled",
+				false,
+				'AUTH',
+				POLLER_VERBOSITY_DEBUG);
 			$_SESSION[SESS_USER_2FA] = true;
 		} else {
-			cacti_log("DEBUG: User '" . $user['username'] . "' attempting to verify 2fa token", false, 'AUTH', POLLER_VERBOSITY_DEBUG);
+			cacti_log("DEBUG: User '" . $user['username'] . "' attempting to verify 2fa token",
+				false,
+				'AUTH',
+				POLLER_VERBOSITY_DEBUG);
 			$g = new \Sonata\GoogleAuthenticator\GoogleAuthenticator();
 
 			if ($g->checkCode($user['tfa_secret'],  $token)) {
@@ -87,7 +96,9 @@ if (gnrv('action') == 'login_2fa') {
 
 				// About using the user agent: It's easy to fake it, but it increases the barrier for stealing and reusing cookies nevertheless
 				// and it doesn't do any harm (except that it's invalid after a browser upgrade, but that may be even intended)
-				$cookie = $_SESSION[SESS_USER_2FA] . ':' . hash_hmac('sha1', $user['username'] . ':' . $tfaMins . ':' . $_SESSION[SESS_USER_2FA] . ':' . $_SERVER['HTTP_USER_AGENT'], $user['tfa_secret']);
+				$cookie = $_SESSION[SESS_USER_2FA] . ':' . hash_hmac('sha1',
+					$user['username'] . ':' . $tfaMins . ':' . $_SESSION[SESS_USER_2FA] . ':' . $_SERVER['HTTP_USER_AGENT'],
+					$user['tfa_secret']);
 
 				$cookie_lifetime = read_config_option('secpass_2fatime') * 60;
 
@@ -114,7 +125,10 @@ if (gnrv('action') == 'login_2fa') {
 		}
 	} else {
 		// BAD token
-		cacti_log("DEBUG: User '" . $user['username'] . "' failed to verify 2fa token", false, 'AUTH', POLLER_VERBOSITY_DEBUG);
+		cacti_log("DEBUG: User '" . $user['username'] . "' failed to verify 2fa token",
+			false,
+			'AUTH',
+			POLLER_VERBOSITY_DEBUG);
 
 		// Structured failure line for fail2ban, at normal verbosity (the human line
 		// above is DEBUG-only). A failed second factor is a brute-force signal too.

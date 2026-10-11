@@ -218,7 +218,8 @@ function form_actions() : void {
 					db_execute('DELETE FROM host_template_graph WHERE ' . array_to_sql_or($selected_items, 'host_template_id'));
 
 					// "undo" any device that is currently using this template
-					db_execute('UPDATE host SET host_template_id = 0 WHERE deleted = "" AND ' . array_to_sql_or($selected_items, 'host_template_id'));
+					db_execute('UPDATE host SET host_template_id = 0 WHERE deleted = "" AND ' . array_to_sql_or($selected_items,
+						'host_template_id'));
 				} elseif (gnrv('drp_action') == '2') { // duplicate
 					foreach ($selected_items as $id) {
 						api_duplicate_device_template($id, gnrv('title_format'));
@@ -246,7 +247,8 @@ function form_actions() : void {
 						}
 
 						$(function() {
-							DownloadStart(\'host_templates.php?action=download&action_type=templates&ids=' . implode(',', $selected_items) . '\');
+							DownloadStart(\'host_templates.php?action=download&action_type=templates&ids=' . implode(',',
+						$selected_items) . '\');
 						});
 					</script>
 					<iframe id="download_iframe" style="display:none;"></iframe>';
@@ -270,7 +272,10 @@ function form_actions() : void {
 
 						db_execute_prepared('DELETE FROM host_template_archive WHERE id = ?', [$id]);
 
-						raise_message('archives_removed_' . $id, __esc('The Device Template Archive %s has been removed.', $name), MESSAGE_LEVEL_INFO);
+						raise_message('archives_removed_' . $id,
+							__esc('The Device Template Archive %s has been removed.',
+								$name),
+							MESSAGE_LEVEL_INFO);
 					}
 				} elseif (gnrv('drp_action') == 2) {
 					top_header();
@@ -285,7 +290,8 @@ function form_actions() : void {
 						}
 
 						$(function() {
-							DownloadStart(\'host_templates.php?action=download&action_type=archives&ids=' . implode(',', $selected_items) . '\');
+							DownloadStart(\'host_templates.php?action=download&action_type=archives&ids=' . implode(',',
+						$selected_items) . '\');
 						});
 					</script>
 					<iframe id="download_iframe" style="display:none;"></iframe>';
@@ -312,9 +318,11 @@ function form_actions() : void {
 				// ====================================================
 
 				if (gnrv('action_type') == 'templates') {
-					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM host_template WHERE id = ?', [$matches[1]])) . '</li>';
+					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM host_template WHERE id = ?',
+						[$matches[1]])) . '</li>';
 				} else {
-					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM host_template_archive WHERE id = ?', [$matches[1]])) . '</li>';
+					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM host_template_archive WHERE id = ?',
+						[$matches[1]])) . '</li>';
 				}
 
 				$iarray[] = $matches[1];
@@ -936,7 +944,11 @@ function draw_template_filter(bool $render = false) : void {
 	$filters = create_template_filter();
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter(__('Device Templates'), 'host_templates.php', 'form_template', 'sess_ht', 'host_templates.php?action=edit');
+	$pageFilter = new CactiTableFilter(__('Device Templates'),
+		'host_templates.php',
+		'form_template',
+		'sess_ht',
+		'host_templates.php?action=edit');
 
 	$pageFilter->set_filter_array($filters);
 
@@ -1093,7 +1105,15 @@ function device_templates() : void {
 		]
 	];
 
-	$nav = html_nav_bar('host_templates.php?action=templates', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Device Templates'), 'page', 'main');
+	$nav = html_nav_bar('host_templates.php?action=templates',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Device Templates'),
+		'page',
+		'main');
 
 	form_start('host_templates.php?action=templates', 'chk');
 
@@ -1101,7 +1121,11 @@ function device_templates() : void {
 
 	html_start_box('', '100%', false, 3, 'center', '');
 
-	html_header_sort_checkbox($display_text, grv('sort_column'), grv('sort_direction'), false, 'host_templates.php?action=template');
+	html_header_sort_checkbox($display_text,
+		grv('sort_column'),
+		grv('sort_direction'),
+		false,
+		'host_templates.php?action=template');
 
 	if (cacti_sizeof($template_list)) {
 		foreach ($template_list as $template) {
@@ -1113,7 +1137,10 @@ function device_templates() : void {
 
 			form_alternate_row('line' . $template['id'], true, $disabled);
 
-			form_selectable_cell(filter_value($template['name'], grv('filter'), 'host_templates.php?action=edit&id=' . $template['id']), $template['id']);
+			form_selectable_cell(filter_value($template['name'],
+				grv('filter'),
+				'host_templates.php?action=edit&id=' . $template['id']),
+				$template['id']);
 
 			if ($template['class'] != '') {
 				form_selectable_cell($device_classes[$template['class']], $template['id']);
@@ -1133,7 +1160,13 @@ function device_templates() : void {
 
 			$url = 'host.php?reset=true&host_template_id=' . $template['id'];
 
-			form_selectable_cell(filter_value(number_format_i18n($template['hosts'], -1), '', $url), $template['id'], '', 'right');
+			form_selectable_cell(filter_value(number_format_i18n($template['hosts'],
+				-1),
+				'',
+				$url),
+				$template['id'],
+				'',
+				'right');
 
 			form_checkbox_cell($template['name'], $template['id'], $disabled);
 
@@ -1497,7 +1530,15 @@ function device_archives() : void {
 		]
 	];
 
-	$nav = html_nav_bar('host_templates.php?action=archives', MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, cacti_sizeof($display_text) + 1, __('Device Templates'), 'page', 'main');
+	$nav = html_nav_bar('host_templates.php?action=archives',
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		cacti_sizeof($display_text) + 1,
+		__('Device Templates'),
+		'page',
+		'main');
 
 	form_start('host_templates.php?action=archives', 'chk');
 
@@ -1505,7 +1546,11 @@ function device_archives() : void {
 
 	html_start_box('', '100%', false, 3, 'center', '');
 
-	html_header_sort_checkbox($display_text, grv('sort_column'), grv('sort_direction'), false, 'host_templates.php?action=archives');
+	html_header_sort_checkbox($display_text,
+		grv('sort_column'),
+		grv('sort_direction'),
+		false,
+		'host_templates.php?action=archives');
 
 	if (cacti_sizeof($archives)) {
 		foreach ($archives as $a) {

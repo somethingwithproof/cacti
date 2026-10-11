@@ -88,12 +88,20 @@ switch ($action) {
 				$body = str_replace($search, $replacement, read_config_option('secnotify_chpass_message'));
 
 				send_mail($user['email_address'], null, read_config_option('secnotify_chpass_subject'), $body, [], [],  true);
-				cacti_log(sprintf('NOTE: Reset password request for user %s from IP %s', $user['username'], get_client_addr()), false, 'SYSTEM');
+				cacti_log(sprintf('NOTE: Reset password request for user %s from IP %s',
+					$user['username'],
+					get_client_addr()),
+					false,
+					'SYSTEM');
 			} else {
 				cacti_log(sprintf('ERROR: Unable to replace password reset token for user %s', $user['username']), false, 'AUTH');
 			}
 		} else {
-			cacti_log(sprintf('NOTE: Reset password request for unknown user "%s" from IP %s', db_qstr($identity), get_client_addr()), false, 'SYSTEM');
+			cacti_log(sprintf('NOTE: Reset password request for unknown user "%s" from IP %s',
+				db_qstr($identity),
+				get_client_addr()),
+				false,
+				'SYSTEM');
 		}
 
 		$errorMessage = "<span class='badpassword_message'>" . __('Reset password token was sent. Check your mailbox') . '</span>';
@@ -257,7 +265,8 @@ switch ($action) {
 			$reset_ok = $reset_ok && db_execute_prepared('DELETE FROM user_auth_reset_hashes
 				WHERE user_id = ?',
 				[$user['id']]) !== false;
-			$reset_ok = $reset_ok && db_execute_prepared('DELETE FROM user_auth_cache WHERE user_id = ?', [$user['id']]) !== false;
+			$reset_ok = $reset_ok && db_execute_prepared('DELETE FROM user_auth_cache WHERE user_id = ?',
+				[$user['id']]) !== false;
 			$reset_ok = $reset_ok && db_execute_prepared('DELETE FROM sessions WHERE user_id = ?', [$user['id']]) !== false;
 
 			if (!$reset_ok || !db_commit_transaction()) {
@@ -307,7 +316,8 @@ if (read_config_option('secpass_reqspec') == 'on') {
 }
 
 if (read_config_option('secpass_history') != '0') {
-	$secpass_body .= ($secpass_body != '' ? '<br>' : '') . __('Cannot be reused for %d password changes', read_config_option('secpass_history') + 1);
+	$secpass_body .= ($secpass_body != '' ? '<br>' : '') . __('Cannot be reused for %d password changes',
+		read_config_option('secpass_history') + 1);
 }
 
 $secpass_tooltip .= $secpass_body;

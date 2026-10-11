@@ -391,7 +391,19 @@ if (!is_file($vendor_autoload) && !defined('IN_CACTI_INSTALL')) {
 
 if ($config['poller_id'] > 1 || isset($rdatabase_hostname)) {
 	if (!$is_test_bootstrap) {
-		$local_db_cnn_id = db_connect_real($database_hostname, $database_username, $database_password, $database_default, $database_type, $database_port, $database_retries, $database_ssl, $database_ssl_key, $database_ssl_cert, $database_ssl_ca, $database_ssl_capath, $database_ssl_verify_server_cert);
+		$local_db_cnn_id = db_connect_real($database_hostname,
+			$database_username,
+			$database_password,
+			$database_default,
+			$database_type,
+			$database_port,
+			$database_retries,
+			$database_ssl,
+			$database_ssl_key,
+			$database_ssl_cert,
+			$database_ssl_ca,
+			$database_ssl_capath,
+			$database_ssl_verify_server_cert);
 	} else {
 		$local_db_cnn_id = new Cacti_TestDbSentinel();
 	}
@@ -450,13 +462,29 @@ if ($config['poller_id'] > 1 || isset($rdatabase_hostname)) {
 	 */
 	if ($conn_mode != 'offline') {
 		if (!$is_test_bootstrap) {
-			$remote_db_cnn_id = db_connect_real($rdatabase_hostname, $rdatabase_username, $rdatabase_password, $rdatabase_default, $rdatabase_type, $rdatabase_port, $database_retries, $rdatabase_ssl, $rdatabase_ssl_key, $rdatabase_ssl_cert, $rdatabase_ssl_ca, $rdatabase_ssl_capath, $rdatabase_ssl_verify_server_cert);
+			$remote_db_cnn_id = db_connect_real($rdatabase_hostname,
+				$rdatabase_username,
+				$rdatabase_password,
+				$rdatabase_default,
+				$rdatabase_type,
+				$rdatabase_port,
+				$database_retries,
+				$rdatabase_ssl,
+				$rdatabase_ssl_key,
+				$rdatabase_ssl_cert,
+				$rdatabase_ssl_ca,
+				$rdatabase_ssl_capath,
+				$rdatabase_ssl_verify_server_cert);
 		} else {
 			$remote_db_cnn_id = new Cacti_TestDbSentinel();
 		}
 	}
 
-	if ($config['is_web'] && _cacti_is_real_db_conn($remote_db_cnn_id) && $config['connection'] != 'recovery' && $config['cacti_db_version'] != 'new_install' && !defined('IN_CACTI_INSTALL')) {
+	if ($config['is_web'] &&
+		_cacti_is_real_db_conn($remote_db_cnn_id) &&
+		$config['connection']       != 'recovery' &&
+		$config['cacti_db_version'] != 'new_install' &&
+		!defined('IN_CACTI_INSTALL')) {
 		// Connection worked, so now override the default settings so that it will always utilize the remote connection
 		$database_default                = $rdatabase_default;
 		$database_hostname               = $rdatabase_hostname;
@@ -478,7 +506,19 @@ if ($config['poller_id'] > 1 || isset($rdatabase_hostname)) {
 	}
 } else {
 	if (!$is_test_bootstrap) {
-		if (!db_connect_real($database_hostname, $database_username, $database_password, $database_default, $database_type, $database_port, $database_retries, $database_ssl, $database_ssl_key, $database_ssl_cert, $database_ssl_ca, $database_ssl_capath, $database_ssl_verify_server_cert)) {
+		if (!db_connect_real($database_hostname,
+			$database_username,
+			$database_password,
+			$database_default,
+			$database_type,
+			$database_port,
+			$database_retries,
+			$database_ssl,
+			$database_ssl_key,
+			$database_ssl_cert,
+			$database_ssl_ca,
+			$database_ssl_capath,
+			$database_ssl_verify_server_cert)) {
 			print $ps . 'FATAL: Connection to Cacti database failed. Please ensure: ' . $ul;
 			print $li . 'the PHP MySQL module is installed and enabled.' . $il;
 			print $li . 'the database is running.' . $il;
@@ -708,7 +748,20 @@ if ($config['is_web']) {
 
 // emulate 'register_globals' = 'off' if turned on
 if ((bool)ini_get('register_globals')) {
-	$not_unset = ['_GET', '_POST', '_COOKIE', '_SERVER', '_SESSION', '_ENV', '_FILES', 'database_type', 'database_default', 'database_hostname', 'database_username', 'database_password', 'config', 'colors'];
+	$not_unset = ['_GET',
+		'_POST',
+		'_COOKIE',
+		'_SERVER',
+		'_SESSION',
+		'_ENV',
+		'_FILES',
+		'database_type',
+		'database_default',
+		'database_hostname',
+		'database_username',
+		'database_password',
+		'config',
+		'colors'];
 
 	/* Not only will array_merge give a warning if a parameter is not an array, it will
 	 * actually fail. So we check if HTTP_SESSION_VARS has been initialised. */
@@ -777,7 +830,10 @@ if ($config['is_web']) {
 			$previous_mode = $_SESSION['connection_mode'];
 			$reload        = false;
 
-			cacti_log('Connection: ' . CACTI_CONNECTION . ', Previous Mode: ' . $previous_mode . ', Page: ' . $_SERVER['SCRIPT_NAME'], false, 'WEBUI', POLLER_VERBOSITY_DEBUG);
+			cacti_log('Connection: ' . CACTI_CONNECTION . ', Previous Mode: ' . $previous_mode . ', Page: ' . $_SERVER['SCRIPT_NAME'],
+				false,
+				'WEBUI',
+				POLLER_VERBOSITY_DEBUG);
 
 			if (CACTI_CONNECTION == 'online' && ($previous_mode != CACTI_CONNECTION)) {
 				$reload  = true;
@@ -857,7 +913,11 @@ if ($config['is_web']) {
 				// can also come from plugins outside this repository; crawlers may
 				// discover those URLs, but they must still fail closed.
 				if (in_array($bad, ['save', 'update_data', 'changepassword'], true)) {
-					cacti_log(sprintf('WARNING: Attempt to use GET method for POST operations in page %s from IP %s', $filename, get_client_addr()), false, 'WEBUI');
+					cacti_log(sprintf('WARNING: Attempt to use GET method for POST operations in page %s from IP %s',
+						$filename,
+						get_client_addr()),
+						false,
+						'WEBUI');
 				}
 
 				header('Allow: POST');

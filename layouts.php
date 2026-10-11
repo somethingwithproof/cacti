@@ -110,7 +110,8 @@ function layouts_form_actions() : void {
 			input_validate_input_number($matches[1], 'chk[1]');
 			// ==========================
 
-			$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM user_layouts WHERE id = ?', [$matches[1]])) . '</li>';
+			$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM user_layouts WHERE id = ?',
+				[$matches[1]])) . '</li>';
 			$iarray[] = $matches[1];
 		}
 	}
@@ -197,7 +198,15 @@ function layouts_manage() : void {
 		$sql_order
 		$sql_limit", $sql_params);
 
-	$nav = html_nav_bar('layouts.php?filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, 5, __('Layouts'), 'page', 'main');
+	$nav = html_nav_bar('layouts.php?filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		5,
+		__('Layouts'),
+		'page',
+		'main');
 
 	form_start('layouts.php', 'chk');
 

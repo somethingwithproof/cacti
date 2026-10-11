@@ -149,7 +149,12 @@ $graph_data_array['image_format'] = $gtype;
 if (POLLER_ID == 1 || read_config_option('storage_location')) { // @phpstan-ignore-line
 	$xport_meta = [];
 
-	$output = rrdtool_function_graph(grv('local_graph_id'), $rra_id, $graph_data_array, null, $xport_meta, $_SESSION[SESS_USER_ID]);
+	$output = rrdtool_function_graph(grv('local_graph_id'),
+		$rra_id,
+		$graph_data_array,
+		null,
+		$xport_meta,
+		$_SESSION[SESS_USER_ID]);
 
 	ob_end_clean();
 } else {
@@ -314,7 +319,9 @@ if ($output !== false && $output != '') {
 	}
 
 	if (isset($graph_data_array['graph_width']) && isset($graph_data_array['graph_height'])) {
-		$image = rrdtool_create_error_image((string) $error, $graph_data_array['graph_width'], $graph_data_array['graph_height']);
+		$image = rrdtool_create_error_image((string) $error,
+			$graph_data_array['graph_width'],
+			$graph_data_array['graph_height']);
 	} else {
 		$image = rrdtool_create_error_image((string) $error);
 	}
