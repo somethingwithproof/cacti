@@ -176,6 +176,21 @@ try {
 		set_config_option('admin_user', $admin_user);
 	}
 
+	$create('pinstall_cfg', $cases['cfg']);
+	[$code, $output] = $cli(['pinstall_cfg']);
+	$assert($code === 1 && str_contains($output, 'needs configuration'), 'CLI must report a failed configuration check');
+	$assert(!str_contains($output, 'Plugin pinstall_cfg enabled.') && !str_contains($output, 'permissions for'), 'Configuration failure must skip enable and permissions');
+	$inspect('pinstall_cfg', true, false, false, false);
+
+	$create('pinstall_flip', $cases['null']);
+	$setup_file = $root . '/plugins/pinstall_flip/setup.php';
+	file_put_contents($setup_file, str_replace('return true;', 'static $checks = 0; return ++$checks === 1;', file_get_contents($setup_file)));
+	[$code, $output] = $cli(['pinstall_flip']);
+	$assert($code === 1 && str_contains($output, 'could not be enabled'), 'CLI must report an enable-time configuration failure');
+	$assert(!str_contains($output, 'Plugin pinstall_flip enabled.') && !str_contains($output, 'permissions for'), 'Enable failure must skip permission grants');
+	$assert((int) db_fetch_cell_prepared('SELECT status FROM plugin_config WHERE directory = ?', ['pinstall_flip']) === 4, 'Failed enable must leave the plugin disabled');
+	$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM user_auth_realm AS uar INNER JOIN plugin_realms AS pr ON uar.realm_id = pr.id + 100 WHERE pr.plugin = ?', ['pinstall_flip']) === 0, 'Failed enable must not grant realms');
+
 	$create('pinstall_error', $cases['null']);
 	$directory = $root . '/plugins/pinstall_error';
 	$outside = sys_get_temp_dir() . '/cacti_error_' . bin2hex(random_bytes(6));
