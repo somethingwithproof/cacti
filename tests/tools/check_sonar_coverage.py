@@ -52,24 +52,31 @@ def validate(root, manifest):
             covered += count > 0
     if not covered:
         raise ValueError("PHP coverage contains no executed production lines")
-    javascript_files = 0
-    javascript_hits = 0
-    limit = None
-    for line in (root / "coverage/lcov.info").read_text().splitlines():
+    javascript_files = sum(validate_lcov(root, name, sources) for name in ["lcov.info", "node.lcov.info"])
+    return len(php_files), javascript_files
+
+
+def validate_lcov(root, name, sources):
+    files, hits, limit = 0, 0, None
+    for line in (root / "coverage" / name).read_text().splitlines():
         if line.startswith("SF:"):
+            if limit is not None:
+                raise ValueError("JavaScript coverage has an unterminated record")
             path = source_file(root, line[3:], sources)
             limit = len(path.read_text().splitlines())
-            javascript_files += 1
+            files += 1
         elif line.startswith("DA:"):
             number, count = (int(value) for value in line[3:].split(",")[:2])
             if limit is None or not 1 <= number <= limit or count < 0:
                 raise ValueError("JavaScript coverage has an invalid line or execution count")
-            javascript_hits += count > 0
+            hits += count > 0
         elif line == "end_of_record":
             limit = None
-    if not javascript_files or not javascript_hits:
+    if limit is not None:
+        raise ValueError("JavaScript coverage has an unterminated record")
+    if not files or not hits:
         raise ValueError("JavaScript coverage contains no executed production lines")
-    return len(php_files), javascript_files
+    return files
 
 
 def main():

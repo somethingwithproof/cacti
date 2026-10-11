@@ -25,13 +25,14 @@ class CoverageBoundaryTests(unittest.TestCase):
         (self.root / "coverage/php.xml").write_text(f'<coverage><project><file name="{self.root}/app.php"><line num="2" count="1"/></file></project></coverage>')
         (self.root / "coverage/php-browser.xml").write_text((self.root / "coverage/php.xml").read_text())
         (self.root / "coverage/lcov.info").write_text("SF:client.js\nDA:1,1\nend_of_record\n")
+        (self.root / "coverage/node.lcov.info").write_text((self.root / "coverage/lcov.info").read_text())
 
     def check(self):
         with patch.object(coverage, "snapshot", return_value=self.manifest):
             return coverage.validate(self.root, self.manifest)
 
     def test_accepts_real_relative_and_absolute_checkout_paths(self):
-        self.assertEqual(self.check(), (2, 1))
+        self.assertEqual(self.check(), (2, 2))
 
     def test_rejects_changed_revision(self):
         with patch.object(coverage, "snapshot", return_value={**self.manifest, "revision": "another"}):

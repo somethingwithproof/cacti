@@ -92,6 +92,11 @@ jobs:
           mkdir -p coverage
           include/vendor/bin/pest --configuration=phpunit-sonar.xml \
             --testsuite=Unit,Integration --coverage-clover=coverage/php.xml
+      - name: Measure executable Node build-tool coverage
+        run: |
+          set -euo pipefail
+          node --test --experimental-test-coverage --test-reporter=lcov \
+            --test-coverage-include='build/**/*.mjs' tests/js/sync_js.test.mjs > coverage/node.lcov.info
       - name: Start disposable native Cacti runtime
         working-directory: tests/e2e
         run: |
@@ -186,6 +191,7 @@ jobs:
             coverage/php-browser.xml
             coverage/revision.json
             coverage/lcov.info
+            coverage/node.lcov.info
           if-no-files-found: error
       - name: Stop disposable native runtime
         if: always()
