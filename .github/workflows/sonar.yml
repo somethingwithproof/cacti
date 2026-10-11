@@ -49,6 +49,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           set -euo pipefail
+          python3 tests/tools/test_mysql_init_identifier.py
           python3 tests/tools/test_sonar_profile_policy.py
           python3 .github/scripts/check-sonar-profile.py
       - name: Measure profile checker coverage
