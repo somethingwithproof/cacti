@@ -1,0 +1,43 @@
+{
+  "organization": "somethingwithproof",
+  "project": "somethingwithproof_cacti",
+  "language": "php",
+  "name": "Cacti PHP conventions",
+  "base_profile": "PSR-2",
+  "deactivate": {
+    "php:S1808": "Composite PSR-2 whitespace and brace rules conflict with .php-cs-fixer.php, which enforces Cacti formatting in CI.",
+    "php:S105": "Cacti requires tab indentation; PHP-CS-Fixer enforces indentation_type."
+  },
+  "configure": {
+    "php:S100": {
+      "format": "^(?:[a-z_][a-zA-Z0-9_]*|Authenticate|BuildGroupMembershipQueries|CactiErrorHandler|CactiShutdownHandler|Connect|DrawMatrixHeaderItem|ErrorHandler|GetErrorDetails|GetMask|Getcn|IgnoreErrorHandler|IsActiveDirectory|RecordError|ResolveGroupMemberships|ResolveUserDnForGroups|RestoreCactiHandler|Search|SetLdapHandler|UserInGroupByName|XMLrip)$"
+    },
+    "php:S101": {
+      "format": "^(?:[A-Z][a-zA-Z0-9]*|Net_Ping|Cacti_TestDbSentinel|spikekill)$"
+    },
+    "php:S115": {
+      "format": "^(?:[A-Z][A-Z0-9]*(_[A-Z0-9]+)*|ConnectionTimeout|ConnectionUnavailable|Disabled|EmptyPassword|Failure|InsufficientAccess|MissingLdapObject|None|ProtocolErrorBind|ProtocolErrorGeneral|ProtocolErrorReferral|ProtocolErrorTls|ProtocolErrorVersion|SearchFoundMultiUser|SearchFoundNoGroup|SearchFoundNoUser|SearchFoundNoUserDN|Success|UndefinedDnOrPassword|UndefinedUsername|log_install_echo)$"
+    }
+  },
+  "rationale": "Allow snake_case and established public LDAP, error-handler, class and constant names without renaming plugin-facing APIs. Legacy exceptions are explicit. Keep the 120-character line rule, all other existing rules and all security/reliability rules. Associate only this project; do not modify organization defaults.",
+  "required_rules": [
+    "php:S1766",
+    "php:S115",
+    "php:S1757",
+    "php:S122",
+    "php:S100",
+    "php:S128",
+    "php:S1784",
+    "php:S1781",
+    "php:S1780",
+    "php:S1124",
+    "php:S1793",
+    "php:S1765",
+    "php:S1779",
+    "php:S1788",
+    "php:S113",
+    "php:S1131",
+    "php:S103",
+    "php:S101"
+  ]
+}

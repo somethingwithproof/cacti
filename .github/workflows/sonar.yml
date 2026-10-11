@@ -43,6 +43,12 @@ jobs:
           fi
       # workflow_dispatch does not automatically infer the selected branch.
       # Validate context before passing it to the scanner argument parser.
+      - name: Verify reviewed PHP profile
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          python3 tests/tools/test_sonar_profile_policy.py
+          python3 .github/scripts/check-sonar-profile.py
       - name: Select branch or pull request context
         id: context
         env:
