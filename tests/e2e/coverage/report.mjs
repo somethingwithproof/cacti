@@ -26,6 +26,12 @@ export async function convert(entries, { origin, root, tracked, exclusions = [] 
 	return map;
 }
 
+export function writeLcov(map, root, directory) {
+	const context = reportLibrary.createContext({ dir: directory, coverageMap: map });
+	reports.create('lcovonly', { projectRoot: root }).execute(context);
+	return context;
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
 	const root = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 	const directory = resolve(process.env.CACTI_COVERAGE_DIR ?? resolve(root, 'coverage/browser'));
@@ -35,7 +41,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 	const exclusions = properties.match(/^sonar.exclusions=(.+)$/m)?.[1].split(',');
 	if (!exclusions) throw new Error('Sonar source exclusions are missing.');
 	const map = await convert(entries, { root, tracked, exclusions, origin: process.env.CACTI_BASE_URL ?? 'http://127.0.0.1:8080' });
-	const context = reportLibrary.createContext({ dir: resolve(root, 'coverage'), coverageMap: map });
-	reports.create('lcovonly').execute(context);
+	const context = writeLcov(map, root, resolve(root, 'coverage'));
 	reports.create('text-summary').execute(context);
 }

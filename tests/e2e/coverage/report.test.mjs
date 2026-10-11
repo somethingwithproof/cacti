@@ -1,10 +1,10 @@
 // Copyright (C) 2004-2026 The Cacti Group. GPL-2.0-or-later.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { sourcePath, convert } from './report.mjs';
+import { sourcePath, convert, writeLcov } from './report.mjs';
 
 function fixture() {
 	const root = mkdtempSync(resolve(tmpdir(), 'cacti-sonar-coverage-'));
@@ -54,4 +54,14 @@ test('browser coverage refuses an empty first-party report', async () => {
 	const f = fixture();
 	try { await assert.rejects(convert([], f), /No checkout-owned/); }
 	finally { rmSync(f.root, { recursive: true }); }
+});
+
+test('LCOV source paths use the checkout root independently of the working directory', async () => {
+	const f = fixture();
+	try {
+		const map = await convert([f.entry], f);
+		const directory = resolve(f.root, 'coverage');
+		writeLcov(map, f.root, directory);
+		assert.match(readFileSync(resolve(directory, 'lcov.info'), 'utf8'), /^SF:client\.js$/m);
+	} finally { rmSync(f.root, { recursive: true }); }
 });
