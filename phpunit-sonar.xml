@@ -26,6 +26,11 @@
             <directory>tests</directory>
             <directory>include/vendor</directory>
             <directory>api/vendor</directory>
+            <directory>include/fa</directory>
+            <directory>include/tabler</directory>
+            <directory>include/js/vendor</directory>
+            <directory>include/js/jquery.validate</directory>
+            <directory>include/js/LC_MESSAGES</directory>
             <directory>node_modules</directory>
             <directory>cache</directory>
             <directory>log</directory>

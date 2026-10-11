@@ -82,6 +82,11 @@ jobs:
         run: |
           set -euo pipefail
           npm run postinstall --ignore-scripts
+          # Measure the committed assets; postinstall also refreshes tracked bundles.
+          git restore --source=HEAD -- include/js/billboard.js include/js/jquery.tablesorter.pager.js \
+            include/js/jquery.tablesorter.widgets.js include/js/purify.js include/js/purify.js.map \
+            include/js/screenfull.js include/js/select2.js
+          git diff --exit-code HEAD
           npm ci --prefix tests/e2e --ignore-scripts
           node --test tests/e2e/coverage/report.test.mjs
           python3 tests/tools/test_sonar_coverage.py
