@@ -93,6 +93,14 @@ jobs:
       - name: Measure application PHP coverage
         env:
           XDEBUG_MODE: coverage
+          CACTI_TEST_MYSQL_DSN: mysql:host=127.0.0.1;port=33061;dbname=cacti_test
+          CACTI_TEST_MYSQL_USER: root
+          CACTI_TEST_MYSQL_PASS: root
+          CACTI_TEST_DB_HOST: 127.0.0.1
+          CACTI_TEST_DB_PORT: '33061'
+          CACTI_TEST_DB_NAME: cacti_test
+          CACTI_TEST_DB_USER: cacti
+          CACTI_TEST_DB_PASS: cacti
         run: |
           set -euo pipefail
           mkdir -p coverage
