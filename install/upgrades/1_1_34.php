@@ -114,7 +114,11 @@ function upgrade_to_1_1_34() : void {
 		MODIFY COLUMN `t_data_source_name` char(2) DEFAULT "",
 		MODIFY COLUMN `t_data_input_field_id` char(2) DEFAULT ""');
 
-	db_install_add_key('data_template_rrd', 'index', 'local_data_template_rrd_id', ['local_data_template_rrd_id'], 'BTREE');
+	db_install_add_key('data_template_rrd',
+		'index',
+		'local_data_template_rrd_id',
+		['local_data_template_rrd_id'],
+		'BTREE');
 
 	db_install_execute('ALTER TABLE `graph_local`
 		MODIFY COLUMN `snmp_query_id` mediumint(8) NOT NULL DEFAULT "0",

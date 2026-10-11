@@ -216,7 +216,12 @@ function html_start_box(string $title, string $width, bool $div, int $cell_paddi
  *
  * @return void
  */
-function html_filter_start_box(string $title, mixed $url_or_buttons = '', bool $div = false, bool $showcols = true, mixed $add_label = false, string $width = '100%') : void {
+function html_filter_start_box(string $title,
+	mixed $url_or_buttons = '',
+	bool $div = false,
+	bool $showcols = true,
+	mixed $add_label = false,
+	string $width = '100%') : void {
 	html_start_box($title, $width, $div, 3, 'center', $url_or_buttons, $add_label, $showcols);
 }
 
@@ -414,7 +419,10 @@ function html_graph_area(array &$graph_array, string $no_graphs_message = '', st
  *
  * @return void
  */
-function html_graph_thumbnail_area(array &$graph_array, string $no_graphs_message = '', string $extra_url_args = '', string $header = '',
+function html_graph_thumbnail_area(array &$graph_array,
+	string $no_graphs_message = '',
+	string $extra_url_args = '',
+	string $header = '',
 	int $columns = 0, int $tree_id = 0, int $branch_id = 0) : void {
 	$i = 0;
 	$k = 0;
@@ -532,7 +540,10 @@ function html_graph_thumbnail_area(array &$graph_array, string $no_graphs_messag
  *
  * @return void
  */
-function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_buttons', int $tree_id = 0, int $branch_id = 0) : void {
+function graph_drilldown_icons(int $local_graph_id,
+	string $type = 'graph_buttons',
+	int $tree_id = 0,
+	int $branch_id = 0) : void {
 	static $rand = 0;
 
 	$aggregate_url = aggregate_build_children_url($local_graph_id);
@@ -611,7 +622,11 @@ function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_button
  * @return string The generated HTML for the navigation bar.
  */
 function html_nav_bar(string $base_url, int $max_pages, int $current_page, int $rows_per_page, int $total_rows,
-	int $colspan = 30, string $object = '', string $page_var = 'page', string $return_to = '', bool $page_count = true) : string {
+	int $colspan = 30,
+		string $object = '',
+		string $page_var = 'page',
+		string $return_to = '',
+		bool $page_count = true) : string {
 	if (!preg_match('/^[A-Za-z_$][A-Za-z0-9_$]*$/', $page_var)) {
 		$page_var = 'page';
 	}
@@ -629,14 +644,25 @@ function html_nav_bar(string $base_url, int $max_pages, int $current_page, int $
 			$base_url = trim($base_url) . '&';
 		}
 
-		$url_page_select = get_page_list($current_page, $max_pages, $rows_per_page, $total_rows, $base_url, $page_var, $return_to);
+		$url_page_select = get_page_list($current_page,
+			$max_pages,
+			$rows_per_page,
+			$total_rows,
+			$base_url,
+			$page_var,
+			$return_to);
 
 		$nav = "<div class='navBarNavigation'>
 			<div class='navBarNavigationPrevious'>
 				" . (($current_page > 1) ? "<a href='#' onClick='goto$page_var(" . ($current_page - 1) . ");return false;'><i class='ti ti-chevrons-left previous'></i>" . __('Previous') . '</a>' : '') . "
 			</div>
 			<div class='navBarNavigationCenter'>
-				" . __('%d to %d of %s [ %s ]', (($rows_per_page * ($current_page - 1)) + 1), (($total_rows < $rows_per_page) || ($total_rows < ($rows_per_page * $current_page)) ? $total_rows : $rows_per_page * $current_page), $total_rows, $url_page_select) . "
+				" . __('%d to %d of %s [ %s ]',
+			(($rows_per_page * ($current_page - 1)) + 1),
+			(($total_rows < $rows_per_page) ||
+			($total_rows < ($rows_per_page * $current_page)) ? $total_rows : $rows_per_page * $current_page),
+			$total_rows,
+			$url_page_select) . "
 			</div>
 			<div class='navBarNavigationNext'>
 				" . (($current_page * $rows_per_page) < $total_rows ? "<a href='#' onClick='goto$page_var(" . ($current_page + 1) . ");return false;'>" . __('Next') . "<i class='ti ti-chevrons-right next'></i></a>" : '') . '
@@ -723,7 +749,12 @@ function html_nav_bar(string $base_url, int $max_pages, int $current_page, int $
  *
  * @return void
  */
-function html_header_sort(array $header_items, string $sort_column, string $sort_direction, int $last_item_colspan = 1, string $url = '', string $return_to = '') : void {
+function html_header_sort(array $header_items,
+	string $sort_column,
+	string $sort_direction,
+	int $last_item_colspan = 1,
+	string $url = '',
+	string $return_to = '') : void {
 	static $page_count = 0;
 
 	$table_id = form_get_table_id();
@@ -1113,7 +1144,8 @@ function html_header(array $header_items, int $last_item_colspan = 1, bool $resi
 		'columns'  => $header_items
 	];
 
-	print "<thead><tr class='tableHeader " . ($last_item_colspan > 1 || !$resizable ? 'tableFixed' : '') . "' data-columns='" . base64_encode((string) json_encode($table_visibility)) . "'>";
+	print "<thead><tr class='tableHeader " . ($last_item_colspan > 1 ||
+		!$resizable ? 'tableFixed' : '') . "' data-columns='" . base64_encode((string) json_encode($table_visibility)) . "'>";
 
 	$i = 0;
 
@@ -1190,7 +1222,11 @@ function html_section_header(mixed $header_item, int $last_item_colspan = 1, boo
  *
  * @return void
  */
-function html_header_checkbox(array $header_items, bool $include_form = true, string $form_action = '', bool $resizable = true, string $prefix = 'chk') : void {
+function html_header_checkbox(array $header_items,
+	bool $include_form = true,
+	string $form_action = '',
+	bool $resizable = true,
+	string $prefix = 'chk') : void {
 	$table_id = form_get_table_id();
 
 	$header_items = form_process_visible_display_text($table_id, $header_items);
@@ -2001,7 +2037,9 @@ function draw_menu(mixed $user_menu = '') : void {
 				if (is_array($item_title)) {
 					$i = 0;
 
-					if ($current_realm_id == -1 || is_realm_allowed($current_realm_id) || !isset($user_auth_realm_filenames[$basename])) {
+					if ($current_realm_id == -1 ||
+						is_realm_allowed($current_realm_id) ||
+						!isset($user_auth_realm_filenames[$basename])) {
 						// if the current page exists in the sub-items array, draw each sub-item
 						if (array_key_exists(get_current_page(), $item_title) == true) {
 							$draw_sub_items = true;
@@ -2044,7 +2082,9 @@ function draw_menu(mixed $user_menu = '') : void {
 						}
 					}
 				} else {
-					if ($current_realm_id == -1 || is_realm_allowed($current_realm_id) || !isset($user_auth_realm_filenames[$basename])) {
+					if ($current_realm_id == -1 ||
+						is_realm_allowed($current_realm_id) ||
+						!isset($user_auth_realm_filenames[$basename])) {
 						// draw normal (non sub-item) menu item
 						if (str_starts_with($item_url, 'EXTERNAL::')) {
 							$item_external = true;
@@ -2803,7 +2843,11 @@ function html_business_hours_filter(string $callBack = 'applyGraphFilter') : str
  *
  * @return void
  */
-function html_host_filter(mixed $host_id = -1, string $call_back = 'applyFilter', string $sql_where = '', bool $noany = false, bool $nonone = false) : void {
+function html_host_filter(mixed $host_id = -1,
+	string $call_back = 'applyFilter',
+	string $sql_where = '',
+	bool $noany = false,
+	bool $nonone = false) : void {
 	if (!str_contains($call_back, '()')) {
 		$call_back .= '()';
 	}
@@ -2846,7 +2890,11 @@ function html_host_filter(mixed $host_id = -1, string $call_back = 'applyFilter'
  *
  * @return void
  */
-function html_site_filter(mixed $site_id = -1, string $call_back = 'applyFilter', string $sql_where = '', bool $noany = false, bool $nonone = false) : void {
+function html_site_filter(mixed $site_id = -1,
+	string $call_back = 'applyFilter',
+	string $sql_where = '',
+	bool $noany = false,
+	bool $nonone = false) : void {
 	$theme = get_selected_theme();
 
 	if (!str_contains($call_back, '()')) {
@@ -2891,7 +2939,11 @@ function html_site_filter(mixed $site_id = -1, string $call_back = 'applyFilter'
  *
  * @return void
  */
-function html_location_filter(string $location = '', string $call_back = 'applyFilter', string $sql_where = '', bool $noany = false, bool $nonone = false) : void {
+function html_location_filter(string $location = '',
+	string $call_back = 'applyFilter',
+	string $sql_where = '',
+	bool $noany = false,
+	bool $nonone = false) : void {
 	$theme = get_selected_theme();
 
 	if (!str_contains($call_back, '()')) {
@@ -3008,7 +3060,12 @@ function html_spikekill_setting(string $name) : mixed {
  *
  * @return string The generated HTML for the menu item.
  */
-function html_spikekill_menu_item(string $text, string $icon = '', string $class = '', string $id = '', mixed $data_graph = '', string $subitem = '') : string {
+function html_spikekill_menu_item(string $text,
+	string $icon = '',
+	string $class = '',
+	string $id = '',
+	mixed $data_graph = '',
+	string $subitem = '') : string {
 	$output = '<li ';
 
 	if (!empty($id)) {
@@ -3050,30 +3107,47 @@ function html_spikekill_menu_item(string $text, string $icon = '', string $class
  */
 function html_spikekill_menu(int $local_graph_id) : void {
 	global $settings;
-	$ravgnan1 = html_spikekill_menu_item(__('Average'), html_spikekill_setting('spikekill_avgnan') == 'avg' ? 'ti ti-check' : 'fa', 'skmethod', 'method_avg');
-	$ravgnan2 = html_spikekill_menu_item(__('NaN\'s'), html_spikekill_setting('spikekill_avgnan') == 'nan' ? 'ti ti-check' : 'fa', 'skmethod', 'method_nan');
-	$ravgnan3 = html_spikekill_menu_item(__('Last Known Good'), html_spikekill_setting('spikekill_avgnan') == 'last' ? 'ti ti-check' : 'fa', 'skmethod', 'method_last');
+	$ravgnan1 = html_spikekill_menu_item(__('Average'),
+		html_spikekill_setting('spikekill_avgnan') == 'avg' ? 'ti ti-check' : 'fa',
+		'skmethod',
+		'method_avg');
+	$ravgnan2 = html_spikekill_menu_item(__('NaN\'s'),
+		html_spikekill_setting('spikekill_avgnan') == 'nan' ? 'ti ti-check' : 'fa',
+		'skmethod',
+		'method_nan');
+	$ravgnan3 = html_spikekill_menu_item(__('Last Known Good'),
+		html_spikekill_setting('spikekill_avgnan') == 'last' ? 'ti ti-check' : 'fa',
+		'skmethod',
+		'method_last');
 
 	$ravgnan = html_spikekill_menu_item(__('Replacement Method'), '', '', '', '', $ravgnan1 . $ravgnan2 . $ravgnan3);
 
 	$rstddev = '';
 
 	foreach ($settings['spikes']['spikekill_deviations']['array'] as $key => $value) {
-		$rstddev .= html_spikekill_menu_item($value, html_spikekill_setting('spikekill_deviations') == $key ? 'ti ti-check' : 'fa', 'skstddev', 'stddev_' . $key);
+		$rstddev .= html_spikekill_menu_item($value,
+			html_spikekill_setting('spikekill_deviations') == $key ? 'ti ti-check' : 'fa',
+			'skstddev',
+			'stddev_' . $key);
 	}
 	$rstddev  = html_spikekill_menu_item(__('Standard Deviations'), '', '', '', '', $rstddev);
 
 	$rkills  = '';
 
 	foreach ($settings['spikes']['spikekill_number']['array'] as $key => $value) {
-		$rkills .= html_spikekill_menu_item($value,html_spikekill_setting('spikekill_number') == $key ? 'ti ti-check' : 'fa', 'skills', 'kills_' . $key);
+		$rkills .= html_spikekill_menu_item($value,html_spikekill_setting('spikekill_number') == $key ? 'ti ti-check' : 'fa',
+			'skills',
+			'kills_' . $key);
 	}
 	$rkills  = html_spikekill_menu_item(__('Kills Per RRA'), '', '', '', '', $rkills);
 
 	$rabsmax  = '';
 
 	foreach ($settings['spikes']['spikekill_absmax']['array'] as $key => $value) {
-		$rabsmax .= html_spikekill_menu_item($value, html_spikekill_setting('spikekill_absmax') == $key ? 'ti ti-check' : 'fa', 'skabsmax', 'absmax_' . $key);
+		$rabsmax .= html_spikekill_menu_item($value,
+			html_spikekill_setting('spikekill_absmax') == $key ? 'ti ti-check' : 'fa',
+			'skabsmax',
+			'absmax_' . $key);
 	}
 	$rabsmax = html_spikekill_menu_item(__('Absolute Max Value'), '', '', '', '', $rabsmax);
 
@@ -3082,16 +3156,37 @@ function html_spikekill_menu(int $local_graph_id) : void {
 	<ul class='spikekillMenu' style='font-size:1em;'>
 	<?php
 	print html_spikekill_menu_item(__('Remove StdDev'), 'deviceUp ti ti-lifebuoy-filled', 'rstddev', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Gap Fill Range'), 'deviceUnknown ti ti-lifebuoy-filled', 'rfill', '',  $local_graph_id);
+	print html_spikekill_menu_item(__('Gap Fill Range'),
+		'deviceUnknown ti ti-lifebuoy-filled',
+		'rfill',
+		'',
+		$local_graph_id);
 	print html_spikekill_menu_item(__('Float Range'), 'deviceDown ti ti-lifebuoy-filled', 'rfloat', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Absolute Maximum'), 'deviceError ti ti-lifebuoy-filled', 'rabsolute', '',  $local_graph_id);
+	print html_spikekill_menu_item(__('Absolute Maximum'),
+		'deviceError ti ti-lifebuoy-filled',
+		'rabsolute',
+		'',
+		$local_graph_id);
 
 	print html_spikekill_menu_item(__('Dry Run StdDev'), 'deviceUp ti ti-check', 'dstddev', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Gap Fill Range'), 'deviceUnknown ti ti-check', 'dfill', '',  $local_graph_id);
+	print html_spikekill_menu_item(__('Dry Run Gap Fill Range'),
+		'deviceUnknown ti ti-check',
+		'dfill',
+		'',
+		$local_graph_id);
 	print html_spikekill_menu_item(__('Dry Run Float Range'), 'deviceDown ti ti-check', 'dfloat', '',  $local_graph_id);
-	print html_spikekill_menu_item(__('Dry Run Absolute Maximum'), 'deviceError ti ti-check', 'dabsolute', '',  $local_graph_id);
+	print html_spikekill_menu_item(__('Dry Run Absolute Maximum'),
+		'deviceError ti ti-check',
+		'dabsolute',
+		'',
+		$local_graph_id);
 
-	print html_spikekill_menu_item(__('Settings'), 'ti ti-settings-filled', '', '', '', $ravgnan . $rstddev . $rkills . $rabsmax);
+	print html_spikekill_menu_item(__('Settings'),
+		'ti ti-settings-filled',
+		'',
+		'',
+		'',
+		$ravgnan . $rstddev . $rkills . $rabsmax);
 }
 
 function html_spikekill_js() : void {
@@ -3603,7 +3698,11 @@ function html_help_page(string $page) : mixed {
  *
  * @return void
  */
-function html_auth_header(string $section, string $browser_title, string $legend, string $title, array $hook_args = []) : void {
+function html_auth_header(string $section,
+	string $browser_title,
+	string $legend,
+	string $title,
+	array $hook_args = []) : void {
 	global $themes;
 
 	?>

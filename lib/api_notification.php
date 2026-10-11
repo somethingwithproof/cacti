@@ -115,7 +115,9 @@ function api_notification_recipients(array|string|RecipientInterface $recipients
 		return [$recipients];
 	}
 
-	if (is_array($recipients) && array_filter($recipients, fn (mixed $recipient) : bool => $recipient instanceof RecipientInterface) !== []) {
+	if (is_array($recipients) &&
+		array_filter($recipients,
+			fn (mixed $recipient) : bool => $recipient instanceof RecipientInterface) !== []) {
 		foreach ($recipients as $recipient) {
 			if (!$recipient instanceof RecipientInterface) {
 				throw new InvalidArgumentException('Symfony recipients cannot be mixed with email address values.');

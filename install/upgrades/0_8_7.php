@@ -24,8 +24,16 @@
 
 function upgrade_to_0_8_7() : void {
 	// add slope mode as an option
-	db_install_add_column('graph_templates_graph', ['name' => 't_slope_mode', 'type' => 'CHAR(2)', 'default' => '0', 'after' => 'vertical_label']);
-	db_install_add_column('graph_templates_graph', ['name' => 'slope_mode', 'type' => 'CHAR(2)', 'default' => 'on', 'after' => 't_slope_mode']);
+	db_install_add_column('graph_templates_graph',
+		['name'   => 't_slope_mode',
+		'type'    => 'CHAR(2)',
+		'default' => '0',
+		'after'   => 'vertical_label']);
+	db_install_add_column('graph_templates_graph',
+		['name'   => 'slope_mode',
+		'type'    => 'CHAR(2)',
+		'default' => 'on',
+		'after'   => 't_slope_mode']);
 
 	// change the width of the last error field
 	db_install_execute('ALTER TABLE `host` MODIFY COLUMN `status_last_error` VARCHAR(255);');
@@ -49,23 +57,80 @@ function upgrade_to_0_8_7() : void {
 	db_install_add_key('user_auth', 'index', 'enabled', ['enabled']);
 
 	// add additional fields to the host table
-	db_install_add_column('host', ['name' => 'availability_method', 'type' => 'SMALLINT(5) UNSIGNED', 'NULL' => false, 'default' => '2', 'after' => 'snmp_timeout']);
-	db_install_add_column('host', ['name' => 'ping_method', 'type' => 'SMALLINT(5) UNSIGNED', 'default' => '0', 'after' => 'availability_method']);
-	db_install_add_column('host', ['name' => 'ping_port', 'type' => 'INT(12) UNSIGNED', 'default' => '0', 'after' => 'ping_method']);
-	db_install_add_column('host', ['name' => 'ping_timeout', 'type' => 'INT(12) UNSIGNED', 'default' => '500', 'after' => 'ping_port']);
-	db_install_add_column('host', ['name' => 'ping_retries', 'type' => 'INT(12) UNSIGNED', 'default' => '2', 'after' => 'ping_timeout']);
-	db_install_add_column('host', ['name' => 'max_oids', 'type' => 'INT(12) UNSIGNED', 'default' => '10', 'after' => 'ping_retries']);
+	db_install_add_column('host',
+		['name'   => 'availability_method',
+		'type'    => 'SMALLINT(5) UNSIGNED',
+		'NULL'    => false,
+		'default' => '2',
+		'after'   => 'snmp_timeout']);
+	db_install_add_column('host',
+		['name'   => 'ping_method',
+		'type'    => 'SMALLINT(5) UNSIGNED',
+		'default' => '0',
+		'after'   => 'availability_method']);
+	db_install_add_column('host',
+		['name'   => 'ping_port',
+		'type'    => 'INT(12) UNSIGNED',
+		'default' => '0',
+		'after'   => 'ping_method']);
+	db_install_add_column('host',
+		['name'   => 'ping_timeout',
+		'type'    => 'INT(12) UNSIGNED',
+		'default' => '500',
+		'after'   => 'ping_port']);
+	db_install_add_column('host',
+		['name'   => 'ping_retries',
+		'type'    => 'INT(12) UNSIGNED',
+		'default' => '2',
+		'after'   => 'ping_timeout']);
+	db_install_add_column('host',
+		['name'   => 'max_oids',
+		'type'    => 'INT(12) UNSIGNED',
+		'default' => '10',
+		'after'   => 'ping_retries']);
 	db_install_add_column('host', ['name' => 'notes', 'type' => 'TEXT', 'after' => 'hostname']);
-	db_install_add_column('host', ['name' => 'snmp_auth_protocol', 'type' => 'CHAR(5)', 'default' => '', 'after' => 'snmp_password']);
-	db_install_add_column('host', ['name' => 'snmp_priv_passphrase', 'type' => 'varchar(200)', 'default' => '', 'after' => 'snmp_auth_protocol']);
-	db_install_add_column('host', ['name' => 'snmp_priv_protocol', 'type' => 'CHAR(6)', 'default' => '', 'after' => 'snmp_priv_passphrase']);
-	db_install_add_column('host', ['name' => 'snmp_context', 'type' => 'VARCHAR(64)', 'default' => '', 'after' => 'snmp_priv_protocol']);
+	db_install_add_column('host',
+		['name'   => 'snmp_auth_protocol',
+		'type'    => 'CHAR(5)',
+		'default' => '',
+		'after'   => 'snmp_password']);
+	db_install_add_column('host',
+		['name'   => 'snmp_priv_passphrase',
+		'type'    => 'varchar(200)',
+		'default' => '',
+		'after'   => 'snmp_auth_protocol']);
+	db_install_add_column('host',
+		['name'   => 'snmp_priv_protocol',
+		'type'    => 'CHAR(6)',
+		'default' => '',
+		'after'   => 'snmp_priv_passphrase']);
+	db_install_add_column('host',
+		['name'   => 'snmp_context',
+		'type'    => 'VARCHAR(64)',
+		'default' => '',
+		'after'   => 'snmp_priv_protocol']);
 
 	// additional poller items fields required
-	db_install_add_column('poller_item', ['name' => 'snmp_auth_protocol', 'type' => 'CHAR(5)', 'default' => '', 'after' => 'snmp_password']);
-	db_install_add_column('poller_item', ['name' => 'snmp_priv_passphrase', 'type' => 'varchar(200)', 'default' => '', 'after' => 'snmp_auth_protocol']);
-	db_install_add_column('poller_item', ['name' => 'snmp_priv_protocol', 'type' => 'CHAR(6)', 'default' => '', 'after' => 'snmp_priv_passphrase']);
-	db_install_add_column('poller_item', ['name' => 'snmp_context', 'type' => 'VARCHAR(64)', 'default' => '', 'after' => 'snmp_priv_protocol']);
+	db_install_add_column('poller_item',
+		['name'   => 'snmp_auth_protocol',
+		'type'    => 'CHAR(5)',
+		'default' => '',
+		'after'   => 'snmp_password']);
+	db_install_add_column('poller_item',
+		['name'   => 'snmp_priv_passphrase',
+		'type'    => 'varchar(200)',
+		'default' => '',
+		'after'   => 'snmp_auth_protocol']);
+	db_install_add_column('poller_item',
+		['name'   => 'snmp_priv_protocol',
+		'type'    => 'CHAR(6)',
+		'default' => '',
+		'after'   => 'snmp_priv_passphrase']);
+	db_install_add_column('poller_item',
+		['name'   => 'snmp_context',
+		'type'    => 'VARCHAR(64)',
+		'default' => '',
+		'after'   => 'snmp_priv_protocol']);
 
 	// Convert to new authentication system
 	$global_auth            = 'on';

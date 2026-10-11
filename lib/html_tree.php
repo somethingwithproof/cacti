@@ -59,7 +59,11 @@ function process_tree_settings() : void {
  *
  * @return void
  */
-function grow_dropdown_tree(int $tree_id, mixed $parent = 0, string $form_name = '', string $selected_tree_item_id = '', int $tier = 0) : void {
+function grow_dropdown_tree(int $tree_id,
+	mixed $parent = 0,
+	string $form_name = '',
+	string $selected_tree_item_id = '',
+	int $tier = 0) : void {
 	$tier++;
 
 	$branches = db_fetch_assoc_prepared('SELECT gti.id, gti.title, parent
@@ -1144,7 +1148,13 @@ function draw_tree_filter(bool $render = false) : void {
 
 	// create the page filter
 	$filters                = create_tree_filter();
-	$pageFilter             = new CactiTableFilter($header, 'graph_view.php', 'form_graph_view', 'sess_tview', '', false, false);
+	$pageFilter             = new CactiTableFilter($header,
+		'graph_view.php',
+		'form_graph_view',
+		'sess_tview',
+		'',
+		false,
+		false);
 	$pageFilter->rows_label = __('Graphs');
 	$pageFilter->set_filter_array($filters);
 	$pageFilter->inject_content = inject_realtime_form();
@@ -1292,7 +1302,9 @@ function grow_right_pane_tree(int $tree_id, int $leaf_id, string $host_group_dat
 			WHERE id = ?',
 			[$host_group_data_array[1]]);
 
-		$host_group_data_name = '<i class="bold">' . __('Graph Template:') . '</i> ' . (empty($host_group_data_array[1]) ? __('Non Query Based') : htmle($name)) . '-> ' . (empty($host_group_data_array[2]) ? __('Template Based') : htmle(get_formatted_data_query_index($leaf['host_id'], intval($host_group_data_array[1]), $host_group_data_array[2])));
+		$host_group_data_name = '<i class="bold">' . __('Graph Template:') . '</i> ' . (empty($host_group_data_array[1]) ? __('Non Query Based') : htmle($name)) . '-> ' . (empty($host_group_data_array[2]) ? __('Template Based') : htmle(get_formatted_data_query_index($leaf['host_id'],
+			intval($host_group_data_array[1]),
+			$host_group_data_array[2])));
 		$data_query_id        = intval($host_group_data_array[1]);
 		$data_query_index     = $host_group_data_array[2];
 	}
@@ -1451,7 +1463,11 @@ function grow_right_pane_tree(int $tree_id, int $leaf_id, string $host_group_dat
 			$graph_template_id = grv('graph_template_id');
 		}
 
-		$graph_list = get_host_graph_list($leaf['host_id'], $graph_template_id, $data_query_id, $leaf['host_grouping_type'], $data_query_index);
+		$graph_list = get_host_graph_list($leaf['host_id'],
+			$graph_template_id,
+			$data_query_id,
+			$leaf['host_grouping_type'],
+			$data_query_index);
 	} elseif ($leaf_type == 'site') {
 		$sql_where = '';
 
@@ -1538,7 +1554,15 @@ function grow_right_pane_tree(int $tree_id, int $leaf_id, string $host_group_dat
 	$total_rows = cacti_sizeof($graph_list);
 
 	// generate page list
-	$nav = html_nav_bar(CACTI_PATH_URL . 'graph_view.php?action=tree_content&tree_id=' . $tree_id . '&leaf_id=' . $leaf_id . '&node=' . grv('node') . '&hgd=' . $host_group_data, MAX_DISPLAY_PAGES, grv('page'), $graph_rows, $total_rows, grv('columns'), __('Graphs'), 'page', 'main');
+	$nav = html_nav_bar(CACTI_PATH_URL . 'graph_view.php?action=tree_content&tree_id=' . $tree_id . '&leaf_id=' . $leaf_id . '&node=' . grv('node') . '&hgd=' . $host_group_data,
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$graph_rows,
+		$total_rows,
+		grv('columns'),
+		__('Graphs'),
+		'page',
+		'main');
 
 	print $nav;
 
@@ -1559,9 +1583,21 @@ function grow_right_pane_tree(int $tree_id, int $leaf_id, string $host_group_dat
 	}
 
 	if (grv('thumbnails') == 'true' || grv('thumbnails') == 'on') {
-		html_graph_thumbnail_area($new_graph_list, '', 'view_type=tree&graph_start=' . get_current_graph_start() . '&graph_end=' . get_current_graph_end(), '', grv('columns'), $tree_id, $leaf_id);
+		html_graph_thumbnail_area($new_graph_list,
+			'',
+			'view_type=tree&graph_start=' . get_current_graph_start() . '&graph_end=' . get_current_graph_end(),
+			'',
+			grv('columns'),
+			$tree_id,
+			$leaf_id);
 	} else {
-		html_graph_area($new_graph_list, '', 'view_type=tree&graph_start=' . get_current_graph_start() . '&graph_end=' . get_current_graph_end(), '', grv('columns'), $tree_id, $leaf_id);
+		html_graph_area($new_graph_list,
+			'',
+			'view_type=tree&graph_start=' . get_current_graph_start() . '&graph_end=' . get_current_graph_end(),
+			'',
+			grv('columns'),
+			$tree_id,
+			$leaf_id);
 	}
 
 	if (!empty($leaf_id)) {
@@ -1588,7 +1624,11 @@ function grow_right_pane_tree(int $tree_id, int $leaf_id, string $host_group_dat
  *
  * @return array An array of graphs for the specified host, graph template, and data query.
  */
-function get_host_graph_list(int $host_id, string $graph_template_id, int $data_query_id, string $host_grouping_type = '', string $data_query_index = '') : array {
+function get_host_graph_list(int $host_id,
+	string $graph_template_id,
+	int $data_query_id,
+	string $host_grouping_type = '',
+	string $data_query_index = '') : array {
 	$graph_list = [];
 	$sql_where  = '';
 
@@ -1657,9 +1697,13 @@ function get_host_graph_list(int $host_id, string $graph_template_id, int $data_
 				array_push($graph_template_ids, $graph_template['id']);
 			}
 
-			$sql_where .= ($sql_where != '' ? ' AND ' : '') . 'gl.graph_template_id IN (' . implode(', ', $graph_template_ids) . ')';
+			$sql_where .= ($sql_where != '' ? ' AND ' : '') . 'gl.graph_template_id IN (' . implode(', ',
+				$graph_template_ids) . ')';
 
-			if (grv('graph_source') != '-1' && read_config_option('dsstats_enable') == 'on' && grv('graph_source') != '' && grv('graph_order') != '') {
+			if (grv('graph_source') != '-1' &&
+				read_config_option('dsstats_enable') == 'on' &&
+				grv('graph_source') != '' &&
+				grv('graph_order')  != '') {
 				$sql_order = [
 					'data_source' => grv('graph_source'),
 					'order'       => grv('graph_order'),

@@ -76,7 +76,17 @@ $fields_reports_edit = [
 		'description'   => __('Defines the default font size for all text in the report including the Report Title.'),
 		'default'       => 16,
 		'method'        => 'drop_array',
-		'array'         => [7 => 7, 8 => 8, 10 => 10, 12 => 12, 14 => 14, 16 => 16, 18 => 18, 20 => 20, 24 => 24, 28 => 28, 32 => 32],
+		'array'         => [7 => 7,
+			8                    => 8,
+			10                   => 10,
+			12                   => 12,
+			14                   => 14,
+			16                   => 16,
+			18                   => 18,
+			20                   => 20,
+			24                   => 24,
+			28                   => 28,
+			32                   => 32],
 		'value'         => '|arg1:font_size|'
 	],
 	'alignment' => [
@@ -111,7 +121,19 @@ $fields_reports_edit = [
 		'friendly_name' => __('Graph Width'),
 		'method'        => 'drop_array',
 		'default'       => '300',
-		'array'         => [100 => 100, 150 => 150, 200 => 200, 250 => 250, 300 => 300, 350 => 350, 400 => 400, 500 => 500, 600 => 600, 700 => 700, 800 => 800, 900 => 900, 1000 => 1000],
+		'array'         => [100 => 100,
+			150                    => 150,
+			200                    => 200,
+			250                    => 250,
+			300                    => 300,
+			350                    => 350,
+			400                    => 400,
+			500                    => 500,
+			600                    => 600,
+			700                    => 700,
+			800                    => 800,
+			900                    => 900,
+			1000                   => 1000],
 		'description'   => __('The Graph width in pixels.'),
 		'value'         => '|arg1:graph_width|'
 	],
@@ -384,8 +406,16 @@ function reports_form_save() : void {
 		}
 
 		$save['item_type']         = form_input_validate(gnrv('item_type'), 'item_type', '^[-0-9]+$', false, 3);
-		$save['tree_id']           = (isrv('tree_id') ? form_input_validate(gnrv('tree_id'), 'tree_id', '^[-0-9]+$', true, 3) : 0);
-		$save['branch_id']         = (isrv('branch_id') ? form_input_validate(gnrv('branch_id'), 'branch_id', '^[-0-9]+$', true, 3) : 0);
+		$save['tree_id']           = (isrv('tree_id') ? form_input_validate(gnrv('tree_id'),
+			'tree_id',
+			'^[-0-9]+$',
+			true,
+			3) : 0);
+		$save['branch_id']         = (isrv('branch_id') ? form_input_validate(gnrv('branch_id'),
+			'branch_id',
+			'^[-0-9]+$',
+			true,
+			3) : 0);
 		$save['tree_cascade']      = (isrv('tree_cascade') ? 'on' : '');
 		$save['graph_name_regexp'] = form_input_validate(gnrv('graph_name_regexp'), 'graph_name_regexp', '', true, 3);
 
@@ -394,18 +424,58 @@ function reports_form_save() : void {
 
 			if ($regex_valid !== true) {
 				$_SESSION[SESS_ERROR_FIELDS]['graph_name_regexp'] = 3;
-				raise_message('custom', __esc('The regular expression "%s" is not valid. Error is %s', (string) $save['graph_name_regexp'], (string) $regex_valid), MESSAGE_LEVEL_ERROR);
+				raise_message('custom',
+					__esc('The regular expression "%s" is not valid. Error is %s',
+						(string) $save['graph_name_regexp'],
+						(string) $regex_valid),
+					MESSAGE_LEVEL_ERROR);
 			}
 		}
-		$save['site_id']           = (isrv('site_id') ? form_input_validate(gnrv('site_id'), 'site_id', '^[-0-9]+$', true, 3) : 0);
-		$save['host_template_id']  = (isrv('host_template_id') ? form_input_validate(gnrv('host_template_id'), 'host_template_id', '^[-0-9]+$', true, 3) : 0);
-		$save['host_id']           = (isrv('host_id') ? form_input_validate(gnrv('host_id'), 'host_id', '^[-0-9]+$', true, 3) : 0);
-		$save['graph_template_id'] = (isrv('graph_template_id') ? form_input_validate(gnrv('graph_template_id'), 'graph_template_id', '^[-0-9]+$', true, 3) : 0);
-		$save['local_graph_id']    = (isrv('local_graph_id') ? form_input_validate(gnrv('local_graph_id'), 'local_graph_id', '^[0-9]+$', true, 3) : 0);
-		$save['timespan']          = (isrv('timespan') ? form_input_validate(gnrv('timespan'), 'timespan', '^[0-9]+$', true, 3) : 0);
-		$save['item_text']         = (isrv('item_text') ? form_input_validate(gnrv('item_text'), 'item_text', '', true, 3) : '');
-		$save['align']             = (isrv('align') ? form_input_validate(gnrv('align'), 'align', '^[0-9]+$', true, 3) : REPORTS_ALIGN_LEFT);
-		$save['font_size']         = (isrv('font_size') ? form_input_validate(gnrv('font_size'), 'font_size', '^[0-9]+$', true, 3) : REPORTS_FONT_SIZE);
+		$save['site_id']           = (isrv('site_id') ? form_input_validate(gnrv('site_id'),
+			'site_id',
+			'^[-0-9]+$',
+			true,
+			3) : 0);
+		$save['host_template_id']  = (isrv('host_template_id') ? form_input_validate(gnrv('host_template_id'),
+			'host_template_id',
+			'^[-0-9]+$',
+			true,
+			3) : 0);
+		$save['host_id']           = (isrv('host_id') ? form_input_validate(gnrv('host_id'),
+			'host_id',
+			'^[-0-9]+$',
+			true,
+			3) : 0);
+		$save['graph_template_id'] = (isrv('graph_template_id') ? form_input_validate(gnrv('graph_template_id'),
+			'graph_template_id',
+			'^[-0-9]+$',
+			true,
+			3) : 0);
+		$save['local_graph_id']    = (isrv('local_graph_id') ? form_input_validate(gnrv('local_graph_id'),
+			'local_graph_id',
+			'^[0-9]+$',
+			true,
+			3) : 0);
+		$save['timespan']          = (isrv('timespan') ? form_input_validate(gnrv('timespan'),
+			'timespan',
+			'^[0-9]+$',
+			true,
+			3) : 0);
+		$save['item_text']         = (isrv('item_text') ? form_input_validate(gnrv('item_text'),
+			'item_text',
+			'',
+			true,
+			3) : '');
+		$save['align']             = (isrv('align') ? form_input_validate(gnrv('align'),
+			'align',
+			'^[0-9]+$',
+			true,
+			3) : REPORTS_ALIGN_LEFT);
+		$save['font_size']         = (isrv('font_size') ? form_input_validate(gnrv('font_size'),
+			'font_size',
+			'^[0-9]+$',
+			true,
+			3) : REPORTS_FONT_SIZE);
 
 		if (!is_error_message()) {
 			$item_id = sql_save($save, 'reports_items');
@@ -446,7 +516,10 @@ function reports_form_actions() : void {
 	$reports_admin   = is_reports_admin();
 	$reportit_exists = db_table_exists('plugin_reportit_reports');
 
-	$can_manage_report = static function (string $type, int $report_id) use ($current_user_id, $reports_admin, $reportit_exists) : bool {
+	$can_manage_report = static function (string $type,
+		int $report_id) use ($current_user_id,
+		$reports_admin,
+		$reportit_exists) : bool {
 		if ($reports_admin) {
 			return true;
 		}
@@ -594,7 +667,8 @@ function reports_form_actions() : void {
 				if ($type == 'reports') {
 					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM reports WHERE id = ?', [$id])) . '</li>';
 				} elseif ($type == 'reportit') {
-					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM plugin_reportit_reports WHERE id = ?', [$id])) . '</li>';
+					$ilist .= '<li>' . htmle(db_fetch_cell_prepared('SELECT name FROM plugin_reportit_reports WHERE id = ?',
+						[$id])) . '</li>';
 				}
 
 				$iarray[] = "{$type}_{$id}";
@@ -693,13 +767,25 @@ function reports_send(int $id) : void {
 		}
 
 		if ($report['email'] == '') {
-			raise_message('report_message', __esc('Unable to send Report \'%s\'.  Please set destination e-mail addresses',  $report['name']), MESSAGE_LEVEL_ERROR);
+			raise_message('report_message',
+				__esc('Unable to send Report \'%s\'.  Please set destination e-mail addresses',
+					$report['name']),
+				MESSAGE_LEVEL_ERROR);
 		} elseif ($report['subject'] == '') {
-			raise_message('report_message', __esc('Unable to send Report \'%s\'.  Please set an e-mail subject',  $report['name']), MESSAGE_LEVEL_ERROR);
+			raise_message('report_message',
+				__esc('Unable to send Report \'%s\'.  Please set an e-mail subject',
+					$report['name']),
+				MESSAGE_LEVEL_ERROR);
 		} elseif ($report['from_name'] == '') {
-			raise_message('report_message', __esc('Unable to send Report \'%s\'.  Please set an e-mail From Name',  $report['name']), MESSAGE_LEVEL_ERROR);
+			raise_message('report_message',
+				__esc('Unable to send Report \'%s\'.  Please set an e-mail From Name',
+					$report['name']),
+				MESSAGE_LEVEL_ERROR);
 		} elseif ($report['from_email'] == '') {
-			raise_message('report_message', __esc('Unable to send Report \'%s\'.  Please set an e-mail from address',  $report['name']), MESSAGE_LEVEL_ERROR);
+			raise_message('report_message',
+				__esc('Unable to send Report \'%s\'.  Please set an e-mail from address',
+					$report['name']),
+				MESSAGE_LEVEL_ERROR);
 		} else {
 			generate_report(0, $report, true);
 		}
@@ -1347,7 +1433,17 @@ function reports_item_edit() : void {
 			'friendly_name' => __('Font Size'),
 			'method'        => 'drop_array',
 			'default'       => REPORTS_FONT_SIZE,
-			'array'         => [7 => 7, 8 => 8, 10 => 10, 12 => 12, 14 => 14, 16 => 16, 18 => 18, 20 => 20, 24 => 24, 28 => 28, 32 => 32],
+			'array'         => [7 => 7,
+				8                    => 8,
+				10                   => 10,
+				12                   => 12,
+				14                   => 14,
+				16                   => 16,
+				18                   => 18,
+				20                   => 20,
+				24                   => 24,
+				28                   => 28,
+				32                   => 32],
 			'description'   => __('Font Size of the Item'),
 			'value'         => '|arg1:font_size|'
 		],
@@ -1775,7 +1871,13 @@ function reports_edit() : void {
 
 			break;
 		case 'items':
-			html_start_box(__esc('Report Items %s', $header_label), '100%', false, 3, 'center', get_reports_page() . '?action=item_edit&id=' . grv('id'));
+			html_start_box(__esc('Report Items %s',
+				$header_label),
+				'100%',
+				false,
+				3,
+				'center',
+				get_reports_page() . '?action=item_edit&id=' . grv('id'));
 
 			// display the items
 			if (!empty($report['id'])) {
@@ -1897,7 +1999,9 @@ function display_reports_items(int $report_id) : void {
 
 					break;
 				case REPORTS_ITEM_HOST:
-					$item_details = __('Device: %s', db_fetch_cell_prepared('SELECT description FROM host WHERE id = ?', [$item['host_id']]));
+					$item_details = __('Device: %s',
+						db_fetch_cell_prepared('SELECT description FROM host WHERE id = ?',
+							[$item['host_id']]));
 
 					if ($item['graph_template_id'] == -1) {
 						$item_details .= __(', Graph Template: All Templates');
@@ -2000,7 +2104,8 @@ function display_reports_items(int $report_id) : void {
 			}
 
 			form_alternate_row('line' . $item['id'], false);
-			$form_data = '<td><a class="linkEditMain" href="' . htmle(get_reports_page() . '?action=item_edit&id=' . $report_id . '&item_id=' . $item['id']) . '">' . __('Item # %d', $i) . '</a></td>';
+			$form_data = '<td><a class="linkEditMain" href="' . htmle(get_reports_page() . '?action=item_edit&id=' . $report_id . '&item_id=' . $item['id']) . '">' . __('Item # %d',
+				$i) . '</a></td>';
 			$form_data .= '<td>' . $item['sequence'] . '</td>';
 			$form_data .= '<td>' . $item_types[$item['item_type']] . '</td>';
 			$form_data .= '<td class="nowrap">' . htmle($item_details) . '</td>';
@@ -2147,7 +2252,10 @@ function draw_preview_filter(bool $render = false, string $header_label = '') : 
 	$header = __esc('Report Preview %s', $header_label);
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter($header, "reports.php?action=edit&id=$report_id&tab=preview", 'forms', 'sess_repprv');
+	$pageFilter = new CactiTableFilter($header,
+		"reports.php?action=edit&id=$report_id&tab=preview",
+		'forms',
+		'sess_repprv');
 
 	$pageFilter->set_filter_array($filters);
 
@@ -2248,7 +2356,11 @@ function draw_reports_filter(bool $render = false) : void {
 	$header = __('Reports [%s]', (is_reports_admin() ? __('Administrator Level') : __('User Level')));
 
 	// create the page filter
-	$pageFilter = new CactiTableFilter($header, 'reports.php', 'forms', 'sess_repv', 'reports.php?action=edit&tab=details');
+	$pageFilter = new CactiTableFilter($header,
+		'reports.php',
+		'forms',
+		'sess_repv',
+		'reports.php?action=edit&tab=details');
 
 	$pageFilter->set_filter_array($filters);
 
@@ -2434,7 +2546,15 @@ function reports() : void {
 		],
 	];
 
-	$nav = html_nav_bar(get_reports_page() . 'filter=' . grv('filter'), MAX_DISPLAY_PAGES, grv('page'), $rows, $total_rows, (cacti_sizeof($display_text) + 1), __('Reports'), 'page', 'main');
+	$nav = html_nav_bar(get_reports_page() . 'filter=' . grv('filter'),
+		MAX_DISPLAY_PAGES,
+		grv('page'),
+		$rows,
+		$total_rows,
+		(cacti_sizeof($display_text) + 1),
+		__('Reports'),
+		'page',
+		'main');
 
 	form_start(get_reports_page(), 'chk');
 
@@ -2508,7 +2628,10 @@ function reports() : void {
 
 			form_selectable_cell($notify, $id);
 
-			form_selectable_cell($report['enabled'] ? '<i class="ti ti-check deviceUp"></i>' : '<i class="ti ti-x deviceDown"></i>', $id, '', 'right');
+			form_selectable_cell($report['enabled'] ? '<i class="ti ti-check deviceUp"></i>' : '<i class="ti ti-x deviceDown"></i>',
+				$id,
+				'',
+				'right');
 
 			if ($report['sched_type'] != 1) {
 				form_selectable_cell(date($date_format, strtotime($report['next_start'])), $id, '', 'right');
@@ -2516,7 +2639,11 @@ function reports() : void {
 				form_selectable_cell(__('N/A'), $id, '', 'right');
 			}
 
-			form_selectable_cell($report['last_started'] == '0000-00-00 00:00:00' ? __('Never') : date($date_format, strtotime($report['last_started'])), $id, '', 'right');
+			form_selectable_cell($report['last_started'] == '0000-00-00 00:00:00' ? __('Never') : date($date_format,
+				strtotime($report['last_started'])),
+				$id,
+				'',
+				'right');
 
 			form_selectable_cell(__('%s sec', number_format_i18n($report['run_limit'], 1)), $id, '', 'right');
 

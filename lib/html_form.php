@@ -62,7 +62,8 @@ function draw_edit_form(array $array) : void {
 					if (isset($field_array['default'])) {
 						$field_array['value'] = $field_array['default'];
 					} else {
-						cacti_log("WARNING: Cacti Form field '$field_name' does not include a 'default' Column.  Using empty string.", false);
+						cacti_log("WARNING: Cacti Form field '$field_name' does not include a 'default' Column.  Using empty string.",
+							false);
 						$field_array['value'] = '';
 					}
 				}
@@ -113,7 +114,8 @@ function draw_edit_form(array $array) : void {
 
 				if (isset($field_array['sub_checkbox'])) {
 					if (!isset($field_array['sub_checkbox']['value'])) {
-						cacti_log("WARNING: Cacti Form field '$field_name' does not include a sub_checkbox 'value' Column.  Using default", false);
+						cacti_log("WARNING: Cacti Form field '$field_name' does not include a sub_checkbox 'value' Column.  Using default",
+							false);
 						cacti_debug_backtrace('form_edit');
 
 						if (isset($field_array['sub_checkbox']['default'])) {
@@ -565,7 +567,8 @@ function draw_edit_control(string $field_name, array &$field_array) : void {
 
 				form_hidden_box($field_name, $field_array['value'], '', true);
 			} else {
-				cacti_log('ERROR: Field Name: ' . $field_name . ' includes Method: ' . $field_array['method'] . ' does not include a value \'value\' element.', false);
+				cacti_log('ERROR: Field Name: ' . $field_name . ' includes Method: ' . $field_array['method'] . ' does not include a value \'value\' element.',
+					false);
 			}
 
 			break;
@@ -783,7 +786,11 @@ function form_dirpath_box(string $form_name, mixed $prev_val, mixed $default_val
  *
  * @return void
  */
-function form_cert_box(string $form_name, mixed $stored_val, mixed $default_val, int $form_rows, int $form_columns) : void {
+function form_cert_box(string $form_name,
+	mixed $stored_val,
+	mixed $default_val,
+	int $form_rows,
+	int $form_columns) : void {
 	if ($stored_val == '') {
 		$stored_val = $default_val;
 	}
@@ -816,9 +823,13 @@ function form_cert_box(string $form_name, mixed $stored_val, mixed $default_val,
 			$expires = date('Y-m-d', $parsed['validTo_time_t']);
 
 			if ($parsed['validTo_time_t'] < time()) {
-				$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-xmark deviceDown' style='padding:5px;font-size:16px' title='" . __esc('Certificate expired on %s', $expires) . "'>" . __esc('Expired: %s', $expires) . '</span>';
+				$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-xmark deviceDown' style='padding:5px;font-size:16px' title='" . __esc('Certificate expired on %s',
+					$expires) . "'>" . __esc('Expired: %s',
+						$expires) . '</span>';
 			} else {
-				$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-check deviceUp' style='padding:5px;font-size:16px' title='" . __esc('Certificate expires on %s', $expires) . "'>" . __esc('Good Till: %s', $expires) . '</span>';
+				$extra_data = "<span class='cactiTooltipHint fa-solid fa-circle-check deviceUp' style='padding:5px;font-size:16px' title='" . __esc('Certificate expires on %s',
+					$expires) . "'>" . __esc('Good Till: %s',
+						$expires) . '</span>';
 			}
 		}
 	}
@@ -885,12 +896,17 @@ function form_privkey_box(string $form_name, mixed $stored_val, int $form_rows, 
  * @return void
  */
 function form_text_box(string $form_name, mixed $prev_val, mixed $default_val, mixed $max_length,
-	mixed $form_size = 30, string $type = 'text', mixed $current_id = 0, string $placeholder = '', string $title = '') : void {
+	mixed $form_size = 30,
+		string $type = 'text',
+		mixed $current_id = 0,
+		string $placeholder = '',
+		string $title = '') : void {
 	if (($prev_val == '') && (empty($current_id))) {
 		$prev_val = $default_val;
 	}
 
-	print "<input type='$type' " . ($type == 'password' || $type == 'password_confirm' ? 'autocomplete="off" readonly onfocus="this.removeAttribute(\'readonly\');"' : '') . ($title != '' ? ' title="' . htmle($title) . '"' : '');
+	print "<input type='$type' " . ($type == 'password' ||
+		$type == 'password_confirm' ? 'autocomplete="off" readonly onfocus="this.removeAttribute(\'readonly\');"' : '') . ($title != '' ? ' title="' . htmle($title) . '"' : '');
 
 	if (isset($_SESSION[SESS_ERROR_FIELDS])) {
 		if (!empty($_SESSION[SESS_ERROR_FIELDS][$form_name])) {
@@ -1234,7 +1250,11 @@ function form_callback(string $form_name, string $classic_sql, string $column_di
  */
 
 function form_checkbox(string $form_name, mixed $prev_val, string $form_caption, mixed $default_val,
-	mixed $current_id = 0, string $class = '', string $on_change = '', string $title = '', bool $show_label = false) : void {
+	mixed $current_id = 0,
+		string $class = '',
+		string $on_change = '',
+		string $title = '',
+		bool $show_label = false) : void {
 	if (($prev_val === null) && (empty($current_id))) {
 		$prev_val = $default_val;
 	}
@@ -2002,7 +2022,11 @@ function form_save_button(mixed $cancel_url, mixed $force_type = '',
 		$alt = __esc('Export');
 	}
 
-	if ($force_type != 'import' && $force_type != 'export' && $force_type != 'save' && $force_type != 'close' && $cancel_url != '') {
+	if ($force_type != 'import' &&
+		$force_type    != 'export' &&
+		$force_type    != 'save' &&
+		$force_type    != 'close' &&
+		$cancel_url    != '') {
 		$cancel_action = "<button type='button' class='ui-button ui-corner-all ui-widget' onClick='cactiReturnTo(\"" . htmle(sanitize_uri($cancel_url)) . "\")' value='" . $catp . "'>" . $calt . '</button>';
 	} else {
 		$cancel_action = '';
@@ -2090,7 +2114,11 @@ function form_save_buttons(array $buttons, mixed $cancel_url = '', string $force
 		$alt = __esc('Export');
 	}
 
-	if ($force_type != 'import' && $force_type != 'export' && $force_type != 'save' && $force_type != 'close' && $cancel_url != '') {
+	if ($force_type != 'import' &&
+		$force_type    != 'export' &&
+		$force_type    != 'save' &&
+		$force_type    != 'close' &&
+		$cancel_url    != '') {
 		$cancel_action = "<button type='button' class='ui-button ui-corner-all ui-widget' onClick='cactiReturnTo(\"" . htmle($cancel_url) . "\")' value='" . $catp . "'>" . $calt . '</button>';
 	} else {
 		$cancel_action = '';

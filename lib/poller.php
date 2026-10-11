@@ -39,7 +39,13 @@ function exec_poll(string $command, int $timeout = 5) : string {
 	$data = exec_with_timeout($command, $output, $return, $timeout);
 
 	if ($return != 0) {
-		cacti_log(sprintf('WARNING: Script:%s, ErrorCode:%d, Output:%s', $command, $return, implode(',', $output)), false, 'POLLER');
+		cacti_log(sprintf('WARNING: Script:%s, ErrorCode:%d, Output:%s',
+			$command,
+			$return,
+			implode(',',
+				$output)),
+			false,
+			'POLLER');
 	}
 
 	if ($data == '') {
@@ -135,7 +141,10 @@ function exec_background(string $filename, string|array $args = '', string|array
 		$redirect_args = implode(' ', $redirect_args);
 	}
 
-	cacti_log("DEBUG: About to Spawn a Remote Process [CMD: $filename, ARGS: $args]", true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_DEBUG));
+	cacti_log("DEBUG: About to Spawn a Remote Process [CMD: $filename, ARGS: $args]",
+		true,
+		'POLLER',
+		($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_DEBUG));
 
 	if ($filename != '') {
 		if (file_exists($filename)) {
@@ -361,7 +370,10 @@ function exec_with_timeout(string $cmd, array &$output, int &$return_code, int $
 	// Only surface stderr noise when the command actually failed; successful
 	// commands may write informational output to stderr that isn't actionable.
 	if ($return_code != 0 && !empty($errors)) {
-		cacti_log("WARNING: Command '$cmd' exited with code $return_code, stderr: " . trim($errors), false, 'POLLER', POLLER_VERBOSITY_MEDIUM);
+		cacti_log("WARNING: Command '$cmd' exited with code $return_code, stderr: " . trim($errors),
+			false,
+			'POLLER',
+			POLLER_VERBOSITY_MEDIUM);
 	}
 
 	// Kill the process in case the timeout expired and it's still running.
@@ -519,17 +531,23 @@ function update_reindex_cache(int $host_id, int $data_query_id) : void {
 					case DATA_INPUT_TYPE_SCRIPT_QUERY:
 						if (isset($data_query_xml['arg_num_indexes'])) { // we have a specific request for counting indexes
 							// escape path (windows!) and parameters for use with database sql; TODO: replace by db specific escape function like mysql_real_escape_string?
-							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SCRIPT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_num_indexes'], $data_query_xml['script_path'], $host_id)) . ', 1)';
+							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SCRIPT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_num_indexes'],
+								$data_query_xml['script_path'],
+								$host_id)) . ', 1)';
 						} else { // count all indexes found
 							// escape path (windows!) and parameters for use with database sql; TODO: replace by db specific escape function like mysql_real_escape_string?
-							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SCRIPT_COUNT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_index'], $data_query_xml['script_path'], $host_id)) . ', 1)';
+							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SCRIPT_COUNT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_index'],
+								$data_query_xml['script_path'],
+								$host_id)) . ', 1)';
 						}
 
 						break;
 					case DATA_INPUT_TYPE_QUERY_SCRIPT_SERVER:
 						if (isset($data_query_xml['arg_num_indexes'])) { // we have a specific request for counting indexes
 							// escape path (windows!) and parameters for use with database sql; TODO: replace by db specific escape function like mysql_real_escape_string?
-							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SCRIPT_PHP . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path($data_query_xml['script_function'] . ' ' . (isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_num_indexes'], $data_query_xml['script_path'], $host_id)) . ', 1)';
+							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SCRIPT_PHP . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path($data_query_xml['script_function'] . ' ' . (isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_num_indexes'],
+								$data_query_xml['script_path'],
+								$host_id)) . ', 1)';
 						} else { // count all indexes found
 							// TODO: push the correct assert value
 							// escape path (windows!) and parameters for use with database sql; TODO: replace by db specific escape function like mysql_real_escape_string?
@@ -556,7 +574,9 @@ function update_reindex_cache(int $host_id, int $data_query_id) : void {
 						if ($data_query_type == DATA_INPUT_TYPE_SNMP_QUERY) {
 							$recache_stack[] = "($host_id, $data_query_id, " . POLLER_ACTION_SNMP . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(($data_query_xml['fields'][$data_query['sort_field']]['source'] == 'index') ? $data_query_xml['oid_index'] . '.' . $index['snmp_index'] : $data_query_xml['fields'][$data_query['sort_field']]['oid'] . '.' . $index['snmp_index']) . ', 1)';
 						} elseif ($data_query_type == DATA_INPUT_TYPE_SCRIPT_QUERY) {
-							$recache_stack[] = '(' . $host_id . ', ' . $data_query_id . ', ' . POLLER_ACTION_SCRIPT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_get'] . ' ' . $data_query_xml['fields'][$data_query['sort_field']]['query_name'] . ' "' . $index['snmp_index'] . '"', $data_query_xml['script_path'], $host_id)) . ', 1)';
+							$recache_stack[] = '(' . $host_id . ', ' . $data_query_id . ', ' . POLLER_ACTION_SCRIPT . ", '=', " . db_qstr($assert_value) . ', ' . db_qstr(get_script_query_path((isset($data_query_xml['arg_prepend']) ? $data_query_xml['arg_prepend'] . ' ' : '') . $data_query_xml['arg_get'] . ' ' . $data_query_xml['fields'][$data_query['sort_field']]['query_name'] . ' "' . $index['snmp_index'] . '"',
+								$data_query_xml['script_path'],
+								$host_id)) . ', 1)';
 						}
 					}
 				}
@@ -747,7 +767,10 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 		$remainder = $max_rows;
 	}
 
-	cacti_log("Processing Poller Output with $remainder maximum items to be processed", false, 'POLLER', POLLER_VERBOSITY_HIGH);
+	cacti_log("Processing Poller Output with $remainder maximum items to be processed",
+		false,
+		'POLLER',
+		POLLER_VERBOSITY_HIGH);
 
 	if ($remainder === 0) {
 		$limit = 'LIMIT ' . $max_rows;
@@ -819,7 +842,8 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 				$values = preg_split('/\s+/', $value);
 
 				// orphan filter applies to templated sources only; cached per data source
-				$unused_data_source_names = $data_template_id > 0 ? poller_get_unused_data_source_names($local_data_id, $unused_cache) : [];
+				$unused_data_source_names = $data_template_id > 0 ? poller_get_unused_data_source_names($local_data_id,
+					$unused_cache) : [];
 
 				// the Data Template dictates field names; only non-templated (dt == 0) sources
 				// need a per-instance lookup (rare exception), cached per data source
@@ -847,7 +871,10 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 							continue;
 						}
 
-						cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' , true, 'POLLER', ($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_HIGH));
+						cacti_log("Parsed MULTI output field '" . $matches[0] . ':' . $matches[1] . "' [map " . $matches[0] . '->' . $field . ']' ,
+							true,
+							'POLLER',
+							($debug ? POLLER_VERBOSITY_NONE : POLLER_VERBOSITY_HIGH));
 
 						if (is_numeric($matches[1]) || ($matches[1] == 'U')) {
 							$rrd_update_array[$rrd_path]['times'][$unix_time][$field] = $matches[1];
@@ -864,7 +891,8 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 				}
 			} else {
 				// orphan filter applies to templated sources only; cached per data source
-				$unused_data_source_names = $data_template_id > 0 ? poller_get_unused_data_source_names($local_data_id, $unused_cache) : [];
+				$unused_data_source_names = $data_template_id > 0 ? poller_get_unused_data_source_names($local_data_id,
+					$unused_cache) : [];
 
 				if ($data_template_id > 0) {
 					// expected field names for this template come from the static template cache
@@ -904,7 +932,12 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 					$rrd_update_array[$rrd_path]['template'] = $rrd_tmpl;
 				}
 
-				cacti_log(sprintf('WARNING: Invalid output! MULTI DS[%d] Encountered [%s] Expected[%s]', $item['local_data_id'], $value, $expected), false, 'POLLER');
+				cacti_log(sprintf('WARNING: Invalid output! MULTI DS[%d] Encountered [%s] Expected[%s]',
+					$item['local_data_id'],
+					$value,
+					$expected),
+					false,
+					'POLLER');
 			}
 
 			// fallback values
@@ -994,12 +1027,18 @@ function process_poller_output(mixed &$rrdtool_pipe, int $remainder = 0) : int {
 					ORDER BY dt.name');
 
 				if (cacti_sizeof($items)) {
-					cacti_log(sprintf('WARNING: There are %s Data Sources not returning all data leaving rows in the poller output table.  Details to follow.', cacti_sizeof($items)), false, 'POLLER');
+					cacti_log(sprintf('WARNING: There are %s Data Sources not returning all data leaving rows in the poller output table.  Details to follow.',
+						cacti_sizeof($items)),
+						false,
+						'POLLER');
 					$prevName = '';
 
 					foreach ($items as $item) {
 						if ($prevName != $item['name']) {
-							cacti_log(sprintf('WARNING: Data Template \'%s\' is impacted by lack of complete information', $item['name']), false, 'POLLER');
+							cacti_log(sprintf('WARNING: Data Template \'%s\' is impacted by lack of complete information',
+								$item['name']),
+								false,
+								'POLLER');
 							$prevName = $item['name'];
 
 							db_execute('DELETE FROM poller_output WHERE ' . db_in_clause('local_data_id', $item['local_data_ids']));
@@ -1145,7 +1184,9 @@ function update_resource_cache($poller_id = 1) : bool {
 							}
 						}
 					} else {
-						cacti_log("WARNING: INFO file does not exist for plugin directory '" . $mpath . '/plugins/' . $path . "'", false, 'REPLICATE');
+						cacti_log("WARNING: INFO file does not exist for plugin directory '" . $mpath . '/plugins/' . $path . "'",
+							false,
+							'REPLICATE');
 					}
 				} else {
 					cache_in_path($mpath . '/plugins/' . $path, 'plugins', false);
@@ -1234,7 +1275,10 @@ function cache_in_path(string $path, string $type, bool $recursive = true) : voi
 		$last_md5      = read_config_option($settings_path);
 
 		if (empty($last_md5) || $last_md5 != $curr_md5) {
-			cacti_log('Type:' . $type . ', Path:' . $path . ', Last MD5:' . $last_md5 . ', Curr MD5:' . $curr_md5, false, 'REPLICATE', POLLER_VERBOSITY_MEDIUM);
+			cacti_log('Type:' . $type . ', Path:' . $path . ', Last MD5:' . $last_md5 . ', Curr MD5:' . $curr_md5,
+				false,
+				'REPLICATE',
+				POLLER_VERBOSITY_MEDIUM);
 			cacti_log("NOTE: Detecting Resource Change.  Updating Resource Cache for '$path'", false, 'REPLICATE');
 			update_db_from_path($path, $type, $recursive);
 		}
@@ -1494,8 +1538,16 @@ function resource_cache_out(string $type, array $path) : void {
 											cacti_log("ERROR: Cache in cannot write to '$mypath', purge this location", false, 'REPLICATE');
 										}
 									} else {
-										cacti_log("ERROR: PHP Source File '$mypath' from Cache has an error while checking syntax ($exit) while executing: '$php_path -l $tmpfile'", false, 'REPLICATE');
-										cacti_log("ERROR: PHP Source File '$mypath'': " . str_replace("\n", ' ', str_replace("\t", ' ', $output)), false, 'REPLICATE');
+										cacti_log("ERROR: PHP Source File '$mypath' from Cache has an error while checking syntax ($exit) while executing: '$php_path -l $tmpfile'",
+											false,
+											'REPLICATE');
+										cacti_log("ERROR: PHP Source File '$mypath'': " . str_replace("\n",
+											' ',
+											str_replace("\t",
+												' ',
+												$output)),
+											false,
+											'REPLICATE');
 									}
 
 									unlink($tmpfile);
@@ -1573,7 +1625,9 @@ function md5sum_path(string $path, bool $recursive = true) : mixed {
 			} elseif (is_readable($path . DIRECTORY_SEPARATOR . $entry)) {
 				$filemd5s[] = md5_file($path . DIRECTORY_SEPARATOR . $entry);
 			} else {
-				cacti_log('WARNING: Unable to read file \'' . $path . DIRECTORY_SEPARATOR . $entry . '\' into Cacti resource cache.', false, 'REPLICATE');
+				cacti_log('WARNING: Unable to read file \'' . $path . DIRECTORY_SEPARATOR . $entry . '\' into Cacti resource cache.',
+					false,
+					'REPLICATE');
 			}
 		}
 	}
@@ -1715,7 +1769,9 @@ function poller_connect_to_remote(int $poller_id) : mixed {
  *
  * @return void
  */
-function poller_item_delete_for_data_source(int|array $local_data_ids, mixed $rcnn_id = false, bool $delete_local = true) : void {
+function poller_item_delete_for_data_source(int|array $local_data_ids,
+	mixed $rcnn_id = false,
+	bool $delete_local = true) : void {
 	if (!is_array($local_data_ids)) {
 		$local_data_ids = [$local_data_ids];
 	}
@@ -2062,7 +2118,10 @@ function replicate_out(int $remote_poller_id = 1, string $class = 'all') : bool 
 	}
 
 	if ($class == 'all') {
-		api_plugin_hook_function('replicate_out', ['remote_poller_id' => $remote_poller_id, 'rcnn_id' => $rcnn_id, 'class' => $class]);
+		api_plugin_hook_function('replicate_out',
+			['remote_poller_id' => $remote_poller_id,
+			'rcnn_id'           => $rcnn_id,
+			'class'             => $class]);
 	}
 
 	$stats = db_fetch_row_prepared('SELECT
@@ -2212,7 +2271,8 @@ function replicate_out_table(mixed $db_conn, array &$data, string $table, int $r
 				$rows_done    += $rows_affected;
 
 				if ($rows_log) {
-					replicate_log('NOTE: Table ' . $table . ' Replicated to Remote Poller ' . $remote_poller_id . ' With ' . $rows_done . ' Rows Updated', $level);
+					replicate_log('NOTE: Table ' . $table . ' Replicated to Remote Poller ' . $remote_poller_id . ' With ' . $rows_done . ' Rows Updated',
+						$level);
 				}
 				$sql    = '';
 				$rowcnt = 0;
@@ -2224,7 +2284,8 @@ function replicate_out_table(mixed $db_conn, array &$data, string $table, int $r
 			$rows_done += db_affected_rows($db_conn);
 		}
 
-		replicate_log('INFO: Table ' . $table . ' Replicated to Remote Poller ' . $remote_poller_id . ' With ' . $rows_done . ' Rows Updated', $level);
+		replicate_log('INFO: Table ' . $table . ' Replicated to Remote Poller ' . $remote_poller_id . ' With ' . $rows_done . ' Rows Updated',
+			$level);
 	} else {
 		if (!db_table_exists($table, false, $db_conn)) {
 			replicate_log('NOTE: Replicate Out Detected a missing remote table for ' . $table, $level);
@@ -2242,7 +2303,8 @@ function replicate_out_table(mixed $db_conn, array &$data, string $table, int $r
 				}
 			}
 		} else {
-			replicate_log('INFO: Table ' . $table . ' Not Replicated to Remote Poller ' . $remote_poller_id . ' Due to No Rows Found', $level);
+			replicate_log('INFO: Table ' . $table . ' Not Replicated to Remote Poller ' . $remote_poller_id . ' Due to No Rows Found',
+				$level);
 
 			db_execute("TRUNCATE TABLE $table", true, $db_conn);
 		}
@@ -2276,7 +2338,10 @@ function poller_push_reindex_only_data_to_main(int $device_id, int $data_query_i
 	}
 }
 
-function poller_push_reindex_data_to_poller(int $device_id = 0, int $data_query_id = 0, bool $force = false, mixed $db_conn = false) : void {
+function poller_push_reindex_data_to_poller(int $device_id = 0,
+	int $data_query_id = 0,
+	bool $force = false,
+	mixed $db_conn = false) : void {
 	global $remote_db_cnn_id, $local_db_cnn_id, $database_hostname, $rdatabase_hostname;
 
 	// If the hostnames are the same, replication is from main to remote
@@ -2450,7 +2515,10 @@ function replicate_table_to_poller(mixed $db_conn, array &$data, string $table, 
 			$rows_done += db_affected_rows($db_conn);
 		}
 
-		cacti_log('NOTE: Table ' . $table . ' Replicated to Poller With ' . $rows_done . ' Rows Updated', true, 'REPLICATE', POLLER_VERBOSITY_MEDIUM);
+		cacti_log('NOTE: Table ' . $table . ' Replicated to Poller With ' . $rows_done . ' Rows Updated',
+			true,
+			'REPLICATE',
+			POLLER_VERBOSITY_MEDIUM);
 	}
 }
 
@@ -2527,7 +2595,11 @@ function poller_push_data_to_main() : void {
 	}
 }
 
-function poller_push_table(object $db_cnn, array $records, string $table, bool $ignore = false, array $dupes = []) : int {
+function poller_push_table(object $db_cnn,
+	array $records,
+	string $table,
+	bool $ignore = false,
+	array $dupes = []) : int {
 	$prefix = 'INSERT ' . ($ignore ? 'IGNORE' : '') . ' INTO ' . $table . ' ';
 	$first  = true;
 	$dupe   = '';
@@ -2888,13 +2960,19 @@ function cacti_process_kill(int $pid, int $signal = SIGTERM, string $environ = '
 	   out of pid_t range at all: kill(2) reads 0 as this process group and -1
 	   as every process the caller may signal. */
 	if ($pid <= 1) {
-		cacti_log(sprintf('WARNING: Refusing to signal PID %s from a process table, which does not name a process a Cacti task can own!', $pid), false, $environ);
+		cacti_log(sprintf('WARNING: Refusing to signal PID %s from a process table, which does not name a process a Cacti task can own!',
+			$pid),
+			false,
+			$environ);
 
 		return false;
 	}
 
 	if ($pid > cacti_process_pid_max()) {
-		cacti_log(sprintf('WARNING: Refusing to signal PID %s from a process table, which is wider than pid_t and would reach the kernel as -1!', $pid), false, $environ);
+		cacti_log(sprintf('WARNING: Refusing to signal PID %s from a process table, which is wider than pid_t and would reach the kernel as -1!',
+			$pid),
+			false,
+			$environ);
 
 		return false;
 	}
@@ -2955,7 +3033,12 @@ function cacti_process_registry_lock(string $tasktype, string $taskname, int $ta
 	$connection = $database_sessions[$key] ?? null;
 
 	if (!$connection instanceof PDO) {
-		cacti_log(sprintf('ERROR: Process registry lock has no database connection! (%s, %s, %s)', $tasktype, $taskname, $taskid), false, 'POLLER');
+		cacti_log(sprintf('ERROR: Process registry lock has no database connection! (%s, %s, %s)',
+			$tasktype,
+			$taskname,
+			$taskid),
+			false,
+			'POLLER');
 
 		return false;
 	}
@@ -2963,7 +3046,13 @@ function cacti_process_registry_lock(string $tasktype, string $taskname, int $ta
 	try {
 		return CactiProcessLock::fromPdo($connection, $tasktype, $taskname, $taskid);
 	} catch (Throwable $e) {
-		cacti_log(sprintf('ERROR: Unable to create process registry lock! (%s, %s, %s): %s', $tasktype, $taskname, $taskid, $e->getMessage()), false, 'POLLER');
+		cacti_log(sprintf('ERROR: Unable to create process registry lock! (%s, %s, %s): %s',
+			$tasktype,
+			$taskname,
+			$taskid,
+			$e->getMessage()),
+			false,
+			'POLLER');
 
 		return false;
 	}
@@ -2994,12 +3083,24 @@ function register_process_start(string $tasktype, string $taskname, int $taskid 
 
 	try {
 		if (!$lock->acquire()) {
-			cacti_log(sprintf('NOTE: Process registry is being updated by another process! (%s, %s, %s)', $tasktype, $taskname, $taskid), false, 'POLLER', POLLER_VERBOSITY_MEDIUM);
+			cacti_log(sprintf('NOTE: Process registry is being updated by another process! (%s, %s, %s)',
+				$tasktype,
+				$taskname,
+				$taskid),
+				false,
+				'POLLER',
+				POLLER_VERBOSITY_MEDIUM);
 
 			return false;
 		}
 	} catch (Throwable $e) {
-		cacti_log(sprintf('ERROR: Unable to acquire process registry lock! (%s, %s, %s): %s', $tasktype, $taskname, $taskid, $e->getMessage()), false, 'POLLER');
+		cacti_log(sprintf('ERROR: Unable to acquire process registry lock! (%s, %s, %s): %s',
+			$tasktype,
+			$taskname,
+			$taskid,
+			$e->getMessage()),
+			false,
+			'POLLER');
 
 		return false;
 	}
@@ -3010,7 +3111,13 @@ function register_process_start(string $tasktype, string $taskname, int $taskid 
 		try {
 			$lock->release();
 		} catch (Throwable $e) {
-			cacti_log(sprintf('WARNING: Unable to release process registry lock! (%s, %s, %s): %s', $tasktype, $taskname, $taskid, $e->getMessage()), false, 'POLLER');
+			cacti_log(sprintf('WARNING: Unable to release process registry lock! (%s, %s, %s): %s',
+				$tasktype,
+				$taskname,
+				$taskid,
+				$e->getMessage()),
+				false,
+				'POLLER');
 		}
 	}
 }
@@ -3038,13 +3145,29 @@ function register_process_start_locked(string $tasktype, string $taskname, int $
 		[$tasktype, $taskname, $taskid]);
 
 	if (!cacti_sizeof($r)) {
-		cacti_log(sprintf('NOTE: Registering process! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $pid), false, 'POLLER', POLLER_VERBOSITY_MEDIUM);
+		cacti_log(sprintf('NOTE: Registering process! (%s, %s, %s, %s)',
+			$tasktype,
+			$taskname,
+			$taskid,
+			$pid),
+			false,
+			'POLLER',
+			POLLER_VERBOSITY_MEDIUM);
 
 		register_process($tasktype, $taskname, $taskid, (int) $pid, $timeout);
 	} elseif ($r['timeout_exceeded']) {
 		if ($r['pid'] > 0) {
 			if (cacti_process_still_running((int) $r['pid'])) {
-				cacti_log(sprintf('ERROR: Process being killed due to timeout! (%s, %s, %s, Process %s, Time %s, Timeout %s, Timestamp %s)', $tasktype, $taskname, $taskid, $r['pid'], $r['timeout_exceeded'], $r['timeout'], $r['current_timestamp']), false, 'POLLER');
+				cacti_log(sprintf('ERROR: Process being killed due to timeout! (%s, %s, %s, Process %s, Time %s, Timeout %s, Timestamp %s)',
+					$tasktype,
+					$taskname,
+					$taskid,
+					$r['pid'],
+					$r['timeout_exceeded'],
+					$r['timeout'],
+					$r['current_timestamp']),
+					false,
+					'POLLER');
 
 				cacti_process_kill((int) $r['pid'], SIGTERM);
 			}
@@ -3053,16 +3176,35 @@ function register_process_start_locked(string $tasktype, string $taskname, int $
 			register_process($tasktype, $taskname, $taskid, (int) $pid, $timeout);
 		} else {
 			// Should never be reached
-			cacti_log(sprintf('ERROR: Failed registering process.  Invalid pid found.  Unable to kill! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $r['pid']), false, 'POLLER');
+			cacti_log(sprintf('ERROR: Failed registering process.  Invalid pid found.  Unable to kill! (%s, %s, %s, %s)',
+				$tasktype,
+				$taskname,
+				$taskid,
+				$r['pid']),
+				false,
+				'POLLER');
 
 			return false;
 		}
 	} elseif (cacti_process_still_running((int) $r['pid'])) {
-		cacti_log(sprintf('NOTE: Failed registering process.  Old process still running and has not timed out! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $pid), false, 'POLLER', POLLER_VERBOSITY_MEDIUM);
+		cacti_log(sprintf('NOTE: Failed registering process.  Old process still running and has not timed out! (%s, %s, %s, %s)',
+			$tasktype,
+			$taskname,
+			$taskid,
+			$pid),
+			false,
+			'POLLER',
+			POLLER_VERBOSITY_MEDIUM);
 
 		return false;
 	} else {
-		cacti_log(sprintf('WARNING: Detected process that is exited and did not unregister first! (%s, %s, %s, %s)', $tasktype, $taskname, $taskid, $pid), false, 'POLLER');
+		cacti_log(sprintf('WARNING: Detected process that is exited and did not unregister first! (%s, %s, %s, %s)',
+			$tasktype,
+			$taskname,
+			$taskid,
+			$pid),
+			false,
+			'POLLER');
 
 		unregister_process($tasktype, $taskname, $taskid);
 		register_process($tasktype, $taskname, $taskid, (int) $pid, $timeout);
@@ -3162,7 +3304,10 @@ function heartbeat_process(string $tasktype, string $taskname, int $taskid = 0) 
  *
  * @return bool
  */
-function timeout_kill_registered_processes(string $tasktype = '', string $taskname = '', int $taskid = 0, int $pid = -1) : bool {
+function timeout_kill_registered_processes(string $tasktype = '',
+	string $taskname = '',
+	int $taskid = 0,
+	int $pid = -1) : bool {
 	if (!db_table_exists('processes')) {
 		return true;
 	}
@@ -3198,10 +3343,22 @@ function timeout_kill_registered_processes(string $tasktype = '', string $taskna
 	if (cacti_sizeof($processes)) {
 		foreach ($processes as $r) {
 			if (cacti_process_still_running((int) $r['pid'])) {
-				cacti_log(sprintf('ERROR: Process killed due to timeout! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
+				cacti_log(sprintf('ERROR: Process killed due to timeout! (%s, %s, %s, %s)',
+					$r['tasktype'],
+					$r['taskname'],
+					$r['taskid'],
+					$r['pid']),
+					false,
+					'POLLER');
 				cacti_process_kill((int) $r['pid'], SIGTERM);
 			} else {
-				cacti_log(sprintf('ERROR: Detected process that is gone and did not unregister first! (%s, %s, %s, %s)', $r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']), false, 'POLLER');
+				cacti_log(sprintf('ERROR: Detected process that is gone and did not unregister first! (%s, %s, %s, %s)',
+					$r['tasktype'],
+					$r['taskname'],
+					$r['taskid'],
+					$r['pid']),
+					false,
+					'POLLER');
 			}
 
 			unregister_process($r['tasktype'], $r['taskname'], $r['taskid'], $r['pid']);

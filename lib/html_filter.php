@@ -568,7 +568,8 @@ class CactiTableFilter {
 				$cb_title = html_escape_attr($field_array['title'] ?? $field_array['friendly_name']);
 
 				print '<div class="filterColumn"><div class="filterFieldName">' . $field_array['friendly_name'] . '</div></div>' . PHP_EOL;
-				print '<div class="filterColumn"><label class="checkboxSwitch" title="' . $cb_title . '"><input type="checkbox" class="formCheckbox' . $class . '" id="' . $field_name . '" title="' . $cb_title . '"' . ($field_array['value'] == 'on' || $field_array['value'] == 'true' ? ' checked' : '') . '><span class="checkboxSlider checkboxRound"></span></label></div>' . PHP_EOL;
+				print '<div class="filterColumn"><label class="checkboxSwitch" title="' . $cb_title . '"><input type="checkbox" class="formCheckbox' . $class . '" id="' . $field_name . '" title="' . $cb_title . '"' . ($field_array['value'] == 'on' ||
+					$field_array['value'] == 'true' ? ' checked' : '') . '><span class="checkboxSlider checkboxRound"></span></label></div>' . PHP_EOL;
 
 				break;
 			case 'timespan':
@@ -635,7 +636,10 @@ class CactiTableFilter {
 					print '</div>';
 				}
 
-				if ((isset($field_array['refresh']) && $field_array['refresh'] === true) || (isset($field_array['clear']) && $field_array['clear'] === true)) {
+				if ((isset($field_array['refresh']) &&
+					$field_array['refresh'] === true) ||
+					(isset($field_array['clear']) &&
+					$field_array['clear'] === true)) {
 					print '<div class="filterColumn">';
 					print '<span>';
 
@@ -863,7 +867,11 @@ class CactiTableFilter {
 		print $this->layout_button('layout_edit',   __('Edit'),    __('Edit the current filter'), false, 'ti ti-edit');
 		print $this->layout_button('layout_rename', __('Rename'),  __('Rename the selected layout'), true, 'ti ti-forms');
 		print $this->layout_button('layout_delete', __('Delete'),  __('Delete the selected layout'), true, 'ti ti-trash');
-		print $this->layout_button('layout_saveas', __('Save As'), __('Save this layout as a new personal layout'), true, 'ti ti-device-floppy');
+		print $this->layout_button('layout_saveas',
+			__('Save As'),
+			__('Save this layout as a new personal layout'),
+			true,
+			'ti ti-device-floppy');
 
 		// Refresh (reload the current view, keeping the selected layout) as a glyph button, right of the Edit group.
 		print "<div class='filterColumnButton'><button type='button' class='ui-button ui-corner-all ui-widget' id='layout_refresh' title='" . __esc('Refresh page') . "'><i class='ti ti-refresh'></i></button></div>" . PHP_EOL;
@@ -1175,7 +1183,10 @@ class CactiTableFilter {
 						case 'drop_tree':
 							if ($field_array['method'] != 'textbox' && $this->dynamic) {
 								if (!isset($field_array['dynamic']) || $field_array['dynamic'] === true) {
-									if (!$this->use_modern_filter() || $this->field_is_bar($field_name, $field_array) || !empty($field_array['bar'])) {
+									if (!$this->use_modern_filter() ||
+										$this->field_is_bar($field_name,
+											$field_array) ||
+										!empty($field_array['bar'])) {
 										$changeChain .= ($changeChain != '' ? ', ' : '') . '#' . $field_name;
 									}
 								}
@@ -1353,7 +1364,11 @@ class CactiTableFilter {
 		validate_store_request_vars($filters, $this->session_var);
 	}
 
-	private function layout_button(string $id, string $display, string $title, bool $hidden = false, string $glyph = '') : string {
+	private function layout_button(string $id,
+		string $display,
+		string $title,
+		bool $hidden = false,
+		string $glyph = '') : string {
 		$content = $glyph !== '' ? '<i class="' . html_escape($glyph) . '"></i>' : '<span class="button-text">' . html_escape($display) . '</span>';
 
 		return '<div class="filterColumnButton"' . ($hidden ? ' style="display:none"' : '') . '>' .
@@ -1377,13 +1392,25 @@ class CactiTableFilter {
 		print $this->layout_select($layouts, $can_glob);
 		print '</div>';
 
-		print $this->layout_button('layout_save',   __('Save'),   __('Overwrite the selected layout with the current filter'), false, 'ti ti-device-floppy');
-		print $this->layout_button('layout_new',    __('New'),    __('Save the current filter as a new layout'), false, 'ti ti-file-plus');
+		print $this->layout_button('layout_save',
+			__('Save'),
+			__('Overwrite the selected layout with the current filter'),
+			false,
+			'ti ti-device-floppy');
+		print $this->layout_button('layout_new',
+			__('New'),
+			__('Save the current filter as a new layout'),
+			false,
+			'ti ti-file-plus');
 		print $this->layout_button('layout_rename', __('Rename'), __('Rename the selected layout'), false, 'ti ti-forms');
 		print $this->layout_button('layout_delete', __('Delete'), __('Delete the selected layout'), false, 'ti ti-trash');
 
 		if ($can_glob) {
-			print $this->layout_button('layout_publish', __('Publish'), __('Publish the selected layout so all users can see it'), false, 'ti ti-world-up');
+			print $this->layout_button('layout_publish',
+				__('Publish'),
+				__('Publish the selected layout so all users can see it'),
+				false,
+				'ti ti-world-up');
 		}
 
 		print '</div>';
@@ -1463,7 +1490,9 @@ class CactiTableFilter {
 	 *
 	 * @return string
 	 */
-	private function create_modern_javascript(string $applyFilter, string $changeFunction, string $clearFunction) : string {
+	private function create_modern_javascript(string $applyFilter,
+		string $changeFunction,
+		string $clearFunction) : string {
 		$page     = filter_layouts_page_key($this->form_action != '' ? $this->form_action : get_current_page());
 		$can_glob = filter_layouts_can_manage_global();
 		$title    = $this->form_header != '' ? $this->form_header : __('Edit Filter');

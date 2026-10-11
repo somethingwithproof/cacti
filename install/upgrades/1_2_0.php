@@ -23,8 +23,16 @@
 */
 
 function upgrade_to_1_2_0() : void {
-	db_install_add_column('user_domains_ldap', ['name' => 'cn_full_name', 'type' => 'varchar(50)', 'NULL' => true, 'default' => '']);
-	db_install_add_column('user_domains_ldap', ['name' => 'cn_email', 'type' => 'varchar(50)', 'NULL' => true, 'default' => '']);
+	db_install_add_column('user_domains_ldap',
+		['name'   => 'cn_full_name',
+		'type'    => 'varchar(50)',
+		'NULL'    => true,
+		'default' => '']);
+	db_install_add_column('user_domains_ldap',
+		['name'   => 'cn_email',
+		'type'    => 'varchar(50)',
+		'NULL'    => true,
+		'default' => '']);
 
 	$poller_exists = db_column_exists('poller', 'processes');
 
@@ -34,13 +42,21 @@ function upgrade_to_1_2_0() : void {
 	db_install_add_column('poller', ['name' => 'total_polls', 'type' => 'int', 'after' => 'avg_time', 'default' => '0']);
 	db_install_add_column('poller', ['name' => 'processes', 'type' => 'int', 'after' => 'total_polls', 'default' => '1']);
 	db_install_add_column('poller', ['name' => 'threads', 'type' => 'double', 'after' => 'processes', 'default' => '1']);
-	db_install_add_column('poller', ['name' => 'sync_interval', 'type' => 'int', 'after' => 'threads', 'default' => '7200']);
+	db_install_add_column('poller',
+		['name'   => 'sync_interval',
+		'type'    => 'int',
+		'after'   => 'threads',
+		'default' => '7200']);
 	db_install_add_column('poller', ['name' => 'timezone', 'type' => 'varchar(40)', 'default' => '', 'after' => 'status']);
 	db_install_add_column('poller', ['name' => 'dbsslkey', 'type' => 'varchar(255)', 'after' => 'dbssl']);
 	db_install_add_column('poller', ['name' => 'dbsslcert', 'type' => 'varchar(255)', 'after' => 'dbsslkey']);
 	db_install_add_column('poller', ['name' => 'dbsslca', 'type' => 'varchar(255)', 'after' => 'dbsslcert']);
 	db_install_add_column('poller', ['name' => 'dbsslcapath', 'type' => 'varchar(255)', 'after' => 'dbsslca']);
-	db_install_add_column('poller', ['name' => 'dbsslverifyservercert', 'type' => 'char(3)', 'after' => 'dbsslcapath', 'default' => 'on']);
+	db_install_add_column('poller',
+		['name'   => 'dbsslverifyservercert',
+		'type'    => 'char(3)',
+		'after'   => 'dbsslcapath',
+		'default' => 'on']);
 
 	if (!$poller_exists) {
 		// Take the value from the settings table and translate to
@@ -76,7 +92,11 @@ function upgrade_to_1_2_0() : void {
 
 	db_install_add_column('poller_resource_cache', ['name' => 'attributes', 'type' => 'int unsigned', 'default' => '0']);
 	db_install_add_column('external_links', ['name' => 'refresh', 'type' => 'int unsigned']);
-	db_install_add_column('automation_networks', ['name' => 'same_sysname', 'type' => 'char(2)', 'default' => '', 'after' => 'add_to_cacti']);
+	db_install_add_column('automation_networks',
+		['name'   => 'same_sysname',
+		'type'    => 'char(2)',
+		'default' => '',
+		'after'   => 'add_to_cacti']);
 
 	db_install_execute("ALTER TABLE user_auth
 		MODIFY COLUMN password varchar(256) NOT NULL DEFAULT ''");
@@ -98,10 +118,26 @@ function upgrade_to_1_2_0() : void {
 			SET name="log_validation" WHERE name="developer_mode"');
 	}
 
-	db_install_add_column('automation_networks', ['name' => 'notification_enabled', 'type' => 'char(2)', 'default' => '', 'after' => 'enabled']);
-	db_install_add_column('automation_networks', ['name' => 'notification_email', 'type' => 'varchar(255)', 'default' => '', 'after' => 'notification_enabled']);
-	db_install_add_column('automation_networks', ['name' => 'notification_fromname', 'type' => 'varchar(32)', 'default' => '', 'after' => 'notification_email']);
-	db_install_add_column('automation_networks', ['name' => 'notification_fromemail', 'type' => 'varchar(128)', 'default' => '', 'after' => 'notification_fromname']);
+	db_install_add_column('automation_networks',
+		['name'   => 'notification_enabled',
+		'type'    => 'char(2)',
+		'default' => '',
+		'after'   => 'enabled']);
+	db_install_add_column('automation_networks',
+		['name'   => 'notification_email',
+		'type'    => 'varchar(255)',
+		'default' => '',
+		'after'   => 'notification_enabled']);
+	db_install_add_column('automation_networks',
+		['name'   => 'notification_fromname',
+		'type'    => 'varchar(32)',
+		'default' => '',
+		'after'   => 'notification_email']);
+	db_install_add_column('automation_networks',
+		['name'   => 'notification_fromemail',
+		'type'    => 'varchar(128)',
+		'default' => '',
+		'after'   => 'notification_fromname']);
 
 	if (db_table_exists('dsdebug')) {
 		db_install_rename_table('dsdebug','data_debug');
@@ -218,12 +254,21 @@ function upgrade_to_1_2_0() : void {
 
 	db_install_add_key('poller_reindex', 'key', 'PRIMARY', ['host_id', 'data_query_id', 'arg1(187)']);
 
-	db_install_add_column('poller', ['name' => 'last_sync', 'type' => 'timestamp', 'NULL' => false, 'default' => '0000-00-00 00:00:00']);
+	db_install_add_column('poller',
+		['name'   => 'last_sync',
+		'type'    => 'timestamp',
+		'NULL'    => false,
+		'default' => '0000-00-00 00:00:00']);
 	db_install_add_column('poller', ['name' => 'requires_sync', 'type' => 'char(3)', 'NULL' => false, 'default' => '']);
 
 	db_install_execute('UPDATE poller SET requires_sync = "on" WHERE id != 1');
 
 	db_install_execute('UPDATE host SET status = 0 WHERE disabled = "on"');
 
-	db_install_add_column('host', ['name' => 'deleted', 'type' => 'char(2)', 'default' => '', 'NULL' => true, 'after' => 'device_threads']);
+	db_install_add_column('host',
+		['name'   => 'deleted',
+		'type'    => 'char(2)',
+		'default' => '',
+		'NULL'    => true,
+		'after'   => 'device_threads']);
 }

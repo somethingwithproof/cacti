@@ -48,61 +48,193 @@ function upgrade_to_1_3_0() : void {
 
 	// JSON map of login_providers.id => IDP group name used for automatic
 	// User Group assignment at login time.
-	db_install_add_column('user_auth_group', ['name' => 'auto_assignments', 'type' => 'longtext', 'NULL' => true, 'after' => 'enabled']);
+	db_install_add_column('user_auth_group',
+		['name' => 'auto_assignments',
+		'type'  => 'longtext',
+		'NULL'  => true,
+		'after' => 'enabled']);
 
-	db_install_add_column('poller', ['name' => 'log_level', 'type' => 'int', 'NULL' => false, 'default' => '-1', 'after' => 'status']);
+	db_install_add_column('poller',
+		['name'   => 'log_level',
+		'type'    => 'int',
+		'NULL'    => false,
+		'default' => '-1',
+		'after'   => 'status']);
 	db_install_add_column('poller', ['name' => 'dbsslkey', 'type' => 'varchar(255)', 'after' => 'dbssl']);
 	db_install_add_column('poller', ['name' => 'dbsslcert', 'type' => 'varchar(255)', 'after' => 'dbsslkey']);
 	db_install_add_column('poller', ['name' => 'dbsslca', 'type' => 'varchar(255)', 'after' => 'dbsslcert']);
 	db_install_add_column('poller', ['name' => 'dbsslcapath', 'type' => 'varchar(255)', 'after' => 'dbsslca']);
-	db_install_add_column('poller', ['name' => 'dbsslverifyservercert', 'type' => 'char(3)', 'after' => 'dbsslcapath', 'default' => 'on']);
+	db_install_add_column('poller',
+		['name'   => 'dbsslverifyservercert',
+		'type'    => 'char(3)',
+		'after'   => 'dbsslcapath',
+		'default' => 'on']);
 
 	db_install_add_column('host', ['name' => 'created', 'type' => 'timestamp', 'default' => 'CURRENT_TIMESTAMP']);
-	db_install_add_column('host', ['name' => 'snmp_options', 'type' => 'tinyint(3)', 'unsigned' => true, 'NULL' => false, 'default' => '0', 'after' => 'external_id']);
-	db_install_add_column('host', ['name' => 'status_options_date', 'type' => 'timestamp', 'NULL' => false, 'default' => '0000-00-00', 'after' => 'status_rec_date']);
-	db_install_add_column('host', ['name' => 'snmp_retries', 'type' => 'tinyint(3) unsigned', 'NULL' => false, 'default' => '3', 'after' => 'snmp_timeout']);
-	db_install_add_column('host', ['name' => 'current_errors', 'type' => 'int(10)', 'unsigned' => true, 'default' => '0', 'after' => 'polling_time']);
+	db_install_add_column('host',
+		['name'    => 'snmp_options',
+		'type'     => 'tinyint(3)',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '0',
+		'after'    => 'external_id']);
+	db_install_add_column('host',
+		['name'   => 'status_options_date',
+		'type'    => 'timestamp',
+		'NULL'    => false,
+		'default' => '0000-00-00',
+		'after'   => 'status_rec_date']);
+	db_install_add_column('host',
+		['name'   => 'snmp_retries',
+		'type'    => 'tinyint(3) unsigned',
+		'NULL'    => false,
+		'default' => '3',
+		'after'   => 'snmp_timeout']);
+	db_install_add_column('host',
+		['name'    => 'current_errors',
+		'type'     => 'int(10)',
+		'unsigned' => true,
+		'default'  => '0',
+		'after'    => 'polling_time']);
 
 	db_install_add_key('host', 'INDEX', 'current_errors', ['current_errors']);
 
-	db_install_add_column('poller_item', ['name' => 'snmp_retries', 'type' => 'tinyint(3) unsigned', 'NULL' => false, 'default' => '3', 'after' => 'snmp_timeout']);
+	db_install_add_column('poller_item',
+		['name'   => 'snmp_retries',
+		'type'    => 'tinyint(3) unsigned',
+		'NULL'    => false,
+		'default' => '3',
+		'after'   => 'snmp_timeout']);
 
 	db_install_execute('UPDATE host SET snmp_retries = ?', [read_config_option('snmp_retries')]);
 	db_install_execute('UPDATE poller_item SET snmp_retries = ?', [read_config_option('snmp_retries')]);
 
-	db_install_add_column('graph_templates_item', ['name' => 'legend', 'type' => 'varchar(30)', 'default' => '', 'after' => 'text_format']);
-	db_install_add_column('graph_templates_item', ['name' => 'color2_id', 'type' => 'mediumint(8)', 'unsigned' => true, 'default' => '0', 'after' => 'alpha']);
-	db_install_add_column('graph_templates_item', ['name' => 'alpha2', 'type' => 'char(2)', 'default' => 'FF', 'after' => 'color2_id']);
-	db_install_add_column('graph_templates_item', ['name' => 'gradheight', 'type' => 'tinyint(4)', 'default' => '50', 'after' => 'alpha2']);
+	db_install_add_column('graph_templates_item',
+		['name'   => 'legend',
+		'type'    => 'varchar(30)',
+		'default' => '',
+		'after'   => 'text_format']);
+	db_install_add_column('graph_templates_item',
+		['name'    => 'color2_id',
+		'type'     => 'mediumint(8)',
+		'unsigned' => true,
+		'default'  => '0',
+		'after'    => 'alpha']);
+	db_install_add_column('graph_templates_item',
+		['name'   => 'alpha2',
+		'type'    => 'char(2)',
+		'default' => 'FF',
+		'after'   => 'color2_id']);
+	db_install_add_column('graph_templates_item',
+		['name'   => 'gradheight',
+		'type'    => 'tinyint(4)',
+		'default' => '50',
+		'after'   => 'alpha2']);
 
-	db_install_add_column('sites', ['name' => 'disabled', 'type' => 'char(2)', 'NULL' => false, 'default' => '', 'after' => 'name']);
-	db_install_add_column('sites', ['name' => 'region', 'type' => 'varchar(30)', 'NULL' => false, 'default' => '', 'after' => 'country']);
+	db_install_add_column('sites',
+		['name'   => 'disabled',
+		'type'    => 'char(2)',
+		'NULL'    => false,
+		'default' => '',
+		'after'   => 'name']);
+	db_install_add_column('sites',
+		['name'   => 'region',
+		'type'    => 'varchar(30)',
+		'NULL'    => false,
+		'default' => '',
+		'after'   => 'country']);
 
-	db_install_add_column('user_domains_ldap', ['name' => 'tls_certificate', 'type' => 'tinyint(3)', 'unsigned' => true, 'NULL' => false, 'default' => '3']);
+	db_install_add_column('user_domains_ldap',
+		['name'    => 'tls_certificate',
+		'type'     => 'tinyint(3)',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '3']);
 
-	db_install_add_column('graph_templates_graph', ['name' => 't_left_axis_format', 'type' => 'char(2)',  'default' => '', 'after' => 'right_axis_formatter']);
-	db_install_add_column('graph_templates_graph', ['name' => 'left_axis_format', 'type' => 'mediumint(8)', 'NULL' => true, 'after' => 't_left_axis_format']);
+	db_install_add_column('graph_templates_graph',
+		['name'   => 't_left_axis_format',
+		'type'    => 'char(2)',
+		'default' => '',
+		'after'   => 'right_axis_formatter']);
+	db_install_add_column('graph_templates_graph',
+		['name' => 'left_axis_format',
+		'type'  => 'mediumint(8)',
+		'NULL'  => true,
+		'after' => 't_left_axis_format']);
 
-	db_install_add_column('graph_templates', ['name' => 'class', 'type' => 'char(40)', 'default' => '', 'NULL' => true, 'after' => 'name']);
-	db_install_add_column('graph_templates', ['name' => 'version', 'type' => 'char(10)', 'default' => '', 'NULL' => true, 'after' => 'class']);
+	db_install_add_column('graph_templates',
+		['name'   => 'class',
+		'type'    => 'char(40)',
+		'default' => '',
+		'NULL'    => true,
+		'after'   => 'name']);
+	db_install_add_column('graph_templates',
+		['name'   => 'version',
+		'type'    => 'char(10)',
+		'default' => '',
+		'NULL'    => true,
+		'after'   => 'class']);
 
-	db_install_add_column('aggregate_graph_templates_graph', ['name' => 't_left_axis_format', 'type' => 'char(2)',  'default' => '0', 'after' => 'right_axis_formatter']);
-	db_install_add_column('aggregate_graph_templates_graph', ['name' => 'left_axis_format', 'type' => 'mediumint(8)', 'NULL' => true, 'after' => 't_left_axis_format']);
+	db_install_add_column('aggregate_graph_templates_graph',
+		['name'   => 't_left_axis_format',
+		'type'    => 'char(2)',
+		'default' => '0',
+		'after'   => 'right_axis_formatter']);
+	db_install_add_column('aggregate_graph_templates_graph',
+		['name' => 'left_axis_format',
+		'type'  => 'mediumint(8)',
+		'NULL'  => true,
+		'after' => 't_left_axis_format']);
 
-	db_install_add_column('plugin_config', ['name' => 'last_updated', 'type' => 'timestamp', 'NULL' => false, 'default' => 'CURRENT_TIMESTAMP', 'after' => 'version']);
+	db_install_add_column('plugin_config',
+		['name'   => 'last_updated',
+		'type'    => 'timestamp',
+		'NULL'    => false,
+		'default' => 'CURRENT_TIMESTAMP',
+		'after'   => 'version']);
 
 	db_install_execute('UPDATE plugin_config SET last_updated = NOW() WHERE status IN (1,2,3,4) AND (last_updated IS NULL OR last_updated = "0000-00-00")');
 
 	db_install_execute("UPDATE graph_templates SET class='unspecified' WHERE class = ''");
 	db_install_execute("UPDATE graph_templates SET version = '" . CACTI_VERSION . "' WHERE version = ''");
 
-	db_install_add_column('data_input_data', ['name' => 'data_template_id', 'type' => 'int', 'unsigned' => true, 'NULL' => false, 'default' => '0', 'after' => 'data_template_data_id']);
-	db_install_add_column('data_input_data', ['name' => 'local_data_id', 'type' => 'int', 'unsigned' => true, 'NULL' => false, 'default' => '0', 'after' => 'data_template_id']);
-	db_install_add_column('data_input_data', ['name' => 'host_id', 'type' => 'int', 'unsigned' => true, 'NULL' => false, 'default' => '0', 'after' => 'local_data_id']);
+	db_install_add_column('data_input_data',
+		['name'    => 'data_template_id',
+		'type'     => 'int',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '0',
+		'after'    => 'data_template_data_id']);
+	db_install_add_column('data_input_data',
+		['name'    => 'local_data_id',
+		'type'     => 'int',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '0',
+		'after'    => 'data_template_id']);
+	db_install_add_column('data_input_data',
+		['name'    => 'host_id',
+		'type'     => 'int',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '0',
+		'after'    => 'local_data_id']);
 
-	db_install_add_column('graph_templates', ['name' => 'last_updated', 'type' => 'timestamp', 'NULL' => false, 'default' => 'CURRENT_TIMESTAMP']);
-	db_install_add_column('data_template', ['name' => 'last_updated', 'type' => 'timestamp', 'NULL' => false, 'default' => 'CURRENT_TIMESTAMP']);
-	db_install_add_column('snmp_query', ['name' => 'last_updated', 'type' => 'timestamp', 'NULL' => false, 'default' => 'CURRENT_TIMESTAMP']);
+	db_install_add_column('graph_templates',
+		['name'   => 'last_updated',
+		'type'    => 'timestamp',
+		'NULL'    => false,
+		'default' => 'CURRENT_TIMESTAMP']);
+	db_install_add_column('data_template',
+		['name'   => 'last_updated',
+		'type'    => 'timestamp',
+		'NULL'    => false,
+		'default' => 'CURRENT_TIMESTAMP']);
+	db_install_add_column('snmp_query',
+		['name'   => 'last_updated',
+		'type'    => 'timestamp',
+		'NULL'    => false,
+		'default' => 'CURRENT_TIMESTAMP']);
 
 	db_install_add_key('data_input_data', 'INDEX', 'data_template_id', ['data_template_id']);
 	db_install_add_key('data_input_data', 'INDEX', 'local_data_id', ['local_data_id']);
@@ -150,8 +282,17 @@ function upgrade_to_1_3_0() : void {
 		}
 	}
 
-	db_install_add_column('host_snmp_query', ['name' => 'reindex_last_runtime', 'type' => 'timestamp', 'NULL' => false, 'default' => 'CURRENT_TIMESTAMP']);
-	db_install_add_column('host_snmp_query', ['name' => 'reindex_last_duration', 'type' => 'double', 'unsigned' => true, 'NULL' => false, 'default' => '0']);
+	db_install_add_column('host_snmp_query',
+		['name'   => 'reindex_last_runtime',
+		'type'    => 'timestamp',
+		'NULL'    => false,
+		'default' => 'CURRENT_TIMESTAMP']);
+	db_install_add_column('host_snmp_query',
+		['name'    => 'reindex_last_duration',
+		'type'     => 'double',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '0']);
 
 	db_install_execute('UPDATE data_input_data AS did
 		INNER JOIN data_template_data AS dtd
@@ -185,7 +326,10 @@ function upgrade_to_1_3_0() : void {
 	$data['columns'][]  = ['name' => 'readme', 'type' => 'blob', 'NULL' => true];
 	$data['columns'][]  = ['name' => 'changelog', 'type' => 'blob', 'NULL' => true];
 	$data['columns'][]  = ['name' => 'archive', 'type' => 'longblob', 'NULL' => true];
-	$data['columns'][]  = ['name' => 'last_updated', 'type' => 'timestamp', 'NULL' => true, 'default' => 'CURRENT_TIMESTAMP'];
+	$data['columns'][]  = ['name' => 'last_updated',
+		'type'                       => 'timestamp',
+		'NULL'                       => true,
+		'default'                    => 'CURRENT_TIMESTAMP'];
 	$data['primary']    = 'plugin`,`tag_name';
 	$data['type']       = 'InnoDB';
 	$data['charset']    = 'utf8mb4';
@@ -194,12 +338,20 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('plugin_available', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'auto_increment' => true];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
 	$data['columns'][]  = ['name' => 'plugin', 'type' => 'varchar(32)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'description', 'type' => 'varchar(64)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'author', 'type' => 'varchar(64)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'webpage', 'type' => 'varchar(255)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'user_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'user_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'version', 'type' => 'varchar(10)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'requires', 'type' => 'varchar(128)', 'NULL' => true, 'default' => ''];
 	$data['columns'][]  = ['name' => 'compat', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
@@ -226,8 +378,16 @@ function upgrade_to_1_3_0() : void {
 		OR IFNULL(s.disabled, "") = "on"');
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'bigint(20)', 'NULL' => false, 'auto_increment' => true];
-	$data['columns'][]  = ['name' => 'poller_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '1'];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'bigint(20)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
+	$data['columns'][]  = ['name' => 'poller_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '1'];
 	$data['columns'][]  = ['name' => 'total_time', 'type' => 'double', 'NULL' => true];
 	$data['columns'][]  = ['name' => 'time', 'type' => 'timestamp', 'NULL' => false, 'default' => '0000-00-00 00:00:00'];
 	$data['primary']    = 'id';
@@ -246,11 +406,18 @@ function upgrade_to_1_3_0() : void {
 	upgrade_dsstats();
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'host_id', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'host_id',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'dimension', 'type' => 'varchar(40)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'value', 'type' => 'varchar(8192)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'time_to_live', 'type' => 'int(11)', 'NULL' => false, 'default' => '-1'];
-	$data['columns'][]  = ['name' => 'last_updated', 'type' => 'timestamp', 'NULL' => true, 'default' => 'CURRENT_TIMESTAMP'];
+	$data['columns'][]  = ['name' => 'last_updated',
+		'type'                       => 'timestamp',
+		'NULL'                       => true,
+		'default'                    => 'CURRENT_TIMESTAMP'];
 	$data['primary']    = 'host_id`,`dimension`,`time_to_live';
 	$data['type']       = 'InnoDB';
 	$data['charset']    = 'utf8mb4';
@@ -259,7 +426,11 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('host_value_cache', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'local_data_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'local_data_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'stats_command', 'type' => 'blob', 'NULL' => false, 'default' => ''];
 	$data['primary']    = 'local_data_id';
 	$data['type']       = 'InnoDB';
@@ -277,12 +448,32 @@ function upgrade_to_1_3_0() : void {
 
 	// create new automation template rules table
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'auto_increment' => true];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
 	$data['columns'][]  = ['name' => 'hash', 'type' => 'varchar(32)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'template_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
-	$data['columns'][]  = ['name' => 'rule_type', 'unsigned' => true, 'type' => 'tinyint(3)', 'NULL' => false, 'default' => '0'];
-	$data['columns'][]  = ['name' => 'rule_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
-	$data['columns'][]  = ['name' => 'sequence', 'unsigned' => true, 'type' => 'tinyint(3)', 'NULL' => false, 'default' => '1'];
+	$data['columns'][]  = ['name' => 'template_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
+	$data['columns'][]  = ['name' => 'rule_type',
+		'unsigned'                   => true,
+		'type'                       => 'tinyint(3)',
+		'NULL'                       => false,
+		'default'                    => '0'];
+	$data['columns'][]  = ['name' => 'rule_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
+	$data['columns'][]  = ['name' => 'sequence',
+		'unsigned'                   => true,
+		'type'                       => 'tinyint(3)',
+		'NULL'                       => false,
+		'default'                    => '1'];
 	$data['columns'][]  = ['name' => 'exit_rules', 'type' => 'char(2)', 'NULL' => false, 'default' => ''];
 	$data['primary']    = 'template_id`,`rule_type`,`rule_id';
 	$data['keys'][]     = ['name' => 'id', 'columns' => ['id']];
@@ -456,11 +647,19 @@ function upgrade_to_1_3_0() : void {
 	prune_deprecated_files();
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'auto_increment' => true];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
 	$data['columns'][]  = ['name' => 'name', 'type' => 'varchar(32)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'enabled', 'type' => 'char(2)', 'NULL' => false, 'default' => 'on'];
 	$data['columns'][]  = ['name' => 'default', 'type' => 'char(2)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'repo_type', 'unsigned' => true, 'type' => 'tinyint(3)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'repo_type',
+		'unsigned'                   => true,
+		'type'                       => 'tinyint(3)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'repo_location', 'type' => 'varchar(128)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'repo_branch', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'repo_api_key', 'type' => 'varchar(100)', 'NULL' => false, 'default' => ''];
@@ -474,7 +673,11 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('package_repositories', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'auto_increment' => true];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
 	$data['columns'][]  = ['name' => 'md5sum', 'type' => 'varchar(32)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'author', 'type' => 'varchar(40)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'homepage', 'type' => 'varchar(128)', 'NULL' => false, 'default' => ''];
@@ -505,7 +708,11 @@ function upgrade_to_1_3_0() : void {
 
 	// add package meta information to the host_template table
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'auto_increment' => true];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
 	$data['columns'][]  = ['name' => 'hash', 'type' => 'varchar(32)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'name', 'type' => 'varchar(100)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'version', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
@@ -516,7 +723,11 @@ function upgrade_to_1_3_0() : void {
 	$data['columns'][]  = ['name' => 'homepage', 'type' => 'varchar(128)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'copyright', 'type' => 'varchar(40)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'installation', 'type' => 'varchar(1024)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'devices', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'devices',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['primary']    = 'id';
 	$data['keys'][]     = ['name' => 'name', 'columns' => ['name']];
 	$data['type']       = 'InnoDB';
@@ -526,8 +737,16 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('host_template', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'auto_increment' => true];
-	$data['columns'][]  = ['name' => 'host_template_id', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
+	$data['columns'][]  = ['name' => 'host_template_id',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'hash', 'type' => 'varchar(32)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'name', 'type' => 'varchar(100)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'version', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
@@ -539,7 +758,10 @@ function upgrade_to_1_3_0() : void {
 	$data['columns'][]  = ['name' => 'copyright', 'type' => 'varchar(40)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'installation', 'type' => 'varchar(1024)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'archive_note', 'type' => 'varchar(256)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'archive_date', 'type' => 'timestamp', 'NULL' => false, 'default' => 'CURRENT_TIMESTAMP'];
+	$data['columns'][]  = ['name' => 'archive_date',
+		'type'                       => 'timestamp',
+		'NULL'                       => false,
+		'default'                    => 'CURRENT_TIMESTAMP'];
 	$data['columns'][]  = ['name' => 'archive_md5sum', 'type' => 'varchar(32)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'archive', 'type' => 'longblob', 'NULL' => true];
 	$data['primary']    = 'id';
@@ -561,7 +783,11 @@ function upgrade_to_1_3_0() : void {
 	}
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'user_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'user_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'hash', 'type' => 'varchar(100)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'expiry', 'type' => 'timestamp', 'NULL' => false, 'default' => '0000-00-00 00:00:00'];
 	$data['primary']    = 'user_id`,`expiry';
@@ -573,10 +799,18 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('user_auth_reset_hashes', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'auto_increment' => true];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
 	$data['columns'][]  = ['name' => 'name', 'type' => 'varchar(64)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'source', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'source_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'source_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'report_output_type', 'type' => 'varchar(5)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'report_raw_data', 'type' => 'longblob', 'NULL' => true];
 	$data['columns'][]  = ['name' => 'report_raw_output', 'type' => 'longblob', 'NULL' => true];
@@ -584,8 +818,15 @@ function upgrade_to_1_3_0() : void {
 	$data['columns'][]  = ['name' => 'report_html_output', 'type' => 'longblob', 'NULL' => true];
 	$data['columns'][]  = ['name' => 'report_attachments', 'type' => 'longblob', 'NULL' => true];
 	$data['columns'][]  = ['name' => 'notification', 'type' => 'blob', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'send_type', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
-	$data['columns'][]  = ['name' => 'send_time', 'type' => 'timestamp', 'NULL' => false, 'default' => 'CURRENT_TIMESTAMP'];
+	$data['columns'][]  = ['name' => 'send_type',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
+	$data['columns'][]  = ['name' => 'send_time',
+		'type'                       => 'timestamp',
+		'NULL'                       => false,
+		'default'                    => 'CURRENT_TIMESTAMP'];
 	$data['columns'][]  = ['name' => 'run_time', 'type' => 'double', 'NULL' => false, 'default' => '0'];
 	$data['columns'][]  = ['name' => 'sent_by', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'sent_id', 'type' => 'int(11)', 'NULL' => false, 'default' => '-1'];
@@ -600,17 +841,35 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('reports_log', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'auto_increment' => true];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
 	$data['columns'][]  = ['name' => 'name', 'type' => 'varchar(64)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'source', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'source_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'source_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'status', 'type' => 'varchar(10)', 'NULL' => false, 'default' => 'pending'];
-	$data['columns'][]  = ['name' => 'scheduled_time', 'type' => 'timestamp', 'NULL' => false, 'default' => '0000-00-00 00:00:00'];
-	$data['columns'][]  = ['name' => 'start_time', 'type' => 'timestamp', 'NULL' => false, 'default' => '0000-00-00 00:00:00'];
+	$data['columns'][]  = ['name' => 'scheduled_time',
+		'type'                       => 'timestamp',
+		'NULL'                       => false,
+		'default'                    => '0000-00-00 00:00:00'];
+	$data['columns'][]  = ['name' => 'start_time',
+		'type'                       => 'timestamp',
+		'NULL'                       => false,
+		'default'                    => '0000-00-00 00:00:00'];
 	$data['columns'][]  = ['name' => 'run_command', 'type' => 'varchar(512)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'run_timeout', 'type' => 'int(11)', 'NULL' => false, 'default' => '60'];
 	$data['columns'][]  = ['name' => 'notification', 'type' => 'blob', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'request_type', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'request_type',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'requested_by', 'type' => 'varchar(20)', 'NULL' => false, 'default' => ''];
 	$data['columns'][]  = ['name' => 'requested_id', 'type' => 'int(11)', 'NULL' => false, 'default' => '-1'];
 	$data['primary']    = 'id';
@@ -624,9 +883,21 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('reports_queued', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'host_id', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'default' => '0'];
-	$data['columns'][]  = ['name' => 'poller_id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'default' => '1'];
-	$data['columns'][]  = ['name' => 'errors', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'host_id',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'default'                    => '0'];
+	$data['columns'][]  = ['name' => 'poller_id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'default'                    => '1'];
+	$data['columns'][]  = ['name' => 'errors',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'local_data_ids', 'type' => 'text', 'NULL' => true];
 	$data['primary']    = 'host_id';
 	$data['keys'][]     = ['name' => 'poller_id', 'columns' => ['poller_id']];
@@ -638,13 +909,33 @@ function upgrade_to_1_3_0() : void {
 	db_install_update_table('host_errors', $data);
 
 	$data               = [];
-	$data['columns'][]  = ['name' => 'id', 'unsigned' => true, 'type' => 'int(10)', 'NULL' => false, 'auto_increment' => true];
-	$data['columns'][]  = ['name' => 'data_template_id', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'default' => '0'];
-	$data['columns'][]  = ['name' => 'host_id', 'unsigned' => true, 'type' => 'mediumint(8)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'id',
+		'unsigned'                   => true,
+		'type'                       => 'int(10)',
+		'NULL'                       => false,
+		'auto_increment'             => true];
+	$data['columns'][]  = ['name' => 'data_template_id',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'default'                    => '0'];
+	$data['columns'][]  = ['name' => 'host_id',
+		'unsigned'                   => true,
+		'type'                       => 'mediumint(8)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['columns'][]  = ['name' => 'snmp_query_id', 'type' => 'mediumint(8)', 'NULL' => false, 'default' => '0'];
 	$data['columns'][]  = ['name' => 'snmp_index', 'type' => 'varchar(255)', 'NULL' => false, 'default' => ''];
-	$data['columns'][]  = ['name' => 'orphan', 'unsigned' => true, 'type' => 'tinyint(3)', 'NULL' => false, 'default' => '0'];
-	$data['columns'][]  = ['name' => 'errored', 'unsigned' => true, 'type' => 'tinyint(3)', 'NULL' => false, 'default' => '0'];
+	$data['columns'][]  = ['name' => 'orphan',
+		'unsigned'                   => true,
+		'type'                       => 'tinyint(3)',
+		'NULL'                       => false,
+		'default'                    => '0'];
+	$data['columns'][]  = ['name' => 'errored',
+		'unsigned'                   => true,
+		'type'                       => 'tinyint(3)',
+		'NULL'                       => false,
+		'default'                    => '0'];
 	$data['primary']    = 'id';
 	$data['keys'][]     = ['name' => 'host_id_snmp_query_id', 'columns' => ['host_id', 'snmp_query_id']];
 	$data['keys'][]     = ['name' => 'snmp_index', 'columns' => ['snmp_index']];
@@ -716,8 +1007,19 @@ function upgrade_boost_process_table() : void {
 		return;
 	}
 
-	db_install_add_column('poller_output_boost_processes', ['name' => 'run_id', 'type' => 'char(32)', 'NULL' => false, 'default' => '', 'after' => 'sock_int_value']);
-	db_install_add_column('poller_output_boost_processes', ['name' => 'child_id', 'type' => 'int(10)', 'unsigned' => true, 'NULL' => false, 'default' => '0', 'after' => 'run_id']);
+	db_install_add_column('poller_output_boost_processes',
+		['name'   => 'run_id',
+		'type'    => 'char(32)',
+		'NULL'    => false,
+		'default' => '',
+		'after'   => 'sock_int_value']);
+	db_install_add_column('poller_output_boost_processes',
+		['name'    => 'child_id',
+		'type'     => 'int(10)',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '0',
+		'after'    => 'run_id']);
 
 	db_install_execute('DELETE FROM poller_output_boost_processes WHERE run_id = ?', ['']);
 
@@ -775,7 +1077,10 @@ function upgrade_reports() : void {
 			foreach ($reports as $r) {
 				switch($r['intrvl']) {
 					case 10: // Minutes
-						cacti_log(sprintf('WARNING: Minute level Reports are no longer supported.  Disabling Report \'%s\'', $r['name']), false, 'INSTALL');
+						cacti_log(sprintf('WARNING: Minute level Reports are no longer supported.  Disabling Report \'%s\'',
+							$r['name']),
+							false,
+							'INSTALL');
 
 						db_install_execute('UPDATE reports
 							SET sched_type = 1,
@@ -875,7 +1180,10 @@ function upgrade_reports() : void {
 
 						break;
 					case 5:  // Yearly
-						cacti_log(sprintf('WARNING: Yearly Reports are no longer supported.  Disabling Report \'%s\'', $r['name']), false, 'INSTALL');
+						cacti_log(sprintf('WARNING: Yearly Reports are no longer supported.  Disabling Report \'%s\'',
+							$r['name']),
+							false,
+							'INSTALL');
 
 						db_install_execute('UPDATE reports
 							SET sched_type = 1,

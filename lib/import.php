@@ -190,7 +190,9 @@ function import_xml_data(string &$xml_data, bool $import_as_new, int $profile_id
 						$repair++;
 					}
 				} elseif ($type == 'graph_template' && !graph_template_input_xml_preflight($hash_array)) {
-					cacti_log('ERROR: Graph template import refused invalid input relationships before the write pass', false, 'SECURITY');
+					cacti_log('ERROR: Graph template import refused invalid input relationships before the write pass',
+						false,
+						'SECURITY');
 
 					return false;
 				}
@@ -216,10 +218,22 @@ function import_xml_data(string &$xml_data, bool $import_as_new, int $profile_id
 					return false;
 				}
 
-				cacti_log('$dep_hash_cache[$type][$i][\'type\']: ' . $dep_hash_cache[$type][$i]['type'], false, 'IMPORT', POLLER_VERBOSITY_HIGH);
-				cacti_log('$dep_hash_cache[$type][$i][\'version\']: ' . $dep_hash_cache[$type][$i]['version'], false, 'IMPORT', POLLER_VERBOSITY_HIGH);
-				cacti_log('$cacti_version_codes[$dep_hash_cache[$type][$i][\'version\']]: ' . $cacti_version_codes[$dep_hash_cache[$type][$i]['version']], false, 'IMPORT', POLLER_VERBOSITY_HIGH);
-				cacti_log('$dep_hash_cache[$type][$i][\'hash\']: ' . $dep_hash_cache[$type][$i]['hash'], false, 'IMPORT', POLLER_VERBOSITY_HIGH);
+				cacti_log('$dep_hash_cache[$type][$i][\'type\']: ' . $dep_hash_cache[$type][$i]['type'],
+					false,
+					'IMPORT',
+					POLLER_VERBOSITY_HIGH);
+				cacti_log('$dep_hash_cache[$type][$i][\'version\']: ' . $dep_hash_cache[$type][$i]['version'],
+					false,
+					'IMPORT',
+					POLLER_VERBOSITY_HIGH);
+				cacti_log('$cacti_version_codes[$dep_hash_cache[$type][$i][\'version\']]: ' . $cacti_version_codes[$dep_hash_cache[$type][$i]['version']],
+					false,
+					'IMPORT',
+					POLLER_VERBOSITY_HIGH);
+				cacti_log('$dep_hash_cache[$type][$i][\'hash\']: ' . $dep_hash_cache[$type][$i]['hash'],
+					false,
+					'IMPORT',
+					POLLER_VERBOSITY_HIGH);
 
 				if (isset($xml_array['hash_' . $hash_type_codes[$dep_hash_cache[$type][$i]['type']] . $cacti_version_codes[$dep_hash_cache[$type][$i]['version']] . $dep_hash_cache[$type][$i]['hash']])) {
 					$hash_array = $xml_array['hash_' . $hash_type_codes[$dep_hash_cache[$type][$i]['type']] . $cacti_version_codes[$dep_hash_cache[$type][$i]['version']] . $dep_hash_cache[$type][$i]['hash']];
@@ -239,7 +253,11 @@ function import_xml_data(string &$xml_data, bool $import_as_new, int $profile_id
 							return false;
 						}
 
-						$cache_add = xml_to_graph_template($dep_hash_cache[$type][$i]['hash'], $hash_array, $hash_cache, $dep_hash_cache[$type][$i]['version'], $remove_orphans);
+						$cache_add = xml_to_graph_template($dep_hash_cache[$type][$i]['hash'],
+							$hash_array,
+							$hash_cache,
+							$dep_hash_cache[$type][$i]['version'],
+							$remove_orphans);
 
 						if ($cache_add === false) {
 							if ($transaction_started) {
@@ -257,7 +275,11 @@ function import_xml_data(string &$xml_data, bool $import_as_new, int $profile_id
 
 						break;
 					case 'data_template':
-						$cache_add = xml_to_data_template($dep_hash_cache[$type][$i]['hash'], $hash_array, $hash_cache, $import_as_new, $profile_id);
+						$cache_add = xml_to_data_template($dep_hash_cache[$type][$i]['hash'],
+							$hash_array,
+							$hash_cache,
+							$import_as_new,
+							$profile_id);
 
 						if ($cache_add === false) {
 							return false;
@@ -268,7 +290,10 @@ function import_xml_data(string &$xml_data, bool $import_as_new, int $profile_id
 
 						break;
 					case 'host_template':
-						$hash_cache += xml_to_host_template($dep_hash_cache[$type][$i]['hash'], $hash_array, $hash_cache, $host_template_data);
+						$hash_cache += xml_to_host_template($dep_hash_cache[$type][$i]['hash'],
+							$hash_array,
+							$hash_cache,
+							$host_template_data);
 
 						break;
 					case 'data_input_method':
@@ -277,7 +302,11 @@ function import_xml_data(string &$xml_data, bool $import_as_new, int $profile_id
 
 						break;
 					case 'data_query':
-						$hash_cache += xml_to_data_query($dep_hash_cache[$type][$i]['hash'], $hash_array, $hash_cache, $files, $replace_svalues);
+						$hash_cache += xml_to_data_query($dep_hash_cache[$type][$i]['hash'],
+							$hash_array,
+							$hash_cache,
+							$files,
+							$replace_svalues);
 
 						break;
 					case 'gprint_preset':
@@ -297,7 +326,11 @@ function import_xml_data(string &$xml_data, bool $import_as_new, int $profile_id
 
 						break;
 					case 'data_source_profile':
-						$cache_add = xml_to_data_source_profile($dep_hash_cache[$type][$i]['hash'], $hash_array, $hash_cache, $import_as_new, $profile_id);
+						$cache_add = xml_to_data_source_profile($dep_hash_cache[$type][$i]['hash'],
+							$hash_array,
+							$hash_cache,
+							$import_as_new,
+							$profile_id);
 
 						if ($cache_add !== false) {
 							$hash_cache += $cache_add;
@@ -534,7 +567,10 @@ function import_read_package_data(string $xmlfile, string &$public_key, bool $pr
 	// A preview neither writes files nor touches the database, so an untrusted
 	// Package may still be inspected.  A real import may not.
 	if (!$preview && !import_validate_signature($xmlfile)) {
-		cacti_log('FATAL: Package Public Key is not a Trusted Public Key for Package ' . $filename, true, 'IMPORT', POLLER_VERBOSITY_LOW);
+		cacti_log('FATAL: Package Public Key is not a Trusted Public Key for Package ' . $filename,
+			true,
+			'IMPORT',
+			POLLER_VERBOSITY_LOW);
 
 		return false;
 	}
@@ -681,8 +717,14 @@ function import_package(string $xmlfile, int $profile_id = 1, bool $remove_orpha
 	// Resolve allowed bases once; the foreach below only consults these.
 	$allowed_base_scripts  = realpath(CACTI_PATH_BASE . '/scripts');
 	$allowed_base_resource = realpath(CACTI_PATH_BASE . '/resource');
-	$normalized_scripts    = ($allowed_base_scripts === false) ? false : rtrim(str_replace('\\', '/', $allowed_base_scripts),  '/');
-	$normalized_resource   = ($allowed_base_resource === false) ? false : rtrim(str_replace('\\', '/', $allowed_base_resource), '/');
+	$normalized_scripts    = ($allowed_base_scripts === false) ? false : rtrim(str_replace('\\',
+		'/',
+		$allowed_base_scripts),
+		'/');
+	$normalized_resource   = ($allowed_base_resource === false) ? false : rtrim(str_replace('\\',
+		'/',
+		$allowed_base_resource),
+		'/');
 
 	foreach ($data['files']['file'] as $f) {
 		$name            = $f['name'];
@@ -734,7 +776,9 @@ function import_package(string $xmlfile, int $profile_id = 1, bool $remove_orpha
 			$in_scripts          = $normalized_scripts !== false
 				&& ($normalized_resolved === $normalized_scripts || strpos($normalized_resolved, $normalized_scripts . '/') === 0);
 			$in_resource         = $normalized_resource !== false
-				&& ($normalized_resolved === $normalized_resource || strpos($normalized_resolved, $normalized_resource . '/') === 0);
+				&& ($normalized_resolved === $normalized_resource ||
+					strpos($normalized_resolved,
+						$normalized_resource . '/') === 0);
 
 			if (!$in_scripts && !$in_resource) {
 				cacti_log('FATAL: Package file destination outside allowed boundaries: ' . $name, true, 'IMPORT');
@@ -779,7 +823,10 @@ function import_package(string $xmlfile, int $profile_id = 1, bool $remove_orpha
 						$filestatus[$filename] = __('not writable');
 					}
 
-					cacti_log('Write Status file: ' . $filename . ', with Status ' . $filestatus[$filename], false, 'IMPORT', POLLER_VERBOSITY_MEDIUM);
+					cacti_log('Write Status file: ' . $filename . ', with Status ' . $filestatus[$filename],
+						false,
+						'IMPORT',
+						POLLER_VERBOSITY_MEDIUM);
 				}
 			} else {
 				cacti_log('Previewing file: ' . $filename, false, 'IMPORT', POLLER_VERBOSITY_MEDIUM);
@@ -931,7 +978,11 @@ function import_package(string $xmlfile, int $profile_id = 1, bool $remove_orpha
 	return [$debug_data, $filestatus];
 }
 
-function xml_to_graph_template(string $hash, array &$xml_array, array &$hash_cache, string $hash_version, bool $remove_orphans = false) : mixed {
+function xml_to_graph_template(string $hash,
+	array &$xml_array,
+	array &$hash_cache,
+	string $hash_version,
+	bool $remove_orphans = false) : mixed {
 	global $struct_graph, $struct_graph_item, $fields_graph_template_input_edit, $cacti_version_codes;
 	global $preview_only, $graph_item_types, $import_debug_info;
 
@@ -967,13 +1018,17 @@ function xml_to_graph_template(string $hash, array &$xml_array, array &$hash_cac
 				? xml_character_decode($item_array['column_name'])
 				: null;
 
-			if (!graph_template_input_column_is_allowed($column_name) || !isset($item_array['items']) || !is_string($item_array['items'])) {
+			if (!graph_template_input_column_is_allowed($column_name) ||
+				!isset($item_array['items']) ||
+				!is_string($item_array['items'])) {
 				cacti_log('ERROR: Graph template import refused an invalid Graph Item Input field', false, 'SECURITY');
 
 				return false;
 			}
 
-			foreach (array_filter(explode('|', $item_array['items']), static fn (string $item_hash) : bool => $item_hash !== '') as $item_hash) {
+			foreach (array_filter(explode('|',
+				$item_array['items']),
+				static fn (string $item_hash) : bool => $item_hash !== '') as $item_hash) {
 				$parsed_item_hash = parse_xml_hash($item_hash);
 
 				if ($parsed_item_hash === false || !isset($available_graph_item_hashes[$parsed_item_hash['hash']])) {
@@ -1162,7 +1217,10 @@ function xml_to_graph_template(string $hash, array &$xml_array, array &$hash_cac
 					// is the value of this field a hash or not?
 					if (preg_match('/hash_([a-f0-9]{2})([a-f0-9]{4})([a-f0-9]{32})/', $item_array[$field_name])) {
 						$save[$field_name] = resolve_hash_to_id($item_array[$field_name], $hash_cache, 'graph_templates_item');
-					} elseif (($field_name == 'color_id') && (preg_match('/^[a-fA-F0-9]{6}$/', $item_array[$field_name])) && (get_version_index($parsed_hash['version']) >= get_version_index('0.8.5'))) { // treat the 'color' field differently
+					} elseif (($field_name == 'color_id') &&
+						(preg_match('/^[a-fA-F0-9]{6}$/',
+							$item_array[$field_name])) &&
+						(get_version_index($parsed_hash['version']) >= get_version_index('0.8.5'))) { // treat the 'color' field differently
 						$color_id = db_fetch_cell_prepared('SELECT id
 							FROM colors
 							WHERE hex = ?',
@@ -1181,7 +1239,10 @@ function xml_to_graph_template(string $hash, array &$xml_array, array &$hash_cac
 						}
 
 						$save[$field_name] = $color_id;
-					} elseif (($field_name == 'color2_id') && (preg_match('/^[a-fA-F0-9]{6}$/', $item_array[$field_name])) && (get_version_index($parsed_hash['version']) >= get_version_index('0.8.5'))) { // treat the 'color' field differently
+					} elseif (($field_name == 'color2_id') &&
+						(preg_match('/^[a-fA-F0-9]{6}$/',
+							$item_array[$field_name])) &&
+						(get_version_index($parsed_hash['version']) >= get_version_index('0.8.5'))) { // treat the 'color' field differently
 						$color2_id = db_fetch_cell_prepared('SELECT id
 							FROM colors
 							WHERE hex = ?',
@@ -1359,13 +1420,18 @@ function import_validate_data_source_item(string $field_name, string $value) : b
 			return preg_match('/^[a-zA-Z0-9_-]{1,19}\z/', $value) == 1;
 		case 'rrd_minimum':
 		case 'rrd_maximum':
-			return preg_match('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\||\|query_ifHighSpeed\|)\z/', $value) == 1;
+			return preg_match('/^(-?([0-9]+(\.[0-9]*)?|[0-9]*\.[0-9]+)([eE][+\-]?[0-9]+)?|U|\|query_ifSpeed\||\|query_ifHighSpeed\|)\z/',
+				$value) == 1;
 	}
 
 	return true;
 }
 
-function xml_to_data_template(string $hash, array &$xml_array, array &$hash_cache, bool $import_as_new, int $profile_id) : mixed {
+function xml_to_data_template(string $hash,
+	array &$xml_array,
+	array &$hash_cache,
+	bool $import_as_new,
+	int $profile_id) : mixed {
 	global $struct_data_source, $struct_data_source_item, $import_template_id, $preview_only;
 	global $ignorable_hashes, $import_debug_info, $legacy_template, $import_messages;
 
@@ -1600,7 +1666,9 @@ function xml_to_data_template(string $hash, array &$xml_array, array &$hash_cach
 				$save = [];
 
 				$save['data_template_data_id'] = $data_template_data_id;
-				$save['data_input_field_id']   = resolve_hash_to_id($item_array['data_input_field_id'], $hash_cache, 'data_input_data');
+				$save['data_input_field_id']   = resolve_hash_to_id($item_array['data_input_field_id'],
+					$hash_cache,
+					'data_input_data');
 				$save['data_template_id']      = $data_template_id;
 				$save['local_data_id']         = 0;
 				$save['host_id']               = 0;
@@ -1656,7 +1724,11 @@ function xml_to_data_template(string $hash, array &$xml_array, array &$hash_cach
 	return $hash_cache;
 }
 
-function xml_to_data_query(string $hash, array &$xml_array, array &$hash_cache, array &$files, bool $replace_svalues = false) : mixed {
+function xml_to_data_query(string $hash,
+	array &$xml_array,
+	array &$hash_cache,
+	array &$files,
+	bool $replace_svalues = false) : mixed {
 	global $fields_data_query_edit, $fields_data_query_item_edit, $preview_only, $import_debug_info;
 
 	// track changes
@@ -1796,12 +1868,21 @@ function xml_to_data_query(string $hash, array &$xml_array, array &$hash_cache, 
 						$save = [];
 
 						$save['snmp_query_graph_id']  = $data_query_graph_id;
-						$save['data_template_id']     = resolve_hash_to_id($sub_item_array['data_template_id'], $hash_cache, 'snmp_query_graph_rrd');
-						$save['data_template_rrd_id'] = resolve_hash_to_id($sub_item_array['data_template_rrd_id'], $hash_cache, 'snmp_query_graph_rrd');
+						$save['data_template_id']     = resolve_hash_to_id($sub_item_array['data_template_id'],
+							$hash_cache,
+							'snmp_query_graph_rrd');
+						$save['data_template_rrd_id'] = resolve_hash_to_id($sub_item_array['data_template_rrd_id'],
+							$hash_cache,
+							'snmp_query_graph_rrd');
 						$save['snmp_field_name']      = $sub_item_array['snmp_field_name'];
 
 						if (!empty($save['data_template_id']) && !empty($save['data_template_rrd_id'])) {
-							sql_save($save, 'snmp_query_graph_rrd', ['snmp_query_graph_id', 'data_template_id', 'data_template_rrd_id'], false);
+							sql_save($save,
+								'snmp_query_graph_rrd',
+								['snmp_query_graph_id',
+								'data_template_id',
+								'data_template_rrd_id'],
+								false);
 						} else {
 							cacti_log('Import Error: inserting into snmp_query_graph_rrd', false, 'IMPORT', POLLER_VERBOSITY_HIGH);
 						}
@@ -1914,7 +1995,9 @@ function xml_to_data_query(string $hash, array &$xml_array, array &$hash_cache, 
 					$save['id']                  = (empty($_data_query_graph_rrd_sv_id) ? '0' : $_data_query_graph_rrd_sv_id);
 					$save['hash']                = $parsed_hash['hash'];
 					$save['snmp_query_graph_id'] = $data_query_graph_id;
-					$save['data_template_id']    = resolve_hash_to_id($sub_item_array['data_template_id'], $hash_cache, 'snmp_query_graph_rrd_sv');
+					$save['data_template_id']    = resolve_hash_to_id($sub_item_array['data_template_id'],
+						$hash_cache,
+						'snmp_query_graph_rrd_sv');
 					$save['sequence']            = $sub_item_array['sequence'];
 					$save['field_name']          = $sub_item_array['field_name'];
 					$save['text']                = xml_character_decode($sub_item_array['text']);
@@ -1928,7 +2011,10 @@ function xml_to_data_query(string $hash, array &$xml_array, array &$hash_cache, 
 
 							$hash_cache['data_query_sv_data_source'][$parsed_hash['hash']] = $data_query_graph_rrd_sv_id;
 						} else {
-							cacti_log('Import Error: Error Importing into snmp_query_graph_rrd_sv table', false, 'IMPORT', POLLER_VERBOSITY_HIGH);
+							cacti_log('Import Error: Error Importing into snmp_query_graph_rrd_sv table',
+								false,
+								'IMPORT',
+								POLLER_VERBOSITY_HIGH);
 						}
 					} else {
 						$hash_cache['data_query_sv_data_source'][$parsed_hash['hash']] = $_data_query_graph_rrd_sv_id;
@@ -1998,7 +2084,11 @@ function xml_to_gprint_preset(string $hash, array &$xml_array, array &$hash_cach
 	return $hash_cache;
 }
 
-function xml_to_data_source_profile(string $hash, array &$xml_array, array &$hash_cache, bool $import_as_new, int $profile_id) : mixed {
+function xml_to_data_source_profile(string $hash,
+	array &$xml_array,
+	array &$hash_cache,
+	bool $import_as_new,
+	int $profile_id) : mixed {
 	global $fields_profile_edit, $fields_profile_rra_edit, $import_template_id, $preview_only, $import_debug_info;
 
 	if ($import_as_new == true) {
@@ -2927,7 +3017,10 @@ function parse_xml_hash(string $hash) : mixed {
 		if (($parsed_hash['type'] === false) || ($parsed_hash['version'] === false)) {
 			$import_messages[] = 7; // xml parse error
 
-			cacti_log(__FUNCTION__ . ' ERROR type or version not found for hash: ' . $hash, false, 'IMPORT', POLLER_VERBOSITY_LOW);
+			cacti_log(__FUNCTION__ . ' ERROR type or version not found for hash: ' . $hash,
+				false,
+				'IMPORT',
+				POLLER_VERBOSITY_LOW);
 
 			return false;
 		}
@@ -2940,7 +3033,10 @@ function parse_xml_hash(string $hash) : mixed {
 		if (($parsed_hash['type'] === false) || ($parsed_hash['version'] === false)) {
 			$import_messages[] = 7; // xml parse error
 
-			cacti_log(__FUNCTION__ . ' ERROR type or version not found for hash: ' . $hash, false, 'IMPORT', POLLER_VERBOSITY_LOW);
+			cacti_log(__FUNCTION__ . ' ERROR type or version not found for hash: ' . $hash,
+				false,
+				'IMPORT',
+				POLLER_VERBOSITY_LOW);
 
 			return false;
 		}
@@ -3058,7 +3154,10 @@ function xml_character_decode(string $text) : string {
 	}
 }
 
-function import_display_results(array $import_debug_info, array $filestatus, bool $web = false, bool $preview = false) : void {
+function import_display_results(array $import_debug_info,
+	array $filestatus,
+	bool $web = false,
+	bool $preview = false) : void {
 	global $hash_type_names, $ignorable_hashes;
 
 	if (!cacti_sizeof($ignorable_hashes)) {
@@ -3167,7 +3266,8 @@ function import_display_results(array $import_debug_info, array $filestatus, boo
 								$dep_errors      = true;
 							}
 
-							$dep_text .= "<span class='monoSpace'>&nbsp;&nbsp;&nbsp;+ $dep_status_text " . hash_to_friendly_name($dep_hash, true) . '</span><br>' . PHP_EOL;
+							$dep_text .= "<span class='monoSpace'>&nbsp;&nbsp;&nbsp;+ $dep_status_text " . hash_to_friendly_name($dep_hash,
+								true) . '</span><br>' . PHP_EOL;
 						}
 					}
 

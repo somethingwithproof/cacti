@@ -23,5 +23,11 @@
 */
 
 function upgrade_to_1_2_14() : void {
-	db_install_add_column('data_local', ['name' => 'orphan', 'type' => 'tinyint', 'unsigned' => true, 'NULL' => false, 'default' => '0', 'after' => 'snmp_index']);
+	db_install_add_column('data_local',
+		['name'    => 'orphan',
+		'type'     => 'tinyint',
+		'unsigned' => true,
+		'NULL'     => false,
+		'default'  => '0',
+		'after'    => 'snmp_index']);
 }

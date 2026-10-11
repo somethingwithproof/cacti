@@ -307,7 +307,11 @@ function install_unlink(string $file) : void {
 	$real_base = realpath(CACTI_PATH_BASE);
 	$real_file = is_link($full_file) ? realpath(dirname($full_file)) : realpath($full_file);
 
-	if ($real_base === false || $real_file === false || ($real_file !== $real_base && !str_starts_with($real_file, $real_base . DIRECTORY_SEPARATOR))) {
+	if ($real_base === false ||
+		$real_file    === false ||
+		($real_file !== $real_base &&
+		!str_starts_with($real_file,
+			$real_base . DIRECTORY_SEPARATOR))) {
 		log_install_high('file', "Not Unlinking file: $full_file due to it not being in the Cacti base path.");
 
 		return;
@@ -525,7 +529,9 @@ function install_remote_database_version_result(string $primaryVersion, string $
 	if (cacti_version_compare($primaryVersion, $remoteVersion, '<')) {
 		return [
 			'status'  => 'false',
-			'message' => __('Test Failed! Remote version newer than Primary.  Main Primary at %s and Remote at %s.', $primaryVersion, $remoteVersion),
+			'message' => __('Test Failed! Remote version newer than Primary.  Main Primary at %s and Remote at %s.',
+				$primaryVersion,
+				$remoteVersion),
 		];
 	}
 
@@ -825,7 +831,9 @@ function db_install_add_cache(int $status, string $sql, mixed $params = null) : 
 		$sql .= "\n [[ WARNING: $expected parameters expected, $actual provided ]]";
 	}
 
-	$database_upgrade_status[$cacti_upgrade_version][] = ['status' => $status, 'sql' => $sql, 'error' => $database_last_error];
+	$database_upgrade_status[$cacti_upgrade_version][] = ['status' => $status,
+		'sql'                                                         => $sql,
+		'error'                                                       => $database_last_error];
 
 	$cacheFile = '';
 
@@ -835,7 +843,9 @@ function db_install_add_cache(int $status, string $sql, mixed $params = null) : 
 
 	if (!empty($cacheFile)) {
 		log_install_high('cache','<[version]> ' . $cacti_upgrade_version . ' <[status]> ' . $status . ' <[sql]> ' . clean_up_lines($sql) . ' <[error]> ' . $database_last_error);
-		file_put_contents($cacheFile, '<[version]> ' . $cacti_upgrade_version . ' <[status]> ' . $status . ' <[sql]> ' . clean_up_lines($sql) . ' <[error]> ' . $database_last_error . PHP_EOL, FILE_APPEND);
+		file_put_contents($cacheFile,
+			'<[version]> ' . $cacti_upgrade_version . ' <[status]> ' . $status . ' <[sql]> ' . clean_up_lines($sql) . ' <[error]> ' . $database_last_error . PHP_EOL,
+			FILE_APPEND);
 	}
 }
 
@@ -1014,7 +1024,9 @@ function install_setup_get_templates() : array {
 		} else {
 			// Loading Template Information from package
 			$shell_output       = shell_exec(cacti_escapeshellcmd((string) read_config_option('path_php_binary')) . ' -q ' . cacti_escapeshellarg(CACTI_PATH_CLI . '/import_package.php') . ' --filename=' . cacti_escapeshellarg("/$path/$xmlfile") . ' --info');
-			$myinfo             = @json_decode($shell_output !== false && $shell_output !== null ? $shell_output : '', true) ?? [];
+			$myinfo             = @json_decode($shell_output !== false &&
+				$shell_output !== null ? $shell_output : '',
+				true) ?? [];
 			$myinfo['filename'] = $xmlfile;
 			$myinfo['name']     = $xmlfile;
 			$info[]             = $myinfo;
@@ -1063,7 +1075,9 @@ function install_setup_get_tables() : array|false {
 				$rows = $table_status['Rows'];
 			}
 
-			if (isset($table_status['Row_format']) && $table_status['Row_format'] == 'Compact' && $table_status['Engine'] == 'InnoDB') {
+			if (isset($table_status['Row_format']) &&
+				$table_status['Row_format'] == 'Compact' &&
+				$table_status['Engine'] == 'InnoDB') {
 				$row_format = 'Dynamic';
 			}
 		}
@@ -1294,7 +1308,9 @@ function install_file_paths() : array {
 	}
 
 	// RRDtool Version
-	if ((@file_exists($input['path_rrdtool']['default'])) && ((CACTI_SERVER_OS == 'win32') || (is_executable($input['path_rrdtool']['default'])))) {
+	if ((@file_exists($input['path_rrdtool']['default'])) &&
+		((CACTI_SERVER_OS == 'win32') ||
+		(is_executable($input['path_rrdtool']['default'])))) {
 		$input['rrdtool_version'] = $settings['general']['rrdtool_version'] ?? [];
 
 		$temp_ver = get_installed_rrdtool_version();
@@ -1568,7 +1584,9 @@ function log_install_level(string $option, int $default_level) : int {
 }
 
 // TODO: Why is option passed to this function?
-function log_install_level_sanitize(mixed $level, int $default_level = POLLER_VERBOSITY_NONE, string $option = '') : int {
+function log_install_level_sanitize(mixed $level,
+	int $default_level = POLLER_VERBOSITY_NONE,
+	string $option = '') : int {
 	if ($level == 0) {
 		$level = $default_level;
 	}
@@ -1613,7 +1631,11 @@ function log_install_level_name(int $level) : string {
 	return $name;
 }
 
-function log_install_to_file(string $section, string $data, int $flags = FILE_APPEND, int $level = POLLER_VERBOSITY_DEBUG, bool $force = false) : void {
+function log_install_to_file(string $section,
+	string $data,
+	int $flags = FILE_APPEND,
+	int $level = POLLER_VERBOSITY_DEBUG,
+	bool $force = false) : void {
 	global $debug;
 	$log_level = log_install_section_level($section);
 
@@ -1636,8 +1658,23 @@ function log_install_to_file(string $section, string $data, int $flags = FILE_AP
 			$section = 'general';
 		}
 		$logfile = 'install' . '-' . $section;
-		file_put_contents(CACTI_PATH_LOG . '/' . $logfile . '.log', sprintf($format_log1, $day, $time, $levelname, $data, PHP_EOL), $flags);
-		file_put_contents(CACTI_PATH_LOG . '/install-complete.log', sprintf($format_log2, $day, $time, $sectionname, $levelname, $data, PHP_EOL), $flags);
+		file_put_contents(CACTI_PATH_LOG . '/' . $logfile . '.log',
+			sprintf($format_log1,
+				$day,
+				$time,
+				$levelname,
+				$data,
+				PHP_EOL),
+			$flags);
+		file_put_contents(CACTI_PATH_LOG . '/install-complete.log',
+			sprintf($format_log2,
+				$day,
+				$time,
+				$sectionname,
+				$levelname,
+				$data,
+				PHP_EOL),
+			$flags);
 	}
 }
 
@@ -1732,7 +1769,8 @@ function install_full_sync() : array {
 
 	if (is_array($pollers) && cacti_sizeof($pollers)) {
 		foreach ($pollers as $poller) {
-			log_install_debug('sync', 'Poller ' . $poller['id'] . ' has a status of ' . $poller['status'] . ' with gap ' . $poller['gap']);
+			log_install_debug('sync',
+				'Poller ' . $poller['id'] . ' has a status of ' . $poller['status'] . ' with gap ' . $poller['gap']);
 
 			if (($poller['status'] == POLLER_STATUS_NEW) ||
 				($poller['status'] == POLLER_STATUS_DOWN) ||
@@ -1743,7 +1781,9 @@ function install_full_sync() : array {
 			} elseif ($poller['gap'] < $gap_time) {
 				log_install_medium('sync', 'Replicating to Poller ' . $poller['id']);
 
-				if (read_config_option('disable_full_sync_on_upgrade') == '' && read_config_option('install_replicate', true) == '') {
+				if (read_config_option('disable_full_sync_on_upgrade') == '' &&
+					read_config_option('install_replicate',
+						true) == '') {
 					set_config_option('install_replicate', 1);
 
 					if (replicate_out($poller['id'])) {
@@ -1767,7 +1807,8 @@ function install_full_sync() : array {
 		}
 	}
 
-	log_install_debug('sync', 'Success: ' . cacti_sizeof($success) . ', Failed: ' . cacti_sizeof($failed) . ', Skipped: ' . cacti_sizeof($skipped) . ', Total: ' . cacti_sizeof($pollers));
+	log_install_debug('sync',
+		'Success: ' . cacti_sizeof($success) . ', Failed: ' . cacti_sizeof($failed) . ', Skipped: ' . cacti_sizeof($skipped) . ', Total: ' . cacti_sizeof($pollers));
 
 	return [
 		'success' => $success,

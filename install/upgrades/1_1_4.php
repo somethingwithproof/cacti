@@ -40,7 +40,11 @@ function upgrade_to_1_1_4() : void {
 
 	db_install_drop_key('snmpagent_managers_notifications', 'index', 'manager_id');
 	db_install_drop_key('snmpagent_managers_notifications', 'index', 'manager_id2');
-	db_install_add_key('snmpagent_managers_notifications', 'index', 'manager_id_notification', ['manager_id', 'notification']);
+	db_install_add_key('snmpagent_managers_notifications',
+		'index',
+		'manager_id_notification',
+		['manager_id',
+		'notification']);
 
 	db_install_drop_key('snmpagent_notifications_log', 'index', 'manager_id');
 	db_install_drop_key('snmpagent_notifications_log', 'index', 'manager_id2');

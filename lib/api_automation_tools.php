@@ -733,7 +733,13 @@ function displayTreeNodes(int $tree_id, string $nodeType = '', int $parentNode =
 		}
 	}
 
-	$render = function (int $parent) use (&$render, &$visited, $nodesByParent, $nodeType, $tree_sort_types, $tree_item_types, $host_group_types) : void {
+	$render = function (int $parent) use (&$render,
+		&$visited,
+		$nodesByParent,
+		$nodeType,
+		$tree_sort_types,
+		$tree_item_types,
+		$host_group_types) : void {
 		foreach ($nodesByParent[$parent] ?? [] as $node) {
 			$nodeId = (int) $node['id'];
 

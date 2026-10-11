@@ -29,7 +29,8 @@ function upgrade_to_1_2_27() : void {
 	db_install_execute("ALTER TABLE `automation_snmp_items` MODIFY `snmp_priv_protocol` char(7) DEFAULT ''");
 	db_install_execute("ALTER TABLE `snmpagent_managers` MODIFY `snmp_priv_protocol` char(7) NOT NULL DEFAULT ''");
 
-	$data_input_field_id = db_fetch_cell_prepared('SELECT id FROM data_input_fields WHERE hash = ?', ['35637c344d84d8aa3a4dc50e4a120b3f']);
+	$data_input_field_id = db_fetch_cell_prepared('SELECT id FROM data_input_fields WHERE hash = ?',
+		['35637c344d84d8aa3a4dc50e4a120b3f']);
 
 	if ($data_input_field_id > 0) {
 		db_execute_prepared('DELETE FROM data_input_fields WHERE id = ?', [$data_input_field_id]);

@@ -50,7 +50,10 @@ function upgrade_to_1_2_2() : void {
 			$orphans = array_rekey($orphans_results, 'local_data_id', 'local_data_id');
 
 			if (cacti_sizeof($orphans)) {
-				cacti_log('Found ' . cacti_sizeof($orphans) . ' orphaned Data Source(s) in Aggregate Graph ' . $a . ' with Local Data IDs of ' . implode(', ', $orphans), false, 'UPGRADE');
+				cacti_log('Found ' . cacti_sizeof($orphans) . ' orphaned Data Source(s) in Aggregate Graph ' . $a . ' with Local Data IDs of ' . implode(', ',
+					$orphans),
+					false,
+					'UPGRADE');
 
 				db_execute_prepared('DELETE
 					FROM graph_templates_item

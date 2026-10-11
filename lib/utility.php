@@ -290,7 +290,14 @@ function update_poller_cache(mixed $data_source, bool $commit = false, ?int $pol
 					$data_source_item_name = '';
 				}
 
-				$poller_items[] = api_poller_cache_item_add($data_source['host_id'], [], $data_source['id'], $data_input['rrd_step'], $action, $data_source_item_name, 1, $script_path);
+				$poller_items[] = api_poller_cache_item_add($data_source['host_id'],
+					[],
+					$data_source['id'],
+					$data_input['rrd_step'],
+					$action,
+					$data_source_item_name,
+					1,
+					$script_path);
 			} elseif ($data_input['type_id'] == DATA_INPUT_TYPE_SNMP) {
 				// get the host override fields
 				if (!isset($data_source['data_template_id'])) {
@@ -366,7 +373,14 @@ function update_poller_cache(mixed $data_source, bool $commit = false, ?int $pol
 					WHERE local_data_id = ?',
 					[$data_source['id']]);
 
-				$poller_items[] = api_poller_cache_item_add($data_source['host_id'], $host_fields, $data_source['id'], $data_input['rrd_step'], 0, get_data_source_item_name($data_template_rrd_id), 1, ($host_fields['snmp_oid'] ?? ''));
+				$poller_items[] = api_poller_cache_item_add($data_source['host_id'],
+					$host_fields,
+					$data_source['id'],
+					$data_input['rrd_step'],
+					0,
+					get_data_source_item_name($data_template_rrd_id),
+					1,
+					($host_fields['snmp_oid'] ?? ''));
 			} elseif ($data_input['type_id'] == DATA_INPUT_TYPE_SNMP_QUERY) {
 				$snmp_queries = get_data_query_array($data_source['snmp_query_id']);
 
@@ -455,7 +469,14 @@ function update_poller_cache(mixed $data_source, bool $commit = false, ?int $pol
 						}
 
 						if (!empty($oid)) {
-							$poller_items[] = api_poller_cache_item_add($data_source['host_id'], $host_fields, $data_source['id'], $data_input['rrd_step'], 0, get_data_source_item_name($output['data_template_rrd_id']), cacti_sizeof($outputs), $oid);
+							$poller_items[] = api_poller_cache_item_add($data_source['host_id'],
+								$host_fields,
+								$data_source['id'],
+								$data_input['rrd_step'],
+								0,
+								get_data_source_item_name($output['data_template_rrd_id']),
+								cacti_sizeof($outputs),
+								$oid);
 						}
 					}
 				}
@@ -546,15 +567,26 @@ function update_poller_cache(mixed $data_source, bool $commit = false, ?int $pol
 									$prepend = $script_queries['arg_prepend'];
 								}
 
-								$script_path = get_script_query_path(trim($prepend . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' "' . $data_source['snmp_index'] . '"'), $script_queries['script_path'] . ' ' . $script_queries['script_function'], $data_source['host_id']);
+								$script_path = get_script_query_path(trim($prepend . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' "' . $data_source['snmp_index'] . '"'),
+									$script_queries['script_path'] . ' ' . $script_queries['script_function'],
+									$data_source['host_id']);
 							} else {
 								$action      = POLLER_ACTION_SCRIPT;
-								$script_path = get_script_query_path(trim(($script_queries['arg_prepend'] ?? '') . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' "' . $data_source['snmp_index'] . '"'), $script_queries['script_path'], $data_source['host_id']);
+								$script_path = get_script_query_path(trim(($script_queries['arg_prepend'] ?? '') . ' ' . $script_queries['arg_get'] . ' ' . $identifier . ' "' . $data_source['snmp_index'] . '"'),
+									$script_queries['script_path'],
+									$data_source['host_id']);
 							}
 						}
 
 						if (isset($script_path)) {
-							$poller_items[] = api_poller_cache_item_add($data_source['host_id'], $host_fields, $data_source['id'], $data_input['rrd_step'], $action, get_data_source_item_name($output['data_template_rrd_id']), cacti_sizeof($outputs), $script_path);
+							$poller_items[] = api_poller_cache_item_add($data_source['host_id'],
+								$host_fields,
+								$data_source['id'],
+								$data_input['rrd_step'],
+								$action,
+								get_data_source_item_name($output['data_template_rrd_id']),
+								cacti_sizeof($outputs),
+								$script_path);
 						}
 					}
 				}
@@ -582,7 +614,9 @@ function update_poller_cache(mixed $data_source, bool $commit = false, ?int $pol
 			[$data_source['id']]);
 
 		if (cacti_sizeof($data_template_data) && $data_template_data['data_input_id'] > 0) {
-			cacti_log('WARNING: Repopulate Poller Cache found Data Input Missing for Data Source ' . $data_source['id'] . '.  Database may be corrupted', false, 'PCACHE');
+			cacti_log('WARNING: Repopulate Poller Cache found Data Input Missing for Data Source ' . $data_source['id'] . '.  Database may be corrupted',
+				false,
+				'PCACHE');
 		}
 	}
 
@@ -645,7 +679,9 @@ function push_out_data_input_method(int $data_input_id) : void {
  *
  * @return void
  */
-function poller_update_poller_cache_from_buffer(array $local_data_ids, array &$poller_items, int $poller_id = 1) : void {
+function poller_update_poller_cache_from_buffer(array $local_data_ids,
+	array &$poller_items,
+	int $poller_id = 1) : void {
 	$ids    = '';
 	$raised = false;
 
@@ -669,11 +705,17 @@ function poller_update_poller_cache_from_buffer(array $local_data_ids, array &$p
 							AND local_data_id IN ($ids)",
 							[$poller_id], true, $rcnn_id);
 					} else {
-						raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+						raise_message('poller_down_' . $poller_id,
+							__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+								$poller_id),
+							MESSAGE_LEVEL_WARN);
 						$raised = true;
 					}
 				} else {
-					raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+					raise_message('poller_down_' . $poller_id,
+						__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+							$poller_id),
+						MESSAGE_LEVEL_WARN);
 					$raised = true;
 				}
 			}
@@ -750,11 +792,17 @@ function poller_update_poller_cache_from_buffer(array $local_data_ids, array &$p
 						if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
 							db_execute($sql_prefix . $buffer . $sql_suffix, true, $rcnn_id);
 						} elseif (!$raised) {
-							raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+							raise_message('poller_down_' . $poller_id,
+								__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+									$poller_id),
+								MESSAGE_LEVEL_WARN);
 							$raised = true;
 						}
 					} elseif (!$raised) {
-						raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+						raise_message('poller_down_' . $poller_id,
+							__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+								$poller_id),
+							MESSAGE_LEVEL_WARN);
 						$raised = true;
 					}
 				}
@@ -776,11 +824,17 @@ function poller_update_poller_cache_from_buffer(array $local_data_ids, array &$p
 				if (($rcnn_id = poller_push_to_remote_db_connect($poller_id, true)) !== false) {
 					db_execute($sql_prefix . $buffer . $sql_suffix, true, $rcnn_id);
 				} else {
-					raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+					raise_message('poller_down_' . $poller_id,
+						__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+							$poller_id),
+						MESSAGE_LEVEL_WARN);
 					$raised = true;
 				}
 			} elseif (!$raised) {
-				raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+				raise_message('poller_down_' . $poller_id,
+					__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+						$poller_id),
+					MESSAGE_LEVEL_WARN);
 				$raised = true;
 			}
 		}
@@ -803,10 +857,16 @@ function poller_update_poller_cache_from_buffer(array $local_data_ids, array &$p
 						AND local_data_id IN ($ids)",
 						[$poller_id], true, $rcnn_id);
 				} elseif (!$raised) {
-					raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+					raise_message('poller_down_' . $poller_id,
+						__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+							$poller_id),
+						MESSAGE_LEVEL_WARN);
 				}
 			} elseif (!$raised) {
-				raise_message('poller_down_' . $poller_id, __esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again', $poller_id), MESSAGE_LEVEL_WARN);
+				raise_message('poller_down_' . $poller_id,
+					__esc('Remote Poller %s is Down, you will need to perform a FullSync once it is up again',
+						$poller_id),
+					MESSAGE_LEVEL_WARN);
 			}
 		}
 	}
@@ -984,7 +1044,10 @@ function push_out_host(int $host_id, int $local_data_id = 0, int $data_template_
 								[$template_field['id'], $data_source['id']]);
 
 							if (isset($old_value['value']) && $old_data['value'] != $host[$field]) {
-								cacti_log("WARNING: Poller Cache updated Device[{$host['id']}], Field[$field], Old[{$old_data['value']}], New[{$host[$field]}]", false, 'PCACHE', POLLER_VERBOSITY_MEDIUM);
+								cacti_log("WARNING: Poller Cache updated Device[{$host['id']}], Field[$field], Old[{$old_data['value']}], New[{$host[$field]}]",
+									false,
+									'PCACHE',
+									POLLER_VERBOSITY_MEDIUM);
 							}
 
 							db_execute_prepared('REPLACE INTO data_input_data
@@ -1484,7 +1547,8 @@ function utilities_get_mysql_capabilities() : void {
 	}
 
 	print '<tr class="tableHeader tableFixed">';
-	print '<th colspan="2">' . __('%s Variable Capability Matrix', $database) . ' - ' . __('Support by engine and version for each Cacti-recommended variable') . '</th>';
+	print '<th colspan="2">' . __('%s Variable Capability Matrix',
+		$database) . ' - ' . __('Support by engine and version for each Cacti-recommended variable') . '</th>';
 	print '</tr>';
 
 	form_alternate_row();
@@ -1573,7 +1637,8 @@ function utilities_get_mysql_recommendations() : int {
 						'value'   => 'ON',
 						'class'   => 'warning',
 						'measure' => 'equalint',
-						'comment' => __('It is STRONGLY recommended that you enable InnoDB in any %s version greater than 5.5.3.', $database)
+						'comment' => __('It is STRONGLY recommended that you enable InnoDB in any %s version greater than 5.5.3.',
+							$database)
 					]
 				];
 
@@ -1643,7 +1708,8 @@ function utilities_get_mysql_recommendations() : int {
 		'max_connections' => [
 			'value'   => '100',
 			'measure' => 'ge',
-			'comment' => __('Depending on the number of logins and use of spine data collector, %s will need many connections.  The calculation for spine is: total_connections = total_processes * (total_threads + script_servers + 1), then you must leave headroom for user connections, which will change depending on the number of concurrent login accounts.', $database)
+			'comment' => __('Depending on the number of logins and use of spine data collector, %s will need many connections.  The calculation for spine is: total_connections = total_processes * (total_threads + script_servers + 1), then you must leave headroom for user connections, which will change depending on the number of concurrent login accounts.',
+				$database)
 		],
 		'table_cache' => [
 			'value'   => '200',
@@ -1683,7 +1749,8 @@ function utilities_get_mysql_recommendations() : int {
 			'value'   => 'ON',
 			'measure' => 'equalint',
 			'class'   => 'error',
-			'comment' => __('When using InnoDB storage it is important to keep your table spaces separate.  This makes managing the tables simpler for long time users of %s.  If you are running with this currently off, you can migrate to the per file storage by enabling the feature, and then running an alter statement on all InnoDB tables.', $database)
+			'comment' => __('When using InnoDB storage it is important to keep your table spaces separate.  This makes managing the tables simpler for long time users of %s.  If you are running with this currently off, you can migrate to the per file storage by enabling the feature, and then running an alter statement on all InnoDB tables.',
+				$database)
 		],
 		'innodb_file_format' => [
 			'value'   => 'Barracuda',
@@ -1732,7 +1799,8 @@ function utilities_get_mysql_recommendations() : int {
 				'innodb_flush_log_at_trx_commit' => [
 					'value'   => '2',
 					'measure' => 'equal',
-					'comment' => __('Setting this value to 2 means that you will flush all transactions every second rather than at commit.  This allows %s to perform writing less often.', $database)
+					'comment' => __('Setting this value to 2 means that you will flush all transactions every second rather than at commit.  This allows %s to perform writing less often.',
+						$database)
 				],
 				'innodb_file_io_threads' => [
 					'value'   => '16',
@@ -1740,12 +1808,19 @@ function utilities_get_mysql_recommendations() : int {
 					'comment' => __('With modern SSD type storage, having multiple io threads is advantageous for applications with high io characteristics.')
 				]
 			];
-		} elseif ($database == 'MariaDB' && version_compare($variables['innodb_version'], '10.5', '<') || $database == 'MySQL') {
+		} elseif ($database == 'MariaDB' &&
+			version_compare($variables['innodb_version'],
+				'10.5',
+				'<') ||
+			$database == 'MySQL') {
 			$recommendations += [
 				'innodb_flush_log_at_timeout' => [
 					'value'    => '3',
 					'measure'  => 'ge',
-					'comment'  => __('As of %s %s, the you can control how often %s flushes transactions to disk.  The default is 1 second, but in high I/O systems setting to a value greater than 1 can allow disk I/O to be more sequential', $database, $version, $database),
+					'comment'  => __('As of %s %s, the you can control how often %s flushes transactions to disk.  The default is 1 second, but in high I/O systems setting to a value greater than 1 can allow disk I/O to be more sequential',
+						$database,
+						$version,
+						$database),
 				],
 				'innodb_read_io_threads' => [
 					'value'   => '32',
@@ -1761,7 +1836,9 @@ function utilities_get_mysql_recommendations() : int {
 					'value'   => '16',
 					'measure' => 'pinst',
 					'class'   => 'warning',
-					'comment' => ($database == 'MySQL' ? __('%s will divide the innodb_buffer_pool into memory regions to improve performance for versions of MySQL upto and including MySQL 8.0.  The max value is 64, but should not exceed more than the number of CPU cores/threads.  When your innodb_buffer_pool is less than 1GB, you should use the pool size divided by 128MB.  Continue to use this equation up to the max of the number of CPU cores or 64.', $database) : __('%s will divide the innodb_buffer_pool into memory regions to improve performance for versions of MariaDB less than 10.5.  The max value is 64, but should not exceed more than the number of CPU cores/threads.  When your innodb_buffer_pool is less than 1GB, you should use the pool size divided by 128MB.  Continue to use this equation up to the max the number of CPU cores or 64.', $database))
+					'comment' => ($database == 'MySQL' ? __('%s will divide the innodb_buffer_pool into memory regions to improve performance for versions of MySQL upto and including MySQL 8.0.  The max value is 64, but should not exceed more than the number of CPU cores/threads.  When your innodb_buffer_pool is less than 1GB, you should use the pool size divided by 128MB.  Continue to use this equation up to the max of the number of CPU cores or 64.',
+						$database) : __('%s will divide the innodb_buffer_pool into memory regions to improve performance for versions of MariaDB less than 10.5.  The max value is 64, but should not exceed more than the number of CPU cores/threads.  When your innodb_buffer_pool is less than 1GB, you should use the pool size divided by 128MB.  Continue to use this equation up to the max the number of CPU cores or 64.',
+							$database))
 				],
 				'innodb_io_capacity' => [
 					'value'   => '5000',
@@ -1787,7 +1864,10 @@ function utilities_get_mysql_recommendations() : int {
 				'innodb_flush_log_at_timeout' => [
 					'value'    => '3',
 					'measure'  => 'ge',
-					'comment'  => __('As of %s %s, the you can control how often %s flushes transactions to disk.  The default is 1 second, but in high I/O systems setting to a value greater than 1 can allow disk I/O to be more sequential', $database, $version, $database),
+					'comment'  => __('As of %s %s, the you can control how often %s flushes transactions to disk.  The default is 1 second, but in high I/O systems setting to a value greater than 1 can allow disk I/O to be more sequential',
+						$database,
+						$version,
+						$database),
 				],
 				'innodb_read_io_threads' => [
 					'value'   => '32',
@@ -1883,7 +1963,8 @@ function utilities_get_mysql_recommendations() : int {
 	}
 
 	print '<tr class="tableHeader tableFixed">';
-	print '<th colspan="2">' . __('%s Tuning', $database) . ' (' . $location . ') - [ <a class="linkOverDark" target="_blank" href="' . $variables_url . '">' . __('Documentation') . '</a> ] ' . __('Note: Many changes below require a database restart') . '</th>';
+	print '<th colspan="2">' . __('%s Tuning',
+		$database) . ' (' . $location . ') - [ <a class="linkOverDark" target="_blank" href="' . $variables_url . '">' . __('Documentation') . '</a> ] ' . __('Note: Many changes below require a database restart') . '</th>';
 	print '</tr>';
 
 	form_alternate_row();
@@ -2386,7 +2467,10 @@ function utility_php_recommends() : array {
 	return $ext;
 }
 
-function utility_get_formatted_bytes(mixed $input_value, string $wanted_type, mixed &$output_value, string $default_type = 'B') : mixed {
+function utility_get_formatted_bytes(mixed $input_value,
+	string $wanted_type,
+	mixed &$output_value,
+	string $default_type = 'B') : mixed {
 	$default_type = cacti_strtoupper($default_type);
 	$multiplier   = [
 		'B' => 1,
@@ -2417,7 +2501,10 @@ function utility_get_formatted_bytes(mixed $input_value, string $wanted_type, mi
 		$output_value = $input_value . 'B';
 	}
 
-	cacti_log("Input values $input_value, Wanted Type $wanted_type, Output Value $output_value", false, 'SYSTEM', POLLER_VERBOSITY_DEBUG);
+	cacti_log("Input values $input_value, Wanted Type $wanted_type, Output Value $output_value",
+		false,
+		'SYSTEM',
+		POLLER_VERBOSITY_DEBUG);
 
 	return $input_value;
 }
@@ -2467,13 +2554,15 @@ function utility_php_verify_recommends(mixed &$recommends, string $source) : voi
 			'name'        => 'memory_limit',
 			'value'       => $rec_memory_mb,
 			'current'     => $memory_ini,
-			'status'      => (($memory_limit <= 0 || $memory_limit >= $rec_memory) ? DB_STATUS_SUCCESS : ($memory_limit != $cfg_mem_limit ? DB_STATUS_RESTART : DB_STATUS_WARNING)),
+			'status'      => (($memory_limit <= 0 ||
+				$memory_limit >= $rec_memory) ? DB_STATUS_SUCCESS : ($memory_limit != $cfg_mem_limit ? DB_STATUS_RESTART : DB_STATUS_WARNING)),
 		],
 		[
 			'name'        => 'max_execution_time',
 			'value'       => $rec_execute,
 			'current'     => $execute_time,
-			'status'      => (($execute_time <= 0 || $execute_time >= $rec_execute) ? DB_STATUS_SUCCESS : ($execute_time != $cfg_max_exec ? DB_STATUS_RESTART : DB_STATUS_WARNING)),
+			'status'      => (($execute_time <= 0 ||
+				$execute_time >= $rec_execute) ? DB_STATUS_SUCCESS : ($execute_time != $cfg_max_exec ? DB_STATUS_RESTART : DB_STATUS_WARNING)),
 		],
 		[
 			'name'        => 'date.timezone',

@@ -161,7 +161,10 @@ function open_packager_metadata_table() : mixed {
 
 		return $cnn;
 	} else {
-		raise_message('package_nowrite', __('The Web Server must have write access to the \'%s\' directory', CACTI_PATH_PKI), MESSAGE_LEVEL_ERROR);
+		raise_message('package_nowrite',
+			__('The Web Server must have write access to the \'%s\' directory',
+				CACTI_PATH_PKI),
+			MESSAGE_LEVEL_ERROR);
 	}
 
 	return false;
@@ -444,7 +447,10 @@ function process_paths(string $line, array $files, bool $raise_message) : array 
 	if (cacti_sizeof($paths['missing_paths'])) {
 		if ($raise_message) {
 			foreach ($paths['missing_paths'] as $p) {
-				raise_message('missing_' . $p['file'], __esc('A Critical Template file \'%s\' is missing.  Please locate this file before packaging', $p['file']), MESSAGE_LEVEL_ERROR);
+				raise_message('missing_' . $p['file'],
+					__esc('A Critical Template file \'%s\' is missing.  Please locate this file before packaging',
+						$p['file']),
+					MESSAGE_LEVEL_ERROR);
 			}
 		}
 	}
