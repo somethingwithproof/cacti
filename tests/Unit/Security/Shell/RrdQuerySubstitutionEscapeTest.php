@@ -16,7 +16,7 @@
  * whole-command pass that previously injected into the quoted args must be gone.
  */
 
-$rrd = file_get_contents(dirname(__DIR__, 4) . '/lib/rrd.php');
+$rrd = file_get_contents(dirname(__DIR__, 4) . '/lib/rrd_graph_options.php');
 
 test('the resolved title value is escaped', function () use ($rrd) {
 	expect($rrd)->toContain('cacti_escapeshellarg(htmle($value))');
