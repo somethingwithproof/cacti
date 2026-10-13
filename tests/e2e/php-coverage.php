@@ -10,7 +10,7 @@ register_shutdown_function(static function (): void {
 	$root = '/var/www/html/cacti/';
 	$files = array();
 	foreach (\pcov\collect() as $file => $lines) {
-		if (!str_starts_with($file, $root) || str_contains($file, '/vendor/') ||
+		if (!str_starts_with($file, $root) || str_contains($file, '/vendor/') || str_contains($file, '/plugins/') ||
 			str_contains($file, '/tests/') || $file === $root . 'include/config.php') {
 			continue;
 		}

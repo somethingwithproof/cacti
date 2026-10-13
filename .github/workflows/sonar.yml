@@ -161,6 +161,7 @@ jobs:
             node node_modules/@playwright/test/cli.js test --config=playwright.config.ts tests/user-action-audit.spec.ts
           fi
           node report-browser-coverage.js "$CACTI_BROWSER_COVERAGE_DIR" coverage/sonar-browser.xml
+          bash test-plugin-install-coverage.sh
           node report-php-coverage.js ../../cache/php-coverage coverage/sonar-php.xml
       - name: Select measured coverage report
         id: coverage

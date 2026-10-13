@@ -23,6 +23,11 @@ if ($database_default !== 'cacti_plugin_test') {
 
 require $root . '/include/cli_check.php';
 
+$coverage_prepend = getenv('CACTI_PLUGIN_INSTALL_COVERAGE') ?: '';
+if ($coverage_prepend !== '' && !is_readable($coverage_prepend)) {
+	throw new RuntimeException('Plugin coverage bootstrap is not readable.');
+}
+
 $assertions = 0;
 $assert = function ($condition, $message) use (&$assertions) {
 	$assertions++;
@@ -77,8 +82,8 @@ $inspect = function ($name, $success, $ready, $enabled, $permissions) use ($asse
 	$assert((int) db_fetch_cell_prepared('SELECT COUNT(*) FROM plugin_db_changes WHERE plugin = ? AND method = \'create\'', [$name]) === 1, $name . ': table ownership retained');
 };
 
-$cli = function ($names) use ($root) {
-	$command = [PHP_BINARY, '-d', 'auto_prepend_file=', $root . '/cli/plugin_manage.php', '--install', '--enable', '--allperms'];
+$cli = function ($names) use ($root, $coverage_prepend) {
+	$command = [PHP_BINARY, '-d', 'auto_prepend_file=' . $coverage_prepend, $root . '/cli/plugin_manage.php', '--install', '--enable', '--allperms'];
 	foreach ($names as $name) {
 		$command[] = '--plugin=' . $name;
 	}
