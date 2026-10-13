@@ -1285,7 +1285,7 @@ function networks_filter() {
 						<input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
 					</td>
 					<td>
-						<label for='rows'><?php print __('Networks');?></label>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>

@@ -705,7 +705,7 @@ function domains() {
 			<table role='presentation' class='filterTable'>
 				<tr class='noprint'>
 					<?php html_search_filter();?>
-					<?php html_rows_filter(__('Domains'));?>
+					<?php html_rows_filter(__('Rows'));?>
 					<td>
 						<span>
 							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __x('filter: use', 'Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>

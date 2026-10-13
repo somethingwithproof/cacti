@@ -927,7 +927,7 @@ function pollers() {
 			<table role='presentation' class='filterTable'>
 				<tr>
 					<?php html_search_filter();?>
-					<?php html_rows_filter(__('Collectors'));?>
+					<?php html_rows_filter(__('Rows'));?>
 					<td>
 						<label for='refresh'><?php print __('Refresh');?></label>
 					</td>

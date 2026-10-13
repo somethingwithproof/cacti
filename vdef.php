@@ -752,7 +752,7 @@ function vdef_edit() {
 
 					applySkin();
 
-					$('#continue').off('click').on('click', function(data) {
+					$('#continue').rebind('click', function(data) {
 						$.post('vdef.php?action=item_remove', {
 							__csrf_magic: csrfMagicToken,
 							vdef_id: $('#my_vdef_id').val(),
@@ -796,7 +796,7 @@ function vdef_filter() {
 			<table role='presentation' class='filterTable'>
 				<tr>
 					<?php html_search_filter();?>
-					<?php html_rows_filter(__('VDEFs'));?>
+					<?php html_rows_filter(__('Rows'));?>
                     <td>
 						<span>
 							<input type='checkbox' id='has_graphs' <?php print (get_request_var('has_graphs') == 'true' ? 'checked':'');?>>

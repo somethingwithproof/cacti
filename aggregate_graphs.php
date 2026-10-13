@@ -1269,7 +1269,7 @@ function aggregate_items() {
 						<input type='text' class='ui-state-default ui-corner-all' id='rfilter' size='45' value='<?php print html_escape_request_var('rfilter');?>'>
 					</td>
 					<td>
-						<label for='rows'><?php print __('Graphs');?></label>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -1591,7 +1591,7 @@ function aggregate_graph() {
 						</select>
 					</td>
 					<td>
-						<?php print __('Graphs');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>

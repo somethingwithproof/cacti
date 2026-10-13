@@ -1408,7 +1408,7 @@ function data_query() {
 			<table role='presentation' class='filterTable'>
 				<tr class='noprint'>
 					<?php html_search_filter(true);?>
-					<?php html_rows_filter(__('Data Queries'), true);?>
+					<?php html_rows_filter(__('Rows'), true);?>
 					<td>
 						<span>
 							<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>

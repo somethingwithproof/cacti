@@ -1567,7 +1567,7 @@ function ds() {
 						<input type='text' class='ui-state-default ui-corner-all' id='rfilter' size='55' value='<?php print html_escape_request_var('rfilter');?>'>
 					</td>
 					<td>
-						<?php print __('Data Sources');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows' name='rows'>

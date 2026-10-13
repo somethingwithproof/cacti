@@ -894,7 +894,7 @@ function automation_graph_rules() {
 								<option value='-3' <?php print (get_request_var('status') == '-3' ? ' selected':'');?>><?php print __('Disabled');?></option>
 							</select>
 						</td>
-						<?php html_rows_filter(__('Graph Rules'));?>
+						<?php html_rows_filter(__('Rows'));?>
 						<td>
 							<span>
 								<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' name='go' value='<?php print __esc('Go');?>'>

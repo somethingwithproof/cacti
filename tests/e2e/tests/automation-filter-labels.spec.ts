@@ -11,12 +11,12 @@ async function login(page: Page): Promise<void> {
 test.beforeEach(async ({ page }) => { await login(page); });
 
 const lists: Array<[string, Array<[string, string]>]> = [
-    ['automation_devices.php', [['filter', 'Search'], ['network', 'Network'], ['status', 'Status']]],
-    ['automation_networks.php', [['filter', 'Search'], ['rows', 'Networks']]],
-    ['automation_snmp.php', [['filter', 'Search'], ['rows', 'SNMP Rules']]],
-    ['automation_templates.php', [['filter', 'Search'], ['rows', 'Templates']]],
-    ['automation_graph_rules.php', [['filter', 'Search'], ['snmp_query_id', 'Data Query'], ['status', 'Status'], ['rows', 'Graph Rules']]],
-    ['automation_tree_rules.php', [['filter', 'Search'], ['status', 'Status'], ['rows', 'Tree Rules']]],
+    ['automation_devices.php', [['filter', 'Search'], ['network', 'Network'], ['status', 'Status'], ['rows', 'Rows']]],
+    ['automation_networks.php', [['filter', 'Search'], ['rows', 'Rows']]],
+    ['automation_snmp.php', [['filter', 'Search'], ['rows', 'Rows']]],
+    ['automation_templates.php', [['filter', 'Search'], ['rows', 'Rows']]],
+    ['automation_graph_rules.php', [['filter', 'Search'], ['snmp_query_id', 'Data Query'], ['status', 'Status'], ['rows', 'Rows']]],
+    ['automation_tree_rules.php', [['filter', 'Search'], ['status', 'Status'], ['rows', 'Rows']]],
 ];
 
 for (const [route, labels] of lists) {

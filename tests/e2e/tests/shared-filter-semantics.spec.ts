@@ -42,6 +42,7 @@ for (const route of ['/graph_view.php?action=list', '/graph_view.php?action=prev
     test(`${route} labels its shared graph filters`, async ({ page }) => {
         await page.goto(route);
         await label(page, 'graph_template_id', 'Template');
+        if (route.includes('action=list')) await label(page, 'rows', 'Rows');
         if (route.includes('preview')) await label(page, 'host_id', 'Device');
         else await label(page, 'rfilter', 'Search');
         for (const table of await page.locator('table.filterTable').all()) await expect(table).toHaveAttribute('role', 'presentation');
@@ -51,7 +52,7 @@ for (const route of ['/graph_view.php?action=list', '/graph_view.php?action=prev
 test('tree management labels listing and site/device/graph search controls', async ({ page }) => {
     await page.goto('/tree.php');
     await label(page, 'filter', 'Search');
-    await label(page, 'rows', 'Trees');
+    await label(page, 'rows', 'Rows');
     await expect(page.locator('table.filterTable')).toHaveAttribute('role', 'presentation');
     await page.goto('/tree.php?action=edit&id=1');
     for (const id of ['sfilter', 'hfilter', 'gfilter']) await label(page, id, 'Search');
@@ -61,6 +62,7 @@ test('tree management labels listing and site/device/graph search controls', asy
 test('user login audit filter labels its native username selection', async ({ page }) => {
     await page.goto('/utilities.php?action=view_user_log');
     await label(page, 'username', 'User');
+    await label(page, 'rows', 'Rows');
     for (const table of await page.locator('form#form_userlog table.filterTable').all()) await expect(table).toHaveAttribute('role', 'presentation');
 });
 

@@ -17,26 +17,26 @@ async function expectLabel(page: Page, id: string, text: string): Promise<void> 
         Array.from((element as HTMLInputElement).labels ?? []).map(label => label.textContent?.trim()))).toContain(text);
 }
 
-const lists: Array<[string, string, Array<[string, string]>]> = [
-    ['cdef.php', 'CDEFs', []],
-    ['color.php', 'Colors', []],
-    ['data_input.php', 'Input Methods', []],
-    ['data_queries.php', 'Data Queries', []],
-    ['data_source_profiles.php', 'Profiles', []],
-    ['data_templates.php', 'Data Templates', [['profile', 'Profile']]],
-    ['gprint_presets.php', 'GPRINTs', []],
-    ['graph_templates.php', 'Graph Templates', []],
-    ['vdef.php', 'VDEFs', []],
-    ['host_templates.php', 'Device Templates', [['class', 'Class'], ['graph_template', 'Graph Template']]],
+const lists: Array<[string, Array<[string, string]>]> = [
+    ['cdef.php', []],
+    ['color.php', []],
+    ['data_input.php', []],
+    ['data_queries.php', []],
+    ['data_source_profiles.php', []],
+    ['data_templates.php', [['profile', 'Profile']]],
+    ['gprint_presets.php', []],
+    ['graph_templates.php', []],
+    ['vdef.php', []],
+    ['host_templates.php', [['class', 'Class'], ['graph_template', 'Graph Template']]],
 ];
 
 test.beforeEach(async ({ page }) => { await login(page); });
 
-for (const [route, rows, additional] of lists) {
+for (const [route, additional] of lists) {
     test(`${route} keeps visible labels associated with its filter controls`, async ({ page }) => {
         await page.goto('/' + route);
         await expectLabel(page, 'filter', 'Search');
-        await expectLabel(page, 'rows', rows);
+        await expectLabel(page, 'rows', 'Rows');
         for (const [id, text] of additional) await expectLabel(page, id, text);
         const tables = page.locator('table.filterTable');
         expect(await tables.count()).toBeGreaterThan(0);

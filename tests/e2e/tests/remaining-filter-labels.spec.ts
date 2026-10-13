@@ -65,7 +65,7 @@ async function label(page: Page, id: string, text: string): Promise<void> {
 test('aggregate member filter labels its native search and row selection', async ({ page }) => {
     await page.goto(`/aggregate_graphs.php?action=edit&tab=items&id=${aggregateId}`);
     await label(page, 'rfilter', 'Search');
-    await label(page, 'rows', 'Graphs');
+    await label(page, 'rows', 'Rows');
     await expect(page.locator('table.filterTable')).toHaveAttribute('role', 'presentation');
     await expect(page.locator('form#forms')).toHaveCount(1);
     await page.goto('/aggregate_graphs.php');

@@ -537,7 +537,7 @@ function update_show_current () {
 			applyFilter();
 		});
 
-		$('.piforceremove').off('click').on('click', function(event) {
+		$('.piforceremove').rebind('click', function(event) {
 			event.preventDefault();
 
 			var url  = $(this).attr('data-url');
@@ -610,7 +610,7 @@ function update_show_current () {
 						</select>
 					</td>
 					<td>
-						<?php print __('Plugins');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows' name='rows'>

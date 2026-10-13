@@ -739,7 +739,7 @@ case 'list':
 						</select>
 					</td>
 					<td>
-						<?php print __('Graphs');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -1113,7 +1113,7 @@ case 'list':
 			viewGraphs();
 		});
 
-		$('#chk').off('submit').on('submit', function(event) {
+		$('#chk').rebind('submit', function(event) {
 			event.preventDefault();
 			applyFilter();
 		});

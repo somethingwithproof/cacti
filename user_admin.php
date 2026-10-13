@@ -2337,7 +2337,7 @@ function user() {
 						</select>
 					</td>
 					<td>
-						<label for='rows'><?php print __('Users');?></label>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -2794,7 +2794,7 @@ function graph_filter($header_label) {
 						</select>
 					</td>
 					<td>
-						<?php print __('Graphs');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -2898,7 +2898,7 @@ function group_filter($header_label) {
 						<input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
 					</td>
 					<td>
-						<?php print __('Groups');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -3021,7 +3021,7 @@ function device_filter($header_label) {
 						</select>
 					</td>
 					<td>
-						<?php print __('Devices');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -3125,7 +3125,7 @@ function template_filter($header_label) {
 						<input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
 					</td>
 					<td>
-						<?php print __('Templates');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -3229,7 +3229,7 @@ function tree_filter($header_label) {
 						<input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
 					</td>
 					<td>
-						<?php print __('Trees');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>
@@ -3333,7 +3333,7 @@ function member_filter($header_label) {
 						<input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
 					</td>
 					<td>
-						<?php print __('Trees');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>

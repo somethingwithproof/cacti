@@ -761,7 +761,7 @@ function profile_edit() {
 
 					applySkin();
 
-					$('#continue').off('click').on('click', function(data) {
+					$('#continue').rebind('click', function(data) {
 						$.post('data_source_profiles.php?action=item_remove', {
 							__csrf_magic: csrfMagicToken,
 							id: $('#rra_id').val()
@@ -974,7 +974,7 @@ function profile() {
 			<table role='presentation' class='filterTable'>
 				<tr>
 					<?php html_search_filter(true);?>
-					<?php html_rows_filter(__('Profiles'), true);?>
+					<?php html_rows_filter(__('Rows'), true);?>
 					<td>
 						<span>
 							<input type='checkbox' id='has_data' <?php print (get_request_var('has_data') == 'true' ? 'checked':'');?>>

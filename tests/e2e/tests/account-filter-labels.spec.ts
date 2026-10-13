@@ -35,8 +35,8 @@ async function label(page: Page, id: string, text: string): Promise<void> {
 }
 
 for (const [route, labels] of [
-    ['user_admin.php', [['filter', 'Search'], ['group', 'Group'], ['login', 'Last Login'], ['realm', 'Realm'], ['rows', 'Users']]],
-    ['user_group_admin.php', [['filter', 'Search'], ['rows', 'Groups']]],
+    ['user_admin.php', [['filter', 'Search'], ['group', 'Group'], ['login', 'Last Login'], ['realm', 'Realm'], ['rows', 'Rows']]],
+    ['user_group_admin.php', [['filter', 'Search'], ['rows', 'Rows']]],
 ] as Array<[string, Array<[string, string]>]>) {
     test(`${route} labels its listing filters`, async ({ page }) => {
         await page.goto('/' + route);
@@ -61,6 +61,7 @@ for (const [tab, policy] of [
                 ? `/user_admin.php?action=user_edit&id=1&tab=${tab}`
                 : `/user_group_admin.php?action=edit&id=${groupId}&tab=${tab}`;
             await page.goto(route);
+            await label(page, 'rows', 'Rows');
             await expect(page.locator(`#${policy}`).locator('xpath=ancestor::table[1]')).toHaveAttribute('role', 'presentation');
             if (tab === 'permsg') {
                 await label(page, 'filter', 'Search');

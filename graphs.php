@@ -2218,7 +2218,7 @@ function graph_management() {
 						</select>
 					</td>
 					<td>
-						<label for='rows'><?php print __('Graphs');?></label>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>

@@ -1092,7 +1092,7 @@ function template() {
 							?>
 						</select>
 					</td>
-					<?php html_rows_filter(__('Data Templates'), true);?>
+					<?php html_rows_filter(__('Rows'), true);?>
 					<td>
 						<span>
 							<input type='checkbox' id='has_data' <?php print (get_request_var('has_data') == 'true' ? 'checked':'');?>>

@@ -151,7 +151,7 @@ function manager() {
 				<table role='presentation' class='filterTable'>
 					<tr>
 						<?php html_search_filter();?>
-						<?php html_rows_filter(__('Receivers'));?>
+						<?php html_rows_filter(__('Rows'));?>
 						<td>
 							<span>
 								<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>
@@ -491,7 +491,7 @@ function manager_notifications($id, $header_label) {
 							</select>
 						</td>
 						<?php html_search_filter();?>
-						<?php html_rows_filter(__('Receivers'), true);?>
+						<?php html_rows_filter(__('Rows'), true);?>
 						<td>
 							<span>
 								<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>

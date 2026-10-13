@@ -833,7 +833,7 @@ function template() {
 			<table role='presentation' class='filterTable'>
 				<tr>
 					<?php html_search_filter();?>
-					<?php html_rows_filter(__('Device Templates'));?>
+					<?php html_rows_filter(__('Rows'));?>
 					<td>
 						<span>
 							<input type='checkbox' id='has_hosts' <?php print (get_request_var('has_hosts') == 'true' ? 'checked':'');?>>

@@ -537,7 +537,7 @@ function sites() {
 			<table role='presentation' class='filterTable'>
 				<tr>
 					<?php html_search_filter();?>
-					<?php html_rows_filter(__('Sites'));?>
+					<?php html_rows_filter(__('Rows'));?>
 					<td>
 						<span>
 								<input type='submit' class='ui-button ui-corner-all ui-widget' id='refresh' value='<?php print __esc('Go');?>' title='<?php print __esc('Set/Refresh Filters');?>'>

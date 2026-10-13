@@ -548,7 +548,7 @@ function color() {
 			<table role='presentation' class='filterTable'>
 				<tr>
 					<?php html_search_filter(true);?>
-					<?php html_rows_filter(__('Colors'));?>
+					<?php html_rows_filter(__('Rows'));?>
 					<td>
 						<span>
 							<input type='checkbox' id='named' <?php print (get_request_var('named') == 'true' ? 'checked':'');?>>

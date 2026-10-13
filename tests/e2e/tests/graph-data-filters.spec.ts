@@ -11,14 +11,14 @@ async function login(page: Page): Promise<void> {
 test.beforeEach(async ({ page }) => { await login(page); });
 
 const pages: Array<[string, Array<[string, string]>]> = [
-    ['graphs.php', [['template_id', 'Template'], ['rfilter', 'Search'], ['source', 'Graph Source'], ['rows', 'Graphs']]],
+    ['graphs.php', [['template_id', 'Template'], ['rfilter', 'Search'], ['source', 'Graph Source'], ['rows', 'Rows']]],
     ['graphs_items.php?action=item_edit&local_graph_id=0', [['data_template_id', 'Data Template']]],
-    ['graphs_new.php', [['graph_type', 'Graph Types']]],
-    ['aggregate_graphs.php', [['filter', 'Search'], ['template_id', 'Template']]],
-    ['data_debug.php', [['template_id', 'Template']]],
-    ['data_sources.php', [['template_id', 'Template']]],
-    ['rrdcheck.php', [['filter', 'Search'], ['age', 'Age'], ['rows', 'Messages']]],
-    ['rrdcleaner.php', [['filter', 'Search'], ['age', 'Time Since Update'], ['rows', 'RRDfiles']]],
+    ['graphs_new.php', [['graph_type', 'Graph Types'], ['rows', 'Rows']]],
+    ['aggregate_graphs.php', [['filter', 'Search'], ['template_id', 'Template'], ['rows', 'Rows']]],
+    ['data_debug.php', [['template_id', 'Template'], ['rows', 'Rows']]],
+    ['data_sources.php', [['template_id', 'Template'], ['rows', 'Rows']]],
+    ['rrdcheck.php', [['filter', 'Search'], ['age', 'Age'], ['rows', 'Rows']]],
+    ['rrdcleaner.php', [['filter', 'Search'], ['age', 'Time Since Update'], ['rows', 'Rows']]],
 ];
 
 for (const [route, labels] of pages) {

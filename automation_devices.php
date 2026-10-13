@@ -598,7 +598,7 @@ function draw_filter() {
 						</select>
 					</td>
 					<td>
-						<?php print __('Devices');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>

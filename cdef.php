@@ -743,7 +743,7 @@ function cdef_edit() {
 
 					applySkin();
 
-					$('#continue').off('click').on('click', function(data) {
+					$('#continue').rebind('click', function(data) {
 						$.post('cdef.php?action=item_remove', {
 							__csrf_magic: csrfMagicToken,
 							cdef_id: $('#my_cdef_id').val(),
@@ -830,7 +830,7 @@ function cdef() {
 			<table role='presentation' class='filterTable'>
 				<tr>
 					<?php html_search_filter(true);?>
-					<?php html_rows_filter(__('CDEFs'), true);?>
+					<?php html_rows_filter(__('Rows'), true);?>
 					<td>
 						<span>
 							<input type='checkbox' id='has_graphs' <?php print (get_request_var('has_graphs') == 'true' ? 'checked':'');?>>

@@ -509,7 +509,7 @@ function display_matching_graphs($rule, $rule_type, $url) {
 							<input type='text' class='ui-state-default ui-corner-all' id='filter' size='25' value='<?php print html_escape_request_var('filter');?>'>
 						</td>
 						<td>
-							<?php print __('Devices');?>
+							<label for='rows'><?php print __('Rows');?></label>
 						</td>
 						<td>
 							<select id='rows'>
@@ -1159,7 +1159,7 @@ function display_matching_trees ($rule_id, $rule_type, $item, $url) {
 						</select>
 					</td>
 					<td>
-						<?php print __('Data Queries');?>
+						<label for='rows'><?php print __('Rows');?></label>
 					</td>
 					<td>
 						<select id='rows'>

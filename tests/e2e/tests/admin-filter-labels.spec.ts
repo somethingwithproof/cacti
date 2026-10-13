@@ -18,13 +18,13 @@ async function expectLabel(page: Page, id: string, text: string): Promise<void> 
 test.beforeEach(async ({ page }) => { await login(page); });
 
 const lists: Array<[string, Array<[string, string]>]> = [
-    ['host.php', [['site_id', 'Site']]],
-    ['sites.php', [['filter', 'Search'], ['rows', 'Sites']]],
-    ['pollers.php', [['filter', 'Search'], ['rows', 'Collectors'], ['refresh', 'Refresh']]],
-    ['plugins.php', [['filter', 'Search'], ['state', 'Status']]],
-    ['links.php', [['filter', 'Search'], ['rows', 'Links']]],
-    ['user_domains.php', [['filter', 'Search'], ['rows', 'Domains']]],
-    ['managers.php', [['filter', 'Search'], ['rows', 'Receivers']]],
+    ['host.php', [['site_id', 'Site'], ['rows', 'Rows']]],
+    ['sites.php', [['filter', 'Search'], ['rows', 'Rows']]],
+    ['pollers.php', [['filter', 'Search'], ['rows', 'Rows'], ['refresh', 'Refresh']]],
+    ['plugins.php', [['filter', 'Search'], ['state', 'Status'], ['rows', 'Rows']]],
+    ['links.php', [['filter', 'Search'], ['rows', 'Rows']]],
+    ['user_domains.php', [['filter', 'Search'], ['rows', 'Rows']]],
+    ['managers.php', [['filter', 'Search'], ['rows', 'Rows']]],
 ];
 
 for (const [route, labels] of lists) {
