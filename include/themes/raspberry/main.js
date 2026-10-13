@@ -103,7 +103,7 @@ function themeReady() {
 
 	$(window).trigger('resize');
 
-	$('.action-icon-user').off('click').on('click', function(event) {
+	$('.action-icon-user').rebind('click', function(event) {
 		event.preventDefault();
 
 		if ($('.menuoptions').is(':visible') === false) {
@@ -134,12 +134,12 @@ function themeReady() {
 }
 
 function setMenuVisibility() {
-	storage=Storages.sessionStorage;
+	const storage = Storages.sessionStorage;
 
 	// Initialize the navigation settings
 	$('#navigation').hide();
 	$('li.menuitem').each(function() {
-		active = storage.get($(this).attr('id'));
+		const active = storage.get($(this).attr('id'));
 		if (active != null && active == 'active') {
 			$(this).find('ul').attr('aria-hidden', 'false').attr('aria-expanded', 'true').show();
 			$(this).next('a').show();
@@ -152,10 +152,10 @@ function setMenuVisibility() {
 	$('#navigation').show();
 
 	// Functon to give life to the Navigation pane
-	$('#nav li:has(ul) a.active').off('click').on('click', function(event) {
+	$('#nav li:has(ul) a.active').rebind('click', function(event) {
 		event.preventDefault();
 
-		id = $(this).closest('.menuitem').attr('id');
+		const id = $(this).closest('.menuitem').attr('id');
 
 		if ($(this).next().is(':visible')){
 			$(this).next('ul').attr('aria-hidden', 'true').attr('aria-expanded', 'false');
@@ -172,8 +172,6 @@ function setMenuVisibility() {
 		}
 
 		$('li.menuitem').not('#'+id).each(function() {
-			text = $(this).attr('id');
-			id   = $(this).attr('id');
 
 			$(this).find('ul').attr('aria-hidden', 'true').attr('aria-expanded', 'false');
 			$(this).find('ul').slideUp( { duration: 200, easing: 'swing' } );

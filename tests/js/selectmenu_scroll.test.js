@@ -65,15 +65,11 @@ test('scroll handlers close initialized select menus without duplicate bindings'
 					assert.equal(target, windowObject);
 
 					return {
-						off: (event) => {
-							assert.equal(event, 'scroll.cactiSelectmenu');
+						rebind: (bound, handler) => {
+							assert.equal(bound, 'scroll.cactiSelectmenu');
 
-							return {
-								on: (bound, handler) => {
-									boundEvent = bound;
-									scrollHandler = handler;
-								}
-							};
+							boundEvent = bound;
+							scrollHandler = handler;
 						}
 					};
 				}
@@ -130,4 +126,25 @@ test('applySkin binds scroll handling after theme widgets initialize', () => {
 
 	assert.notEqual(themeReadyPosition, -1);
 	assert.ok(setupPosition > themeReadyPosition);
+});
+
+test('repeated skin setup keeps one blinking interval and preserves other timers', () => {
+	const start = layoutSource.indexOf('// Setup blinking');
+	const end = layoutSource.indexOf('/* applySkin() runs more than once', start);
+	assert.ok(start > 0 && end > start);
+	const intervals = new Map([[1, () => {}]]);
+	let nextId = 1;
+	const context = vm.createContext({
+		setInterval(callback, delay) {
+			assert.equal(delay, 1200);
+			const id = ++nextId;
+			intervals.set(id, callback);
+			return id;
+		},
+		clearInterval(id) { intervals.delete(id); },
+	});
+	vm.runInContext(`function applySkin() { ${layoutSource.slice(start, end)} }`, context);
+	for (let transition = 0; transition < 100; transition++) context.applySkin();
+	assert.equal(intervals.size, 2);
+	assert.equal(intervals.has(1), true);
 });

@@ -161,7 +161,7 @@ final class LocalAuthLoginProvider implements CredentialLoginProviderInterface {
 
 				if (!$error) {
 					$error     = true;
-					$error_msg = __('Access Denied! Login Failed.') . ' <a href="auth_resetpassword.php">' . __('Reset password') . '</a>';
+					$error_msg = __('Access Denied! Login Failed.');
 
 					cacti_log(sprintf('LOGIN FAILED: Local Login Failed for user %s from IP Address %s', $username, get_client_addr()), false, 'AUTH');
 				}

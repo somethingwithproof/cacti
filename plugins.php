@@ -180,6 +180,17 @@ if (isrv('plugin')) {
 	$plugin = '';
 }
 
+if (in_array(grv('action'), [
+	'load', 'latest', 'install',
+	'uninstall', 'remove', 'remove_data',
+	'disable', 'enable', 'check',
+	'moveup', 'movedown', 'remote_enable',
+	'remote_disable', 'restore', 'delete',
+	'archive', 'ajax_dnd',
+], true)) {
+	csrf_require_post();
+}
+
 switch($action) {
 	case 'list':
 	case 'avail':
@@ -882,7 +893,7 @@ function update_show_current() : void {
 					});
 				}
 
-				$('.pirestore').off('click').on('click', function(event) {
+				$('.pirestore').rebind('click', function(event) {
 					event.preventDefault();
 
 					var dialogTitle    = '<?php print $resarchive_title; ?>';
@@ -895,7 +906,7 @@ function update_show_current() : void {
 					displayDialog(url, dialogTitle, dialogMessage, dialogForm, buttonContinue, buttonCancel, 80, 400);
 				});
 
-				$('.pirmarchive').off('click').on('click', function(event) {
+				$('.pirmarchive').rebind('click', function(event) {
 					event.preventDefault();
 
 					var dialogTitle    = '<?php print $rmarchive_title; ?>';
@@ -908,7 +919,7 @@ function update_show_current() : void {
 					displayDialog(url, dialogTitle, dialogMessage, dialogForm, buttonContinue, buttonCancel, 80, 400);
 				});
 
-				$('.piarchive').off('click').on('click', function(event) {
+				$('.piarchive').rebind('click', function(event) {
 					event.preventDefault();
 
 					var dialogTitle    = '<?php print $archive_title; ?>';
@@ -921,7 +932,7 @@ function update_show_current() : void {
 					displayDialog(url, dialogTitle, dialogMessage, dialogForm, buttonContinue, buttonCancel, 120, 600);
 				});
 
-				$('.pirmdata').off('click').on('click', function(event) {
+				$('.pirmdata').rebind('click', function(event) {
 					event.preventDefault();
 
 					var dialogTitle    = '<?php print $rmdata_title; ?>';
@@ -934,7 +945,7 @@ function update_show_current() : void {
 					displayDialog(url, dialogTitle, dialogMessage, dialogForm, buttonContinue, buttonCancel, 80, 400);
 				});
 
-				$('.piuninstall').off('click').on('click', function(event) {
+				$('.piuninstall').rebind('click', function(event) {
 					event.preventDefault();
 
 					var dialogTitle    = '<?php print $uninstall_title; ?>';
@@ -947,7 +958,7 @@ function update_show_current() : void {
 					displayDialog(url, dialogTitle, dialogMessage, dialogForm, buttonContinue, buttonCancel, 80, 400);
 				});
 
-				$('.pidisable').off('click').on('click', function(event) {
+				$('.pidisable').rebind('click', function(event) {
 					event.preventDefault();
 
 					var url = $(this).attr('href');
@@ -959,7 +970,7 @@ function update_show_current() : void {
 					postUrl({ url: url }, { __csrf_magic: csrfMagicToken });
 				});
 
-				$('.piforceremove').off('click').on('click', function(event) {
+				$('.piforceremove').rebind('click', function(event) {
 					event.preventDefault();
 
 					var cfg    = <?php print $forceremove_cfg; ?>;
@@ -974,7 +985,7 @@ function update_show_current() : void {
 					$('#dialogForm input[name=plugin]').val(plugin);
 				});
 
-				$('.pireadme').off('click').on('click', function(event) {
+				$('.pireadme').rebind('click', function(event) {
 					event.preventDefault();
 
 					var dialogTitle   = '<?php print __esc('Plugin Reame File'); ?>';
@@ -983,7 +994,7 @@ function update_show_current() : void {
 					displayFileDialog(url, dialogTitle, 400, 700);
 				});
 
-				$('.pichangelog').off('click').on('click', function(event) {
+				$('.pichangelog').rebind('click', function(event) {
 					event.preventDefault();
 
 					var dialogTitle = '<?php print __esc('Plugin ChangeLog File'); ?>';
