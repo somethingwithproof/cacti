@@ -26,7 +26,20 @@ jobs:
       (github.event_name != 'workflow_dispatch' ||
        github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/1.2.x')
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
+    services:
+      mariadb:
+        image: mariadb@sha256:7db29378d4fdab73f8123bbc2b48905c90d1a4b00cf848b028f1e81e623257f2 # 10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: cacti_test
+          MARIADB_USER: cacti
+          MARIADB_PASSWORD: cacti
+        ports:
+          - 33061:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -proot"
+          --health-interval=5s --health-timeout=3s --health-retries=30
     steps:
       - name: Checkout full history
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -42,6 +55,102 @@ jobs:
             echo '::error::SONAR_TOKEN must be configured in repository Actions secrets.'
             exit 1
           fi
+      - name: Setup locked PHP coverage dependencies
+        uses: ./.github/actions/setup-php-composer
+        with:
+          php-version: '8.3'
+          coverage: xdebug
+          extensions: intl, mysql, gd, ldap, gmp, xml, curl, json, mbstring
+          dependency-mode: locked-sonar-coverage
+          install-args: --prefer-dist --no-progress --no-interaction
+      - name: Setup Node for native browser coverage
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tests/e2e/package-lock.json
+      - name: Measure executable Node build-tool coverage
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          mkdir -p coverage
+          node --test --experimental-test-coverage --test-reporter=lcov \
+            --test-coverage-include='build/**/*.mjs' tests/js/sync_js.test.mjs > coverage/node.lcov.info
+      - name: Build managed assets and install browser tools
+        run: |
+          set -euo pipefail
+          npm run postinstall --ignore-scripts
+          # Measure the committed assets; postinstall also refreshes tracked bundles.
+          git restore --source=HEAD -- include/js/billboard.js include/js/jquery.tablesorter.pager.js \
+            include/js/jquery.tablesorter.widgets.js include/js/purify.js include/js/purify.js.map \
+            include/js/screenfull.js include/js/select2.js
+          git diff --exit-code HEAD
+          npm ci --prefix tests/e2e --ignore-scripts
+          node --test tests/e2e/coverage/report.test.mjs
+          python3 tests/tools/test_sonar_coverage.py
+          python3 tests/tools/test_sonar_browser_coverage.py
+          python3 tests/tools/test_mysql_init_identifier.py
+          python3 tests/tools/test_sonar_profile_policy.py
+          cd tests/e2e
+          npx --no-install playwright install --with-deps chromium
+      - name: Record the coverage source revision
+        run: python3 tests/tools/check_sonar_coverage.py --snapshot --root "$GITHUB_WORKSPACE"
+      - name: Measure application PHP coverage
+        env:
+          XDEBUG_MODE: coverage
+          CACTI_TEST_MYSQL_DSN: mysql:host=127.0.0.1;port=33061;dbname=cacti_test
+          CACTI_TEST_MYSQL_USER: root
+          CACTI_TEST_MYSQL_PASS: root
+          CACTI_TEST_DB_HOST: 127.0.0.1
+          CACTI_TEST_DB_PORT: '33061'
+          CACTI_TEST_DB_NAME: cacti_test
+          CACTI_TEST_DB_USER: cacti
+          CACTI_TEST_DB_PASS: cacti
+        run: |
+          set -euo pipefail
+          mkdir -p coverage
+          include/vendor/bin/pest --configuration=phpunit-sonar.xml \
+            --testsuite=Unit,Integration --coverage-clover=coverage/php.xml
+      - name: Start disposable native Cacti runtime
+        working-directory: tests/e2e
+        run: |
+          set -euo pipefail
+          # Build before creating the HTTP worker's private output directory:
+          # the runner must be able to traverse the build context itself.
+          docker compose -f docker-compose.yml -f docker-compose.coverage.yml build cacti
+          sudo install -d -m 0700 -o 33 -g 33 ../../coverage/php-browser
+          docker compose -f docker-compose.yml -f docker-compose.coverage.yml up -d --no-build
+          ready=0
+          for attempt in $(seq 1 60); do
+            echo "Native runtime readiness probe $attempt/60"
+            if curl -fsS http://127.0.0.1:8080/ >/dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            sleep 3
+          done
+          [[ "$ready" == 1 ]]
+          docker compose exec -T mariadb mariadb -ucactiuser -pcactiuser cacti -e \
+            "REPLACE INTO settings (name, value) VALUES ('auth_method', '1'); UPDATE user_auth SET must_change_password='', password_change='on' WHERE id=1;"
+      - name: Collect native JavaScript coverage and export LCOV
+        env:
+          CACTI_BASE_URL: http://127.0.0.1:8080
+          CACTI_COVERAGE_DIR: ${{ github.workspace }}/coverage/browser
+        run: |
+          set -euo pipefail
+          cd tests/e2e
+          npx --no-install playwright test tests/sonar-runtime-coverage.spec.ts --project=chromium --workers=1
+          npm run coverage:report
+          docker compose -f docker-compose.yml -f docker-compose.coverage.yml stop --timeout 60 cacti
+          cd ../..
+          sudo chown -R "$(id -u):$(id -g)" coverage/php-browser
+          python3 tests/tools/merge_sonar_browser_coverage.py --root "$GITHUB_WORKSPACE"
+      - name: Validate coverage belongs to the scanned checkout
+        run: |
+          set -euo pipefail
+          python3 tests/tools/check_sonar_coverage.py --root "$GITHUB_WORKSPACE"
       # workflow_dispatch does not automatically infer the selected branch.
       # Validate context before passing it to the scanner argument parser.
       - name: Verify reviewed PHP profile
@@ -49,8 +158,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           set -euo pipefail
-          python3 tests/tools/test_mysql_init_identifier.py
-          python3 tests/tools/test_sonar_profile_policy.py
           python3 .github/scripts/check-sonar-profile.py
       - name: Measure profile checker coverage
         env:
@@ -92,3 +199,19 @@ jobs:
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=600
             ${{ steps.context.outputs.args }}
+      - name: Upload coverage evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: sonar-coverage-${{ github.sha }}
+          path: |
+            coverage/php.xml
+            coverage/php-browser.xml
+            coverage/revision.json
+            coverage/lcov.info
+            coverage/node.lcov.info
+          if-no-files-found: error
+      - name: Stop disposable native runtime
+        if: always()
+        working-directory: tests/e2e
+        run: docker compose -f docker-compose.yml -f docker-compose.coverage.yml down --volumes

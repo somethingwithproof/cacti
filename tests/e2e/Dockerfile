@@ -15,6 +15,8 @@ FROM php:8.3-apache
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+ARG CACTI_E2E_COVERAGE=0
+
 # System packages Cacti needs at runtime plus build-time extras for PHP
 # extensions (gd, intl, ldap, gmp, snmp, mysqli). mariadb-client is kept so
 # the entrypoint can seed the schema before Apache forks.
@@ -65,13 +67,26 @@ WORKDIR /var/www/html
 # Copy repo contents; .dockerignore trims node_modules, .git, worktrees, etc.
 COPY . /var/www/html
 
-RUN composer install --no-interaction --prefer-dist --no-dev \
+RUN if [ "$CACTI_E2E_COVERAGE" = "1" ]; then \
+		composer install --no-interaction --prefer-dist; \
+	else \
+		composer install --no-interaction --prefer-dist --no-dev; \
+	fi \
 	&& chown -R www-data:www-data /var/www/html \
 	&& a2enmod rewrite \
 	&& cp include/config.php.dist include/config.php
 
 COPY tests/e2e/entrypoint.sh /usr/local/bin/cacti-entrypoint
 RUN chmod +x /usr/local/bin/cacti-entrypoint
+
+# Instrument only the explicitly selected disposable coverage image.
+RUN if [ "$CACTI_E2E_COVERAGE" = "1" ]; then \
+		pecl install xdebug-3.5.0 \
+		&& docker-php-ext-enable xdebug \
+		&& printf '%s\n' 'xdebug.mode=coverage' \
+		'auto_prepend_file=/var/www/html/tests/fixtures/Coverage/CollectRequest.php' \
+		> /usr/local/etc/php/conf.d/cacti-request-coverage.ini; \
+	fi
 
 EXPOSE 80
 
