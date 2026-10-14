@@ -7,7 +7,14 @@ test('password-change username renders as text', function () {
 	preg_match('/[^\n]*id=\'current\'[^\n]*/', $source, $line);
 	preg_match('/<\?php print (.+?);\s*\?>/', $line[0], $expression);
 	$user   = ['username' => '<img src=x onerror=alert(1)>'];
-	$output = eval('return ' . $expression[1] . ';');
+	$path   = tempnam(sys_get_temp_dir(), 'cacti-xss-test-');
+	file_put_contents($path, '<?php return ' . $expression[1] . ';');
+
+	try {
+		$output = include $path;
+	} finally {
+		unlink($path);
+	}
 	expect($output)->toBe(htmle($user['username']));
 });
 
@@ -16,13 +23,16 @@ test('authentication failure messages render as text', function () {
 	preg_match('/print [^\n]*ui-state-error[^\n]*;/', $source, $statement);
 	$message        = '<script>alert(1)</script>';
 	$custom_message = '<img src=x onerror=alert(2)>';
+	$path           = tempnam(sys_get_temp_dir(), 'cacti-xss-test-');
+	file_put_contents($path, '<?php ' . $statement[0]);
 	ob_start();
 
 	try {
-		eval($statement[0]);
+		include $path;
 		$output = ob_get_contents();
 	} finally {
 		ob_end_clean();
+		unlink($path);
 	}
 	expect($output)->toContain(htmle($message))->toContain(htmle($custom_message))
 		->not->toContain('<script>')->not->toContain('<img');

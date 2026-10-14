@@ -14,15 +14,19 @@ test('local package repositories cannot read outside their directory', function 
 	$link       = symlink($root . '/outside', $root . '/repo/escape');
 	$repo       = ['repo_location' => $root . '/repo', 'name' => 'fixture'];
 	$javascript = true;
+	$path       = tempnam(sys_get_temp_dir(), 'cacti-repo-test-');
 
 	try {
 		if (!$link && str_starts_with($filename, 'escape/')) {
 			test()->markTestSkipped('Symlinks unavailable');
 		}
 		// Execute the actual directory branch with a controlled repository lookup.
-		$data = eval($block[1]);
+		file_put_contents($path, '<?php ' . $block[1]);
+		$data = include $path;
 		expect($data)->toBe($expected);
 	} finally {
+		unlink($path);
+
 		if ($link) {
 			unlink($root . '/repo/escape');
 		}
