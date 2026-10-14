@@ -46,6 +46,21 @@ class ProfilePolicyTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             MODULE.validate_profile(self.policy, self.profile, self.response)
 
+    def test_rejects_missing_baseline_rule_outside_required_subset(self):
+        self.policy['baseline_rules'].append('php:S2076')
+        with self.assertRaisesRegex(ValueError, 'reviewed baseline'):
+            MODULE.validate_profile(self.policy, self.profile, self.response)
+
+    def test_rejects_unreviewed_rule_inventory(self):
+        self.response['rules'].append({'key': 'php:S2076'})
+        with self.assertRaisesRegex(ValueError, 'reviewed baseline'):
+            MODULE.validate_profile(self.policy, self.profile, self.response)
+
+    def test_requires_both_allowed_omissions_in_baseline(self):
+        self.policy['baseline_rules'].remove('php:S105')
+        with self.assertRaisesRegex(ValueError, 'both allowed formatting omissions'):
+            MODULE.validate_profile(self.policy, self.profile, self.response)
+
     def test_rejects_unreviewed_naming_pattern(self):
         self.response['actives']['php:S100'][0]['params'][0]['value'] = '.*'
         with self.assertRaises(ValueError):

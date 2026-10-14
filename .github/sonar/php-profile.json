@@ -4,6 +4,12 @@
   "language": "php",
   "name": "Cacti PHP conventions",
   "base_profile": "PSR-2",
+  "baseline_rules": [
+    "php:S100", "php:S101", "php:S103", "php:S105", "php:S113", "php:S115",
+    "php:S122", "php:S128", "php:S1124", "php:S1131", "php:S1757", "php:S1765",
+    "php:S1766", "php:S1779", "php:S1780", "php:S1781", "php:S1784", "php:S1788",
+    "php:S1793", "php:S1808"
+  ],
   "deactivate": {
     "php:S1808": "Composite PSR-2 whitespace and brace rules conflict with .php-cs-fixer.php, which enforces Cacti formatting in CI.",
     "php:S105": "Cacti requires tab indentation; PHP-CS-Fixer enforces indentation_type."

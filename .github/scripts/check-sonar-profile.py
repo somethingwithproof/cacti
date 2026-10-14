@@ -18,6 +18,14 @@ def validate_profile(policy, profile, response):
         raise ValueError('Required PHP rules are missing from the profile')
     if set(policy['deactivate']) & active:
         raise ValueError('PSR-2 rules conflict with Cacti PHP-CS-Fixer conventions')
+    baseline = set(policy['baseline_rules'])
+    if not set(policy['deactivate']) <= baseline:
+        raise ValueError('Reviewed baseline must include both allowed formatting omissions')
+    expected_active = baseline - set(policy['deactivate'])
+    if active != expected_active:
+        missing = sorted(expected_active - active)
+        unexpected = sorted(active - expected_active)
+        raise ValueError(f'PHP rule inventory differs from reviewed baseline: missing={missing}, unexpected={unexpected}')
     expected = {**policy['configure'], 'php:S103': {'maximumLineLength': '120'}}
     for rule, parameters in expected.items():
         activations = [item for item in response['actives'].get(rule, [])
@@ -56,7 +64,7 @@ def main():
     if rules['total'] != len(rules['rules']):
         raise SystemExit('Profile verification requires the complete rule inventory')
     validate_profile(policy, profiles[0], rules)
-    print('Cacti PHP profile verified; required rules and line limit retained.')
+    print('Cacti PHP profile verified; complete reviewed inventory and line limit retained.')
 
 
 if __name__ == '__main__':
