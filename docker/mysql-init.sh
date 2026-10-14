@@ -3,9 +3,12 @@
 # The canonical Cacti schema contains directives for Cacti's installer SQL
 # parser. Convert those two directives before feeding it to MySQL's client.
 case "${MYSQL_DATABASE:-}" in
-	''|*[!a-zA-Z0-9_]*)
+	''|*[!abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_]*)
 		echo 'MYSQL_DATABASE must contain only letters, numbers, and underscores.' >&2
 		return 1
+		;;
+	*)
+		# Valid identifiers proceed to the schema import below.
 		;;
 esac
 
