@@ -26,8 +26,6 @@ Cacti CHANGELOG
 -security: Keep LDAP directory errors out of the login page
 -security: Demand TLS certificates for new LDAP domains
 -security: Restore the Cacti error handler on LDAP bind-only and empty-password paths
--issue#7969: Restore excluded integration and mutation regression coverage
--issue#7969: Align Rocky Linux compatibility checks with the supported PHP runtime
 -security#GHSA-2fhv-c794-v433: Authorize Data Source enable/disable against the owning device before mutating
 -security#GHSA-4p7f-qcc2-vmx7: Escape path_php_binary before the resource-cache PHP syntax-check shell command
 -security#GHSA-967c-6qj7-q7rh: Confirm the rrdtool control-character strip closes the RRD-create |query_*| injection path
@@ -68,6 +66,8 @@ Cacti CHANGELOG
 -security#8158: Harden - Confine automation sorting and pagination before SQL and HTML rendering
 -security#8158: Harden - Replace sibling password-reset links and revoke authentication state after reset
 -security#GHSA-3jj2-v5ch-wmq5: Fail closed on a posted LDAP realm that is not a configured domain
+-issue#7969: Restore excluded integration and mutation regression coverage
+-issue#7969: Align Rocky Linux compatibility checks with the supported PHP runtime
 -issue#8221: Align the Deepness theme console menu icon sizing and alignment with the Modern theme and remove the sub-menu indentation
 -issue#8219: Fix the Deepness theme rendering the modern filter bar controls stacked vertically by porting the missing .filterRow/.filterColumn table-display rules from the other themes
 -issue#8220: Skin the modern filter Edit dialog (.ui-dialog.cactiFilterDialog titlebar/content/buttonpane) for the Deepness theme using its emerald palette so the dialog matches the theme instead of the default jQuery UI themeroller look

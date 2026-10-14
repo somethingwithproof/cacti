@@ -37,6 +37,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          set -euo pipefail
           if [[ -z "$SONAR_TOKEN" ]]; then
             echo '::error::SONAR_TOKEN must be configured in repository Actions secrets.'
             exit 1
