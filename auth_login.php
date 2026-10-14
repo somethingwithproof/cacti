@@ -434,4 +434,4 @@ html_auth_footer('login', $error_message, "
 
 		});
 	</script>
-");
+", $error && $frv_realm <= 1);
