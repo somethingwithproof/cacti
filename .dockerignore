@@ -1,4 +1,5 @@
 .git
+.omc
 .github
 # check-changelog.py is a composer 'check' step
 !.github/scripts

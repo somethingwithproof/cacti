@@ -149,3 +149,11 @@ at all**, which is easy to read as passing in both the merge box and
 with `--branch <name>`. Report a pull request as green only once its checks
 exist and have completed.
 
+
+## Runtime and operational boundaries
+
+Select language runtimes through `mise`, following `composer.json`, `.nvmrc`
+and the checked-out CI matrix. Database installs/upgrades, live polling and
+configuration changes require an explicitly selected disposable environment or
+authorized deployment. Keep real credentials, RRD data and research notes out of
+commits. Preserve runtime directory security guards and generated-asset inputs.
