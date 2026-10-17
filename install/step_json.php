@@ -38,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 	exit;
 }
 
+require_once __DIR__ . '/preflight.php';
+
 // set the json variable for request validation handling
 include_once('lib/functions.php');
 include_once('lib/html_utility.php');
