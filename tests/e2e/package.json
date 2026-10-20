@@ -7,9 +7,14 @@
         "test": "playwright test",
         "test:htmx": "playwright test tests/htmx-loader.spec.ts",
         "test:smoke": "playwright test tests/login-smoke.spec.ts",
-        "install-browsers": "playwright install --with-deps chromium"
+        "install-browsers": "playwright install --with-deps chromium",
+        "coverage:report": "node coverage/report.mjs"
     },
     "devDependencies": {
-        "@playwright/test": "1.64.0"
+        "@playwright/test": "1.64.0",
+        "v8-to-istanbul": "9.3.0",
+        "istanbul-lib-coverage": "3.2.2",
+        "istanbul-lib-report": "3.0.1",
+        "istanbul-reports": "3.2.0"
     }
 }

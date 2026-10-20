@@ -22,6 +22,9 @@ rra/*.rrd
 # Local assistant state
 .omc
 
+# Coverage is mounted only into the disposable instrumentation runtime.
+/coverage/
+
 # Local runtime configuration and credentials never belong in build layers.
 .env.*
 **/.env
