@@ -144,6 +144,13 @@ a:hover {
 	color: #333333;
 }
 
+i.ti {
+	font-size: 16px;
+	padding: 0px 3px;
+	text-align: left;
+	vertical-align: middle;
+}
+
 i.fa, i.fas, i.fab, i.far, i.fal {
 	font-size: 15px;
 	padding: 0px 3px;
@@ -1009,7 +1016,7 @@ legend {
 	overflow-y: auto !important;
 	overflow-x: hidden !important;
 	padding-left: 10px;
-	padding-right: 0px;
+	padding-right: 15px;
 }
 
 .cactiConsoleContentArea>div:last-child {
@@ -1345,6 +1352,8 @@ legend {
 }
 
 .ui-dialog.cactiFilterDialog .ui-dialog-content {
+	/* floor the content width so the table-display edit rows lay out instead of collapsing to min-content under the dialog's width:auto sizing */
+	min-width: 480px;
 	padding: 14px 16px;
 }
 
@@ -2984,4 +2993,14 @@ select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.s
 
 .filterTable input[type='checkbox']:not(.formCheckbox) + label {
 	cursor: pointer;
+}
+
+/* Graph drilldown action menu palette (consumed by include/css/graph_drilldown.css). */
+:root {
+	--cacti-dd-fg: #242424;
+	--cacti-dd-menu-bg: rgba(248,248,248,0.92);
+	--cacti-dd-menu-bg-open: rgba(255,255,255,0.97);
+	--cacti-dd-panel-bg: rgba(255,255,255,0.97);
+	--cacti-dd-border: rgba(0,0,0,0.20);
+	--cacti-dd-accent: #41708c;
 }

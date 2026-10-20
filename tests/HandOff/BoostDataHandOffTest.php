@@ -11,6 +11,8 @@
  +-------------------------------------------------------------------------+
  */
 
+require_once dirname(__DIR__) . '/Helpers/PhpSource.php';
+
 if (!function_exists('boostSource')) {
 	function boostSource(string $path): string {
 		$source = file_get_contents(CACTI_PATH_BASE . '/' . $path);
@@ -76,7 +78,7 @@ test('Recovery status SQL remains valid when ANSI_QUOTES is enabled', function (
 test('Scheduled Boost retains shard ownership after an RRD update failure', function () {
 	$poller = boostSource('poller_boost.php');
 
-	expect($poller)->toContain('function boost_process_output(int $local_data_id, array $outarray, string $rrd_path, array $rrd_tmplp, mixed $rrdtool_pipe) : bool');
+	expect($poller)->toContainPhp('function boost_process_output(int $local_data_id, array $outarray, string $rrd_path, array $rrd_tmplp, mixed $rrdtool_pipe) : bool');
 	expect($poller)->toContain('if ($updates_ok && $results !== false)');
 	expect($poller)->toContain('return $updates_ok && $results !== false ? cacti_sizeof($results) : -1;');
 	expect($poller)->toContain('if ($pass_rows < 0)');
@@ -107,11 +109,12 @@ test('Boost child completion and archive deletion are scoped to a parent run', f
 	expect($schema)->toContain('`child_id` int(10) unsigned NOT NULL default 0');
 });
 
-test('legacy direct Boost redirection bypasses staging while acknowledgement callers verify storage', function () {
+test('direct Boost redirection never re-stages collector output from the poller', function () {
 	$boost = boostSource('lib/boost.php');
 
-	expect($boost)->toContain("if (!\$track_staging && read_config_option('boost_redirect') == 'on')")
-		->and($boost)->toContain('cmd.php already staged these rows');
+	expect($boost)->toContain("if (read_config_option('boost_redirect') == 'on') {")
+		->and($boost)->not->toContain('$track_staging')
+		->and($boost)->toContain('spine/cmd.php already staged these rows');
 });
 
 test('Archive discovery validates every dynamic table identifier', function () {
@@ -125,11 +128,11 @@ test('Remote tuples are quoted by their destination connection', function () {
 	$cmd      = boostSource('cmd.php');
 	$recovery = boostSource('poller_recovery.php');
 
-	expect($cmd)->toContain("db_qstr(\$item['rrd_name'], \$poller_db_cnn_id)");
-	expect($cmd)->toContain('db_qstr($output, $poller_db_cnn_id)');
-	expect($cmd)->toContain("db_qstr('U', \$poller_db_cnn_id)");
+	expect($cmd)->toContainPhp("db_qstr(\$item['rrd_name'], \$poller_db_cnn_id)");
+	expect($cmd)->toContainPhp('db_qstr($output, $poller_db_cnn_id)');
+	expect($cmd)->toContainPhp("db_qstr('U', \$poller_db_cnn_id)");
 	expect($cmd)->toContain("IFNULL(s.disabled, \\'\\') != \\'on\\'");
-	expect($recovery)->toContain("db_qstr(\$row['rrd_name'], \$remote_conn)");
+	expect($recovery)->toContainPhp("db_qstr(\$row['rrd_name'], \$remote_conn)");
 });
 
 test('Graph cache names are opaque and writes are atomically published', function () {

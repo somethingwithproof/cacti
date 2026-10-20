@@ -5673,10 +5673,14 @@ function sanitize_uri(string $uri) : string {
 		']', '{',
 		'}', ';',
 		'!', '(',
-		')'
+		')', '\\',
+		"\0", "\r",
+		"\n"
 	];
 
 	static $drop_char_replace = [
+		'', '',
+		'', '',
 		'', '',
 		'', '',
 		'', '',
@@ -7652,6 +7656,40 @@ function IgnoreErrorHandler(string $message, string $file = '', int $line = 0) :
 	return false;
 }
 
+/**
+ * Attribute errors only to files within the resolved Cacti plugins directory.
+ * The first directory below that root owns nested vendor/plugin directories.
+ */
+function cacti_error_plugin(string $file) : string {
+	$root = realpath(CACTI_PATH_PLUGINS);
+	$path = realpath($file);
+
+	if ($root === false || $path === false) {
+		return '';
+	}
+
+	$root           = str_replace('\\', '/', $root) . '/';
+	$path           = str_replace('\\', '/', $path);
+	$prefix_matches = DIRECTORY_SEPARATOR === '\\'
+		? str_starts_with(strtolower($path), strtolower($root))
+		: str_starts_with($path, $root);
+
+	if (!$prefix_matches) {
+		return '';
+	}
+
+	$relative  = substr($path, strlen($root));
+	$separator = strpos($relative, '/');
+
+	if ($separator === false) {
+		return '';
+	}
+
+	$plugin = substr($relative, 0, $separator);
+
+	return preg_match('/^[A-Za-z0-9_-]+$/D', $plugin) ? $plugin : '';
+}
+
 function CactiErrorHandler(int $level, string $message, string $file, int $line, array $context = []) : bool {
 	global $phperrors;
 
@@ -7669,9 +7707,7 @@ function CactiErrorHandler(int $level, string $message, string $file, int $line,
 		return true;
 	}
 
-	preg_match("/.*\/plugins\/([\w-]*)\/.*/", $file, $output_array);
-
-	$plugin = $output_array[1] ?? '';
+	$plugin = cacti_error_plugin($file);
 	$error  = 'Unknown error occurred';
 
 	if ($level != null && isset($phperrors[$level])) {
@@ -7758,9 +7794,7 @@ function CactiShutdownHandler() : bool {
 			case E_CORE_WARNING:
 			case E_COMPILE_WARNING:
 			case E_PARSE:
-				preg_match('/.*\/plugins\/([\w-]*)\/.*/', $error['file'], $output_array);
-
-				$plugin = ($output_array[1] ?? '');
+				$plugin = cacti_error_plugin($error['file']);
 
 				if ($error['type'] != null && isset($phperrors[$error['type']])) {
 					$message = 'PHP ' . $phperrors[$error['type']] .
@@ -9157,12 +9191,17 @@ function get_md5_include_css(string $path, bool $async = false, string|null $the
  * @param string|null $theme Theme to use
  * @param string|null $file  File to include
  * @param string|null $rel   Rel type output when not null (eg, icon, shortcut icon)
+ * @param string|null $type  Icon type output when not null (eg, image/svg+xml)
  * @param string|null $sizes Sizes output when not null (eg, 96x96)
  *
  * @return string
  */
-function get_md5_include_icon(string $path, bool $async = false, string|null $theme = null, string|null $file = null, string|null $rel = null, string|null $sizes = null) : string {
-	$format = '<link href=\'%s\' type=\'text/css\' %s%s>';
+function get_md5_include_icon(string $path, bool $async = false, string|null $theme = null, string|null $file = null, string|null $rel = null, string|null $type = null, string|null $sizes = null) : string {
+	if ($type === null) {
+		$format = '<link href=\'%s\' type=\'text/css\' %s%s>';
+	} else {
+		$format = "<link href='%s' type='$type' %s%s>";
+	}
 
 	if (!empty($rel)) {
 		$rel = " rel='" . htmlspecialchars($rel) . "'";
@@ -10745,7 +10784,10 @@ function cacti_path_is_within(string $candidate, string $base, ?bool $windows = 
  * validate_relative_path_within - validates an untrusted relative path
  *
  * Rejects absolute paths, drive letters, empty or dot segments, and symlinked
- * segments under the base, then confirms the result resolves inside the base.
+ * segments under the base, then confirms the deepest existing ancestor resolves
+ * inside the base. A not-yet-created entry (including nested directories that
+ * an archive restore has not built yet) is allowed, mirroring
+ * data_source_path_within_rra().
  *
  * @param mixed  $path     The untrusted relative path
  * @param string $base_dir The base directory the path must stay within
@@ -10781,27 +10823,80 @@ function validate_relative_path_within(mixed $path, string $base_dir) : mixed {
 
 	$candidate = $base_real . '/' . implode('/', $parts);
 
-	// block symlink pivots under writable base paths
-	$walk = $base_real;
+	// block symlink pivots under writable base paths, and remember the deepest
+	// ancestor that actually exists
+	$walk             = $base_real;
+	$deepest_existing = $base_real;
 
 	foreach ($parts as $part) {
 		$walk .= '/' . $part;
 
-		if (file_exists($walk) && is_link($walk)) {
+		// is_link() before file_exists(): file_exists() follows the link and is
+		// false for a dangling symlink, so a symlink segment whose target does
+		// not exist yet would otherwise be accepted.
+		if (is_link($walk)) {
 			return false;
+		}
+
+		if (file_exists($walk)) {
+			$deepest_existing = $walk;
 		}
 	}
 
 	/**
-	 * An entry that does not exist yet is judged by its parent directory.
-	 * cacti_path_is_within() already fails closed when realpath() cannot
-	 * resolve either side, so both cases share one check.
+	 * A not-yet-created entry is judged by its deepest existing ancestor, so a
+	 * nested archive directory that has not been created yet is not mistaken
+	 * for an escape. Every segment is a plain name and no walked segment is a
+	 * symlink, so the full candidate stays within the base.
 	 */
-	$anchor = file_exists($candidate) ? $candidate : dirname($candidate);
+	$resolved = realpath($deepest_existing);
 
-	if (!cacti_path_is_within($anchor, $base_real)) {
+	return $resolved !== false && cacti_path_is_within($resolved, $base_real) ? $candidate : false;
+}
+
+/**
+ * Log an administrative action performed on a user account.
+ *
+ * @param mixed $user   Username of the affected account.
+ * @param mixed $action Action that was performed.
+ *
+ * @return bool Whether the message was written to the Cacti log.
+ */
+function log_user_action($user, $action) {
+	if (!is_string($user) || !is_string($action)) {
 		return false;
 	}
 
-	return $candidate;
+	$clean = static function (string $value) : string {
+		return preg_replace('/[\x00-\x1f\x7f]/', '', $value) ?? '';
+	};
+	$user   = $clean($user);
+	$action = $clean($action);
+
+	if ($user === '' || $action === '') {
+		return false;
+	}
+
+	if (!empty($_SESSION['sess_user_id'])) {
+		$acting_user_id = $_SESSION['sess_user_id'];
+		$acting_user    = get_username($acting_user_id);
+
+		if (!is_string($acting_user) || $acting_user === '') {
+			$acting_user = 'user ID ' . $acting_user_id;
+		}
+	} elseif (PHP_SAPI === 'cli') {
+		$acting_user = get_execution_user();
+
+		if ($acting_user === '') {
+			$acting_user = 'unknown user';
+		}
+
+		$acting_user .= ' (CLI)';
+	} else {
+		$acting_user = 'unknown user';
+	}
+
+	$acting_user = $clean($acting_user);
+
+	return cacti_log("NOTE: User '$user' was $action by user '$acting_user'", false, PHP_SAPI === 'cli' ? 'AUTHC' : 'AUTH');
 }

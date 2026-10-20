@@ -564,9 +564,9 @@ function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_button
 
 	print "<span class='graphDrillDownMenu noprint' role='button' tabindex='0' aria-haspopup='true' aria-expanded='false' aria-label='" . __esc('Graph Actions') . "'><i class='fa fa-bars'></i></span>";
 	print "<div class='iconWrapper'>";
-	print "<a class='iconLink utils' href='#' role='link' id='graph_" . $local_graph_id . "_util'><i class='drillDown ti ti-settings-filled actionCog' title='" . __esc('Graph Details, Zooming and Debugging Utilities') . "'></i></a><br>";
-	print "<a class='iconLink csvexport' href='#' role='link' id='graph_" . $local_graph_id . "_csv'><i class='drillDown ti ti-file-type-csv fileCSV' title='" . __esc('CSV Export of Graph Data') . "'></i></a><br>";
-	print "<a class='iconLink mrtg' href='#' role='link' id='graph_" . $local_graph_id . "_mrtg'><i class='drillDown ti ti-table threeBars' title='" . __esc('Time Graph View') . "'></i></a><br>";
+	print "<a class='iconLink utils' href='#' role='link' id='graph_" . $local_graph_id . "_util'><i class='drillDown ti ti-settings-filled actionCog' title='" . __esc('Details') . "'></i></a><br>";
+	print "<a class='iconLink csvexport' href='#' role='link' id='graph_" . $local_graph_id . "_csv'><i class='drillDown ti ti-file-type-csv fileCSV' title='" . __esc('CSV Export') . "'></i></a><br>";
+	print "<a class='iconLink mrtg' href='#' role='link' id='graph_" . $local_graph_id . "_mrtg'><i class='drillDown ti ti-table threeBars' title='" . __esc('Time View') . "'></i></a><br>";
 
 	if (is_realm_allowed(3)) {
 		$host_id = db_fetch_cell_prepared('SELECT host_id
@@ -588,14 +588,14 @@ function graph_drilldown_icons(int $local_graph_id, string $type = 'graph_button
 
 	if (read_config_option('realtime_enabled') == 'on' && is_realm_allowed(25)) {
 		if (read_user_setting('realtime_mode') == '' || read_user_setting('realtime_mode') == '1') {
-			print "<a class='iconLink realtime' href='#' role='link' id='graph_" . $local_graph_id . "_realtime'><i class='drillDown ti ti-chart-area realTime' title='" . __esc('Click to view just this Graph in Real-time') . "'></i></a><br>";
+			print "<a class='iconLink realtime' href='#' role='link' id='graph_" . $local_graph_id . "_realtime'><i class='drillDown ti ti-chart-area realTime' title='" . __esc('Realtime') . "'></i></a><br>";
 		} else {
-			print "<a class='iconLink' href='#' onclick=\"window.open('" . CACTI_PATH_URL . 'graph_realtime.php?top=0&left=0&local_graph_id=' . $local_graph_id . "', 'popup_" . $local_graph_id . "', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=650,height=300');return false\"><i class='drillDown ti ti-chart-area realTime' title='" . __esc('Click to view just this Graph in Real-time') . "'></i></a><br>";
+			print "<a class='iconLink' href='#' onclick=\"window.open('" . CACTI_PATH_URL . 'graph_realtime.php?top=0&left=0&local_graph_id=' . $local_graph_id . "', 'popup_" . $local_graph_id . "', 'directories=no,titlebar=no,toolbar=no,location=no,status=no,menubar=no,scrollbars=no,resizable=yes,width=650,height=300');return false\"><i class='drillDown ti ti-chart-area realTime' title='" . __esc('Realtime') . "'></i></a><br>";
 		}
 	}
 
 	if (is_realm_allowed(1043)) {
-		print "<a href='#' class='iconLink spikekill' data-graph='" . $local_graph_id . "' id='graph_" . $local_graph_id . "_sk'><i id='sk" . $local_graph_id . "' class='drillDown ti ti-paint-filled spikeKill' title='" . __esc('Kill Spikes in Graphs') . "'></i></a>";
+		print "<a href='#' class='iconLink spikekill' data-graph='" . $local_graph_id . "' id='graph_" . $local_graph_id . "_sk'><i id='sk" . $local_graph_id . "' class='drillDown ti ti-paint-filled spikeKill' title='" . __esc('Kill Spikes') . "'></i></a>";
 		print '<br>';
 	}
 
@@ -2442,6 +2442,21 @@ function html_make_device_where() : string {
 		$sql_where .= ($sql_where != '' ? ' AND ' : ' (') . 'h.external_id = ' . db_qstr(gnrv('external_id'));
 	}
 
+	// cross-filter the Device list by the selected Graph Template(s); -1 == 'All' applies no restriction
+	if (isrv('graph_template_id') && gnrv('graph_template_id') != '-1') {
+		// ajax_hosts reaches this before the graph filter is sanitized, so validate the raw
+		// request value against the same allowlist the filter uses before transforming it
+		$requested = gnrv('graph_template_id');
+
+		if (is_string($requested) && preg_match('/^(cg_[0-9]+|dq_[0-9]+|-?[0-9]+)(,(cg_[0-9]+|dq_[0-9]+|-?[0-9]+))*$/', $requested)) {
+			$graph_templates = html_transform_graph_template_ids($requested);
+
+			if ($graph_templates !== '' && $graph_templates !== '-1') {
+				$sql_where .= ($sql_where != '' ? ' AND ' : ' (') . db_in_clause('gl.graph_template_id', $graph_templates);
+			}
+		}
+	}
+
 	if ($sql_where != '') {
 		$sql_where .= ')';
 	}
@@ -3094,7 +3109,7 @@ function html_spikekill_js() : void {
  * @return void
  */
 function html_common_header(string $title, string $selectedTheme = '') : void {
-	global $path2calendar, $path2timepicker, $path2colorpicker, $path2ms, $path2msfilter;
+	global $config, $path2calendar, $path2timepicker, $path2colorpicker, $path2ms, $path2msfilter;
 
 	if ($selectedTheme == '') {
 		$selectedTheme = get_selected_theme();
@@ -3246,13 +3261,11 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 		var zoom_i18n_zoom_out_factor = '<?php print __esc('Zoom Out Factor'); ?>';
 		var zoom_i18n_zoom_out_positioning = '<?php print __esc('Zoom Out Positioning'); ?>';
 		var zoom_outOfRangeTitle='<?php print __esc('Zoom Window Out of Range'); ?>';
-		var zoom_outOfRangeMessage= <?php print cacti_js_encode(__esc('Zoom Dates before January 1, 1993 are not supported in Cacti!  Pick a ' .
-			'more recent date.')); ?>;
+		var zoom_outOfRangeMessage= <?php print cacti_js_encode(__esc('Zoom Dates before January 1, 1993 are not supported in Cacti!  Pick a more recent date.')); ?>;
 	</script>
 	<?php
-	// Global icons
-	print get_md5_include_icon('images', theme: $selectedTheme, file: 'favicon.ico', rel: 'shortcut icon');
-	print get_md5_include_icon('images', theme: $selectedTheme, file: 'cacti_logo.gif', rel: 'icon', sizes: '96x96');
+
+	print get_md5_include_icon('images', theme: $selectedTheme, file: 'favicon.svg', rel: 'icon', type: 'image/svg+xml');
 
 	// Global styles that can be overloaded by themes css as required.
 	print get_md5_include_css('include/css/jquery.contextMenu.css');
@@ -3279,6 +3292,7 @@ function html_common_header(string $title, string $selectedTheme = '') : void {
 	print get_md5_include_css('include/themes/' . $selectedTheme . '/main.css');
 	print get_md5_include_css('include/themes/print.css');
 	print get_md5_include_css('include/css/graph_drilldown.css');
+	print get_md5_include_css('include/css/', theme: $selectedTheme, file: 'context_menu_overrides.css');
 
 	// Global scripts
 	print get_md5_include_js('include/js/screenfull.js', true);

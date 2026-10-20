@@ -113,6 +113,13 @@ img {
 	vertical-align: middle;
 }
 
+i.ti {
+	font-size: 16px;
+	padding: 0px 3px;
+	text-align: left;
+	vertical-align: middle;
+}
+
 i.fa, i.fas, i.fab, i.far, i.fal {
 	padding: 0px 3px;
 	font-size: 15px;
@@ -825,7 +832,8 @@ label {
 }
 
 .filteredValue {
-	background-color: #F8D93D;
+	background-color: #e3b341;
+	color: var(--dp-page);
 }
 
 .graphItemGr1Alt1 {
@@ -834,10 +842,6 @@ label {
 
 .graphItemGr1Alt2 {
 	background-color: var(--dp-panel);
-}
-
-.graphItemGr1Cust {
-	background-color: var(--dp-panel-alt);
 }
 
 .graphItemGr2Alt1 {
@@ -1178,6 +1182,7 @@ legend {
 	overflow-y: auto !important;
 	overflow-x: hidden;
 	padding-left: 10px;
+	padding-right: 15px;
 	margin-right: 5px;
 }
 
@@ -1527,6 +1532,8 @@ legend {
 }
 
 .ui-dialog.cactiFilterDialog .ui-dialog-content {
+	/* floor the content width so the table-display edit rows lay out instead of collapsing to min-content under the dialog's width:auto sizing */
+	min-width: 480px;
 	padding: 14px 16px;
 }
 
@@ -1624,9 +1631,6 @@ legend {
 .formSubCheckbox input {
 	margin: 0px;
 	vertical-align: -10%;
-}
-
-.formSubCheckbox label {
 }
 
 .formCheckbox {
@@ -1843,7 +1847,7 @@ th.sortable {
 }
 
 .graphSubHeaderColumn {
-	color: #white;
+	color: white;
 	font-size: 12px;
 	vertical-align: middle;
 	text-align: left;
@@ -3065,7 +3069,7 @@ select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.s
 /* open/close carets as glyphs, centered to match the node glyphs */
 .jstree-default .jstree-ocl {
 	background: none !important;
-	font-family: 'Font Awesome 5 Free';
+	font-family: 'Font Awesome 5 Free', sans-serif;
 	font-weight: 900;
 	font-size: 14px;
 	line-height: 20px;
@@ -3487,4 +3491,14 @@ text.bb-chart-arcs-gauge-title {
 
 .filterTable input[type='checkbox']:not(.formCheckbox) + label {
 	cursor: pointer;
+}
+
+/* Graph drilldown action menu palette (consumed by include/css/graph_drilldown.css). */
+:root {
+	--cacti-dd-fg: #e6edf3;
+	--cacti-dd-menu-bg: rgba(11,14,19,0.70);
+	--cacti-dd-menu-bg-open: rgba(11,14,19,0.90);
+	--cacti-dd-panel-bg: rgba(17,22,29,0.94);
+	--cacti-dd-border: rgba(230,237,243,0.16);
+	--cacti-dd-accent: #1f9f6e;
 }

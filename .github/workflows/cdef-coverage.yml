@@ -14,9 +14,9 @@ on:
       - 'lib/api_aggregate.php'
       - 'lib/cdef.php'
       - 'lib/rrd.php'
-      - 'phpunit-cdef.xml'
-      - 'phpunit-cdef-integration.xml'
-      - 'phpunit.xml'
+      - 'tests/phpunit-cdef.xml'
+      - 'tests/phpunit-cdef-integration.xml'
+      - 'tests/phpunit.xml'
       - 'tests/Coverage/CdefCoverageTest.php'
       - 'tests/Helpers/CdefCoverageBootstrap.php'
       - 'tests/integration/CdefDatabaseIntegrationTest.php'
@@ -36,9 +36,9 @@ on:
       - 'lib/api_aggregate.php'
       - 'lib/cdef.php'
       - 'lib/rrd.php'
-      - 'phpunit-cdef.xml'
-      - 'phpunit-cdef-integration.xml'
-      - 'phpunit.xml'
+      - 'tests/phpunit-cdef.xml'
+      - 'tests/phpunit-cdef-integration.xml'
+      - 'tests/phpunit.xml'
       - 'tests/Coverage/CdefCoverageTest.php'
       - 'tests/Helpers/CdefCoverageBootstrap.php'
       - 'tests/integration/CdefDatabaseIntegrationTest.php'
@@ -62,10 +62,17 @@ jobs:
     name: lib/cdef.php 100% coverage
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
 
     services:
       mariadb:
-        image: public.ecr.aws/docker/library/mariadb@sha256:611a2fcc5fa7c6ceb8644c6f74b25ede004ff6c3a6b38c8f8c23d3bbf6c26430 # 11.4
+        # Copied by ci-images.yml; services pull before any step can set a mirror.
+        image: ghcr.io/cacti/ci-images/mariadb:11.4@sha256:611a2fcc5fa7c6ceb8644c6f74b25ede004ff6c3a6b38c8f8c23d3bbf6c26430
+        credentials:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: cacti_test
@@ -85,23 +92,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup PHP 8.4 with Xdebug
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+      - name: Setup locked PHP 8.4 with Xdebug
+        uses: ./.github/actions/setup-php-composer
         with:
           php-version: '8.4'
           coverage: xdebug
           extensions: intl, mysql, gd, ldap, gmp, xml, curl, json, mbstring
-
-      - name: Cache Composer packages
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: include/vendor
-          key: ${{ runner.os }}-php-cdef-coverage-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-cdef-coverage-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+          dependency-mode: locked-coverage
+          install-args: --prefer-dist --no-progress --no-interaction
 
       - name: Enforce line coverage
         env:
@@ -109,7 +107,7 @@ jobs:
         run: |
           set -euo pipefail
           include/vendor/bin/pest \
-            --configuration=phpunit-cdef.xml \
+            --configuration=tests/phpunit-cdef.xml \
             --coverage \
             --coverage-text \
             --min=100
@@ -122,4 +120,4 @@ jobs:
           CACTI_TEST_DB_NAME: cacti_test
           CACTI_TEST_DB_USER: cacti
           CACTI_TEST_DB_PASS: cacti
-        run: include/vendor/bin/pest --configuration=phpunit-cdef-integration.xml
+        run: include/vendor/bin/pest --configuration=tests/phpunit-cdef-integration.xml

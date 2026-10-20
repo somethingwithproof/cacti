@@ -1,6 +1,6 @@
 category	location	match
 cmd_exec	./cactid.php		exec('pgrep -a php | grep cactid.php', $output);
-cmd_exec	./cli/audit_database.php								exec('php ' . CACTI_PATH_PLUGINS . '/' . $pname . '/database_upgrade.php --type=large --force-ver=' . $old, $output, $return_var);
+cmd_exec	./cli/audit_database.php								exec('php ' . CACTI_PATH_PLUGINS . '/' . $pname . '/database_upgrade.php --type=large --force-ver=' . $old,
 cmd_exec	./cli/audit_database.php				$db_shell = trim((string) shell_exec('which mysql'));
 cmd_exec	./cli/audit_database.php				exec($cmd, $output, $error);
 cmd_exec	./cli/audit_database.php		exec('php ' . CACTI_PATH_CLI . '/upgrade_database.php --debug', $output, $return_var);
@@ -390,8 +390,13 @@ header_redirect	./data_sources.php			header('Location: data_sources.php');
 header_redirect	./data_sources.php			header('Location: data_sources.php');
 header_redirect	./data_sources.php			header('Location: data_sources.php');
 header_redirect	./data_sources.php			header('Location: data_sources.php');
+header_redirect	./data_sources.php			header('Location: data_sources.php');
 header_redirect	./data_sources.php			header('Location: data_sources.php?action=ds_edit&host_id=' . grv('host_id') . '&new=1');
+header_redirect	./data_sources.php			header('Location: data_sources.php?action=ds_edit&id=' . $id);
+header_redirect	./data_sources.php			header('Location: data_sources.php?action=ds_edit&id=' . $id);
+header_redirect	./data_sources.php			header('Location: data_sources.php?action=ds_edit&id=' . $id);
 header_redirect	./data_sources.php			header('Location: data_sources.php?action=ds_edit&id=' . (empty($local_data_id) ? gfrv('local_data_id') : $local_data_id) . '&host_id=' . grv('host_id') . '&view_rrd=' . (isrv('current_rrd') ? gnrv('current_rrd') : '0'));
+header_redirect	./data_sources.php		header('Location: data_sources.php?action=ds_edit&id=' . $id);
 header_redirect	./data_sources.php		header('Location: data_sources.php?action=ds_edit&id=' . grv('id') . "&view_rrd=$data_template_rrd_id");
 header_redirect	./data_sources.php		header('Location: data_sources.php?action=ds_edit&id=' . grv('id'));
 header_redirect	./data_sources.php		header('Location: data_sources.php?action=ds_edit&id=' . grv('id'));
