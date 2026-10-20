@@ -290,7 +290,7 @@ msgstr "[编辑:%s]"
 msgid "Aggregate Graph does not Exist"
 msgstr "聚合图形设置"
 
-#: aggregate_graphs.php lib/html_reports.php utilities.php
+#: aggregate_graphs.php lib/html.php lib/html_reports.php utilities.php
 msgid "Details"
 msgstr "详情"
 
@@ -2647,6 +2647,32 @@ msgstr "所有RRDfile修复成功。"
 msgid "One or more RRDfile repairs failed.  See Cacti log for errors."
 msgstr "一个或多个RRDfile修复失败。有关错误，请参阅仙人掌日志。"
 
+#: data_sources.php
+msgid "The RRDfile could not be read, so no repairs were performed."
+msgstr ""
+
+#: data_sources.php
+#, fuzzy
+#| msgid "All RRDfile repairs succeeded."
+msgid "No RRDfile repairs were necessary."
+msgstr "所有RRDfile修复成功。"
+
+#: data_sources.php
+msgid "The RRDfile is not writable by the web server.  Run the suggested commands from the command line instead."
+msgstr ""
+
+#: data_sources.php
+#, fuzzy, php-format
+#| msgid "RRDtool Tune Info"
+msgid "RRDtool Tune Info [ %s ]"
+msgstr "RRDtool调谐信息"
+
+#: data_sources.php
+#, fuzzy
+#| msgid "Repair Steps [ Run Fix from Command Line ]"
+msgid "Run Fix from Command Line"
+msgstr "修复步骤[从命令行运行修复]"
+
 #: data_debug.php
 msgid "Automatic Data Source debug being rerun after repair."
 msgstr "修复后重新运行自动数据源调试。"
@@ -4076,9 +4102,27 @@ msgstr ""
 msgid "Graph Details, Zooming and Debugging Utilities"
 msgstr "图形细节,缩放和调试工具"
 
-#: graph.php
+#: graph.php lib/html.php
 msgid "CSV Export"
 msgstr "CSV 导出"
+
+#: lib/html.php
+#, fuzzy
+#| msgid "Tree View"
+msgid "Time View"
+msgstr "树形视图"
+
+#: lib/html.php
+#, fuzzy
+#| msgid "Realm"
+msgid "Realtime"
+msgstr "域"
+
+#: lib/html.php
+#, fuzzy
+#| msgid "Spikes"
+msgid "Kill Spikes"
+msgstr "尖峰"
 
 #: graph.php lib/html.php
 msgid "Edit Graph Template"

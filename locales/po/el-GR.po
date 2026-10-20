@@ -290,7 +290,7 @@ msgstr "[επεξεργασία: %s]"
 msgid "Aggregate Graph does not Exist"
 msgstr "Συγκεντρωτικές ρυθμίσεις γραφήματος"
 
-#: aggregate_graphs.php lib/html_reports.php utilities.php
+#: aggregate_graphs.php lib/html.php lib/html_reports.php utilities.php
 msgid "Details"
 msgstr "Λεπτομέρειες"
 
@@ -2660,6 +2660,32 @@ msgstr "Όλες οι επισκευές RRDfile πέτυχαν."
 msgid "One or more RRDfile repairs failed.  See Cacti log for errors."
 msgstr "Μία ή περισσότερες επισκευές RRDfile απέτυχαν. Δείτε το αρχείο καταγραφής Cacti για σφάλματα."
 
+#: data_sources.php
+msgid "The RRDfile could not be read, so no repairs were performed."
+msgstr ""
+
+#: data_sources.php
+#, fuzzy
+#| msgid "All RRDfile repairs succeeded."
+msgid "No RRDfile repairs were necessary."
+msgstr "Όλες οι επισκευές RRDfile πέτυχαν."
+
+#: data_sources.php
+msgid "The RRDfile is not writable by the web server.  Run the suggested commands from the command line instead."
+msgstr ""
+
+#: data_sources.php
+#, fuzzy, php-format
+#| msgid "RRDtool Tune Info"
+msgid "RRDtool Tune Info [ %s ]"
+msgstr "RRDtool Tune Info"
+
+#: data_sources.php
+#, fuzzy
+#| msgid "Repair Steps [ Run Fix from Command Line ]"
+msgid "Run Fix from Command Line"
+msgstr "Βήματα επιδιόρθωσης [Εκτέλεση επιδιόρθωσης από γραμμή εντολών]"
+
 #: data_debug.php
 msgid "Automatic Data Source debug being rerun after repair."
 msgstr "Η αυτόματη εντοπισμός σφαλμάτων πηγής δεδομένων επαναλαμβάνεται μετά την επισκευή."
@@ -4116,9 +4142,27 @@ msgstr ""
 msgid "Graph Details, Zooming and Debugging Utilities"
 msgstr "Λεπτομέρειες γραφήματος, βοηθητικά προγράμματα μεγέθυνσης και εντοπισμός σφαλμάτων"
 
-#: graph.php
+#: graph.php lib/html.php
 msgid "CSV Export"
 msgstr "Εξαγωγή CSV"
+
+#: lib/html.php
+#, fuzzy
+#| msgid "Tree View"
+msgid "Time View"
+msgstr "Προβολή δέντρου"
+
+#: lib/html.php
+#, fuzzy
+#| msgid "Realm"
+msgid "Realtime"
+msgstr "Περιοχή"
+
+#: lib/html.php
+#, fuzzy
+#| msgid "Spikes"
+msgid "Kill Spikes"
+msgstr "Ακίδες"
 
 #: graph.php lib/html.php
 msgid "Edit Graph Template"
