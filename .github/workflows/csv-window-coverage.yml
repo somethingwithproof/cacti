@@ -8,7 +8,7 @@ on:
       - 'graph.php'
       - 'lib/rrd.php'
       - 'lib/graph_variables.php'
-      - 'phpunit-csv.xml'
+      - 'tests/phpunit-csv.xml'
       - 'tests/Unit/Core/Rrd/RrdFetchWindowTest.php'
       - 'tests/Unit/Core/Rrd/BandwidthEffectiveStepTest.php'
       - 'tests/Unit/Ui/Graph/CsvWindowResolutionContractTest.php'
@@ -24,7 +24,7 @@ on:
       - 'graph.php'
       - 'lib/rrd.php'
       - 'lib/graph_variables.php'
-      - 'phpunit-csv.xml'
+      - 'tests/phpunit-csv.xml'
       - 'tests/Unit/Core/Rrd/RrdFetchWindowTest.php'
       - 'tests/Unit/Core/Rrd/BandwidthEffectiveStepTest.php'
       - 'tests/Unit/Ui/Graph/CsvWindowResolutionContractTest.php'
@@ -60,7 +60,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2.40.0
         with:
           php-version: ${{ matrix.php }}
           coverage: xdebug
@@ -99,5 +99,5 @@ jobs:
             Unit/Ui/Graph/PercentileResolutionBehaviorTest.php \
             Unit/TwoYearGraphPanelTest.php \
             integration/CsvWindowRrdIntegrationTest.php; do
-            "${pest_runner}" --configuration=../phpunit-csv.xml "${test_file}"
+            "${pest_runner}" --configuration=phpunit-csv.xml "${test_file}"
           done
