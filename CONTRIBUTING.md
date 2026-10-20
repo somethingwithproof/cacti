@@ -52,6 +52,10 @@ the issue or pull request number, as described in `changelog.d/README.md`:
 
 Each fragment is a new file, so concurrent pull requests do not conflict.
 
+After merging or rebasing the target branch, recheck the entire unreleased
+section for duplicate issue descriptions, including findings fixed earlier in
+the PR. A clean merge does not establish that those fixes survived.
+
 ## Baselines
 
 `composer sink-guard` and `composer hotspot-guard` compare against checked-in
