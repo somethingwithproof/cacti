@@ -18,7 +18,7 @@ on:
       - 'lib/import.php'
       - 'lib/installer.php'
       - 'lib/utility.php'
-      - 'phpunit-installer.xml'
+      - 'tests/phpunit-installer.xml'
       - 'tests/Unit/Installer/**'
       - 'tests/Unit/Security/Csrf/InstallerCsrfRecoveryTest.php'
       - 'tests/e2e/installer_resilience_docker.sh'
@@ -42,7 +42,7 @@ on:
       - 'lib/import.php'
       - 'lib/installer.php'
       - 'lib/utility.php'
-      - 'phpunit-installer.xml'
+      - 'tests/phpunit-installer.xml'
       - 'tests/Unit/Installer/**'
       - 'tests/Unit/Security/Csrf/InstallerCsrfRecoveryTest.php'
       - 'tests/e2e/installer_resilience_docker.sh'
@@ -86,7 +86,7 @@ jobs:
         run: |
           set -euo pipefail
           composer test -- --colors=never \
-            --configuration=phpunit-installer.xml \
+            --configuration=tests/phpunit-installer.xml \
             --testsuite='Installer Unit' \
             --fail-on-empty-test-suite \
             --fail-on-warning \
@@ -99,14 +99,14 @@ jobs:
         run: |
           set -euo pipefail
           composer test -- --colors=never \
-            --configuration=phpunit-installer.xml \
+            --configuration=tests/phpunit-installer.xml \
             --testsuite='Installer Integration' \
             --fail-on-empty-test-suite \
             --fail-on-warning
 
       - name: Upload unit coverage
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: installer-unit-coverage
           path: installer-unit-coverage.xml
