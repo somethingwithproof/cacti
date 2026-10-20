@@ -1790,7 +1790,7 @@ function responsiveUI(event) {
 	var tree = false;
 
 	if (event != 'force') {
-	    if (new Date() - resizeTime < resizeDelta) {
+			if (new Date() - resizeTime < resizeDelta) {
 			var myEvent = event;
 			setTimeout(function() {
 				responsiveUI(myEvent);
@@ -4178,7 +4178,9 @@ function removeSpikes(method, dryrun, local_graph_id) {
 		postData.dryrun = true;
 	}
 
-	$.post(urlPath + 'spikekill.php', postData, null, 'json')
+	var href = urlPath + 'spikekill.php';
+
+	$.post(href, postData, null, 'json')
 		.done(function(data) {
 			checkForRedirects(data, href);
 
