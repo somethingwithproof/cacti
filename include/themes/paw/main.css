@@ -74,6 +74,13 @@ img {
 	vertical-align: middle;
 }
 
+i.ti {
+	font-size: 16px;
+	padding: 0px 3px;
+	text-align: left;
+	vertical-align: middle;
+}
+
 i.fa, i.fas, i.fab, i.far, i.fal {
 	font-size: 15px;
 	padding: 0px 3px;
@@ -640,10 +647,7 @@ label {
 }
 
 .even-alternate {
-	/* #background: none repeat scroll 0 0 #E7E9F2;
-	#background-color: #E7E9F2; */
 	border: none;
-	/* #box-shadow: 0 0 1px rgba(0, 0, 0, 0.1); */
 }
 
 .saveRow {
@@ -841,11 +845,10 @@ label {
 	-moz-border-radius: 10px;
 	border-radius: 10px;
 	padding: 15px;
-	background-color: white;
 	top: 30%;
 	width: 360px;
 	max-height: 300px;
-	background: #ffffff;
+	background-color: #ffffff;
 	border: 1px solid #cccccc;
 }
 
@@ -1030,6 +1033,7 @@ legend {
 	overflow-y: auto !important;
 	overflow-x: hidden;
 	padding-left: 10px;
+	padding-right: 15px;
 }
 
 .cactiConsoleContentArea>div:last-child {
@@ -1376,6 +1380,8 @@ legend {
 }
 
 .ui-dialog.cactiFilterDialog .ui-dialog-content {
+	/* floor the content width so the table-display edit rows lay out instead of collapsing to min-content under the dialog's width:auto sizing */
+	min-width: 480px;
 	padding: 14px 16px;
 }
 
@@ -1475,7 +1481,6 @@ legend {
 }
 
 .formData {
-	/* display: inline-block; */
 	float: left;
 	text-align: left;
 }
@@ -1495,15 +1500,11 @@ legend {
 	vertical-align: -10%;
 }
 
-.formSubCheckbox label {
-}
-
 .formCheckbox {
 	vertical-align: -15%;
 }
 
 .formFieldName {
-	/* display: inline-block; */
 	color: #000000;
 	float: left;
 	text-align: left;
@@ -1708,7 +1709,6 @@ th.sortable {
 }
 
 .graphSubHeaderColumn {
-	/* color: #white; */
 	font-size: 12px;
 	vertical-align: middle;
 	text-align: left;
@@ -1815,7 +1815,6 @@ th.sortable {
 }
 
 .popupBox {
-	/* #z-index: 2; */
 	position: absolute;
 	padding: 0px;
 	display: none;
@@ -2038,7 +2037,6 @@ div#gtabs {
 	float: left !important;
 	text-decoration: none;
 	font-size: 18px;
-	/* vertical-align: bottom; */
 	display: block;
 }
 
@@ -2127,14 +2125,6 @@ div.submenu span {
 	list-style: none;
 	margin: 0;
 	padding: 0;
-}
-
-tr td:last-child .checkbox {
-	margin-right: 10px !important;
-}
-
-tr th:last-child .checkbox {
-	margin-right: 10px !important;
 }
 
 /* Navigation Area */
@@ -2981,7 +2971,7 @@ select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.s
 /* scoped to non-loading nodes so the AJAX loading throbber is preserved  */
 .jstree-default .jstree-node:not(.jstree-loading) > .jstree-ocl {
 	background: none !important;
-	font-family: "tabler-icons";
+	font-family: "tabler-icons", sans-serif;
 	font-size: 14px;
 	display: inline-flex;
 	align-items: center;
@@ -3057,4 +3047,14 @@ select.select2-multi-count.select2-hidden-accessible + .select2-container:not(.s
 
 .filterTable input[type='checkbox']:not(.formCheckbox) + label {
 	cursor: pointer;
+}
+
+/* Graph drilldown action menu palette (consumed by include/css/graph_drilldown.css). */
+:root {
+	--cacti-dd-fg: #242424;
+	--cacti-dd-menu-bg: rgba(250,250,250,0.92);
+	--cacti-dd-menu-bg-open: rgba(255,255,255,0.97);
+	--cacti-dd-panel-bg: rgba(255,255,255,0.97);
+	--cacti-dd-border: rgba(0,0,0,0.20);
+	--cacti-dd-accent: #2f7d6b;
 }
