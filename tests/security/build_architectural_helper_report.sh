@@ -19,6 +19,9 @@ MODE="${1:---summary}"
 EXCLUDE=(
 	--glob '!include/vendor/**'
 	--glob '!locales/**'
+	# Installed plugins are gitignored third-party code; --no-ignore would
+	# otherwise make the report depend on the local plugins/ checkout.
+	--glob '!plugins/**'
 	--glob '!tests/**'
 	--glob '!**/*.min.js'
 )
