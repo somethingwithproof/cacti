@@ -36,7 +36,7 @@ php cli/queue_worker.php --queue=reports --once
 
 Without `--once` or a positive `--time-limit`, the worker runs until it receives SIGTERM or SIGINT. Run it under the operating system's service manager and restart it on failure. The worker is Symfony Messenger's `Worker`, with Cacti logging, signal handling, and database visibility leases around it.
 
-The repository includes `service/cacti-queue@.service` as a hardened systemd template. Adjust the literal PHP and Cacti paths for the installation, add a packaging-specific `User` and `Group` override, then enable one instance per queue (for example, `cacti-queue@reports.service`).
+The repository includes `service/cacti-queue@.service` as a hardened systemd template. Adjust the literal PHP and Cacti paths for the installation, change `User` and `Group` from `apache` when the web server runs as another account (Debian variants use `www-data`), then enable one instance per queue (for example, `cacti-queue@reports.service`). A failed worker restarts after five seconds; after 10 starts within 10 minutes the unit stays failed until the cause is fixed and `systemctl reset-failed` is run.
 
 Workers acknowledge successful handling. Exceptions cause exponential retries until `max_attempts`, after which the database transport records the message as `dead`. Expired leases are reclaimed only while delivery attempts remain; exhausted messages are moved to the dead-letter state. Delivery is at least once, so handlers must be idempotent.
 
