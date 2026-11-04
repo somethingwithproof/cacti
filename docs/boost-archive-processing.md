@@ -1,6 +1,6 @@
 # Boost bounded archive drain
 
-Status: implemented in draft pull request #8582 and validated on disposable infrastructure. It is
+Status: implemented and validated on disposable infrastructure. It is
 not a claim about production performance on every database or RRD storage backend.
 
 ## Decision

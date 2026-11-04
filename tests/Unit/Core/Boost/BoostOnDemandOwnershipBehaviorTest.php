@@ -87,9 +87,19 @@ test('on-demand processing rejects invalid IDs and defers behind archive ownersh
 });
 
 test('on-demand processing defers while a scheduled owner lease remains active', function () {
-	$GLOBALS['boost_on_demand_ownership']['settings']['boost_poller_started'] = 1;
+	$GLOBALS['boost_on_demand_ownership']['settings']['boost_poller_started'] = time() - 60;
 
 	expect(boost_process_poller_output(7))->toBe(-1)
+		->and($GLOBALS['boost_on_demand_ownership']['released_archives'])->toBe(array('boost.archive.lifecycle'))
+		->and($GLOBALS['boost_on_demand_ownership']['processed'])->toBe(array());
+});
+
+test('on-demand processing ignores a scheduled owner lease left by a killed master', function () {
+	$GLOBALS['boost_on_demand_ownership']['settings']['boost_poller_started']        = time() - 3700;
+	$GLOBALS['boost_on_demand_ownership']['settings']['boost_rrd_update_max_runtime'] = 1200;
+
+	expect(boost_process_poller_output(7))->toBe(3)
+		->and($GLOBALS['boost_on_demand_ownership']['processed'])->toHaveCount(1)
 		->and($GLOBALS['boost_on_demand_ownership']['released_archives'])->toBe(array('boost.archive.lifecycle'));
 });
 

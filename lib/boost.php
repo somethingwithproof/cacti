@@ -2100,11 +2100,21 @@ function boost_process_poller_output($local_data_id, $rrdtool_pipe = '') {
 		return -1;
 	}
 
-	if ((int) read_config_option('boost_poller_started') > 0) {
-		boost_release_archive_lifecycle_lock($archive_lock);
-		cacti_log("NOTICE: On-demand Boost processing for Local Data ID '$local_data_id' deferred because a scheduled owner lease remains active.", false, 'BOOST');
+	$lease_started = (int) read_config_option('boost_poller_started');
 
-		return -1;
+	if ($lease_started > 0) {
+		/* The master sets this lease before it takes the lifecycle lock, so a fresh lease must
+		 * defer us. A master killed outright never clears it, so an expired lease is ignored. */
+		$lease_expiry = $lease_started + (max(1, (int) read_config_option('boost_rrd_update_max_runtime')) * 3);
+
+		if ($lease_expiry >= time()) {
+			boost_release_archive_lifecycle_lock($archive_lock);
+			cacti_log("NOTICE: On-demand Boost processing for Local Data ID '$local_data_id' deferred because a scheduled owner lease remains active.", false, 'BOOST');
+
+			return -1;
+		}
+
+		cacti_log("NOTICE: On-demand Boost processing for Local Data ID '$local_data_id' is ignoring an expired scheduled owner lease.", false, 'BOOST');
 	}
 
 	boost_reset_rrd_metadata_page_cache();
