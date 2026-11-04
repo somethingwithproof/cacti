@@ -96,8 +96,6 @@ Cacti CHANGELOG
 -security#8346: Pin workflow Actions and isolate release signing from builds
 -security#8449: Harden - Escape the serialized notification selection in the managers.php confirmation form
 -security#8450: Harden - Bound Script Server requests, contain script failures, and validate poller script arguments
--issue#8584: Only add the theme search filter icon when the filter input is visible
--issue#8574: RRDcheck does not delete old data when boost is enabled
 -issue#2815: Render empty known query fields as blank graph text without changing suggested-value fallback
 -issue#5679: Attempt SNMP in Ping-OR-SNMP availability checks when ping fails
 -issue#6609: Return a controlled empty export when RRDtool XPORT omits metadata
@@ -214,8 +212,11 @@ Cacti CHANGELOG
 -issue#8442: Skin jQuery multiselect buttons and menus in the Deepness theme with its own palette so they match the select2 and selectmenu controls
 -issue#8459: Validate discovery evidence and ranges, preserve overlapping targets and valid .255 hosts, and restore SNMP form controls
 -issue#8470: Remove the setting boost_redirect from the settings page.  Make it permanent when boost is enabled
+-issue#8574: RRDcheck does not delete old data when boost is enabled
 -issue#8581: Bound Boost archive draining, isolate RRD failures, and make cleanup predictable
+-issue#8584: Only add the theme search filter icon when the filter input is visible
 -issue#8588: Ignore an expired scheduled Boost owner lease so on-demand RRD updates resume after a killed Boost run
+-issue#8593: Apply the theme filter search icon, placeholder and autocomplete setting even when the filter is hidden at page load
 -issue: Keep zoom controls on the correct archive panel and prevent scroll jumps while refreshing graphs
 -issue: Fix Script Server performance issues with continual checks to the file include file path
 -feature#7246: It should be possible to change the Device of a Graph if both Devices include the Data Query

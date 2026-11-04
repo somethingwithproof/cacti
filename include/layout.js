@@ -1698,6 +1698,32 @@ function toggleFilterAndIcon(id, child, initial) {
 	$(window).trigger('resize');
 }
 
+/** setupFilterSearchIcons - Decorate the page filter inputs with the search
+ *  icon, the localized placeholder and autocomplete=off.  This is idempotent
+ *  and does not depend on the input being visible: the icon is a sibling of
+ *  the input, so it is hidden and shown with it when the filter is collapsed
+ *  (toggleFilterAndIcon) or trimmed on narrow viewports (tuneFilter).
+ *  Themes call it from themeReady(). */
+function setupFilterSearchIcons() {
+	var filters = {
+		'filter':  searchFilter,
+		'filterd': searchFilter,
+		'rfilter': searchRFilter
+	};
+
+	$.each(filters, function(id, placeholder) {
+		$('input[id="' + id + '"]').each(function() {
+			var input = $(this);
+
+			input.attr('autocomplete', 'off').attr('placeholder', placeholder).parent('td').css('white-space', 'nowrap');
+
+			if (input.next('i.fa-search.filter').length < 1) {
+				input.after("<i class='fa fa-search filter'/>");
+			}
+		});
+	});
+}
+
 function setGraphTabs() {
 	page = window.location.href;
 
