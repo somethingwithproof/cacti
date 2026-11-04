@@ -8,7 +8,7 @@ updates:
     directory: /
     schedule: {interval: weekly, day: friday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       github-actions: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, github_actions]
@@ -17,7 +17,7 @@ updates:
     directory: /
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       composer: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, composer]
@@ -34,7 +34,7 @@ updates:
     target-branch: 1.2.x
     schedule: {interval: weekly, day: friday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       github-actions-1-2-x: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, github_actions, 1.2.x]
@@ -46,8 +46,9 @@ updates:
     directory: /api
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
+    # /api tracks no composer.lock, so raise the manifest constraint to take updates.
     versioning-strategy: increase
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       composer-api: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, composer]
@@ -57,7 +58,7 @@ updates:
     target-branch: 1.2.x
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       composer-1-2-x: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, composer, 1.2.x]
@@ -70,7 +71,7 @@ updates:
     directory: /
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       npm: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, "area:ui"]
@@ -81,7 +82,7 @@ updates:
     target-branch: 1.2.x
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       npm-1-2-x: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, "area:ui", 1.2.x]
@@ -97,7 +98,7 @@ updates:
     directory: /tests/e2e
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       npm-e2e: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, "area:ui"]
@@ -108,7 +109,7 @@ updates:
     target-branch: 1.2.x
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       npm-e2e-1-2-x: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, "area:ui", 1.2.x]
@@ -122,7 +123,7 @@ updates:
     target-branch: 1.2.x
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       composer-tests-1-2-x: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, composer, 1.2.x]
@@ -134,7 +135,7 @@ updates:
     directory: /tests/tools/plugin-harness
     schedule: {interval: weekly, day: monday}
     open-pull-requests-limit: 5
-    cooldown: {semver-major-days: 7}
+    cooldown: {default-days: 7}
     groups:
       plugin-harness: {patterns: ["*"], update-types: [minor, patch]}
     labels: [dependencies, composer]

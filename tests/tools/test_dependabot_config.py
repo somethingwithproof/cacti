@@ -61,6 +61,18 @@ class DependabotConfigTest(unittest.TestCase):
         self.assertIn(('composer', '/'), release_jobs)
         self.assertIn(('composer', '/tests'), release_jobs)
 
+    def test_every_update_keeps_the_seven_day_default_cooldown(self) -> None:
+        # Without default-days Dependabot applies an implicit 3-day cooldown.
+        for update in self.updates:
+            name = f"{update['package-ecosystem']}:{update['directory']}"
+            with self.subTest(update=name):
+                self.assertEqual(update['cooldown']['default-days'], 7)
+
+    def test_github_actions_cooldown_uses_only_supported_options(self) -> None:
+        for update in self.updates:
+            if update['package-ecosystem'] == 'github-actions':
+                self.assertEqual(set(update['cooldown']), {'default-days'})
+
     def test_symfony_stays_on_7_x_on_develop(self) -> None:
         symfony_rules = [
             (update, rule)
