@@ -1192,27 +1192,17 @@ function boost_validate_poller_ownership($results, $poller_id, $conn = false) {
 }
 
 /**
- * Handles the on-demand poller boost functionality for Cacti. This function processes the results
- * of a poller run and inserts the data into the `poller_output_boost` table. It ensures that the
- * data is inserted in a way that avoids exceeding the maximum allowed packet size for SQL
- * queries. Additionally, it manages error handling and configuration options related to the boost
- * functionality. Used as part of Cacti's lib functionality.
+ * Decides whether the poller should write its results straight to the RRDs. Boost is the
+ * alternative path that defers RRD updates, so this returns false when boost is enabled (or when
+ * running on a remote poller, which always forces boost on) and boost is correctly configured,
+ * and true when the caller should update the RRDs itself. Used as part of Cacti's lib
+ * functionality.
  *
- * @param mixed &$results An array of poller results, where each result contains: - 'local_data_id':
- *   The ID of the local data source. - 'rrd_name': The name of the RRD file. - 'time': The
- *   timestamp of the data. - 'output': The output value to be stored.
- *
- * @return bool Returns `false` if the boost functionality is enabled and processed, or `true` if
- *   the boost functionality is disabled or bypassed.
+ * @return bool Returns `false` if boost is enabled and correctly configured, or `true` if boost
+ *   is disabled, misconfigured or bypassed.
  */
-function boost_poller_on_demand(&$results) {
-	global $config, $remote_db_cnn_id;
-
-	if ($config['poller_id'] > 1 && $config['connection'] == 'online') {
-		$conn = $remote_db_cnn_id;
-	} else {
-		$conn = false;
-	}
+function boost_poller_on_demand() {
+	global $config;
 
 	if (read_config_option('boost_rrd_update_enable') == 'on' || $config['poller_id'] > 1) {
 		$previous_error_reporting = error_reporting();

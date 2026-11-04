@@ -793,6 +793,17 @@ function rrdcheck_error_handler($errno, $errmsg, $filename, $linenum, $vars = []
 }
 
 /**
+ * Deletes rrdcheck findings older than the seven day retention window. Shared by the periodic
+ * master handler in poller_rrdcheck.php and the boost hand-off in rrdcheck_boost_bottom() so the
+ * retention rule lives in one place. Used as part of Cacti's lib functionality.
+ *
+ * @return void No value is returned.
+ */
+function rrdcheck_purge_old_findings() {
+	db_execute('DELETE FROM rrdcheck WHERE test_date < DATE_SUB(NOW(), INTERVAL 7 DAY)');
+}
+
+/**
  * This routine accommodates rrdcheck after the boost process has completed. The use of boost will
  * require boost version 2.5 or above. The idea if that rrdcheck will be started on the boost
  * cycle. Used as part of Cacti's lib functionality.
@@ -819,7 +830,7 @@ function rrdcheck_boost_bottom() {
 		}
 
 		// delete old data
-		db_execute('DELETE FROM rrdcheck WHERE test_date < DATE_SUB(NOW(), INTERVAL 7 DAY)');
+		rrdcheck_purge_old_findings();
 
 		rrdcheck_log_statistics('BOOST');
 	}

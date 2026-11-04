@@ -1029,7 +1029,7 @@ function process_poller_output(&$rrdtool_pipe, $remainder = 0) {
 
 		api_plugin_hook_function('poller_output', $rrd_update_array);
 
-		if (boost_poller_on_demand($results)) {
+		if (boost_poller_on_demand()) {
 			$rrds_processed = rrdtool_function_update($rrd_update_array, $rrdtool_pipe, $unused_cache);
 		}
 

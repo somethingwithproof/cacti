@@ -137,7 +137,7 @@ if ($help) {
 }
 
 /* record the script start time */
-$start     = microtime(true);
+$start = microtime(true);
 
 /* store the effective log level in a local variable so that expensive debug
  * strings are only built when debug logging is actually enabled.  This mirrors
@@ -180,7 +180,6 @@ fputs(STDOUT, 'PHP Script Server has Started - Parent is ' . $environ . "\n");
 fflush(STDOUT);
 
 require_once(__DIR__ . '/lib/snmp.php');
-
 snmp_auth_cache_load();
 
 /* process waits for input and then calls functions as required */
@@ -299,13 +298,16 @@ while (1) {
 			}
 
 			if (!function_exists($function)) {
-				/* Validate the include path unconditionally. Built-ins like system,
-				 * passthru, exec satisfy function_exists() without ever loading a
-				 * script file, so the path guard cannot be gated on the function
-				 * being undefined. include_once() is idempotent, so re-running it
-				 * on cached entries is a no-op. The scripts_path setting is an
-				 * explicitly configured Cacti script root and may live outside the
-				 * web root, so it is an allowed containment root as well. */
+				/* Containment of the function being dispatched is enforced by the
+				 * Reflection check below, which rejects PHP internals (system,
+				 * passthru, exec, which satisfy function_exists() without any
+				 * script file) and any function whose source file lies outside
+				 * the allowed roots. The include path is therefore only vetted
+				 * here, immediately before it would be loaded; a function that
+				 * is already defined never loads the file again. The scripts_path
+				 * setting is an explicitly configured Cacti script root and may
+				 * live outside the web root, so it is an allowed containment
+				 * root as well. */
 				$real_include = realpath($include_file);
 
 				$path_ok = script_server_path_is_allowed($real_include, $allowed_roots);

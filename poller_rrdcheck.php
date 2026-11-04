@@ -220,7 +220,7 @@ function rrdcheck_master_handler($forcerun) {
 			}
 
 			// delete old data
-			db_execute('DELETE FROM rrdcheck WHERE test_date < DATE_SUB(NOW(), INTERVAL 7 DAY)');
+			rrdcheck_purge_old_findings();
 
 			rrdcheck_log_statistics('HOURLY');
 		}

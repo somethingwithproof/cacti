@@ -13,86 +13,214 @@
 */
 
 /*
- * Regression tests for #8574: RRDcheck did not delete old findings when Boost
- * was enabled.
- *
- * When Boost is active, poller_rrdcheck.php's rrdcheck_master_handler() skips
- * its periodic rollup ("Boost will handle the Periodic Roll-up Cycle") and the
- * handoff runs through rrdcheck_boost_bottom() in lib/rrdcheck.php instead --
- * poller_boost.php calls that function directly rather than launching
- * poller_rrdcheck.php --type=bmaster. The original fix added the retention
- * DELETE to the unreachable 'bmaster' switch case in poller_rrdcheck.php, so
- * Boost runs still never purged and old rrdcheck rows accumulated forever.
- *
- * The fix moves the retention DELETE into rrdcheck_boost_bottom(), after its
- * children finish writing findings and alongside the existing BOOST statistics
- * logging (BOOST, not HOURLY, so the bchild counters are aggregated/cleared).
+ * Behavioural tests for the rrdcheck retention purge (#8574).  When Boost is
+ * active poller_rrdcheck.php skips its periodic rollup and the hand-off runs
+ * through rrdcheck_boost_bottom() in lib/rrdcheck.php, so both paths must
+ * purge through the shared rrdcheck_purge_old_findings() helper.  The
+ * unchanged production functions are sliced out and run against recording
+ * stand-ins for the database and process helpers.
  */
 
-$rrdcheckLibPath    = __DIR__ . '/../../../../lib/rrdcheck.php';
-$pollerRrdcheckPath = __DIR__ . '/../../../../poller_rrdcheck.php';
+namespace RrdcheckBoostPurgeFixture;
 
-if (!function_exists('rrdcheck_boost_purge_extract_function')) {
-	function rrdcheck_boost_purge_extract_function(string $contents, string $signature) : string {
-		$func_pos = strpos($contents, $signature);
+$root = dirname(__DIR__, 4);
+require_once $root . '/tests/Helpers/SourceSlice.php';
 
-		if ($func_pos === false) {
-			return '';
-		}
-
-		$func_end = strpos($contents, "\nfunction ", $func_pos + 1);
-
-		if ($func_end === false) {
-			$func_end = strlen($contents);
-		}
-
-		return substr($contents, $func_pos, $func_end - $func_pos);
-	}
+/**
+ * Record a database statement in the shared event log.
+ *
+ * @param string $sql The statement.
+ *
+ * @return void No value is returned.
+ */
+function db_execute($sql) {
+	$GLOBALS['rrdcheck_purge_events'][] = array('sql', $sql);
 }
 
-$rrdcheck_retention_delete = "db_execute('DELETE FROM rrdcheck WHERE test_date < DATE_SUB(NOW(), INTERVAL 7 DAY)');";
+/**
+ * Return a configured option value for the scenario under test.
+ *
+ * @param string $name The option name.
+ *
+ * @return mixed The option value, or an empty string.
+ */
+function read_config_option($name) {
+	return $GLOBALS['rrdcheck_purge_settings'][$name] ?? '';
+}
 
-test('rrdcheck_boost_bottom purges old findings on the Boost handoff', function () use ($rrdcheckLibPath, $rrdcheck_retention_delete) {
-	$contents  = file_get_contents($rrdcheckLibPath);
-	$func_body = rrdcheck_boost_purge_extract_function($contents, 'function rrdcheck_boost_bottom()');
+/**
+ * Record a configuration write.
+ *
+ * @param string $name  The option name.
+ * @param mixed  $value The new value.
+ *
+ * @return void No value is returned.
+ */
+function set_config_option($name, $value) {
+	$GLOBALS['rrdcheck_purge_events'][] = array('set', $name);
+}
 
-	expect($func_body)->not->toBe('');
-	expect($func_body)->toContain($rrdcheck_retention_delete);
+/**
+ * Record the launch of the child collectors.
+ *
+ * @param string $type The collector type.
+ *
+ * @return void No value is returned.
+ */
+function rrdcheck_launch_children($type) {
+	$GLOBALS['rrdcheck_purge_events'][] = array('launch', $type);
+}
+
+/**
+ * Report running children, draining one scripted count per call.
+ *
+ * @param string $type The collector type.
+ *
+ * @return int The scripted number of running processes.
+ */
+function rrdcheck_processes_running($type) {
+	$GLOBALS['rrdcheck_purge_events'][] = array('running', $type);
+
+	return array_shift($GLOBALS['rrdcheck_purge_running']);
+}
+
+/**
+ * Ignore debug output.
+ *
+ * @param string $message The message.
+ *
+ * @return void No value is returned.
+ */
+function rrdcheck_debug($message) {
+}
+
+/**
+ * Skip the real two second wait between process checks.
+ *
+ * @param int $seconds The requested delay.
+ *
+ * @return int Always zero.
+ */
+function sleep($seconds) {
+	return 0;
+}
+
+/**
+ * Record the statistics roll-up that closes a cycle.
+ *
+ * @param string $label The statistics label.
+ *
+ * @return void No value is returned.
+ */
+function rrdcheck_log_statistics($label) {
+	$GLOBALS['rrdcheck_purge_events'][] = array('stats', $label);
+}
+
+/**
+ * Ignore log output.
+ *
+ * @param string $message The message.
+ * @param bool   $output  Unused.
+ * @param string $source  Unused.
+ *
+ * @return void No value is returned.
+ */
+function cacti_log($message, $output = false, $source = '') {
+}
+
+cacti_fixture_source_function($root . '/lib/rrdcheck.php', 'rrdcheck_purge_old_findings', __NAMESPACE__);
+cacti_fixture_source_function($root . '/lib/rrdcheck.php', 'rrdcheck_boost_bottom', __NAMESPACE__);
+cacti_fixture_source_function($root . '/poller_rrdcheck.php', 'rrdcheck_master_handler', __NAMESPACE__);
+
+/**
+ * Reset the scenario state and the stand-in base path.
+ *
+ * @param array $settings Option values to serve.
+ * @param array $running  Scripted running-process counts.
+ *
+ * @return void No value is returned.
+ */
+function rrdcheck_purge_scenario(array $settings, array $running = array(0)) {
+	global $config, $type;
+
+	$base = sys_get_temp_dir() . '/cacti-rrdcheck-purge';
+
+	if (!is_dir($base . '/lib')) {
+		mkdir($base . '/lib', 0700, true);
+		file_put_contents($base . '/lib/rrd.php', "<?php\n");
+	}
+
+	$config                             = array('base_path' => $base);
+	$type                               = 'master';
+	$GLOBALS['rrdcheck_purge_events']   = array();
+	$GLOBALS['rrdcheck_purge_settings'] = $settings;
+	$GLOBALS['rrdcheck_purge_running']  = $running;
+}
+
+/**
+ * Return the recorded event names in order, without their arguments.
+ *
+ * @return array The ordered event kinds, with launch/stats/sql labels appended.
+ */
+function rrdcheck_purge_trace() {
+	return array_map(function ($event) {
+		return $event[0] == 'sql' ? 'purge' : $event[0] . ':' . $event[1];
+	}, $GLOBALS['rrdcheck_purge_events']);
+}
+
+const PURGE_SQL = 'DELETE FROM rrdcheck WHERE test_date < DATE_SUB(NOW(), INTERVAL 7 DAY)';
+
+test('the shared helper issues the seven day retention delete', function () {
+	rrdcheck_purge_scenario(array());
+	rrdcheck_purge_old_findings();
+
+	expect($GLOBALS['rrdcheck_purge_events'])->toBe(array(array('sql', PURGE_SQL)));
 });
 
-test('rrdcheck_boost_bottom purges only after its children finish writing findings', function () use ($rrdcheckLibPath, $rrdcheck_retention_delete) {
-	$contents  = file_get_contents($rrdcheckLibPath);
-	$func_body = rrdcheck_boost_purge_extract_function($contents, 'function rrdcheck_boost_bottom()');
+test('the boost hand-off purges after its children finish and before BOOST statistics', function () {
+	rrdcheck_purge_scenario(array('rrdcheck_enable' => 'on'), array(2, 1, 0));
+	rrdcheck_boost_bottom();
 
-	$drain_pos  = strpos($func_body, 'while ($running = rrdcheck_processes_running(\'bmaster\'))');
-	$delete_pos = strpos($func_body, $rrdcheck_retention_delete);
-
-	expect($drain_pos)->not->toBeFalse();
-	expect($delete_pos)->not->toBeFalse();
-	expect($drain_pos)->toBeLessThan($delete_pos);
+	expect(rrdcheck_purge_trace())->toBe(array(
+		'set:rrdcheck_last_run_time', 'launch:bmaster',
+		'running:bmaster', 'running:bmaster', 'running:bmaster',
+		'purge', 'stats:BOOST',
+	))->and($GLOBALS['rrdcheck_purge_events'][5][1])->toBe(PURGE_SQL);
 });
 
-test('rrdcheck_boost_bottom logs BOOST statistics so bchild counters are aggregated and cleared', function () use ($rrdcheckLibPath) {
-	$contents  = file_get_contents($rrdcheckLibPath);
-	$func_body = rrdcheck_boost_purge_extract_function($contents, 'function rrdcheck_boost_bottom()');
+test('the boost hand-off does nothing when rrdcheck is disabled', function () {
+	rrdcheck_purge_scenario(array('rrdcheck_enable' => ''));
+	rrdcheck_boost_bottom();
 
-	expect($func_body)->toContain("rrdcheck_log_statistics('BOOST');");
-	expect($func_body)->not->toContain("rrdcheck_log_statistics('HOURLY');");
+	expect($GLOBALS['rrdcheck_purge_events'])->toBe(array());
 });
 
-test('the unreachable bmaster switch case does not carry the retention purge', function () use ($pollerRrdcheckPath, $rrdcheck_retention_delete) {
-	// rrdcheck_launch_children('bmaster') forks poller_rrdcheck.php --type=bchild,
-	// never --type=bmaster, so the 'bmaster' case here never runs during a Boost
-	// cycle. The purge must live in rrdcheck_boost_bottom(), not here.
-	$contents = file_get_contents($pollerRrdcheckPath);
+test('the periodic master handler purges after its children finish and before HOURLY statistics', function () {
+	rrdcheck_purge_scenario(array('rrdcheck_interval' => 60, 'rrdcheck_last_run_time' => 1, 'boost_rrd_update_enable' => ''), array(1, 0));
+	rrdcheck_master_handler(false);
 
-	$bmaster_pos = strpos($contents, "case 'bmaster':");
-	$bchild_pos  = strpos($contents, "case 'bchild':");
+	expect(rrdcheck_purge_trace())->toBe(array(
+		'launch:master', 'running:master', 'running:master', 'purge', 'stats:HOURLY',
+	));
+});
 
-	expect($bmaster_pos)->not->toBeFalse();
-	expect($bchild_pos)->not->toBeFalse();
+test('the periodic master handler purges on a forced run even before the interval elapses', function () {
+	rrdcheck_purge_scenario(array('rrdcheck_interval' => 60, 'rrdcheck_last_run_time' => time(), 'boost_rrd_update_enable' => ''));
+	rrdcheck_master_handler(true);
 
-	$bmaster_case = substr($contents, $bmaster_pos, $bchild_pos - $bmaster_pos);
+	expect(rrdcheck_purge_trace())->toContain('purge');
+});
 
-	expect($bmaster_case)->not->toContain($rrdcheck_retention_delete);
+test('the periodic master handler neither collects nor purges before the interval elapses', function () {
+	rrdcheck_purge_scenario(array('rrdcheck_interval' => 60, 'rrdcheck_last_run_time' => time(), 'boost_rrd_update_enable' => ''));
+	rrdcheck_master_handler(false);
+
+	expect($GLOBALS['rrdcheck_purge_events'])->toBe(array());
+});
+
+test('the periodic master handler leaves the cycle to Boost when Boost is active', function () {
+	rrdcheck_purge_scenario(array('rrdcheck_interval' => 60, 'rrdcheck_last_run_time' => 1, 'boost_rrd_update_enable' => 'on'));
+	rrdcheck_master_handler(true);
+
+	expect($GLOBALS['rrdcheck_purge_events'])->toBe(array());
 });

@@ -102,7 +102,7 @@ try {
 		array(array('oid_index' => '.1.3.6.1.2.1.2.2.1.1', 'oid_num_indexes' => '.1.3.6.1.2.1.2.1.0'), POLLER_ACTION_SNMP, '.1.3.6.1.2.1.2.1.0'),
 	);
 
-	foreach ($cases as list($queryXml, $action, $oid)) {
+	foreach ($cases as [$queryXml, $action, $oid]) {
 		$writes = array();
 		$pushes = array();
 		update_reindex_cache(1, 2);

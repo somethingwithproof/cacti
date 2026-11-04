@@ -5400,6 +5400,9 @@ function cacti_escapeshellcmd($string) {
  * scripts so the standard argument-parsing preamble is not duplicated across
  * them.
  *
+ * The argument is split on the first '=' only, so a value may itself contain
+ * '=' characters (for example '--filter=a=b' yields ['--filter', 'a=b']).
+ *
  * @param string $parameter The raw CLI argument, e.g. '--type=boost' or '--force'.
  *
  * @return array A two element array of [name, value].
