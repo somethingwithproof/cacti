@@ -28,6 +28,8 @@ jobs:
   audit-contracts:
     name: Audit and remediation contracts
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -87,7 +89,6 @@ jobs:
         with:
           ref: 1.2.x
           path: released
-          fetch-depth: 0
           persist-credentials: false
 
       - name: Set up Cacti Composer toolchain
@@ -224,17 +225,25 @@ jobs:
       - name: Require remediation for security findings
         if: always() && github.event_name != 'pull_request' && steps.audit.outputs.security_count != '0'
         env:
-          MATERIALIZE_COUNT: ${{ steps.materialize.outputs.count }}
           MATERIALIZE_OUTCOME: ${{ steps.materialize.outcome }}
           UPDATER_OUTCOME: ${{ steps.updater.outcome }}
+          REMEDIATION_DIR: ${{ runner.temp }}/remediation/${{ matrix.id }}
         run: |
           set -euo pipefail
           if [ "$UPDATER_OUTCOME" != success ]; then
             echo '::error title=Released branch remediation::Dependabot could not resolve every 1.2.x security finding.'
             exit 1
           fi
-          if [ "$MATERIALIZE_OUTCOME" != success ] || [ "${MATERIALIZE_COUNT:-0}" -eq 0 ]; then
+          if [ "$MATERIALIZE_OUTCOME" != success ]; then
             echo '::error title=Released branch remediation::No safe allowlisted remediation patch was produced.'
+            exit 1
+          fi
+          # Fails on any recorded Dependabot error type and on any audited
+          # dependency that no created remediation covers (partial remediation).
+          if ! python3 automation/.github/scripts/released_dependency_remediation.py verify \
+            --remediation "$REMEDIATION_DIR" \
+            --job "$RUNNER_TEMP/dependabot-job.json"; then
+            echo '::error title=Released branch remediation::Remediation is partial or Dependabot reported errors.'
             exit 1
           fi
 
@@ -275,6 +284,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          # Tracking issue linked from the draft PRs. Set the repository
+          # variable RELEASED_REMEDIATION_ISSUE to change it; unset falls back
+          # to the script's DEFAULT_TRACKING_ISSUE.
+          RELEASED_REMEDIATION_ISSUE: ${{ vars.RELEASED_REMEDIATION_ISSUE }}
         run: >-
           python3 automation/.github/scripts/released_dependency_remediation.py publish
           --artifacts "$RUNNER_TEMP/released-remediation"
@@ -282,5 +295,4 @@ jobs:
           --repository "${{ github.repository }}"
           --base-branch 1.2.x
           --assignee TheWitness
-          --issue 8577
           --run-url "$RUN_URL"

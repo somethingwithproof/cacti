@@ -11,6 +11,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
@@ -20,6 +21,13 @@ EVENT_ID_RE = re.compile(r"^[0-9a-f]{16}$")
 DEPENDENCY_RE = re.compile(r"^[A-Za-z0-9@._/+:-]{1,214}$")
 REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 MAX_PATCH_BYTES = 25 * 1024 * 1024
+BOT_NAME = "github-actions[bot]"
+BOT_EMAIL = "41898282+github-actions[bot]@users.noreply.github.com"
+# Tracking issue linked from draft PRs. Override it without a code change by
+# setting the RELEASED_REMEDIATION_ISSUE repository variable (the workflow
+# exports it) or by passing --issue.
+ISSUE_ENV = "RELEASED_REMEDIATION_ISSUE"
+DEFAULT_TRACKING_ISSUE = 8577
 
 
 class RemediationError(RuntimeError):
@@ -154,28 +162,44 @@ def composer_security_advisories(report: dict) -> list[dict]:
 
 
 def npm_security_advisories(report: dict) -> list[dict]:
-    """Translate npm audit vulnerabilities into a Dependabot job."""
+    """Translate npm audit advisories into a Dependabot job.
+
+    npm lists a package under `vulnerabilities` either because an advisory
+    names it (a `via` object carrying that advisory's own range) or only
+    because it depends on a vulnerable package (a `via` name string). The
+    latter carry the parent's range, which says nothing about the package, so
+    they are skipped; updating the advisory's package fixes them.
+    """
     vulnerabilities = require_mapping(
         report.get("vulnerabilities"), "npm vulnerabilities"
     )
-    result = []
+    ranges: dict[str, set[str]] = {}
     for dependency in sorted(vulnerabilities):
-        name = validate_dependency_name(dependency)
+        key = validate_dependency_name(dependency)
         record = require_mapping(
-            vulnerabilities[dependency], f"npm vulnerability for {name}"
+            vulnerabilities[dependency], f"npm vulnerability for {key}"
         )
-        affected = record.get("range")
-        if not isinstance(affected, str) or not affected.strip():
-            raise RemediationError(f"npm vulnerability range is missing for {name}")
-        result.append(
-            {
-                "dependency-name": name,
-                "affected-versions": [affected.strip()],
-                "patched-versions": [],
-                "unaffected-versions": [],
-            }
-        )
-    return result
+        via = record.get("via")
+        if not isinstance(via, list):
+            raise RemediationError(f"npm vulnerability via is invalid for {key}")
+        for item in via:
+            if not isinstance(item, dict):
+                continue
+            name = validate_dependency_name(item.get("name", key))
+            affected = item.get("range")
+            if not isinstance(affected, str) or not affected.strip():
+                raise RemediationError(f"npm advisory range is missing for {name}")
+            ranges.setdefault(name, set()).add(affected.strip())
+
+    return [
+        {
+            "dependency-name": name,
+            "affected-versions": sorted(ranges[name]),
+            "patched-versions": [],
+            "unaffected-versions": [],
+        }
+        for name in sorted(ranges)
+    ]
 
 
 def security_advisories(ecosystem: str, report: object) -> list[dict]:
@@ -531,6 +555,32 @@ def materialize_results(
     return len(created)
 
 
+def verify_remediation(*, output_root: Path, job_path: Path) -> None:
+    """Fail unless every audited dependency has a clean, created remediation."""
+    status = require_mapping(load_json(output_root / "status.json"), "status")
+    error_types = status.get("error_types")
+    if not isinstance(error_types, list):
+        raise RemediationError("status.json error_types must be a list")
+    if error_types:
+        raise RemediationError(
+            "Dependabot reported errors: " + ", ".join(map(str, error_types))
+        )
+
+    job = require_mapping(load_json(job_path), "Dependabot job")
+    audited = require_mapping(job.get("job"), "Dependabot job body").get("dependencies")
+    if not isinstance(audited, list) or not audited:
+        raise RemediationError("Dependabot job lists no audited dependencies")
+
+    covered: set[str] = set()
+    for metadata_path in sorted((output_root / "events").glob("*/metadata.json")):
+        covered.update(validate_metadata(load_json(metadata_path))["dependencies"])
+    missing = sorted(set(audited) - covered)
+    if missing:
+        raise RemediationError(
+            "no remediation was created for: " + ", ".join(missing)
+        )
+
+
 def validate_metadata(value: object) -> dict:
     """Validate metadata before a write-enabled job trusts its patch."""
     metadata = require_mapping(value, "remediation metadata")
@@ -638,6 +688,63 @@ def existing_pull_request(
     return pulls[0] if pulls else None
 
 
+def fetch_remote_branch(repository_root: Path, branch: str) -> str | None:
+    """Fetch the remediation branch and return its tip, or None if absent."""
+    ref = f"refs/heads/{branch}"
+    listing = run_command(
+        ["git", "ls-remote", "--exit-code", "--heads", "origin", ref],
+        cwd=repository_root,
+        capture_output=True,
+        check=False,
+    )
+    if listing.returncode == 2:
+        return None
+    if listing.returncode != 0:
+        raise RemediationError(f"cannot query origin for {branch}")
+    run_command(
+        ["git", "fetch", "--no-tags", "origin", f"+{ref}:refs/remotes/origin/{branch}"],
+        cwd=repository_root,
+    )
+    return run_command(
+        ["git", "rev-parse", f"refs/remotes/origin/{branch}"],
+        cwd=repository_root,
+        capture_output=True,
+    ).stdout.strip()
+
+
+def assert_bot_only(repository_root: Path, base_branch: str, remote: str) -> None:
+    """Refuse to overwrite a branch that carries maintainer commits."""
+    authors = run_command(
+        ["git", "log", "--format=%ae", f"origin/{base_branch}..{remote}"],
+        cwd=repository_root,
+        capture_output=True,
+    ).stdout.split()
+    foreign = sorted({email for email in authors if email != BOT_EMAIL})
+    if foreign:
+        raise RemediationError(
+            "remediation branch has commits not authored by the bot "
+            f"({', '.join(foreign)}); refusing to overwrite it"
+        )
+
+
+def patches_match(repository_root: Path, base_branch: str, remote: str) -> bool:
+    """Return whether the remote branch already holds the staged change."""
+    arguments = ["git", "diff", "--no-ext-diff", "--no-textconv", "--binary", "--full-index"]
+    wanted = run_command(
+        [*arguments, "--cached", f"origin/{base_branch}", "--"],
+        cwd=repository_root,
+        capture_output=True,
+        text=False,
+    ).stdout
+    present = run_command(
+        [*arguments, f"origin/{base_branch}", remote, "--"],
+        cwd=repository_root,
+        capture_output=True,
+        text=False,
+    ).stdout
+    return wanted == present
+
+
 def publish_event(
     *,
     metadata_path: Path,
@@ -698,18 +805,18 @@ def publish_event(
             "applied patch changed files not declared by the read-only job"
         )
 
-    run_command(
-        ["git", "config", "user.name", "github-actions[bot]"], cwd=repository_root
-    )
-    run_command(
-        [
-            "git",
-            "config",
-            "user.email",
-            "41898282+github-actions[bot]@users.noreply.github.com",
-        ],
-        cwd=repository_root,
-    )
+    remote = fetch_remote_branch(repository_root, branch)
+    if remote is not None:
+        assert_bot_only(repository_root, base_branch, remote)
+        if patches_match(repository_root, base_branch, remote):
+            print(
+                f"{branch} already carries an equivalent patch; leaving it untouched",
+                file=sys.stderr,
+            )
+            return False
+
+    run_command(["git", "config", "user.name", BOT_NAME], cwd=repository_root)
+    run_command(["git", "config", "user.email", BOT_EMAIL], cwd=repository_root)
     run_command(
         [
             "git",
@@ -721,12 +828,13 @@ def publish_event(
         ],
         cwd=repository_root,
     )
+    # An empty expected value means "the branch must not exist yet".
     run_command(
         [
             "git",
             "push",
             "--no-verify",
-            "--force",
+            f"--force-with-lease=refs/heads/{branch}:{remote or ''}",
             "origin",
             f"HEAD:refs/heads/{branch}",
         ],
@@ -850,9 +958,27 @@ def parse_arguments() -> argparse.Namespace:
     publish.add_argument("--repository", required=True)
     publish.add_argument("--base-branch", default="1.2.x")
     publish.add_argument("--assignee", default="TheWitness")
-    publish.add_argument("--issue", required=True, type=int)
+    publish.add_argument("--issue", type=int)
     publish.add_argument("--run-url", required=True)
+
+    verify = subparsers.add_parser("verify")
+    verify.add_argument("--remediation", required=True, type=Path)
+    verify.add_argument("--job", required=True, type=Path)
     return parser.parse_args()
+
+
+def tracking_issue(value: int | None) -> int:
+    """Resolve the tracking issue: --issue, then the variable, then the default."""
+    if value is None:
+        raw = os.environ.get(ISSUE_ENV, "").strip()
+        if not raw:
+            return DEFAULT_TRACKING_ISSUE
+        if not raw.isdecimal():
+            raise RemediationError(f"{ISSUE_ENV} must be an issue number: {raw!r}")
+        value = int(raw)
+    if value <= 0:
+        raise RemediationError(f"invalid tracking issue: {value}")
+    return value
 
 
 def main() -> None:
@@ -884,6 +1010,10 @@ def main() -> None:
                     output_root=arguments.output,
                 )
             )
+        elif arguments.command == "verify":
+            verify_remediation(
+                output_root=arguments.remediation, job_path=arguments.job
+            )
         else:
             print(
                 publish_results(
@@ -892,7 +1022,7 @@ def main() -> None:
                     repository=arguments.repository,
                     base_branch=arguments.base_branch,
                     assignee=arguments.assignee,
-                    issue=arguments.issue,
+                    issue=tracking_issue(arguments.issue),
                     run_url=arguments.run_url,
                 )
             )
