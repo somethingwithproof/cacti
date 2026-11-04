@@ -1891,6 +1891,37 @@ function toggleFilterAndIcon(id, child, initial) {
 	$(window).trigger('resize');
 }
 
+/** setupFilterSearchIcons - Decorate the page filter inputs with the search
+ *  icon, the localized placeholder and autocomplete=off.  This is idempotent
+ *  and does not depend on the input being visible: the icon is a sibling of
+ *  the input, so it is hidden and shown with it when the filter is collapsed
+ *  (toggleFilterAndIcon) or trimmed on narrow viewports (tuneFilter).  The
+ *  rfilter input is left alone inside a .cactiFilterEditTable.  Themes call
+ *  it from themeReady(). */
+function setupFilterSearchIcons() {
+	var filters = {
+		'filter':  searchFilter,
+		'filterd': searchFilter,
+		'rfilter': searchRFilter
+	};
+
+	$.each(filters, function(id, placeholder) {
+		$('input[id="' + id + '"]').each(function() {
+			var input = $(this);
+
+			if (id == 'rfilter' && input.closest('.cactiFilterEditTable').length > 0) {
+				return;
+			}
+
+			input.attr('autocomplete', 'off').attr('placeholder', placeholder).parent('td').css('white-space', 'nowrap');
+
+			if (input.next('i.ti-search.filter').length < 1) {
+				input.after("<i class='ti ti-search filter'/>");
+			}
+		});
+	});
+}
+
 function setGraphTabs() {
 	page = window.location.href;
 
