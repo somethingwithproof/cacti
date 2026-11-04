@@ -667,6 +667,19 @@ function load_and_validate_device($device_id, $overrides, $host_templates, $sour
 			return false;
 		}
 
+		/* the privacy settings only take effect with authentication (see lib/snmp.php) */
+		if ($security_level == '' && isset($overrides['snmp_auth_protocol']) &&
+			in_array($host['snmp_auth_protocol'], array('', '[None]'), true) &&
+			!in_array($host['snmp_priv_protocol'], array('', '[None]'), true) && $host['snmp_priv_passphrase'] != '') {
+			print "ERROR: SNMP privacy requires authentication; --authproto cannot be [None] while a priv protocol and passphrase are set.  Use --security-level=noAuthNoPriv to clear both, or --privproto=[None]\n";
+			return false;
+		}
+
+		if ($host['snmp_auth_protocol'] == '' && $host['snmp_password'] == '') {
+			print "ERROR: No SNMP auth protocol is set for this device.  Supply --authproto and --password, or --authproto=[None] for noAuthNoPriv\n";
+			return false;
+		}
+
 		if ($host['snmp_auth_protocol'] != '[None]' && $host['snmp_password'] == '') {
 			print "ERROR: When using snmpv3 with an auth protocol you must supply a password\n";
 			return false;
@@ -999,36 +1012,36 @@ function clear_cli_messages() {
  */
 function device_override_definitions() {
 	return array(
-		'id'           => array('key' => 'id'),
-		'description'  => array('key' => 'description'),
-		'ip'           => array('key' => 'ip'),
-		'template'     => array('key' => 'host_template_id', 'min' => 0),
-		'community'    => array('key' => 'snmp_community'),
-		'version'      => array('key' => 'snmp_version', 'min' => 0, 'max' => 3),
-		'notes'        => array('key' => 'notes'),
-		'location'     => array('key' => 'location'),
-		'site'         => array('key' => 'site_id', 'min' => 0),
-		'poller'       => array('key' => 'poller_id', 'min' => 0),
-		'disable'      => array('key' => 'disabled'),
-		'external-id'  => array('key' => 'external_id'),
+		'id'             => array('key' => 'id'),
+		'description'    => array('key' => 'description'),
+		'ip'             => array('key' => 'ip'),
+		'template'       => array('key' => 'host_template_id', 'min' => 0),
+		'community'      => array('key' => 'snmp_community'),
+		'version'        => array('key' => 'snmp_version', 'min' => 0, 'max' => 3),
+		'notes'          => array('key' => 'notes'),
+		'location'       => array('key' => 'location'),
+		'site'           => array('key' => 'site_id', 'min' => 0),
+		'poller'         => array('key' => 'poller_id', 'min' => 0),
+		'disable'        => array('key' => 'disabled'),
+		'external-id'    => array('key' => 'external_id'),
 		'security-level' => array('key' => 'snmp_security_level'),
-		'username'     => array('key' => 'snmp_username'),
-		'password'     => array('key' => 'snmp_password'),
-		'authproto'    => array('key' => 'snmp_auth_protocol'),
-		'privproto'    => array('key' => 'snmp_priv_protocol'),
-		'privpass'     => array('key' => 'snmp_priv_passphrase'),
-		'context'      => array('key' => 'snmp_context'),
-		'engineid'     => array('key' => 'snmp_engine_id'),
-		'port'         => array('key' => 'snmp_port', 'min' => 1, 'max' => 65534),
-		'timeout'      => array('key' => 'snmp_timeout', 'min' => 1, 'max' => 20000),
-		'ping_timeout' => array('key' => 'ping_timeout', 'min' => 1),
-		'threads'      => array('key' => 'device_threads', 'min' => 1, 'max' => 10),
-		'avail'        => array('key' => 'availability_method'),
-		'ping_method'  => array('key' => 'ping_method'),
-		'ping_port'    => array('key' => 'ping_port', 'min' => 1, 'max' => 65534),
-		'ping_retries' => array('key' => 'ping_retries', 'min' => 0),
-		'max_oids'     => array('key' => 'max_oids', 'min' => 1, 'max' => 60),
-		'bulk_walk'    => array('key' => 'bulk_walk_size', 'min' => 1, 'max' => 60, 'allow' => array(-1)),
+		'username'       => array('key' => 'snmp_username'),
+		'password'       => array('key' => 'snmp_password'),
+		'authproto'      => array('key' => 'snmp_auth_protocol'),
+		'privproto'      => array('key' => 'snmp_priv_protocol'),
+		'privpass'       => array('key' => 'snmp_priv_passphrase'),
+		'context'        => array('key' => 'snmp_context'),
+		'engineid'       => array('key' => 'snmp_engine_id'),
+		'port'           => array('key' => 'snmp_port', 'min' => 1, 'max' => 65534),
+		'timeout'        => array('key' => 'snmp_timeout', 'min' => 1, 'max' => 20000),
+		'ping_timeout'   => array('key' => 'ping_timeout', 'min' => 1),
+		'threads'        => array('key' => 'device_threads', 'min' => 1, 'max' => 10),
+		'avail'          => array('key' => 'availability_method'),
+		'ping_method'    => array('key' => 'ping_method'),
+		'ping_port'      => array('key' => 'ping_port', 'min' => 1, 'max' => 65534),
+		'ping_retries'   => array('key' => 'ping_retries', 'min' => 0),
+		'max_oids'       => array('key' => 'max_oids', 'min' => 1, 'max' => 60),
+		'bulk_walk'      => array('key' => 'bulk_walk_size', 'min' => 1, 'max' => 60, 'allow' => array(-1)),
 	);
 }
 
@@ -1372,12 +1385,15 @@ function display_help() {
 	print "    --quiet        suppress normal output and skip CSV confirmation\n\n";
 	print "SNMPv3 security level:\n" .
 		"    Options not given keep the value already stored for the device.  Without\n" .
-		"    --security-level, the level follows the resulting protocols: an auth\n" .
-		"    protocol of [None] is noAuthNoPriv, a priv protocol of [None] is\n" .
-		"    authNoPriv, and otherwise authPriv.  To lower the level of a device that\n" .
-		"    is currently authPriv, pass --security-level, or --privproto=[None].\n" .
-		"    --security-level=noAuthNoPriv clears the password and priv passphrase;\n" .
-		"    authNoPriv clears the priv passphrase.\n\n";
+		"    --security-level, the level follows the resulting settings: authPriv when\n" .
+		"    a priv protocol other than [None] and a priv passphrase are set (checked\n" .
+		"    first, whatever the auth protocol), otherwise authNoPriv when an auth\n" .
+		"    protocol other than [None] and a password are set, and otherwise\n" .
+		"    noAuthNoPriv.  Privacy requires authentication, so --authproto=[None] is\n" .
+		"    rejected while a priv protocol and passphrase are set.  To lower the level\n" .
+		"    of a device that is currently authPriv, pass --security-level, or\n" .
+		"    --privproto=[None].  --security-level=noAuthNoPriv clears the password\n" .
+		"    and priv passphrase; authNoPriv clears the priv passphrase.\n\n";
 	print "Examples:\n" .
 		"    SNMPv3 authPriv with SHA-256 and AES-128:\n" .
 		"      change_device.php --id=5 --version=3 --security-level=authPriv --username=monitor \\\n" .

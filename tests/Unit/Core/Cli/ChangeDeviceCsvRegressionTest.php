@@ -12,6 +12,12 @@
  +-------------------------------------------------------------------------+
  */
 
+namespace ChangeDeviceCsvRegressionFixture;
+
+require_once __DIR__ . '/../../../Helpers/SourceSlice.php';
+
+cacti_fixture_source_function(__DIR__ . '/../../../../cli/change_device.php', 'device_override_definitions', __NAMESPACE__);
+
 $source = file_get_contents(__DIR__ . '/../../../../cli/change_device.php');
 
 test('legacy id changes do not require interactive confirmation', function () use ($source) {
@@ -27,10 +33,12 @@ test('validation and save failures both determine the final status', function ()
 });
 
 test('numeric CSV and CLI overrides share documented constraints', function () use ($source) {
-	expect($source)->toContain("'ping_port'    => array('key' => 'ping_port', 'min' => 1, 'max' => 65534)");
-	expect($source)->toContain("'threads'      => array('key' => 'device_threads', 'min' => 1, 'max' => 10)");
-	expect($source)->toContain("'max_oids'     => array('key' => 'max_oids', 'min' => 1, 'max' => 60)");
-	expect($source)->toContain("'bulk_walk'    => array('key' => 'bulk_walk_size', 'min' => 1, 'max' => 60, 'allow' => array(-1))");
+	$definitions = device_override_definitions();
+
+	expect($definitions['ping_port'])->toBe(array('key' => 'ping_port', 'min' => 1, 'max' => 65534));
+	expect($definitions['threads'])->toBe(array('key' => 'device_threads', 'min' => 1, 'max' => 10));
+	expect($definitions['max_oids'])->toBe(array('key' => 'max_oids', 'min' => 1, 'max' => 60));
+	expect($definitions['bulk_walk'])->toBe(array('key' => 'bulk_walk_size', 'min' => 1, 'max' => 60, 'allow' => array(-1)));
 	expect($source)->toContain("\$converted = convert_override_value('max_oids', \$value);");
 	expect($source)->toContain("\$converted = convert_override_value('bulk_walk', \$value);");
 });
@@ -87,7 +95,7 @@ test('remote pollers switch administrative changes to the main database', functi
 });
 
 test('no-op rows are excluded from device saves', function () use ($source) {
-	expect($source)->toContain('if (!device_has_requested_changes($original, $merged))');
+	expect($source)->toContain('!device_has_requested_changes($original, $merged) &&');
 	expect($source)->toContain('already has the requested settings; no changes are needed.');
 	expect($source)->toContain('No devices require changes.');
 });
