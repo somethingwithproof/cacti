@@ -53,7 +53,7 @@ foreach (['auth_2fa.php', 'auth_resetpassword.php'] as $file) {
 			}
 			$count++;
 		} else {
-			foreach ([[false, 'valid', true], [['hash' => 'valid'], 'valid', false], [['hash' => 'valid'], 'vali', true], [['hash' => 'valid'], 'valid0', true], [['hash' => '0e123'], '0e456', true], [['hash' => 123], '123', false]] as [$hash, $user_hash, $expected]) {
+			foreach ([[false, 'valid', true], [[], 'valid', true], [[], '', true], [[], false, true], [['hash' => 'valid'], 'valid', false], [['hash' => 'valid'], 'vali', true], [['hash' => 'valid'], 'valid0', true], [['hash' => '0e123'], '0e456', true], [['hash' => 123], '123', false]] as [$hash, $user_hash, $expected]) {
 				if ($guard(compact('hash', 'user_hash')) !== $expected) {
 					throw new RuntimeException('Reset hash decision mismatch');
 				}
