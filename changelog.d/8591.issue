@@ -1,0 +1,1 @@
+Fix substitute_script_path() corrupting a quoted command substitution that precedes a field and refusing templates over constructs that do not touch a field

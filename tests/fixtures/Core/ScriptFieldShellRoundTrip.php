@@ -57,6 +57,16 @@ $nestedCases = [
 	['"$(printf %s <field>)"', '$(printf unexpected)',         '$(printf unexpected)'],
 	['"$(printf %s <field>)"', 'back`printf unexpected`tick',  'back`printf unexpected`tick'],
 	['"$(printf %s <field>)"', 'dollar$HOME',                  'dollar$HOME'],
+	// plain redirections do not change quoting, so the field is placed normally
+	['"$(printf %s < /dev/null; printf %s <field>)"', '$(printf unexpected)', '$(printf unexpected)'],
+	['"$(printf %s > /dev/null; printf %s <field>)"', 'hello world',          'hello world'],
+	['"$(printf %s 2>/dev/null <field>)"',            'back`printf unexpected`tick', 'back`printf unexpected`tick'],
+	// a command substitution that precedes the field is content of the open quote
+	['"$(printf x)<field>"',   'hello world',          'xhello world'],
+	['"$(printf x)<field>"',   '$(printf unexpected)', 'x$(printf unexpected)'],
+	['"`printf x`<field>"',    'hello world',          'xhello world'],
+	['"`printf x`<field>"',    'back`printf unexpected`tick', 'xback`printf unexpected`tick'],
+	['"$(printf a)$(printf b)<field>"', 'dollar$HOME', 'abdollar$HOME'],
 ];
 
 foreach ($nestedCases as $case) {
@@ -99,8 +109,6 @@ $rejectedTemplates = [
 	'"$( (true); printf %s <field>)"',
 	'"$(case x in x) printf %s <field>;; esac)"',
 	'"$(printf %s # )' . "\n" . '<field>)"',
-	'"$(printf %s < /dev/null; printf %s <field>)"',
-	'"$(printf %s > /dev/null; printf %s <field>)"',
 	'"`(true); printf %s <field>`"',
 ];
 

@@ -138,3 +138,110 @@ test('GHSA-5v3j: substituted templates round-trip through /bin/sh as safe litera
 })->skip(stripos(PHP_OS, 'WIN') === 0 || !function_exists('proc_open'), 'POSIX /bin/sh round-trip required');
 
 
+
+/*
+ * Issue #8591: regressions in the nested-frame handling of substitute_script_path().
+ */
+
+/**
+ * Parses a command line with /bin/sh -n, which checks syntax and runs nothing.
+ *
+ * @param string $command The command line to parse.
+ *
+ * @return int The shell's exit status; 0 means the command is well formed.
+ */
+function substitute_script_path_syntax_status(string $command) : int {
+	$pipes   = [];
+	$process = proc_open(['/bin/sh', '-n', '-c', $command], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+
+	if (!is_resource($process)) {
+		return -1;
+	}
+
+	stream_get_contents($pipes[1]);
+	stream_get_contents($pipes[2]);
+	fclose($pipes[1]);
+	fclose($pipes[2]);
+
+	return proc_close($process);
+}
+
+test('#8591: a command substitution before a field keeps the double quote balanced', function () {
+	$esc = "'x'";
+
+	// the open double quote holds the substitution, so the field is not an exact wrap
+	expect(substitute_script_path('"$(date)<a>"', ['a' => $esc]))->toBe('"$(date)"' . $esc . '""')
+		->and(substitute_script_path('"`echo hi`<a>"', ['a' => $esc]))->toBe('"`echo hi`"' . $esc . '""')
+		->and(substitute_script_path('"$(a)$(b)<a>"', ['a' => $esc]))->toBe('"$(a)$(b)"' . $esc . '""')
+		->and(substitute_script_path('"$(date)"<a>', ['a' => $esc]))->toBe('"$(date)"' . $esc)
+		->and(substitute_script_path('"<a>"', ['a' => $esc]))->toBe($esc);
+});
+
+test('#8591: balanced output parses as shell and never runs a hostile value', function () {
+	$payload = "'" . '$(touch MARKER)`touch MARKER`;touch MARKER' . "'";
+
+	foreach (['"$(date)<a>"', '"`echo hi`<a>"', 'echo "$(date)<a>" "x<a>y"', '$(cmd 2>/dev/null) <a>', 'cmd ${FOO:-x} <a>', 'cmd $((1+2)) <a>', 'cmd 2>&1 <a>'] as $template) {
+		$result = substitute_script_path($template, ['a' => $payload]);
+
+		expect($result)->not->toBe('')
+			->and(substitute_script_path_syntax_status($result))->toBe(0);
+	}
+})->skip(stripos(PHP_OS, 'WIN') === 0 || !function_exists('proc_open'), 'POSIX /bin/sh required');
+
+test('#8591: constructs that do not touch a field no longer refuse the template', function () {
+	$esc = "'p'";
+
+	expect(substitute_script_path('$(cmd 2>/dev/null) <a>', ['a' => $esc]))->toBe('$(cmd 2>/dev/null) ' . $esc)
+		->and(substitute_script_path('cmd ${FOO:-x} <a>', ['a' => $esc]))->toBe('cmd ${FOO:-x} ' . $esc)
+		->and(substitute_script_path('cmd $((1+2)) <a>', ['a' => $esc]))->toBe('cmd $((1+2)) ' . $esc)
+		->and(substitute_script_path('cmd $(( $n * (2+1) )) <a>', ['a' => $esc]))->toBe('cmd $(( $n * (2+1) )) ' . $esc)
+		->and(substitute_script_path('"$(true < /dev/null; echo <a>)"', ['a' => $esc]))->toBe('"$(true < /dev/null; echo ' . $esc . ')"')
+		->and(substitute_script_path('<a> $(case x in x) true ;; esac)', ['a' => $esc]))->toBe($esc . ' $(case x in x) true ;; esac)')
+		->and(substitute_script_path('cmd 2>&1 <a>', ['a' => $esc]))->toBe('cmd 2>&1 ' . $esc)
+		->and(substitute_script_path('cmd <a> 2>&1', ['a' => $esc]))->toBe('cmd ' . $esc . ' 2>&1');
+});
+
+test('#8591: a field after a construct the scanner cannot follow is still refused with a reason', function () {
+	$esc     = "'secret-value'";
+	$refused = [
+		['`echo <a>`', 'backtick'],
+		["cat <<EOF\n<a>\nEOF", 'here-document'],
+		['${n:-"x"} <a>', 'parameter expansion'],
+		['${n#<a>}', 'parameter expansion'],
+		['$(case x in x) true ;; esac) <a>', 'case statement'],
+		['$( (true) ) <a>', 'grouping parenthesis'],
+		['$((1)+(2)) <a>', 'grouping parenthesis'],
+		['$((1<2)) <a>', 'grouping parenthesis'],
+		["\$(true # c\n) <a>", 'comment'],
+		["\"x\\\n<a>\"", 'line continuation'],
+	];
+
+	foreach ($refused as [$template, $reason]) {
+		$reject = null;
+		$result = substitute_script_path($template, ['a' => $esc], $reject);
+
+		expect($result)->toBe('')
+			->and($reject)->toBeString()
+			->and($reject)->toContain($reason)
+			->and($reject)->not->toContain('secret-value');
+	}
+});
+
+test('#8591: an unsupported construct does not stop a trusted raw path token', function () {
+	$reject = null;
+
+	expect(substitute_script_path("\$(true # c\n) <path>", ['path' => '/raw path'], $reject))->toBe("\$(true # c\n) /raw path")
+		->and($reject)->toBeNull();
+});
+
+test('#8591: the reject reason is reset and an empty value is not a refusal', function () {
+	$reject = 'stale';
+
+	expect(substitute_script_path('cmd <a>', ['a' => "'p'"], $reject))->toBe("cmd 'p'")
+		->and($reject)->toBeNull();
+
+	$reject = 'stale';
+
+	expect(substitute_script_path('<a>', ['a' => ''], $reject))->toBe('')
+		->and($reject)->toBeNull();
+});

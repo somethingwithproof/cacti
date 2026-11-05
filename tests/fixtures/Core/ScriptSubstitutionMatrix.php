@@ -82,14 +82,60 @@ $cases = [
 	['"$( (true); printf %s <field>)"', ['field' => "'p'"], ''],
 	['"$(case x in x) printf %s <field>;; esac)"', ['field' => "'p'"], ''],
 	['"$(printf %s # )' . "\n" . '<field>)"', ['field' => "'p'"], ''],
-	['"$(printf %s < /dev/null; printf %s <field>)"', ['field' => "'p'"], ''],
-	['"$(printf %s > /dev/null; printf %s <field>)"', ['field' => "'p'"], ''],
 	['"`(true); printf %s <field>`"', ['field' => "'p'"], ''],
+	// Plain redirections neither change quoting nor nesting, so a field after
+	// one is placed exactly like any other and the template is not refused.
+	['"$(printf %s < /dev/null; printf %s <field>)"', ['field' => "'p'"], '"$(printf %s < /dev/null; printf %s \'p\')"'],
+	['"$(printf %s > /dev/null; printf %s <field>)"', ['field' => "'p'"], '"$(printf %s > /dev/null; printf %s \'p\')"'],
+	['$(cmd 2>/dev/null) <field>', ['field' => "'p'"], '$(cmd 2>/dev/null) \'p\''],
+	// A construct that merely appears is not refused: only a self-quoting field
+	// placed after one the scanner cannot follow is.
+	['cmd ${FOO:-x} <field>', ['field' => "'p'"], 'cmd ${FOO:-x} \'p\''],
+	['cmd $((1+2)) <field>', ['field' => "'p'"], 'cmd $((1+2)) \'p\''],
+	['cmd $(( $a * (2+1) )) <field>', ['field' => "'p'"], 'cmd $(( $a * (2+1) )) \'p\''],
+	['<field> $(case x in x) true ;; esac)', ['field' => "'p'"], '\'p\' $(case x in x) true ;; esac)'],
+	['cmd ${FOO:-"x"} <field>', ['field' => "'p'"], ''],
+	['cmd $((1)+(2)) <field>', ['field' => "'p'"], ''],
+	['cmd $((1<2)) <field>', ['field' => "'p'"], ''],
+	['$(true # c' . "\n" . ') <field>', ['field' => "'p'"], ''],
+	['$(true # c' . "\n" . ') <path>', ['path' => '/raw path'], '$(true # c' . "\n" . ') /raw path'],
+	// a bare descriptor duplication does not affect field placement
+	['cmd <field> 2>&1', ['field' => "'p'"], 'cmd \'p\' 2>&1'],
+	['cmd 2>&1 <field>', ['field' => "'p'"], 'cmd 2>&1 \'p\''],
+	// A command substitution inside an open double quote is content of that
+	// quote, so an exact-wrap token after it must not drop the wrong character.
+	['"$(date)<field>"', ['field' => "'p'"], '"$(date)"\'p\'""'],
+	['"`echo hi`<field>"', ['field' => "'p'"], '"`echo hi`"\'p\'""'],
+	['"$(a)$(b)<field>"', ['field' => "'p'"], '"$(a)$(b)"\'p\'""'],
+	['"$(date)"<field>', ['field' => "'p'"], '"$(date)"\'p\''],
+	['"<field>"', ['field' => "'p'"], '\'p\''],
 ];
 
 foreach ($cases as $index => [$template, $values, $expected]) {
 	$check(substitute_script_path($template, $values), $expected, 'parser ' . $index);
 }
+
+// A refused template reports why (without echoing the template or any value);
+// an accepted one leaves the reason null.
+$reasons = [
+	['`printf %s <field>`', 'backtick'],
+	['cat <<EOF' . "\n<field>\nEOF", 'here-document'],
+	['${name:-"x"} <field>', 'parameter expansion'],
+	['$(case x in x) true ;; esac) <field>', 'case statement'],
+	['$( (true) ) <field>', 'grouping parenthesis'],
+	['$(true # c' . "\n" . ') <field>', 'comment'],
+	['"x\\' . "\n" . '<field>"', 'line continuation'],
+];
+
+foreach ($reasons as $index => [$template, $needle]) {
+	$reject = null;
+	$result = substitute_script_path($template, ['field' => "'secret-value'"], $reject);
+	$check([$result, is_string($reject) && str_contains($reject, $needle) && !str_contains($reject, 'secret-value')], ['', true], 'reason ' . $index);
+}
+
+$reject = 'stale';
+$check([substitute_script_path('cmd <field>', ['field' => "'p'"], $reject), $reject], ["cmd 'p'", null], 'reason reset');
+$check([substitute_script_path('<field>', ['field' => ''], $reject), $reject], ['', null], 'empty value is not a refusal');
 
 $directory = sys_get_temp_dir() . '/cacti-shell-matrix-' . bin2hex(random_bytes(8));
 mkdir($directory, 0700);

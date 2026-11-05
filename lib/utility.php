@@ -290,7 +290,10 @@ function update_poller_cache(mixed $data_source, bool $commit = false, ?int $pol
 					$data_source_item_name = '';
 				}
 
-				$poller_items[] = api_poller_cache_item_add($data_source['host_id'], [], $data_source['id'], $data_input['rrd_step'], $action, $data_source_item_name, 1, $script_path);
+				// a refused input string (logged by the builder) must not be cached as an empty command
+				if ($script_path !== false) {
+					$poller_items[] = api_poller_cache_item_add($data_source['host_id'], [], $data_source['id'], $data_input['rrd_step'], $action, $data_source_item_name, 1, $script_path);
+				}
 			} elseif ($data_input['type_id'] == DATA_INPUT_TYPE_SNMP) {
 				// get the host override fields
 				if (!isset($data_source['data_template_id'])) {

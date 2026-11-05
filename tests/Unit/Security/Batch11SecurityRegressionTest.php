@@ -42,7 +42,7 @@ test('GHSA-fq9x: substitute_script_path substitutes tokens in a single pass', fu
 
 test('GHSA-fq9x: both path builders drop the iterative str_replace and call the helper', function () use ($functionsSource) {
 	expect($functionsSource)->not->toContain("\$full_path = str_replace('<' . \$item['data_name'] . '>', \$value, \$full_path);");
-	expect(substr_count($functionsSource, '$full_path = substitute_script_path($full_path, $escaped_values);'))->toBe(2);
+	expect(substr_count($functionsSource, '$full_path = substitute_script_path($full_path, $escaped_values, $reject);'))->toBe(2);
 });
 
 /*

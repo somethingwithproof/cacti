@@ -2811,6 +2811,11 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
 
 			dsv_log('script_path', $script_path);
 
+			// the builder refuses (and logs) a template it cannot substitute safely
+			if ($script_path === false) {
+				return false;
+			}
+
 			$num_output_fields_sql = 'SELECT ' . SQL_NO_CACHE . ' id
 				FROM data_input_fields
 				WHERE data_input_id = ?
@@ -3192,6 +3197,17 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
  * normalised to an even run first, so it cannot escape the quote that must open or
  * close around the value and leave the shell with an unmatched quote.
  *
+ * Constructs that this scanner cannot follow exactly (grouping parentheses,
+ * case patterns, comments, here-documents, line continuations and parameter
+ * expansions with operators or non-trivial words) do not reject the template on
+ * their own: after one is seen the quoting state of everything that follows is
+ * uncertain, so the template is rejected only when a self-quoting field value
+ * would later have to be placed. Simple ${name}, ${name:-word} style expansions
+ * with a plain word, $((arithmetic)) and ordinary redirections are followed
+ * exactly and never reject. When the template is rejected an empty string is
+ * returned and, if supplied, $reject receives a short reason that contains no
+ * template or field values.
+ *
  * A resolved value that is NOT self-quoting - the trusted path_* tokens resolve to
  * raw configuration values that the callers do not shell-escape - is substituted
  * in place so the template keeps its own quotes. That leaves a spaced path such as
@@ -3199,16 +3215,20 @@ function test_data_source(int $data_template_id, int $host_id, int $snmp_query_i
  * <path_cacti>/scripts/x.php unquoted for the PHP script server, which resolves the
  * first token as a filesystem path rather than through a shell.
  *
- * @param string $template       The command template containing <field> tokens
- * @param array  $escaped_values Map of field name => already-escaped value
+ * @param string      $template       The command template containing <field> tokens
+ * @param array       $escaped_values Map of field name => already-escaped value
+ * @param string|null $reject         Set to null, or to the reason when the template was rejected
  *
  * @return string The template with all known tokens substituted once; unknown
- *                tokens are left intact for the caller's trailing cleanup to strip
+ *                tokens are left intact for the caller's trailing cleanup to strip.
+ *                An empty string with $reject set means the template was refused.
  */
-function substitute_script_path(string $template, array $escaped_values) : string {
-	$out = '';
-	$len = strlen($template);
-	$i   = 0;
+function substitute_script_path(string $template, array $escaped_values, ?string &$reject = null) : string {
+	$reject = null;
+	$unsafe = null;
+	$out    = '';
+	$len    = strlen($template);
+	$i      = 0;
 
 	// Stack of parsing frames so a command substitution ($(...)) or backtick is
 	// scanned with its own fresh quoting context, exactly as /bin/sh re-parses
@@ -3243,8 +3263,18 @@ function substitute_script_path(string $template, array $escaped_values) : strin
 				if ($selfQuoted) {
 					foreach ($stack as $frame) {
 						if ($frame['kind'] === 'backtick') {
+							$reject = 'field placeholder inside a backtick command substitution';
+
 							return '';
 						}
+					}
+
+					// a construct earlier in the template left the quoting state
+					// unknown, so this value cannot be placed safely
+					if ($unsafe !== null) {
+						$reject = 'field placeholder follows ' . $unsafe;
+
+						return '';
 					}
 				}
 
@@ -3262,7 +3292,7 @@ function substitute_script_path(string $template, array $escaped_values) : strin
 					}
 
 					$out .= $value;
-				} elseif ($stack[$top]['quoteEmpty'] && ($i + $tokenLen) < $len && $template[$i + $tokenLen] === $quote) {
+				} elseif ($stack[$top]['quoteEmpty'] && ($i + $tokenLen) < $len && $template[$i + $tokenLen] === $quote && substr($out, -1) === $quote) {
 					// template wrapped the token exactly ("<arg>"): drop the pair
 					// so the already-escaped value stands on its own
 					$out   = substr($out, 0, -1);
@@ -3310,33 +3340,53 @@ function substitute_script_path(string $template, array $escaped_values) : strin
 		}
 
 		// These constructs change how the shell interprets quoting around a
-		// field. Simple ${name} expansion is safe; its operators and here-docs
-		// need a full shell parser. Line continuations can conceal their syntax.
+		// field, or hide syntax from this scanner. They are only remembered here;
+		// the template is refused if a self-quoting field value follows one.
 		if ($ch === '\\' && ($template[$i + 1] ?? '') === "\n" ||
-			$ch    === '\\' && substr($template, $i + 1, 2) === "\r\n" ||
-			$quote === '' && $ch === '<' && ($template[$i + 1] ?? '') === '<') {
-			return '';
+			$ch    === '\\' && substr($template, $i + 1, 2) === "\r\n") {
+			$unsafe ??= 'a line continuation';
+		} elseif ($quote === '' && $ch === '<' && ($template[$i + 1] ?? '') === '<') {
+			$unsafe ??= 'a here-document';
 		}
 
 		if ($ch === '$' && ($template[$i + 1] ?? '') === '{') {
-			if (!preg_match('/\G\$\{(?:[A-Za-z_][A-Za-z0-9_]*|[0-9]+|[@*?#$!\-])\}/', $template, $variable, 0, $i)) {
-				return '';
+			// plain ${name}, ${1}, ${@} and ${name<op>word} with a word that cannot
+			// contain quotes, expansions or nesting are followed exactly
+			if (preg_match('/\G\$\{(?:[A-Za-z_][A-Za-z0-9_]*(?:(?::?[-+=?]|%%?|##?)[A-Za-z0-9_.\/:@,+=%^~*?-]*)?|[0-9]+|[@*?#$!\-])\}/', $template, $variable, 0, $i)) {
+				$out .= $variable[0];
+				$i += strlen($variable[0]);
+				$stack[$top]['quoteEmpty'] = false;
+
+				continue;
 			}
-			$out .= $variable[0];
-			$i += strlen($variable[0]);
+
+			$unsafe ??= 'a parameter expansion with an unsupported form';
+		}
+
+		// $((arithmetic)) cannot contain quotes, command substitution or a
+		// redirection, so it is copied through whole when its parentheses balance
+		if ($ch === '$' && substr($template, $i + 1, 2) === '((' &&
+			preg_match('/\G\$\(\((?<b>(?:[0-9A-Za-z_+\-*\/%=!&|^~?:,. \t]|\$[A-Za-z_][A-Za-z0-9_]*|\((?&b)\))*+)\)\)/', $template, $arith, 0, $i)) {
+			$out .= $arith[0];
+			$i += strlen($arith[0]);
 			$stack[$top]['quoteEmpty'] = false;
 
 			continue;
 		}
 
-		// Grouping, case patterns, comments and redirections require shell grammar
-		// beyond this quote scanner. Reject the whole template before an ambiguous
-		// closing parenthesis can expose field values to the outer quote context.
-		if ($quote === '' && $stack[$top]['kind'] !== 'top' &&
-			($ch === '(' || $ch === '#' || $ch === '<' || $ch === '>' ||
-				preg_match('/\Gcase(?=\s|$)/', $template, $unused, 0, $i) &&
-				($i === 0 || strpos(" \t\r\n;|&(", $template[$i - 1]) !== false))) {
-			return '';
+		// Grouping, case patterns and comments inside a nested frame need shell
+		// grammar beyond this quote scanner: an ambiguous closing parenthesis could
+		// expose later field values to the outer quote context. Plain redirections
+		// do not change quoting or nesting and are copied through.
+		if ($quote === '' && $stack[$top]['kind'] !== 'top') {
+			if ($ch === '(') {
+				$unsafe ??= 'a grouping parenthesis inside a command substitution';
+			} elseif ($ch === '#' && ($i === 0 || strpos(" \t\r\n;|&(", $template[$i - 1]) !== false)) {
+				$unsafe ??= 'a comment inside a command substitution';
+			} elseif (preg_match('/\Gcase(?=\s|$)/', $template, $unused, 0, $i) &&
+				($i === 0 || strpos(" \t\r\n;|&(", $template[$i - 1]) !== false)) {
+				$unsafe ??= 'a case statement inside a command substitution';
+			}
 		}
 
 		// unquoted or inside double quotes: $(...) and backticks start a nested
@@ -3345,13 +3395,17 @@ function substitute_script_path(string $template, array $escaped_values) : strin
 		if ($ch === '$' && $i + 1 < $len && $template[$i + 1] === '(') {
 			$out .= '$(';
 			$i      += 2;
-			$stack[] = ['quote' => '', 'quoteEmpty' => false, 'kind' => 'cmdsub'];
+			$stack[$top]['quoteEmpty'] = false;
+			$stack[]                   = ['quote' => '', 'quoteEmpty' => false, 'kind' => 'cmdsub'];
 
 			continue;
 		}
 
 		if ($ch === ')' && $quote === '' && $stack[$top]['kind'] === 'cmdsub') {
 			array_pop($stack);
+
+			// the nested substitution is content of the parent's open quote
+			$stack[count($stack) - 1]['quoteEmpty'] = false;
 			$out .= ')';
 			$i++;
 
@@ -3364,8 +3418,12 @@ function substitute_script_path(string $template, array $escaped_values) : strin
 			if ($stack[$top]['kind'] === 'backtick' && $quote === '') {
 				array_pop($stack);
 			} else {
-				$stack[] = ['quote' => '', 'quoteEmpty' => false, 'kind' => 'backtick'];
+				$stack[$top]['quoteEmpty'] = false;
+				$stack[]                   = ['quote' => '', 'quoteEmpty' => false, 'kind' => 'backtick'];
 			}
+
+			// the backtick pair is content of whichever frame is now on top
+			$stack[count($stack) - 1]['quoteEmpty'] = false;
 
 			$out .= '`';
 			$i++;
@@ -3450,7 +3508,8 @@ function substitute_script_path(string $template, array $escaped_values) : strin
  * @param int $data_template_id The ID of the data template
  * @param int $host_id          The ID of the host device
  *
- * @return mixed The full script path or (bool) false for an error
+ * @return mixed The full script path or (bool) false for an error, including
+ *               an input string that substitute_script_path() refused (logged)
  */
 function get_full_test_script_path(int $data_template_id, int $host_id) : mixed {
 	$data_source = db_fetch_row_prepared('SELECT ' . SQL_NO_CACHE . '
@@ -3512,7 +3571,13 @@ function get_full_test_script_path(int $data_template_id, int $host_id) : mixed 
 	/* single-pass substitution over the original template prevents a field whose
 	 * value contains another field's <token> from re-injecting an escaped payload
 	 * into an already-quoted region (GHSA-fq9x-x3vf-3vf2) */
-	$full_path = substitute_script_path($full_path, $escaped_values);
+	$full_path = substitute_script_path($full_path, $escaped_values, $reject);
+
+	if ($reject !== null) {
+		cacti_log(sprintf('ERROR: Test command for Data Template[%d] and Device[%d] (Data Input[%d]) was refused: %s.  Simplify the Data Input Method input string.', $data_template_id, $host_id, $data_source['data_input_id'], $reject), false, 'POLLER');
+
+		return false;
+	}
 
 	/**
 	 * sometimes a certain input value will not have anything entered... null out these fields
@@ -3533,7 +3598,8 @@ function get_full_test_script_path(int $data_template_id, int $host_id) : mixed 
  *
  * @param int $local_data_id The ID of the data source
  *
- * @return mixed The full script path or (bool) false for an error
+ * @return mixed The full script path or (bool) false for an error, including
+ *               an input string that substitute_script_path() refused (logged)
  */
 function get_full_script_path(int $local_data_id) : mixed {
 	$data_source = db_fetch_row_prepared('SELECT ' . SQL_NO_CACHE . ' dtd.id, dtd.data_input_id,
@@ -3592,7 +3658,13 @@ function get_full_script_path(int $local_data_id) : mixed {
 	/* single-pass substitution over the original template prevents a field whose
 	 * value contains another field's <token> from re-injecting an escaped payload
 	 * into an already-quoted region (GHSA-fq9x-x3vf-3vf2) */
-	$full_path = substitute_script_path($full_path, $escaped_values);
+	$full_path = substitute_script_path($full_path, $escaped_values, $reject);
+
+	if ($reject !== null) {
+		cacti_log(sprintf('ERROR: Command for Data Source[%d] (Data Input[%d]) was refused: %s.  Simplify the Data Input Method input string.', $local_data_id, $data_source['data_input_id'], $reject), false, 'POLLER');
+
+		return false;
+	}
 
 	/* sometimes a certain input value will not have anything entered... null out these fields
 	in the input string so we don't mess up the script */
