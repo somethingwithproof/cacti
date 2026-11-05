@@ -179,8 +179,12 @@ separate stress evidence, but they are not a full 1.3-million-file end-to-end ru
 
 Real-RRD scenarios cover acknowledged success, permanent failure, backend outage, automatic
 retry, worker death and restart, shared-path refusal, cleanup, and Linux setgid/different-owner
-writes. Production schema contracts run against MariaDB 10.6 and MySQL 8.4. Windows pipe timing,
-RRDtool proxy deployments, NFSv3, RRDCached, MariaDB 10.5, and MySQL 8.0 remain explicit integration
+writes. Production schema contracts run against MariaDB 10.6 and MySQL 8.4. On Windows,
+`stream_select()` cannot wait on a `proc_open()` pipe, so the RRDtool worker pipe is read
+non-blocking and polled against the same response deadline; a worker that misses it is terminated and
+poisoned exactly as on Linux. The `Windows RRDtool acknowledgement` workflow runs those contracts,
+including a real `rrdtool.exe` where one can be installed, on a Windows runner. Windows pipe timing on
+production hosts, RRDtool proxy deployments, NFSv3, RRDCached, MariaDB 10.5, and MySQL 8.0 remain explicit integration
 boundaries.
 
 Redis or another broker is not justified by the measurements. It would duplicate durable

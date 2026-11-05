@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="bootstrap-unit.php" failOnRisky="true">
+	<testsuites>
+		<testsuite name="Windows RRDtool acknowledgement">
+			<file>Unit/Core/Rrd/RrdAcknowledgementTimeoutTest.php</file>
+			<file>Unit/Core/Rrd/RrdAcknowledgementRealRrdtoolTest.php</file>
+		</testsuite>
+	</testsuites>
+</phpunit>

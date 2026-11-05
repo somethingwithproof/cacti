@@ -169,8 +169,20 @@ function __rrd_init_acknowledged() {
 
 	if (PHP_OS_FAMILY !== 'Windows') {
 		stream_set_blocking($pipes[1], false);
+	} elseif (!stream_set_blocking($pipes[1], false)) {
+		/* stream_select() does not work on Windows pipes, so the response deadline is enforced by
+		 * polling a non-blocking read. Without non-blocking reads a hung RRDtool would block
+		 * forever, so refuse the worker instead of silently losing the deadline. */
+		proc_terminate($process, 9);
+		fclose($pipes[0]);
+		fclose($pipes[1]);
+		proc_close($process);
+		rrdtool_reset_language();
+
+		return false;
 	}
 
+	stream_context_set_option($pipes[0], 'cacti', 'rrd_poll', PHP_OS_FAMILY === 'Windows');
 	stream_context_set_option($pipes[0], 'cacti', 'rrd_output', $pipes[1]);
 	stream_context_set_option($pipes[0], 'cacti', 'rrd_process', $process);
 
@@ -182,6 +194,10 @@ function __rrd_init_acknowledged() {
  *
  * A timed-out or oversized response permanently poisons the worker. The caller must close it;
  * silently falling back to a write-only process would acknowledge data that RRDtool may reject.
+ *
+ * Windows cannot stream_select() a proc_open() pipe and a blocking read would ignore the
+ * deadline, so the worker pipe is non-blocking there and is polled with a short sleep. The
+ * polling mode is recorded on the command pipe by __rrd_init_acknowledged().
  *
  * @param resource $input Writable command pipe returned by __rrd_init_acknowledged().
  * @param int $timeout Maximum seconds to wait for one complete response.
@@ -196,6 +212,7 @@ function __rrd_read_acknowledgement($input, $timeout = 30) {
 	}
 
 	$output   = $options['cacti']['rrd_output'];
+	$poll     = $options['cacti']['rrd_poll'] ?? PHP_OS_FAMILY === 'Windows';
 	$deadline = microtime(true) + max(1, (int) $timeout);
 	$buffer   = '';
 
@@ -206,8 +223,14 @@ function __rrd_read_acknowledgement($input, $timeout = 30) {
 			break;
 		}
 
-		if (PHP_OS_FAMILY === 'Windows') {
-			$chunk = fgets($output, 65537);
+		if ($poll) {
+			$chunk = fread($output, 8192);
+
+			if ($chunk === '') {
+				usleep(10000);
+
+				continue;
+			}
 		} else {
 			$read    = array($output);
 			$write   = null;

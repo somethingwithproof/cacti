@@ -14,6 +14,7 @@
             <file>Unit/Core/Rrd/RrdcheckDataSourceFindingsTest.php</file>
             <file>Unit/Core/Rrd/RrdTuneRenderTest.php</file>
             <file>Unit/Core/Rrd/RrdErrorImageAndFetchParseTest.php</file>
+            <file>Unit/Core/Rrd/RrdAcknowledgementTimeoutTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
