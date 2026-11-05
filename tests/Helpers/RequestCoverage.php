@@ -28,6 +28,27 @@ if ($requestCoverageDirectory !== false && $requestCoverageDirectory !== '') {
 
 				continue;
 			}
+			// Xdebug reports one line for a statement spanning several lines (a
+			// folded constant array or concatenation), while PHPUnit's report counts
+			// every line of that statement as executable and credits them all when it
+			// runs.  Credit the continuation lines the same way, and only when
+			// php-code-coverage is loaded; no line is credited without a real hit.
+			if (class_exists(\SebastianBergmann\CodeCoverage\StaticAnalysis\ParsingFileAnalyser::class)) {
+				$groups = (new \SebastianBergmann\CodeCoverage\StaticAnalysis\ParsingFileAnalyser(false, false))->executableLinesIn($file);
+				$byGroup = [];
+
+				foreach ($groups as $line => $group) {
+					$byGroup[$group][] = $line;
+				}
+
+				foreach ($lines as $line => $hits) {
+					if ($hits > 0 && isset($groups[$line])) {
+						foreach ($byGroup[$groups[$line]] as $member) {
+							$data[$file][$member] = max($hits, $data[$file][$member] ?? -2);
+						}
+					}
+				}
+			}
 			$hashes[$file]    = hash_file('sha256', $file);
 			$htmlSpans[$file] = [];
 
