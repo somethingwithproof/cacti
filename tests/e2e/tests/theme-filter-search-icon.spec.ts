@@ -1,6 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 
-/* Run against the standard disposable Cacti compose installation.
+/* Run against the standard disposable Cacti compose installation, with the
+ * local admin account (CACTI_E2E_USER / CACTI_E2E_PASSWORD, default admin/admin)
+ * released from the forced first-login password change.
  * Collapses the host filter, reloads so the filter is hidden at load, then
  * expands it and checks the search icon, placeholder and autocomplete setting
  * for every theme that decorates the filter input. */
@@ -9,9 +11,10 @@ const themes = ['cacti', 'dark', 'deepness', 'midwinter', 'modern', 'paper-plane
 
 async function login(page: Page): Promise<void> {
     await page.goto('/');
-    await page.locator('input[name="login_username"]').fill('admin');
-    await page.locator('input[name="login_password"]').fill('admin');
-    await page.locator('form#login input[type="submit"]').click();
+    await page.locator('input[name="login_username"]').fill(process.env.CACTI_E2E_USER ?? 'admin');
+    await page.locator('input[name="login_password"]').fill(process.env.CACTI_E2E_PASSWORD ?? 'admin');
+    await page.locator('#realm').selectOption('0');
+    await page.locator('#auth button[type="submit"]').click();
     await expect(page).toHaveURL(/index\.php/);
 }
 
@@ -34,23 +37,33 @@ for (const theme of themes) {
         await selectTheme(page, theme);
 
         await page.goto('/host.php');
+        await page.waitForLoadState('networkidle');
         const input = page.locator('input#filter');
         const icon = page.locator('input#filter + i.ti-search.filter');
 
-        /* Make sure the stored state is hidden, whichever state we start in. */
-        if (await input.isVisible()) {
-            await page.locator('.cactiTableTitle').first().click();
+        /* midwinter moves the filter into its own panel and has no collapse
+         * control, so only the decoration is checked there, whether or not the
+         * panel is open. */
+        const toggle      = page.locator('.cactiFilterState').first();
+        const collapsible = await toggle.count() > 0;
+
+        if (collapsible) {
+            /* Make sure the stored state is hidden, whichever state we start in. */
+            if (await input.isVisible()) {
+                await toggle.click();
+            }
+            await expect(input).toBeHidden();
+
+            await page.reload();
+            await page.waitForLoadState('networkidle');
+            await expect(input).toBeHidden();
+
+            await toggle.click();
+            await expect(input).toBeVisible();
+            await expect(icon).toBeVisible();
         }
-        await expect(input).toBeHidden();
 
-        await page.reload();
-        await page.waitForLoadState('networkidle');
-        await expect(input).toBeHidden();
-
-        await page.locator('.cactiTableTitle').first().click();
-        await expect(input).toBeVisible();
         await expect(icon).toHaveCount(1);
-        await expect(icon).toBeVisible();
         await expect(input).toHaveAttribute('autocomplete', 'off');
         await expect(input).toHaveAttribute('placeholder', /\S/);
 

@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 const rejected = 'Incorrect resetlink hash';
 
 test.describe('password reset form hash handling', () => {
-	for (const [label, hash] of [['empty', ''], ['unknown', 'ffffffffffffffffffffffffffffffff'], ['malformed', 'not a hash!']]) {
+	for (const [label, hash] of [['empty', ''], ['unknown', 'ffffffffffffffffffffffffffffffff']]) {
 		test(`${label} hash returns to the identity form`, async ({ page }) => {
 			const response = await page.goto(`/auth_resetpassword.php?action=formreset&hash=${encodeURIComponent(hash)}`);
 			expect(response?.ok()).toBe(true);
@@ -13,6 +13,14 @@ test.describe('password reset form hash handling', () => {
 			expect(await page.content()).not.toMatch(/Undefined array key|Warning:/);
 		});
 	}
+
+	// Input validation stops a malformed hash before the lookup, so no form is offered.
+	test('a malformed hash is rejected by input validation without a password form', async ({ page }) => {
+		await page.goto(`/auth_resetpassword.php?action=formreset&hash=${encodeURIComponent('not a hash!')}`);
+		await expect(page.getByText('Validation error').first()).toBeVisible();
+		await expect(page.locator('#password')).toHaveCount(0);
+		expect(await page.content()).not.toMatch(/Undefined array key/);
+	});
 
 	// Needs a live, unexpired row in user_auth_reset_hashes supplied by the environment.
 	test('a stored hash shows the new password form', async ({ page }) => {
