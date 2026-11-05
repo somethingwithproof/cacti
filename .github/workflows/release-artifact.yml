@@ -218,6 +218,9 @@ jobs:
     permissions:
       contents: read
       actions: read
+      # id-token: write requests the OIDC token that Sigstore signs with, and
+      # attestations: write stores the provenance. This job only downloads the
+      # built artifact; it never checks out or executes repository code.
       id-token: write
       attestations: write
     steps:
@@ -250,6 +253,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
+      # contents: write is needed to create the draft release and upload its
+      # assets with GITHUB_TOKEN. The job runs no repository code.
       contents: write
       actions: read
 
