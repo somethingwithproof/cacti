@@ -168,11 +168,19 @@ function loadEnvironment(dom) {
 	};
 
 	vm.createContext(context);
-	vm.runInContext(
-		[extractFunction('setupFilterSearchIcons'), extractFunction('toggleFilterAndIcon')].join('\n') +
-		'\nthis.setupFilterSearchIcons = setupFilterSearchIcons; this.toggleFilterAndIcon = toggleFilterAndIcon;',
-		context
-	);
+
+	/* Run each function as its own script named after layout.js.  The text before
+	 * the function is blanked but keeps its length and newlines, so V8 offsets match
+	 * the production file and coverage lands on the real lines of layout.js. */
+	for (const name of ['setupFilterSearchIcons', 'toggleFilterAndIcon']) {
+		const source = extractFunction(name);
+		const start = layoutSource.indexOf(source);
+		const padding = layoutSource.slice(0, start).replace(/[^\n]/g, ' ');
+
+		new vm.Script(padding + source + `\nthis.${name} = ${name};`, {
+			filename: path.join(root, 'layout.js'),
+		}).runInContext(context);
+	}
 
 	return context;
 }
