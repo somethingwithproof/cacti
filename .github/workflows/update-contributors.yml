@@ -28,9 +28,7 @@ on:
 
 # This workflow is meant to live on develop. Protected branches do not permit
 # bot bypasses, so updates are proposed through a dedicated reviewable PR.
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 concurrency:
   group: update-contributors
@@ -43,6 +41,11 @@ jobs:
   refresh:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    permissions:
+      # contents: write pushes the dedicated ci/update-contributors branch.
+      contents: write
+      # pull-requests: write opens or refreshes the reviewable PR from that branch.
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

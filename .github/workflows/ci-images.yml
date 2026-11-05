@@ -30,6 +30,8 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      # packages: write publishes the mirrored images to ghcr.io/cacti with
+      # GITHUB_TOKEN. The job is skipped outside Cacti/cacti.
       packages: write
     steps:
       - name: Check out source
