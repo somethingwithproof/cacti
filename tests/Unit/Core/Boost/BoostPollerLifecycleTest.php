@@ -435,7 +435,9 @@ test('scheduled and on-demand archive ownership is serialized without blocking c
 
 	expect($boost)->toContain("\$lock_name = 'boost.archive.lifecycle'")
 		->and($wrapper)->toContain('boost_acquire_archive_lifecycle_lock(0)')
-		->and($wrapper)->toContain("read_config_option('boost_poller_started') > 0")
+		->and($wrapper)->toContain("\$lease_started = (int) read_config_option('boost_poller_started')")
+		->and($wrapper)->toContain('if ($lease_started > 0)')
+		->and($wrapper)->toContain("read_config_option('boost_rrd_update_max_runtime')")
 		->and($wrapper)->toContain('boost_acquire_rrd_path_lock($metadata[\'rrd_path\'])')
 		->and($wrapper)->toContain('boost_release_rrd_path_lock($path_lock)')
 		->and($wrapper)->toContain('boost_release_archive_lifecycle_lock($archive_lock)')
