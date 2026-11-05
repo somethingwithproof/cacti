@@ -137,11 +137,7 @@ test('GHSA-5v3j: substituted templates round-trip through /bin/sh as safe litera
 	}
 })->skip(stripos(PHP_OS, 'WIN') === 0 || !function_exists('proc_open'), 'POSIX /bin/sh round-trip required');
 
-
-
-/*
- * Issue #8591: regressions in the nested-frame handling of substitute_script_path().
- */
+// Issue #8591: regressions in the nested-frame handling of substitute_script_path().
 
 /**
  * Parses a command line with /bin/sh -n, which checks syntax and runs nothing.

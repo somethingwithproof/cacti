@@ -150,6 +150,13 @@ beforeEach(function () {
 
 	$this->db_globals = [$database_sessions, $database_hostname, $database_port, $database_default];
 	$this->config     = $config ?? [];
+	$this->session    = $_SESSION ?? [];
+
+	/* read_config_option() memoises settings in $config (CLI) or $_SESSION (web).
+	   An earlier test in the shared process may have cached a log destination or
+	   verbosity that silences cacti_log(), so start from the defaults. */
+	$config[OPTIONS_CLI]      = [];
+	$_SESSION[OPTIONS_WEB]    = [];
 
 	if (!is_dir(CACTI_PATH_LOG)) {
 		mkdir(CACTI_PATH_LOG, 0700, true);
@@ -165,7 +172,8 @@ afterEach(function () {
 
 	[$database_sessions, $database_hostname, $database_port, $database_default] = $this->db_globals;
 
-	$config = $this->config;
+	$config   = $this->config;
+	$_SESSION = $this->session;
 
 	@unlink(CACTI_PATH_LOG . '/cacti.log');
 });
