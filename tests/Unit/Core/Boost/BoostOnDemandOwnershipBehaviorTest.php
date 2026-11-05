@@ -87,7 +87,8 @@ test('on-demand processing rejects invalid IDs and defers behind archive ownersh
 });
 
 test('on-demand processing defers while a scheduled owner lease remains active', function () {
-	$GLOBALS['boost_on_demand_ownership']['settings']['boost_poller_started'] = time() - 60;
+	$GLOBALS['boost_on_demand_ownership']['settings']['boost_poller_started']        = time() - 60;
+	$GLOBALS['boost_on_demand_ownership']['settings']['boost_rrd_update_max_runtime'] = 1200;
 
 	expect(boost_process_poller_output(7))->toBe(-1)
 		->and($GLOBALS['boost_on_demand_ownership']['released_archives'])->toBe(array('boost.archive.lifecycle'))
