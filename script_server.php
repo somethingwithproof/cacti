@@ -137,7 +137,7 @@ if ($help) {
 }
 
 /* record the script start time */
-$start = microtime(true);
+$start     = microtime(true);
 
 /* store the effective log level in a local variable so that expensive debug
  * strings are only built when debug logging is actually enabled.  This mirrors
@@ -180,6 +180,7 @@ fputs(STDOUT, 'PHP Script Server has Started - Parent is ' . $environ . "\n");
 fflush(STDOUT);
 
 require_once(__DIR__ . '/lib/snmp.php');
+
 snmp_auth_cache_load();
 
 /* process waits for input and then calls functions as required */
