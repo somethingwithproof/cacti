@@ -54,8 +54,10 @@ for (const theme of themes) {
         await expect(input).toHaveAttribute('autocomplete', 'off');
         await expect(input).toHaveAttribute('placeholder', /\S/);
 
-        /* A second skin pass must not add a second icon. */
-        await page.evaluate(() => (window as any).applySkin());
+        /* A second decoration pass must not add a second icon.  The shared helper is
+         * called directly: midwinter's applySkin() rebuilds its sticky filter bar from
+         * scratch, which is unrelated to the icon. */
+        await page.evaluate(() => (window as any).setupFilterSearchIcons());
         await expect(page.locator('input#filter + i.fa-search.filter')).toHaveCount(1);
 
         /* Narrow viewport then widened keeps exactly one icon. */
