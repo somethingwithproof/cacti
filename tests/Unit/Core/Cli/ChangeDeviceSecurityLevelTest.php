@@ -308,6 +308,43 @@ test('every override definition lines up its arrow column', function () {
 	expect(count($columns))->toBe(1);
 });
 
+test('every numeric override accepts its bounds and rejects values just outside them', function () {
+	/* column => [accepted, rejected] boundary values, taken from the documented ranges */
+	$bounds = array(
+		'template'     => array(array('0'), array('-1')),
+		'version'      => array(array('0', '3'), array('4')),
+		'site'         => array(array('0'), array('-1')),
+		'poller'       => array(array('0'), array('-1')),
+		'port'         => array(array('1', '65534'), array('0', '65535')),
+		'timeout'      => array(array('1', '20000'), array('0', '20001')),
+		'ping_timeout' => array(array('1'), array('0')),
+		'threads'      => array(array('1', '10'), array('0', '11')),
+		'ping_port'    => array(array('1', '65534'), array('0', '65535')),
+		'ping_retries' => array(array('0', '5'), array('-1', 'x')),
+		'max_oids'     => array(array('1', '60'), array('0', '61')),
+		'bulk_walk'    => array(array('-1', '1', '60'), array('0', '61', '-2', '-1.5')),
+	);
+
+	foreach ($bounds as $column => list($accepted, $rejected)) {
+		foreach ($accepted as $value) {
+			ob_start();
+			$converted = convert_override_value($column, $value);
+			ob_end_clean();
+
+			expect($converted)->toBe($value, "$column=$value must be accepted");
+		}
+
+		foreach ($rejected as $value) {
+			ob_start();
+			$converted = convert_override_value($column, (string) $value);
+			$out       = ob_get_clean();
+
+			expect($converted)->toBeFalse("$column=$value must be rejected")
+				->and($out)->toContain("Invalid $column value ($value)");
+		}
+	}
+});
+
 test('a security level alone is not a requested change but can change the stored device', function () {
 	$original = change_device_row();
 
