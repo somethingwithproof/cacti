@@ -20,6 +20,15 @@ CHECKOUT_WRITE_WORKFLOWS = {
     ".github/workflows/security-baseline-refresh.yml",
     ".github/workflows/update-contributors.yml",
 }
+# Individual checkout steps that push and so must keep their credentials. Keyed
+# by workflow and step name so the read-only checkouts in the same file stay
+# subject to the persist-credentials rule.
+CHECKOUT_WRITE_STEPS = {
+    (
+        ".github/workflows/released-dependency-audit.yml",
+        "Checkout released branch for publication",
+    ),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -186,6 +195,7 @@ def main() -> int:
                     if (
                         uses_value.startswith("actions/checkout@")
                         and rel not in CHECKOUT_WRITE_WORKFLOWS
+                        and (rel, step_name) not in CHECKOUT_WRITE_STEPS
                     ):
                         checkout_with = step.get("with")
                         persisted = (
