@@ -403,8 +403,9 @@ function do_rrdcheck($thread_id = 1) {
 						} else {
 							$parts = explode(':', $line, 2);
 
-							if (!isset($parts[1])) {
-								// Not a 'timestamp: value value ...' data line, skip it
+							if (!isset($parts[1]) || !ctype_digit(trim($parts[0]))) {
+								/* Not a 'timestamp: value value ...' data line, such as
+								 * 'ERROR: ...' diagnostics, so do not count it as a row */
 								continue;
 							}
 
