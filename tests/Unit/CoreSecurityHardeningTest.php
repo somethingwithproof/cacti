@@ -40,10 +40,98 @@ test('get_script_query_path sanitizes the script path without corrupting Windows
 		->and($body)->toContain('cacti_escapeshellcmd($parsed_script_path)');
 });
 
-test('get_script_query_path rejects path traversal', function () use ($dqSource) {
-	$start = strpos($dqSource, 'function get_script_query_path(');
-	$body = substr($dqSource, $start, 2400);
-	expect(str_contains($body, "strpos(\$parsed_script_path, '..')"))->toBeTrue();
+/* Load get_script_query_path() and the real escaping helpers it relies on
+ * into an isolated namespace, so the traversal check is exercised against the
+ * shipped code rather than matched as text. */
+function core_hardening_load_script_query_path() {
+	static $loaded = false;
+
+	if ($loaded) {
+		return;
+	}
+
+	$code = 'namespace CoreHardeningScriptQueryPath; ';
+
+	foreach (array('lib/functions.php' => 'cacti_escapeshellcmd', 'lib/data_query.php' => 'get_script_query_path') as $file => $name) {
+		$src   = file_get_contents(__DIR__ . '/../../' . $file);
+		$start = strpos($src, "function $name(");
+		$depth = 0;
+
+		for ($i = strpos($src, '{', $start); $i < strlen($src); $i++) {
+			if ($src[$i] == '{') {
+				$depth++;
+			} elseif ($src[$i] == '}' && --$depth == 0) {
+				break;
+			}
+		}
+
+		$code .= substr($src, $start, $i - $start + 1) . "\n";
+	}
+
+	$code .= 'function substitute_script_query_path($path) { global $config; return $config["cacti_server_os"] == "win32" ? str_replace("/", "\\\\", $path) : $path; }
+		function cacti_log($message) { $GLOBALS["core_hardening_log"][] = $message; }';
+
+	eval($code);
+
+	$loaded = true;
+}
+
+function core_hardening_script_query_path($os, $path) {
+	global $config;
+
+	core_hardening_load_script_query_path();
+
+	/* get_script_query_path() includes variables.php from library_path; give
+	 * it an empty one, as the substitution helper is stubbed above. */
+	$library = sys_get_temp_dir() . '/cacti-core-hardening';
+
+	if (!is_dir($library)) {
+		mkdir($library);
+	}
+
+	touch($library . '/variables.php');
+
+	$saved  = isset($config) ? $config : null;
+	$config = array('cacti_server_os' => $os, 'library_path' => $library);
+
+	try {
+		return \CoreHardeningScriptQueryPath\get_script_query_path('', $path, 0);
+	} finally {
+		$config = $saved;
+	}
+}
+
+test('get_script_query_path rejects traversal after sanitizing', function () {
+	foreach (array('win32', 'unix') as $os) {
+		expect(core_hardening_script_query_path($os, '/cacti/scripts/../x.php'))->toBeFalse();
+		expect(core_hardening_script_query_path($os, '../x.php'))->toBeFalse();
+		expect(core_hardening_script_query_path($os, '/cacti/scripts/..'))->toBeFalse();
+		expect(core_hardening_script_query_path($os, '/usr/bin/php -q ../x.php'))->toBeFalse();
+	}
+
+	/* metacharacters that are stripped on Windows, or quotes that cmd.exe
+	 * drops, must not join two dots */
+	foreach (array('.;.', '.#.', '.^.', '.%.', '."."') as $joined) {
+		expect(core_hardening_script_query_path('win32', "/cacti/scripts/$joined/x.php"))->toBeFalse();
+	}
+});
+
+test('get_script_query_path rejects any two consecutive dots in the sanitized path', function () {
+	foreach (array('win32', 'unix') as $os) {
+		expect(core_hardening_script_query_path($os, '/cacti/scripts..old/x.php'))->toBeFalse();
+		expect(core_hardening_script_query_path($os, '/cacti/scripts/a..b.php'))->toBeFalse();
+	}
+
+	expect(core_hardening_script_query_path('win32', 'C:..\\x.php'))->toBeFalse();
+});
+
+test('get_script_query_path strips cmd.exe variable expansion on Windows', function () {
+	expect(core_hardening_script_query_path('win32', '/cacti/scripts/%COMSPEC%x.php'))->toBe('\\cacti\\scripts\\COMSPECx.php ');
+	expect(core_hardening_script_query_path('win32', '"/Program Files/cacti/%TEMP%/x.php" test'))->toBe('"\\Program Files\\cacti\\TEMP\\x.php" test ');
+});
+
+test('get_script_query_path keeps quotes around Windows paths with spaces', function () {
+	expect(core_hardening_script_query_path('win32', '"C:/Program Files/Cacti/scripts/test.php" test'))->toBe('"C:\\Program Files\\Cacti\\scripts\\test.php" test ');
 });
 
 test('data_query value_index_parse constrains PCRE backtrack limit', function () use ($dqSource) {
