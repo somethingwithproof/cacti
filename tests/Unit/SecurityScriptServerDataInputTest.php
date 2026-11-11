@@ -69,11 +69,63 @@ test('script_server rejects PHP internal functions via ReflectionFunction', func
 		->not->toBeFalse('rejection must be logged so operators can see the attempt');
 });
 
-test('script_server rejects functions defined outside base_path', function () use ($scriptServerSource) {
+test('script_server rejects functions defined outside the allowed script roots', function () use ($scriptServerSource) {
 	expect(strpos($scriptServerSource, '$ref->getFileName()'))
 		->not->toBeFalse('the source file of the function must be checked');
-	expect(strpos($scriptServerSource, "defined outside base path"))
+	expect(strpos($scriptServerSource, "defined outside the allowed script roots"))
 		->not->toBeFalse('out-of-tree definitions must be rejected with a log line');
+});
+
+test('script_server path containment accepts base_path and scripts_path only', function () use ($scriptServerSource) {
+	$start = strpos($scriptServerSource, 'function script_server_path_is_allowed(');
+	$end   = strpos($scriptServerSource, "\n}\n", $start);
+
+	expect($start)->not->toBeFalse();
+
+	if (!function_exists('ScriptServerContainment\\script_server_path_is_allowed')) {
+		eval('namespace ScriptServerContainment; ' . substr($scriptServerSource, $start, $end - $start + 2));
+	}
+
+	$base = sys_get_temp_dir() . '/cacti-ss-roots-' . getmypid();
+
+	foreach (array('cacti/scripts', 'custom', 'cacti_evil', 'outside') as $dir) {
+		@mkdir($base . '/' . $dir, 0700, true);
+	}
+
+	foreach (array('cacti/scripts/ss.php', 'custom/ss.php', 'cacti_evil/ss.php', 'outside/ss.php') as $file) {
+		touch($base . '/' . $file);
+	}
+
+	@symlink($base . '/outside/ss.php', $base . '/cacti/scripts/link.php');
+
+	$allowed = function ($path, $roots) {
+		return \ScriptServerContainment\script_server_path_is_allowed(realpath($path), $roots);
+	};
+
+	try {
+		$roots = array($base . '/cacti', $base . '/custom');
+
+		expect($allowed($base . '/cacti/scripts/ss.php', $roots))->toBeTrue();
+		expect($allowed($base . '/custom/ss.php', $roots))->toBeTrue();
+		expect($allowed($base . '/custom/ss.php', array($base . '/cacti')))->toBeFalse();
+		expect($allowed($base . '/cacti/scripts/../../outside/ss.php', $roots))->toBeFalse();
+		expect($allowed($base . '/cacti_evil/ss.php', $roots))->toBeFalse();
+		expect($allowed($base . '/cacti/scripts/%2e%2e/%2e%2e/outside/ss.php', $roots))->toBeFalse();
+		expect($allowed('phar://' . $base . '/cacti/scripts/ss.php', $roots))->toBeFalse();
+		expect($allowed($base . '/cacti/scripts/missing.php', $roots))->toBeFalse();
+
+		if (is_link($base . '/cacti/scripts/link.php')) {
+			expect($allowed($base . '/cacti/scripts/link.php', $roots))->toBeFalse();
+		}
+	} finally {
+		foreach (array('cacti/scripts/link.php', 'cacti/scripts/ss.php', 'custom/ss.php', 'cacti_evil/ss.php', 'outside/ss.php') as $file) {
+			@unlink($base . '/' . $file);
+		}
+
+		foreach (array('cacti/scripts', 'cacti', 'custom', 'cacti_evil', 'outside', '') as $dir) {
+			@rmdir($base . '/' . $dir);
+		}
+	}
 });
 
 test('script_server emits U on every rejection branch', function () use ($scriptServerSource) {
