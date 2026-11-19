@@ -23,7 +23,7 @@ run_probe() {
 	php_coverage+=("$output")
 }
 
-for fixture in ScriptSubstitutionMatrix PackageManifestMatrix PackageSaveMatrix ConstantTimeGuardMatrix GraphDrilldownMarkup HtmlGraphMarkup CardWidgetMarkup SpikekillMutationMatrix SpikekillFloatDebug RowGuardMatrix; do
+for fixture in ScriptSubstitutionMatrix PackageManifestMatrix PackageSaveMatrix GraphDrilldownMarkup HtmlGraphMarkup CardWidgetMarkup SpikekillMutationMatrix SpikekillFloatDebug RowGuardMatrix; do
 	if [[ -f "tests/fixtures/Core/$fixture.php" ]]; then
 		run_probe "$fixture.php" "$fixture"
 	fi
@@ -44,12 +44,6 @@ if [[ -f tests/fixtures/Core/RraContainmentMatrix.php ]]; then
 	run_probe RraContainmentMatrix.php rra-normal normal
 	run_probe RraContainmentMatrix.php rra-missing missing
 fi
-for fixture in IpRangeDiscovery AutomationNetworkIgnoreField; do
-	if [[ -f "tests/fixtures/Core/$fixture.php" ]]; then
-		run_probe "$fixture.php" "$fixture"
-	fi
-done
-
 if [[ -f tests/fixtures/Core/Boost/FailedDataSourceIsolation.php ]]; then
 	run_probe Boost/FailedDataSourceIsolation.php boost-failed-data-source-isolation
 fi
@@ -79,6 +73,15 @@ if [[ -f tests/fixtures/Core/TableColumnSizing.php ]]; then
 		done
 	done
 fi
+
+# Isolate each invocation so the reporter never collects stale registered reports.
+feature_dir=$(mktemp -d "$coverage_dir/features.XXXXXXXX")
+"$python_binary" tests/tools/run_feature_coverage.py native "$feature_dir" --php "$php_binary"
+for report in "$feature_dir"/*.json; do
+	if [[ -f "$report" ]]; then
+		php_coverage+=("$report")
+	fi
+done
 
 browser_specs=()
 for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths; do

@@ -1,0 +1,7 @@
+[
+  {
+    "fixture": "tests/fixtures/Core/ConstantTimeGuardMatrix.php",
+    "native": true,
+    "request_paths": ["auth_2fa.php", "auth_resetpassword.php"]
+  }
+]

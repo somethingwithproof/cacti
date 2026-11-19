@@ -1,0 +1,10 @@
+[
+  {
+    "fixture": "tests/fixtures/Core/IpRangeDiscovery.php",
+    "native": true
+  },
+  {
+    "fixture": "tests/fixtures/Core/AutomationNetworkIgnoreField.php",
+    "native": true
+  }
+]
