@@ -3,6 +3,9 @@ name: PR changed-code coverage
 on:
   pull_request:
     paths:
+      - 'tests/Coverage/features/*.json'
+      - 'tests/tools/run_feature_coverage.py'
+      - 'tests/tools/test_feature_coverage.py'
       - 'auth_2fa.php'
       - 'auth_resetpassword.php'
       - 'package_import.php'
