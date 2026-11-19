@@ -1,0 +1,1387 @@
+{
+  "format": "cacti-coverage-pinset-v1",
+  "object_format": "sha1",
+  "base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+  "fork_foundation": "a06117f1653438101999708ce7aea892964d0097",
+  "fork_foundation_tree": "4d2386b1e85e893f82559b5d5319682e99bb65a3",
+  "foundation_tree": "e78d4bc25028a18e38f17a24a2630937095ebaf1",
+  "loader": [
+    {
+      "path": "tests/tools/test_request_coverage_dispatch.py",
+      "mode": "100644",
+      "blob": "4d512008f22fa1d96de285302a3961f98313f2ec",
+      "from": "published",
+      "before": "a06cd43e785fa443b05b8c4cc032df4872e0e49e",
+      "hunks": "@@ -4,0 +5 @@ Copyright (C) 2004-2026 The Cacti Group. GPL-2.0-or-later.\n+import json\n@@ -67 +68,14 @@ class RequestDispatchTest(unittest.TestCase):\n-    def dispatch(self, changed, expected):\n+    def test_registered_feature_dispatch(self):\n+        root = Path(__file__).resolve().parents[2]\n+        for contract in sorted((root / 'tests/Coverage/dispatch').glob('*.json')):\n+            settings = json.loads(contract.read_text())\n+            manifest = root / 'tests/Coverage/features' / contract.name\n+            for changed, expected in settings['cases']:\n+                changed_path = Path(changed)\n+                if (not changed_path.parts or changed_path.is_absolute() or\n+                        any(part.casefold() in {'.git', '..'} for part in changed_path.parts)):\n+                    raise ValueError(f'Expected a repository-relative changed path in {contract.name}')\n+                with self.subTest(feature=contract.stem, changed=changed):\n+                    self.dispatch(changed, expected, manifest, settings['fixtures'])\n+\n+    def dispatch(self, changed, expected, manifest=None, feature_fixtures=()):\n@@ -110,0 +125,14 @@ class RequestDispatchTest(unittest.TestCase):\n+            if manifest is not None:\n+                destination = repository / 'tests/Coverage/features' / manifest.name\n+                shutil.copy(manifest, destination)\n+                registered = [entry['fixture'] for entry in json.loads(manifest.read_text())]\n+                for name in (*feature_fixtures, *registered):\n+                    relative = Path(name)\n+                    if (relative.parts[:1] != ('tests',) or relative.suffix != '.php' or\n+                            any(part.casefold() in {'.git', '..'} for part in relative.parts)):\n+                        raise ValueError(f'Expected a PHP fixture under tests/ in {manifest.name}')\n+                    fixture = repository / relative\n+                    if not fixture.resolve().is_relative_to((repository / 'tests').resolve()):\n+                        raise ValueError(f'Fixture escapes the temporary tests directory: {name}')\n+                    fixture.parent.mkdir(parents=True, exist_ok=True)\n+                    fixture.write_text('<?php // dispatch fixture\\n')\n"
+    }
+  ],
+  "shared": {
+    "1": {
+      "blob": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+      "from": "foundation",
+      "mode": "100644",
+      "path": "tests/tools/run_pr_change_tests.sh"
+    },
+    "2": {
+      "blob": "4d512008f22fa1d96de285302a3961f98313f2ec",
+      "from": "foundation",
+      "mode": "100644",
+      "path": "tests/tools/test_request_coverage_dispatch.py"
+    },
+    "3": {
+      "blob": "6fe526fe3ba3b49a1929954b67a302e5c9da9f96",
+      "from": "foundation",
+      "mode": "100644",
+      "path": "tests/Coverage/features/constant-time-guards.json"
+    },
+    "4": {
+      "blob": "986e4d089af54fdcd316788c0e00a0a0ef9228c8",
+      "from": "foundation",
+      "mode": "100644",
+      "path": "tests/tools/test_feature_coverage.py"
+    },
+    "5": {
+      "blob": "b5b2092e1a0fb31fb8dd375d0237b954f005b7cb",
+      "from": "foundation",
+      "mode": "100644",
+      "path": "tests/tools/run_feature_coverage.py"
+    },
+    "6": {
+      "blob": "bce9cb414e9abb4c56236bddec39e5b6873dce9e",
+      "from": "foundation",
+      "mode": "100644",
+      "path": ".github/workflows/pr-changed-coverage.yml"
+    },
+    "7": {
+      "blob": "bfa0e4216851756a223cbf8d61fb20a5f5b0317c",
+      "from": "foundation",
+      "mode": "100644",
+      "path": "tests/Coverage/features/README.md"
+    },
+    "8": {
+      "blob": "d5b727c396a4669c8b112d1d56ce4db687925934",
+      "from": "foundation",
+      "mode": "100644",
+      "path": ".github/workflows/pr-php-coverage.yml"
+    },
+    "9": {
+      "blob": "f652c8260f826de2423c662c7c617a8bc96615fb",
+      "from": "foundation",
+      "mode": "100644",
+      "path": "tests/tools/run_request_coverage.sh"
+    }
+  },
+  "prs": {
+    "8306": {
+      "status": "partial",
+      "head": "cf8a325018d4bad88b64582bf64ffbda9d5aa502",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "87c6b293860c0cbfdb7b37343fc37ff492ae421d",
+      "tree": "6ea2aed76e6084cba6160a710294c5ded7ca9316",
+      "entries": [
+        {
+          "path": ".github/workflows/pr-changed-coverage.yml",
+          "mode": "100644",
+          "blob": "8c110430f8940083df09e8aaeeb75a7a7a4c31fd",
+          "from": "source",
+          "before": "19f0abe593b538f50b39ed28df260d52a9f6b7a8",
+          "hunks": "@@ -5,0 +6,3 @@ on:\n+      - 'tests/Coverage/features/*.json'\n+      - 'tests/tools/run_feature_coverage.py'\n+      - 'tests/tools/test_feature_coverage.py'\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8306.json",
+          "mode": "100644",
+          "blob": "ce5de993ce34026073b8b2a2afb737204a3a7159",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/InstallerChangedCoverage.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "5db7a561ad77467b67af04b4da0ea6cf9137a87f",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -35,0 +36,6 @@ fi\n+if [[ -f phpunit-installer-components.xml && -x include/vendor/bin/pest ]]; then\n+\tclover=\"$coverage_dir/installer-components.xml\"\n+\tXDEBUG_MODE=coverage \"$php_binary\" -d memory_limit=1G include/vendor/bin/pest \\\n+\t\t--configuration=phpunit-installer-components.xml --colors=never --coverage-clover=\"$clover\"\n+\tphp_coverage+=(\"$clover\")\n+fi\n"
+        }
+      ],
+      "shared": [
+        "8",
+        "7",
+        "3",
+        "5",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8337": {
+      "status": "partial",
+      "head": "91d1836a4a177fc2d96e004ed2f083327d080bbe",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "5285ae594e3a656bc97b3a6661cedf715429890a",
+      "tree": "8c02d83b4299e6b5413c69638144d931fd3a7a1e",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8337.json",
+          "mode": "100644",
+          "blob": "6201cc5b1db563149ea6983f379769a842b064d7",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/Auth/BoundaryContracts.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "dc8dbe50430cc29d4269968bdd6d3c75551914a6",
+          "from": "foundation",
+          "before": "f652c8260f826de2423c662c7c617a8bc96615fb",
+          "hunks": "@@ -36 +36 @@ run_php_probe() {\n-run_php_probe tests/fixtures/Core/Auth/BoundaryContracts.php '^(auth_changepassword\\.php|include/global\\.php|lib/auth\\.php|package_import\\.php|tests/fixtures/Core/Auth/BoundaryContracts\\.php)'\n+run_php_probe tests/fixtures/Core/Auth/BoundaryContracts.php '^(auth_changepassword\\.php|include/global\\.php|lib/(auth|functions)\\.php|package_import\\.php|tests/fixtures/Core/Auth/BoundaryContracts\\.php)'\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "247f610dd159ff5fe94e099e51e0ff82dd6b13e5",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -44 +44 @@ class RequestDispatchTest(unittest.TestCase):\n-        self.dispatch('lib/functions.php', ['ScriptSubstitutionMatrix.php', 'UserAdministrationAuditCoverage.php', 'graph_group_probe.php'])\n+        self.dispatch('lib/functions.php', ['BoundaryContracts.php', 'ScriptSubstitutionMatrix.php', 'UserAdministrationAuditCoverage.php', 'graph_group_probe.php'])\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "4"
+      ]
+    },
+    "8352": {
+      "status": "partial",
+      "head": "3d07546de815f36c6b3a2967fc48a8141c9c1548",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "0fe328cd06f7f96290155376e3509aef91600032",
+      "tree": "77be35117105a0ea1a25c40e12458405470768db",
+      "entries": [
+        {
+          "path": ".github/workflows/pr-changed-coverage.yml",
+          "mode": "100644",
+          "blob": "a0b2a9c020eb27901796552b49a09994f1aa4918",
+          "from": "foundation",
+          "before": "bce9cb414e9abb4c56236bddec39e5b6873dce9e",
+          "hunks": "@@ -20,0 +21 @@ on:\n+      - 'tests/phpunit-aggregate-coverage.xml'\n"
+        },
+        {
+          "path": "tests/Coverage/dispatch/pr-8352.json",
+          "mode": "100644",
+          "blob": "ff110eedcc0900135344718ec4e589683ba4fbb8",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/Core/AggregateApiCoverage.php\"\n  ],\n  \"cases\": [\n    [\n      \"lib/api_aggregate.php\",\n      [\n        \"AggregateApiCoverage.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8352.json",
+          "mode": "100644",
+          "blob": "6197e03be4d24beea7074b69c132b3998701b5f2",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateAutomationDetachProbe.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateAutomationRuleProbe.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateAutomationReconcileProbe.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateAutomationOwnershipProbe.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateAutomationReindexProbe.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateApiCoverage.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/api_aggregate.php*\",\n      \"lib/aggregate.php*\",\n      \"tests/fixtures/Core/AggregateApiCoverage.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateGraphsRequest.php\",\n    \"native\": true,\n    \"cases\": [\n      [\n        \"save-graph\"\n      ],\n      [\n        \"save-template-item\"\n      ],\n      [\n        \"save-graph-item\"\n      ],\n      [\n        \"save-invalid\"\n      ],\n      [\n        \"save-legend-type\"\n      ],\n      [\n        \"save-vanished\"\n      ],\n      [\n        \"edit-template\"\n      ],\n      [\n        \"edit-graph\"\n      ],\n      [\n        \"edit-unrelated\"\n      ]\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AggregateTemplatesRequest.php\",\n    \"native\": true,\n    \"cases\": [\n      [\n        \"save\"\n      ],\n      [\n        \"save-items\"\n      ],\n      [\n        \"template-missing\"\n      ],\n      [\n        \"missing-row\"\n      ],\n      [\n        \"delete\"\n      ],\n      [\n        \"list\"\n      ]\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "7ac5ad915ecf1d032cd8c14cdf7ffb6d73b852f6",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -75,0 +76,3 @@ fi\n+if [[ -f tests/fixtures/Core/PestSuiteCoverage.php && -f tests/phpunit-aggregate-coverage.xml && -x include/vendor/bin/pest ]]; then\n+\trun_probe PestSuiteCoverage.php aggregate-suite tests/phpunit-aggregate-coverage.xml\n+fi\n@@ -87 +90 @@ browser_specs=()\n-for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths; do\n+for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths aggregate-template-automation aggregate-item-override-editor; do\n"
+        }
+      ],
+      "shared": [
+        "8",
+        "7",
+        "3",
+        "5",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8448": {
+      "status": "complete",
+      "head": "4d5f5fb026153562070de2788ca6138ea46a8373",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "9614e269205249fd426f1b74bc3503f5e72dd679",
+      "tree": "e3c5511eb544db557a568b91574255e4c96df161",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8448.json",
+          "mode": "100644",
+          "blob": "d93d930be49e4c309cc0c3b13f54a355fa759e32",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/Core/SelectedItemsCoverage.php\"\n  ],\n  \"cases\": [\n    [\n      \"automation_snmp.php\",\n      [\n        \"SelectedItemsCoverage.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8448.json",
+          "mode": "100644",
+          "blob": "a042cc514ca988c9ff7687e5966259b7f7db2f33",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/SelectedItemsCoverage.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"automation_graph_rules.php*\",\n      \"automation_networks.php*\",\n      \"automation_snmp.php*\",\n      \"automation_templates.php*\",\n      \"automation_tree_rules.php*\",\n      \"data_source_profiles.php*\",\n      \"host_templates.php*\",\n      \"lib/html_form.php*\",\n      \"tests/fixtures/Core/SelectedItems*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8461": {
+      "status": "partial",
+      "head": "180927633a38d8f24c2e245f99a5d3a04f651d55",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "4ff931c87a23a224fcdb0c4a628e43d70e5df3fa",
+      "tree": "91e7d70085a6eeff0fa7d901289b2674976a88c9",
+      "entries": [
+        {
+          "path": ".github/workflows/pr-php-coverage.yml",
+          "mode": "100644",
+          "blob": "7f37e51ca4db3e322f3aefb76c515f8a6c15761e",
+          "from": "source",
+          "before": "de7a920231c7b7ccced62dd67718c4c2e6262569",
+          "hunks": "@@ -5,0 +6,3 @@ on:\n+      - 'tests/Coverage/features/*.json'\n+      - 'tests/tools/run_feature_coverage.py'\n+      - 'tests/tools/test_feature_coverage.py'\n@@ -56,0 +60 @@ jobs:\n+          python3 tests/tools/test_feature_coverage.py\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8461.json",
+          "mode": "100644",
+          "blob": "625e3099b5defdbec135899f3be6eab04d807cb3",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/DiscoveryCorrectnessCoverage.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "137a7bff578abd48f1438e4ad86f2dc5f4951628",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -87 +87 @@ browser_specs=()\n-for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths; do\n+for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths snmp-controls; do\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "b7e4f894080d8fb94a231cc6443d74d8bb713ea3",
+          "from": "source",
+          "before": "ff70863ecd2ad3b0cad53682438facff75c8f683",
+          "hunks": "@@ -39 +38,0 @@ run_php_probe tests/fixtures/Core/ScriptSubstitutionMatrix.php '^(lib/functions\\\n-run_php_probe tests/fixtures/Core/ConstantTimeGuardMatrix.php '^(auth_2fa\\.php|auth_resetpassword\\.php|tests/fixtures/Core/ConstantTimeGuardMatrix\\.php)'\n@@ -84,0 +84,2 @@ run_probe tests/tools/run_discovery_request_coverage.sh '^(poller_automation\\.ph\n+\n+git diff --name-only -z \"$merge_base\" HEAD | python3 tests/tools/run_feature_coverage.py request \"$CACTI_PR_COVERAGE_OUTPUT\"\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "32194202e8e6e2fc0878afe4024ec6e74ad41115",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -25,0 +26,15 @@ class RequestDispatchTest(unittest.TestCase):\n+    def test_worker_change_runs_the_discovery_probe(self):\n+        self.dispatch('poller_automation.php', 'discovery')\n+\n+    def test_criteria_change_runs_the_discovery_probe(self):\n+        self.dispatch('automation_graph_rules.php', 'discovery')\n+\n+    def test_discovery_library_change_runs_the_discovery_probe(self):\n+        self.dispatch('lib/api_automation.php', 'discovery')\n+\n+    def test_discovery_fixture_change_runs_the_discovery_probe(self):\n+        self.dispatch('tests/fixtures/discovery_worker_ping_coverage.php', 'discovery')\n+\n+    def test_source_mapping_change_runs_the_discovery_probe(self):\n+        self.dispatch('tests/Helpers/SourceSlice.php', 'discovery')\n+\n@@ -141,0 +157,3 @@ class RequestDispatchTest(unittest.TestCase):\n+            path = repository / 'tests/tools/run_discovery_request_coverage.sh'\n+            path.parent.mkdir(parents=True, exist_ok=True)\n+            path.write_text('printf \"%s\\\\n\" discovery >> \"$CACTI_PR_COVERAGE_OUTPUT/probes\"\\n')\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "7",
+        "3",
+        "5",
+        "4"
+      ]
+    },
+    "8475": {
+      "status": "partial",
+      "head": "c0bca14ae8edf0df71fd8a45cb9983f1c009cfc4",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "c25e9ee4fa3d015584a4a38b4b8f5bf099066dac",
+      "tree": "48fd893a89df13357a329c2eac01ea17a6d0e0b6",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8475.json",
+          "mode": "100644",
+          "blob": "9c51d8ccbd8f1400793dc5ddd15c5e2f505d488f",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/HttpTransportCoverage.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/HttpPollerActionCoverage.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/HttpDnsCoverage.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "fb7ff8cee61293a8bae954a7448494536faba7a8",
+          "from": "foundation",
+          "before": "f652c8260f826de2423c662c7c617a8bc96615fb",
+          "hunks": "@@ -67,0 +68,2 @@ run_php_probe tests/fixtures/Core/PackageArchive.php '^(lib/package\\.php|tests/f\n+run_php_probe tests/fixtures/Core/HttpDnsCoverage.php '^(lib/functions\\.php|tests/fixtures/Core/HttpDnsCoverage\\.php)'\n+run_php_probe tests/fixtures/Core/HttpPollerActionCoverage.php '^(poller\\.php|cmd\\.php|remote_agent\\.php|data_templates\\.php|lib/(CactiHttpPoll(er|Item)|utility)\\.php|install/upgrades/1_3_0\\.php|tests/fixtures/Core/HttpPollerActionCoverage\\.php)'\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "e0538f606d8ec9b7cb30a44404692d8594a506f7",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -35 +35 @@ class RequestDispatchTest(unittest.TestCase):\n-                ('install/upgrades/1_3_0.php', ['queue', 'RetiredThemeCleanup.php']),\n+                ('install/upgrades/1_3_0.php', ['queue', 'HttpPollerActionCoverage.php', 'RetiredThemeCleanup.php']),\n@@ -53,0 +54,6 @@ class RequestDispatchTest(unittest.TestCase):\n+    def test_http_poller_change_runs_the_http_action_probe(self):\n+        for path in ['cmd.php', 'poller.php', 'remote_agent.php', 'lib/CactiHttpPoller.php',\n+                     'tests/fixtures/Core/HttpPollerActionCoverage.php']:\n+            with self.subTest(path=path):\n+                self.dispatch(path, ['ScriptServerLogMaskingCoverage.php', 'HttpPollerActionCoverage.php'] if path == 'cmd.php' else 'HttpPollerActionCoverage.php')\n+\n@@ -114 +120 @@ class RequestDispatchTest(unittest.TestCase):\n-                           'Installer/RetiredThemeCleanup.php', 'ScriptServerLogMaskingCoverage.php', 'BoostBulkDrainCoverage.php']:\n+                           'Installer/RetiredThemeCleanup.php', 'ScriptServerLogMaskingCoverage.php', 'Core/HttpPollerActionCoverage.php', 'BoostBulkDrainCoverage.php']:\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "4"
+      ]
+    },
+    "8523": {
+      "status": "partial",
+      "head": "ccc47459e09b31f7bb234388a9a00aff274ab748",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "710b11509c0046f1a7c340a4ef4a8e553430fe4e",
+      "tree": "bfa4e1fede6247a919a4146b794ccebf98ce2b26",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8523.json",
+          "mode": "100644",
+          "blob": "67a2bb4631a366f605b43170da5363a620700010",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/ThemeInheritanceMatrix.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "6754e9c7deb2cf429568c47e7fd4f187572ef071",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -92,3 +92,3 @@ done\n-# Theme stylesheets are exercised by the theme correctness specs, which only\n-# record coverage when CACTI_THEME_COVERAGE is set.\n-for spec in develop-theme-correctness develop-theme-cleanup; do\n+# Theme stylesheets are exercised by the theme specs, which only record\n+# coverage when CACTI_THEME_COVERAGE is set.\n+for spec in develop-theme-correctness develop-theme-cleanup develop-theme-palettes; do\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8525": {
+      "status": "partial",
+      "head": "0433a8a3a622ad9c787a2096523223db691aa775",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "b11ef60e8168dfaa6239a6d0807e399c7341d0a3",
+      "tree": "e7221be311ab09f9f00274221ba1e1b7c9207ffa",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8525.json",
+          "mode": "100644",
+          "blob": "9bb417aaaed2f6c546e6609fcfd358607a5d0047",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/DocumentDirectionShells.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/RealtimeDocumentShell.php\",\n    \"native\": true,\n    \"cases\": [\n      [\n        \"disabled\"\n      ],\n      [\n        \"missing\"\n      ],\n      [\n        \"unwritable\"\n      ],\n      [\n        \"page\"\n      ]\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "e37764a242ea7d5bc060d1e28d22abab93bb1d59",
+          "from": "foundation",
+          "before": "f652c8260f826de2423c662c7c617a8bc96615fb",
+          "hunks": "@@ -82,0 +83,2 @@ run_probe tests/e2e/basic_auth_identity_docker.sh '^(include/(auth|global)\\.php|\n+run_php_probe tests/Unit/fixtures/document_direction_probe.php '^(include/global_languages\\.php|include/top_general_header\\.php|lib/auth\\.php|tests/Unit/fixtures/(document_direction_probe|i18n_probe_bootstrap)\\.php)'\n+\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "68d275c0b80ba1b4661882f2ea57bb777ba37355",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -25,0 +26,3 @@ class RequestDispatchTest(unittest.TestCase):\n+    def test_locale_change_runs_the_document_shell_probe(self):\n+        self.dispatch('include/global_languages.php', 'document_direction_probe.php')\n+\n@@ -47 +50 @@ class RequestDispatchTest(unittest.TestCase):\n-        self.dispatch('lib/auth.php', 'BoundaryContracts.php')\n+        self.dispatch('lib/auth.php', ['BoundaryContracts.php', 'document_direction_probe.php'])\n@@ -141,0 +145,2 @@ class RequestDispatchTest(unittest.TestCase):\n+            probe = repository / 'tests/Unit/fixtures/document_direction_probe.php'\n+            probe.write_text('<?php // dispatch fixture\\n')\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "4"
+      ]
+    },
+    "8529": {
+      "status": "partial",
+      "head": "c607d9a0d50a2800d94229d45c655127a19dd410",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "dbfe031a25f046d2c4f592113f7ebe282e5bb130",
+      "tree": "f1ad266c08df06131dfd2dccf4906c2157b10c7c",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8529.json",
+          "mode": "100644",
+          "blob": "eb14d27c65cb8ad022175989b64242e7222c452d",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/RrdInfoHtmlEscape.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/rrd.php*\",\n      \"tests/fixtures/Core/RrdInfoHtmlEscape.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/GraphItemsListMarkup.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/html.php*\",\n      \"tests/fixtures/Core/GraphItemsListMarkup.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/Unit/fixtures/aggregate_label_render_probe.php\",\n    \"request_paths\": [\n      \"lib/api_aggregate.php*\",\n      \"lib/html.php*\",\n      \"tests/Unit/fixtures/aggregate_label_render_probe.php*\"\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "b5ee0e8e80edd6d8e5261e663351c5b70732ad6f",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -76,0 +77,5 @@ fi\n+if [[ -f tests/fixtures/Core/GraphItemLabelMarkup.php ]]; then\n+\trun_probe GraphItemLabelMarkup.php graph-item-label-aggregate label '<em>Literal label</em>'\n+\trun_probe GraphItemLabelMarkup.php graph-item-label-graph graph '<em>Literal label</em>'\n+fi\n+\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "724caaa754385ad5cd0d66d7e9a1d10fd60d5a96",
+          "from": "foundation",
+          "before": "f652c8260f826de2423c662c7c617a8bc96615fb",
+          "hunks": "@@ -82,0 +83,2 @@ run_probe tests/e2e/basic_auth_identity_docker.sh '^(include/(auth|global)\\.php|\n+run_php_probe tests/Unit/fixtures/aggregate_label_render_probe.php '^(lib/(api_aggregate|html)\\.php|tests/Unit/fixtures/aggregate_label_render_probe\\.php)' graph '<em>Literal label</em>'\n+\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "4",
+        "2"
+      ]
+    },
+    "8532": {
+      "status": "complete",
+      "head": "1e3344d9e18b280bf27c834388946d01bfc05afd",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "7ecc12335f498c108b99bb0ec719d7d98940f22b",
+      "tree": "9e06f6416ca16225b83e4a738232cfa4908a2c15",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8532.json",
+          "mode": "100644",
+          "blob": "303de791bc493ddf7b2fe65b5e70464740f6cce6",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/FilterActionCoverage.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/html_filter.php*\",\n      \"tests/fixtures/Core/FilterActionCoverage.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8534": {
+      "status": "complete",
+      "head": "88fbcb667de5da749be39f0c22b3269b98618f7d",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "f68b4abb72d21f01916c022d7b707a6e14bec1b4",
+      "tree": "1e4f70571a26652cdb333499ef212a032a6bc1e3",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8534.json",
+          "mode": "100644",
+          "blob": "bab6bcd1c6840bcaf96b6930bd01795550de38ad",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/MysqlClientCredentials.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/database.php*\",\n      \"scripts/ss_sql.php*\",\n      \"scripts/sql.php*\",\n      \"tests/fixtures/Core/MysqlClientCredentials.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8538": {
+      "status": "complete",
+      "head": "e7294f25169c9a46515586d8c5c9152826b6fa6a",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "0336ba53505961edb351cdd19c163973ed2c89db",
+      "tree": "5e6634cdcab8996179ba0430c6f77b41e7e3f83f",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8538.json",
+          "mode": "100644",
+          "blob": "3941068c045cca94d16ee698e3d5bea49cf2d774",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/AutomationImportFields.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/api_automation.php*\",\n      \"tests/fixtures/Core/AutomationImportFields.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8540": {
+      "status": "partial",
+      "head": "266df09a00e3e48a6ab46917cda111b4a83a8828",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "13eba10d882d2795294fb2ef01c5201ac2794a7a",
+      "tree": "96d95ad2995216f3b628a47242d23614d387bd36",
+      "entries": [
+        {
+          "path": ".github/workflows/pr-changed-coverage.yml",
+          "mode": "100644",
+          "blob": "6918146dbd2346ab5eb35a864ceab938fe8194ec",
+          "from": "foundation",
+          "before": "bce9cb414e9abb4c56236bddec39e5b6873dce9e",
+          "hunks": "@@ -14,0 +15,2 @@ on:\n+      - 'lib/html_reports.php'\n+      - 'lib/reports.php'\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8540.json",
+          "mode": "100644",
+          "blob": "67a4d0a69a6870adae2ee92c72eeac0b97657b94",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/ReportsPostGuard.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/ReportsListSortCoverage.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/SanitizeSqlColumnAllowlist.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "2588395bdf49539fc6c0a31e23951eec581cc33b",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -42,0 +43,7 @@ fi\n+if [[ -f tests/fixtures/Core/ReportOwnership.php ]]; then\n+\trun_probe ReportOwnership.php report-ownership\n+\t# Each form request ends its own process, so record it separately.\n+\tfor mode in parent item item-parent-mismatch read-other read-parent-mismatch read-report-other edit-other bulk-other bulk-own bulk-admin bulk-reportit-admin; do\n+\t\trun_probe ReportOwnership.php \"report-form-$mode\" form \"$mode\"\n+\tdone\n+fi\n@@ -87 +94 @@ browser_specs=()\n-for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths; do\n+for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths post-action-transport; do\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "c4d898e0a240d9ed394591bd1c449f113ca2eb62",
+          "from": "source",
+          "before": "5ac5c464a61303d06c5d33f1426caef97b7846a3",
+          "hunks": "@@ -39 +38,0 @@ run_php_probe tests/fixtures/Core/ScriptSubstitutionMatrix.php '^(lib/functions\\\n-run_php_probe tests/fixtures/Core/ConstantTimeGuardMatrix.php '^(auth_2fa\\.php|auth_resetpassword\\.php|tests/fixtures/Core/ConstantTimeGuardMatrix\\.php)'\n@@ -88,0 +88,2 @@ run_php_probe tests/fixtures/Core/ReportOwnership.php '^(lib/(reports|html_repor\n+\n+git diff --name-only -z \"$merge_base\" HEAD | python3 tests/tools/run_feature_coverage.py request \"$CACTI_PR_COVERAGE_OUTPUT\"\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "bd97823fea853602d73beb111673b7ea8294b056",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -67,0 +68,5 @@ class RequestDispatchTest(unittest.TestCase):\n+    def test_reports_list_change_runs_the_sort_fixture(self):\n+        for path in ['lib/html_reports.php', 'lib/reports.php', 'tests/fixtures/Core/ReportsListSortCoverage.php']:\n+            with self.subTest(path=path):\n+                self.dispatch(path, 'ReportsListSortCoverage.php')\n+\n@@ -113,0 +119 @@ class RequestDispatchTest(unittest.TestCase):\n+                           'Core/ReportsListSortCoverage.php',\n"
+        }
+      ],
+      "shared": [
+        "8",
+        "7",
+        "3",
+        "5",
+        "4"
+      ]
+    },
+    "8541": {
+      "status": "partial",
+      "head": "7ff995a50053dc8c2fd9505655fe826bd73a06f3",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "6c4e571f9e8d254b1532d12fd2ae4cedeb05d4a9",
+      "tree": "fbf6e42ba8e707437f8cf350ddebfeb8843d5154",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8541.json",
+          "mode": "100644",
+          "blob": "4b9d78413afd2ecb19271190f0b0e4a1af9b59c8",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/DataInputCommand.php\",\n    \"request_paths\": [\n      \"data_input.php*\",\n      \"lib/functions.php*\",\n      \"lib/import.php*\",\n      \"tests/fixtures/Core/DataInputCommand.php*\"\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "5aeef54d50a62f158ad0274a36721e4de41834e9",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -75,0 +76,5 @@ fi\n+if [[ -f tests/fixtures/Core/DataInputCommand.php ]]; then\n+\trun_probe DataInputCommand.php data-input-import\n+\trun_probe DataInputCommand.php data-input-form-safe form \"$(printf '%s' '<path_php_binary> <path_cacti>/scripts/query.php <hostname>' | base64 | tr -d '\\n')\"\n+\trun_probe DataInputCommand.php data-input-form-unsafe form \"$(printf '%s' 'echo alpha; label' | base64 | tr -d '\\n')\"\n+fi\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8609": {
+      "status": "partial",
+      "head": "cf6e1a41e0aee8c4201361cba93c43ae6971311d",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "41097296e535aa6a1f1ecc36578ba8ba2545b248",
+      "tree": "c08007f8b0376659fc2842e99999eecd6853cb7d",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8609.json",
+          "mode": "100644",
+          "blob": "c8e586aa624ac64bcff0c527003dc168e8ea743e",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/CoreBulkActionPostGuardCoverage.php\",\n    \"request_paths\": [\n      \"aggregate_graphs.php*\",\n      \"aggregate_templates.php*\",\n      \"cdef.php*\",\n      \"color.php*\",\n      \"color_templates.php*\",\n      \"data_input.php*\",\n      \"data_queries.php*\",\n      \"data_source_profiles.php*\",\n      \"data_sources.php*\",\n      \"data_templates.php*\",\n      \"gprint_presets.php*\",\n      \"graph_templates.php*\",\n      \"graphs.php*\",\n      \"host_templates.php*\",\n      \"pollers.php*\",\n      \"sites.php*\",\n      \"vdef.php*\",\n      \"tests/fixtures/CoreBulkActionPostGuardCoverage.php*\",\n      \"tests/fixtures/BulkActionPostGuardProbe.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/AdministrationBulkActionPostGuardCoverage.php\",\n    \"request_paths\": [\n      \"host.php*\",\n      \"layouts.php*\",\n      \"lib/html_reports.php*\",\n      \"links.php*\",\n      \"login_providers.php*\",\n      \"managers.php*\",\n      \"package_keys.php*\",\n      \"package_repos.php*\",\n      \"tree.php*\",\n      \"user_admin.php*\",\n      \"user_group_admin.php*\",\n      \"tests/fixtures/AdministrationBulkActionPostGuardCoverage.php*\",\n      \"tests/fixtures/BulkActionPostGuardProbe.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/CsrfPostGuardBatch3Coverage.php\",\n    \"request_paths\": [\n      \"aggregate_graphs.php*\",\n      \"auth_profile.php*\",\n      \"automation_graph_rules.php*\",\n      \"automation_networks.php*\",\n      \"automation_snmp.php*\",\n      \"automation_templates.php*\",\n      \"automation_tree_rules.php*\",\n      \"cdef.php*\",\n      \"color.php*\",\n      \"color_templates.php*\",\n      \"data_input.php*\",\n      \"data_queries.php*\",\n      \"data_source_profiles.php*\",\n      \"data_sources.php*\",\n      \"data_templates.php*\",\n      \"gprint_presets.php*\",\n      \"graph_templates.php*\",\n      \"graphs.php*\",\n      \"host.php*\",\n      \"host_templates.php*\",\n      \"links.php*\",\n      \"login_providers.php*\",\n      \"managers.php*\",\n      \"package_repos.php*\",\n      \"pollers.php*\",\n      \"sites.php*\",\n      \"tree.php*\",\n      \"user_admin.php*\",\n      \"user_group_admin.php*\",\n      \"vdef.php*\",\n      \"include/csrf.php*\",\n      \"tests/fixtures/Core/CsrfPostGuardBatch3Probe.php*\",\n      \"tests/fixtures/Core/CsrfPostGuardBatch3Coverage.php*\"\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "0b70d9cad4d61052ec7a05b227f2ae8dd20122d1",
+          "from": "source",
+          "before": "f703513b5fbe5e2714f188100c01771d06ee0269",
+          "hunks": "@@ -26 +26 @@ run_probe() {\n-for fixture in ScriptSubstitutionMatrix PackageManifestMatrix PackageSaveMatrix ConstantTimeGuardMatrix GraphDrilldownMarkup HtmlGraphMarkup CardWidgetMarkup SpikekillMutationMatrix SpikekillFloatDebug RowGuardMatrix; do\n+for fixture in ScriptSubstitutionMatrix PackageManifestMatrix PackageSaveMatrix GraphDrilldownMarkup HtmlGraphMarkup CardWidgetMarkup SpikekillMutationMatrix SpikekillFloatDebug RowGuardMatrix; do\n@@ -87,0 +88,9 @@ fi\n+# Isolate each invocation so the reporter never collects stale registered reports.\n+feature_dir=$(mktemp -d \"$coverage_dir/features.XXXXXXXX\")\n+\"$python_binary\" tests/tools/run_feature_coverage.py native \"$feature_dir\" --php \"$php_binary\"\n+for report in \"$feature_dir\"/*.json; do\n+\tif [[ -f \"$report\" ]]; then\n+\t\tphp_coverage+=(\"$report\")\n+\tfi\n+done\n+\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8610": {
+      "status": "complete",
+      "head": "632ee2452e4e3a281d0e419a2f8f07d461a20d3b",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "7f8db54d1f30aa9b253d677031fbf62af0409a83",
+      "tree": "00e002f0d90b2357c989b927766bf60a1922e4a5",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8610.json",
+          "mode": "100644",
+          "blob": "c6895c4968891672989f180128fbdd5aa5bc2913",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/AuthHardeningMatrix.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"auth_2fa.php*\",\n      \"lib/Auth/LocalAuthLoginProvider.php*\",\n      \"lib/Auth/SamlLoginProvider.php*\",\n      \"tests/fixtures/Core/AuthHardeningMatrix.php*\",\n      \"tests/fixtures/AuthProviderHardeningProbe.php*\",\n      \"tests/fixtures/AuthSecondFactorBootstrap.php*\",\n      \"tests/fixtures/AuthSecondFactorProbe.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8615": {
+      "status": "partial",
+      "head": "a7f643a363d4b0c19d3d747cd4f539f6ac5dfaa6",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "b5930af2c0b3ca42da7344b2a89db56a96e9251f",
+      "tree": "ef2df5a69361cd48f38aac609d7fd4b54c6d6cb5",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8615.json",
+          "mode": "100644",
+          "blob": "a55262fb308186eb8e9e67dad6fd008b461b3c64",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/DeviceRepositoryContracts.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "c463b6a8aea694e8c43d5ca7ba56bcf1d68ba5d1",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -35,0 +36,6 @@ fi\n+if [[ -f tests/phpunit-changed-components.xml && -x include/vendor/bin/pest ]]; then\n+\tclover=\"$coverage_dir/changed-components.xml\"\n+\tXDEBUG_MODE=coverage \"$php_binary\" -d memory_limit=1G include/vendor/bin/pest \\\n+\t\t--configuration=tests/phpunit-changed-components.xml --colors=never --coverage-clover=\"$clover\"\n+\tphp_coverage+=(\"$clover\")\n+fi\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8616": {
+      "status": "complete",
+      "head": "a9027faa109626f4004ffbfa58ce74f734e38fcd",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "b106a4746b3ef03f3d56335132f4c4bd3c6b4b4f",
+      "tree": "d42d3ed9d1922d0c31d1bacc2d8fbc5a414d1436",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8616.json",
+          "mode": "100644",
+          "blob": "399ea79c857acd3527f8fa90472c2e3d9b981ad8",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/Core/AuthAuthorizeMatrix.php\"\n  ],\n  \"cases\": [\n    [\n      \"lib/auth.php\",\n      [\n        \"BoundaryContracts.php\",\n        \"AuthAuthorizeMatrix.php\"\n      ]\n    ],\n    [\n      \"package_import.php\",\n      [\n        \"BoundaryContracts.php\",\n        \"PackageManifestMatrix.php\",\n        \"AuthAuthorizeMatrix.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8616.json",
+          "mode": "100644",
+          "blob": "6869a55d596b2cda3541f55df8e1b057c0910835",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/AuthAuthorizeMatrix.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/auth.php*\",\n      \"package_import.php*\",\n      \"tests/fixtures/Core/AuthAuthorizeMatrix.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8617": {
+      "status": "partial",
+      "head": "b07931a1bba37533d591871e5e3a16d4d29a8fd9",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "6948af5ef5ee6652e9471be071e5ddfd0ce7fbd0",
+      "tree": "5cd85cc85571ffe2261ff5d2617f705bca0180ff",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8617.json",
+          "mode": "100644",
+          "blob": "9161d7664845d778f45b813aaa184a41661033c9",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/CompatPasswordMatrix.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/LoginWorkMatrix.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/LocalAuthDecoyProbe.php\",\n    \"native\": true,\n    \"cases\": [\n      [\n        \"known\"\n      ],\n      [\n        \"unknown\"\n      ],\n      [\n        \"unknown-empty\"\n      ],\n      [\n        \"legacy\"\n      ],\n      [\n        \"current\"\n      ]\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "0ed965266111ed8ec720807e18a5d6610d84a552",
+          "from": "source",
+          "before": "da2cba6bc4be9c8b9f0cc1d4681ab0babd8350ac",
+          "hunks": "@@ -42 +41,0 @@ run_php_probe tests/fixtures/Core/ScriptSubstitutionMatrix.php '^(lib/functions\\\n-run_php_probe tests/fixtures/Core/ConstantTimeGuardMatrix.php '^(auth_2fa\\.php|auth_resetpassword\\.php|tests/fixtures/Core/ConstantTimeGuardMatrix\\.php)'\n@@ -85,0 +85,2 @@ run_probe tests/e2e/basic_auth_identity_docker.sh '^(include/(auth|global)\\.php|\n+\n+git diff --name-only -z \"$merge_base\" HEAD | python3 tests/tools/run_feature_coverage.py request \"$CACTI_PR_COVERAGE_OUTPUT\"\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "a8d82981b459adea0fd2006cca2f83b97c3b1d28",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -47 +47,6 @@ class RequestDispatchTest(unittest.TestCase):\n-        self.dispatch('lib/auth.php', 'BoundaryContracts.php')\n+        self.dispatch('lib/auth.php', ['BoundaryContracts.php', 'CompatPasswordMatrix.php', 'LocalAuthDecoyCoverage.php'])\n+\n+    def test_local_login_change_runs_the_login_decoy_probe(self):\n+        for path in ['lib/Auth/LocalAuthLoginProvider.php', 'tests/fixtures/Core/LocalAuthDecoyProbe.php']:\n+            with self.subTest(path=path):\n+                self.dispatch(path, 'LocalAuthDecoyCoverage.php')\n@@ -110 +115,2 @@ class RequestDispatchTest(unittest.TestCase):\n-            for script in ['Core/Auth/BoundaryContracts.php', 'Core/Rrd/FallbackSourceIdentity.php',\n+            for script in ['Core/Auth/BoundaryContracts.php', 'Core/CompatPasswordMatrix.php',\n+                           'Core/LocalAuthDecoyCoverage.php', 'Core/Rrd/FallbackSourceIdentity.php',\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "4"
+      ]
+    },
+    "8622": {
+      "status": "complete",
+      "head": "b07df4daefbc135dc23f19334ac9e156bb42a596",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "854bf7c81cd0a6272fdf4083b5a4b53b00744fd2",
+      "tree": "8beaaaab10c76a01f1acd513937a9f393a66ac08",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8622.json",
+          "mode": "100644",
+          "blob": "a1550bca0b85212eb906486ea6e5009085bcdb2b",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/Core/RequestAccessorMatrix.php\",\n    \"tests/fixtures/Core/LayoutActionsMatrix.php\"\n  ],\n  \"cases\": [\n    [\n      \"lib/html_utility.php\",\n      [\n        \"RequestAccessorMatrix.php\",\n        \"LayoutActionsMatrix.php\"\n      ]\n    ],\n    [\n      \"layouts.php\",\n      [\n        \"LayoutActionsMatrix.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8622.json",
+          "mode": "100644",
+          "blob": "a3ad754fd73faa17da7b65e8d03e17856f15c0b9",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/RequestAccessorMatrix.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/html_utility.php*\",\n      \"tests/fixtures/Core/RequestAccessorMatrix.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/LayoutActionsMatrix.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"layouts.php*\",\n      \"lib/html_utility.php*\",\n      \"tests/fixtures/Core/LayoutActionsMatrix.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8623": {
+      "status": "complete",
+      "head": "64a87b1fbefdc9e8bbdb41e355bd0569fb98da91",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "e1b2e70661b1ad178bc1e865345d1f5ea338ccf3",
+      "tree": "b9ca4f95dd8cbbd0fad56d18063bfe12e55419f8",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8623.json",
+          "mode": "100644",
+          "blob": "765b7e464796adb8deaf7fbb9981b5bd0f339d74",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/PathContainmentMatrix.php\",\n    \"native\": true\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8624": {
+      "status": "complete",
+      "head": "0989acf5755182991a9bfe4cdc54d5c7bc299198",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "68d734650924de7e44723ca9a7b58ba00342cbd0",
+      "tree": "83c614c36a93fb7f94c9be5c2b6b3b74b655b7ab",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8624.json",
+          "mode": "100644",
+          "blob": "cf1cacb23eb9c9de42ee3e1c66004f2a274bbe95",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/IpRangeDiscovery.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AutomationNetworkIgnoreField.php\",\n    \"native\": true\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8662": {
+      "status": "complete",
+      "head": "86b283ba412e4220b07f4afb5972bb0daded62e9",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "c7f34032563faee5a6bb302010f67feb1f54d0c0",
+      "tree": "2003363c4c69ea50d22d9c69659c8c973ba0305e",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8662.json",
+          "mode": "100644",
+          "blob": "d3028bef6737777644fcf1f0ad0a7d8a4bc01f33",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/AutomationNetworkRangeLimit.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/api_automation.php*\",\n      \"tests/fixtures/Core/AutomationNetworkRangeLimit.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/AutomationRangeLimitEntryPoints.php\",\n    \"native\": true\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8663": {
+      "status": "complete",
+      "head": "46605dde999de9e3d483d80638e39d04ba719339",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "8ac8aad27771549ff3da2f6113ecdb07388f1e5f",
+      "tree": "e46af4fd3619c267ff6a2c8122b0413a31c7facb",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8663.json",
+          "mode": "100644",
+          "blob": "8e468a35fb919029866afd1b61f2b4d77816b622",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/SelectedItemsRoundTrip.php\",\n    \"native\": true\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8666": {
+      "status": "complete",
+      "head": "35bfd6599a8319516e6e14fbdf8c514225e50d3f",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "cad76d689aee41ce4c39287ece1ef245164fa6f6",
+      "tree": "191f7d2da4014930777cd96a59f66848e4e474ca",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8666.json",
+          "mode": "100644",
+          "blob": "080ab401d3691cb45540e389798051fa6203b5cb",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/DsstatsHourlyRollupCoverage.php\"\n  ],\n  \"cases\": [\n    [\n      \"poller_dsstats.php\",\n      [\n        \"DsstatsHourlyRollupCoverage.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/DsstatsHourlyRollupCoverage.php\",\n      [\n        \"DsstatsHourlyRollupCoverage.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8666.json",
+          "mode": "100644",
+          "blob": "f976eac4717e818aa5057ac1906fe62ac7004c3c",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/DsstatsHourlyRollupCoverage.php\",\n    \"request_paths\": [\n      \"poller_dsstats.php*\",\n      \"tests/fixtures/DsstatsHourlyRollupCoverage.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8706": {
+      "status": "complete",
+      "head": "5f2d8b692c3408df2e0bd10731f39f5b1b8d6b41",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "6389932bba1cae7bf7a8e26a76f84c7cacbbb49f",
+      "tree": "3e36c5a9bc05e74aeb81bb0afc50e718200fc8b0",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8706.json",
+          "mode": "100644",
+          "blob": "e8b3a149ea4522d6c66dc49ae09c2c594d382070",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/DbSessionCleanCoverage.php\"\n  ],\n  \"cases\": [\n    [\n      \"include/session.php\",\n      [\n        \"DbSessionCleanCoverage.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/DbSessionCleanCoverage.php\",\n      [\n        \"DbSessionCleanCoverage.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8706.json",
+          "mode": "100644",
+          "blob": "7a05c50c0b688da67de9b425cae30824c28600cc",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/DbSessionCleanCoverage.php\",\n    \"request_paths\": [\n      \"include/session.php*\",\n      \"tests/fixtures/DbSessionCleanCoverage.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8707": {
+      "status": "complete",
+      "head": "0e52c32dac3ed5d828b60d71088a34e28b1aa564",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "f5bcb335dfdacdee9afd1f1f84230f8e935c6636",
+      "tree": "d91fe461564c4d57a1161ed636257ccb5e65e9ec",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8707.json",
+          "mode": "100644",
+          "blob": "93f8953315638ecc5d6c98a47ae9d946fa149c1a",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/PermissionCacheResetCoverage.php\"\n  ],\n  \"cases\": [\n    [\n      \"lib/auth.php\",\n      [\n        \"BoundaryContracts.php\",\n        \"PermissionCacheResetCoverage.php\"\n      ]\n    ],\n    [\n      \"user_admin.php\",\n      [\n        \"accessibility\",\n        \"UserAdministrationAuditCoverage.php\",\n        \"PermissionCacheResetCoverage.php\"\n      ]\n    ],\n    [\n      \"user_group_admin.php\",\n      [\n        \"accessibility\",\n        \"PermissionCacheResetCoverage.php\"\n      ]\n    ],\n    [\n      \"lib/auth.php\",\n      [\n        \"BoundaryContracts.php\",\n        \"PermissionCacheResetCoverage.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/PermissionCacheResetCoverage.php\",\n      [\n        \"PermissionCacheResetCoverage.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8707.json",
+          "mode": "100644",
+          "blob": "a337572fd1c313c4ecaf159514ae4ed87100a198",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/PermissionCacheResetCoverage.php\",\n    \"request_paths\": [\n      \"user_admin.php*\",\n      \"user_group_admin.php*\",\n      \"lib/auth.php*\",\n      \"tests/fixtures/PermissionCacheResetCoverage.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8709": {
+      "status": "complete",
+      "head": "754582eb4fa158015b05f7fcfacefcc14a4f2a58",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "8b3c41072cb9045c6f3235af8b5bd5d404ed53b2",
+      "tree": "90caf4c24d41492df532549babfd12fda0849390",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8709.json",
+          "mode": "100644",
+          "blob": "80da0a09d0e19fb6835b3cfe09514152865b5eee",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/SsFpingLostProbeCoverage.php\"\n  ],\n  \"cases\": [\n    [\n      \"scripts/ss_fping.php\",\n      [\n        \"SsFpingLostProbeCoverage.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/SsFpingLostProbeCoverage.php\",\n      [\n        \"SsFpingLostProbeCoverage.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8709.json",
+          "mode": "100644",
+          "blob": "a5065664ce2a50e9e3997bf7c0ce2b83a643a524",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/SsFpingLostProbeCoverage.php\",\n    \"request_paths\": [\n      \"scripts/ss_fping.php*\",\n      \"tests/fixtures/SsFpingLostProbeCoverage.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8714": {
+      "status": "complete",
+      "head": "f8ebc4812e248becccf6cdc008b9cfa3bf57bcba",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "1b4ec5c1ecd8ce38c6b3eae660012a47b6fc8c3a",
+      "tree": "d55374555a3f51c46402059824b9a0c21fbf58a7",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8714.json",
+          "mode": "100644",
+          "blob": "f8a91836039edaadebe56e2cd93ce9bd7dd87756",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/Rrd/AggregateCdefDefs.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/rrd.php*\",\n      \"tests/fixtures/Core/Rrd/AggregateCdefDefs.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8716": {
+      "status": "complete",
+      "head": "33f22bde2c676aa82b974b110b54608414f2199b",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "ec0b44801763ff119dc9896c2ad726df6e497163",
+      "tree": "50a40b33c29c87b4ba5d42d01a996637fff96ce0",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8716.json",
+          "mode": "100644",
+          "blob": "b4dd0e6c3337d18b7f498d755f20d75365421856",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/Poller/KilledProcessDbConnection.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/poller.php*\",\n      \"poller_commands.php*\",\n      \"install/upgrades/1_3_0.php*\",\n      \"tests/fixtures/Core/Poller/KilledProcessDbConnection.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8726": {
+      "status": "complete",
+      "head": "0080aad6da05a9d8b4f7741e508e665e1f88dcf3",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "6d73a6daecbba5c7df0e54ba07c3ca9160432e1d",
+      "tree": "06c941d250e80a3aeaaad83b788ca7fea0f43632",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8726.json",
+          "mode": "100644",
+          "blob": "69f6f7ef4818c542f53fc1b58c6f0d96e0660458",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/Core/SecretFieldSaveMatrix.php\"\n  ],\n  \"cases\": [\n    [\n      \"settings.php\",\n      [\n        \"SecretFieldSaveMatrix.php\"\n      ]\n    ],\n    [\n      \"pollers.php\",\n      [\n        \"SecretFieldSaveMatrix.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/Core/SecretFieldSaveMatrix.php\",\n      [\n        \"SecretFieldSaveMatrix.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8726.json",
+          "mode": "100644",
+          "blob": "51e6225cf028467fc73c15e3c83cb6f18b6fba53",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/SecretFieldSaveMatrix.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/html_form.php*\",\n      \"settings.php*\",\n      \"pollers.php*\",\n      \"tests/fixtures/Core/SecretFieldSaveMatrix.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8739": {
+      "status": "partial",
+      "head": "0c1603c7480cd3c24036e0708bddc61273287473",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "937e915f0ac84bda2202dfc469b9e67261bf27bd",
+      "tree": "e3a7affd0e8d37756dad71f41d3f9e5729e64a6f",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8739.json",
+          "mode": "100644",
+          "blob": "c82041cd9b23d45269be0cc47cac3f68efd5a047",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/DeviceCollectorMessages.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/ReportMessageDelivery.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/ExternalLinkMessage.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/MessageFormatting.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/TrustedActionMessages.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "08a88b62dd5281d233a36423f7fe4893c08935db",
+          "from": "source",
+          "before": "dc56794a0d2c334dfc8ef1151c8135094de85bfa",
+          "hunks": "@@ -46 +45,0 @@ run_php_probe tests/fixtures/Core/MessageFormatting.php \"^((${message_pages}|lib\n-run_php_probe tests/fixtures/Core/ConstantTimeGuardMatrix.php '^(auth_2fa\\.php|auth_resetpassword\\.php|tests/fixtures/Core/ConstantTimeGuardMatrix\\.php)'\n@@ -89,0 +89,2 @@ run_probe tests/e2e/basic_auth_identity_docker.sh '^(include/(auth|global)\\.php|\n+\n+git diff --name-only -z \"$merge_base\" HEAD | python3 tests/tools/run_feature_coverage.py request \"$CACTI_PR_COVERAGE_OUTPUT\"\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "b952d2f0de528e9af30c5834cb5fa2cc3a859357",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -18 +18 @@ class RequestDispatchTest(unittest.TestCase):\n-                self.dispatch(path, 'PackageArchive.php')\n+                self.dispatch(path, ['MessageFormatting.php', 'PackageArchive.php'] if path == 'lib/package.php' else 'PackageArchive.php')\n@@ -42,0 +43,7 @@ class RequestDispatchTest(unittest.TestCase):\n+    def test_device_change_runs_the_collector_notification_probe(self):\n+        self.dispatch('lib/api_device.php', ['DeviceCollectorMessages.php', 'MessageFormatting.php'])\n+\n+    def test_ui_messages_run_their_rendering_probes(self):\n+        self.dispatch('link.php', 'ExternalLinkMessage.php')\n+        self.dispatch('lib/plugins.php', ['TrustedActionMessages.php', 'MessageFormatting.php'])\n+\n@@ -44 +51 @@ class RequestDispatchTest(unittest.TestCase):\n-        self.dispatch('lib/functions.php', ['ScriptSubstitutionMatrix.php', 'UserAdministrationAuditCoverage.php', 'graph_group_probe.php'])\n+        self.dispatch('lib/functions.php', ['ScriptSubstitutionMatrix.php', 'ReportMessageDelivery.php', 'MessageFormatting.php', 'UserAdministrationAuditCoverage.php', 'graph_group_probe.php'])\n@@ -63 +70 @@ class RequestDispatchTest(unittest.TestCase):\n-        self.dispatch('package_repos.php', ['PackageManifestMatrix.php', 'PackageSaveMatrix.php'])\n+        self.dispatch('package_repos.php', ['MessageFormatting.php', 'PackageManifestMatrix.php', 'PackageSaveMatrix.php'])\n@@ -111 +118,2 @@ class RequestDispatchTest(unittest.TestCase):\n-                           'UserAdministrationAuditCoverage.php', 'Core/ScriptSubstitutionMatrix.php',\n+                           'UserAdministrationAuditCoverage.php', 'Core/ScriptSubstitutionMatrix.php', 'Core/ReportMessageDelivery.php', 'Core/DeviceCollectorMessages.php',\n+                           'Core/MessageFormatting.php', 'Core/ExternalLinkMessage.php', 'Core/TrustedActionMessages.php',\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "4"
+      ]
+    },
+    "8769": {
+      "status": "complete",
+      "head": "874a7abb9b09d6427041e23aaf357683735e7732",
+      "merge_base": "92354267c477c9548c55caf2c5cdc9ba50f07d1f",
+      "source_tree": "85cf4a14a9d8da68370e2111ad63b418e139683a",
+      "tree": "fc8088129b5999653608f866c29ea495b66329b3",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8769.json",
+          "mode": "100644",
+          "blob": "8703b28a5282bb4e7bdedbb7fbb24f35ea4dd61a",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/Core/PollerHardening.php\"\n  ],\n  \"cases\": [\n    [\n      \"poller.php\",\n      [\n        \"PollerHardening.php\"\n      ]\n    ],\n    [\n      \"poller_commands.php\",\n      [\n        \"PollerHardening.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/Core/PollerHardening.php\",\n      [\n        \"PollerHardening.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8769.json",
+          "mode": "100644",
+          "blob": "e06f6773041de6d343175957e8f1fdf5188e9279",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/PollerHardening.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"poller.php*\",\n      \"poller_commands.php*\",\n      \"tests/fixtures/Core/PollerHardening.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8810": {
+      "status": "partial",
+      "head": "cb9dd04d92acbd8259b7426b2e4359d068753392",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "ccd3d12fcb9032891b4388d15582136842418b63",
+      "tree": "3e71729171a5e8d5f397c623f77820bf6adde977",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8810.json",
+          "mode": "100644",
+          "blob": "5828126824d9d22665f8a57d94e9dbf4bec066ee",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/LibraryDataUpdates.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"lib/functions.php*\",\n      \"lib/utility.php*\",\n      \"lib/data_query.php*\",\n      \"tests/fixtures/Core/LibraryDataUpdates.php*\"\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "918d5d578ac3319da1a32d05625c7f12dc703484",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -76,0 +77,5 @@ fi\n+library_coverage=\"$coverage_dir/library-regressions\"\n+mkdir -p \"$library_coverage\"\n+CACTI_LIBRARY_NATIVE_COVERAGE=\"$library_coverage\" bash tests/tools/run_library_regressions.sh\n+php_coverage+=(\"$library_coverage\"/*.json)\n+\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "2aab3525f8922259ca0f3e687ac3221b60975352",
+          "from": "foundation",
+          "before": "f652c8260f826de2423c662c7c617a8bc96615fb",
+          "hunks": "@@ -35,0 +36,4 @@ run_php_probe() {\n+if [[ -f tests/tools/run_library_regressions.sh ]] && grep -Eq '^lib/(api_data_source|data_query|functions|html_form|ldap|plugins|poller|reports|utility)\\.php$' <<< \"$changed_paths\"; then\n+\tCACTI_PR_RAW_COVERAGE=\"$CACTI_PR_COVERAGE_OUTPUT\" bash tests/tools/run_library_regressions.sh\n+fi\n+\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "4",
+        "2"
+      ]
+    },
+    "8813": {
+      "status": "complete",
+      "head": "05c6ad9b419b3ae0773088052f3142bff829c224",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "1671e932fd0477f04a6650bda403d0549332c126",
+      "tree": "615107ddc67a9043d2536213d821775cd6fe1038",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8813.json",
+          "mode": "100644",
+          "blob": "3d3b1caaf60689d051301432d5b35c17d770e64c",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/RemoveSpikesHelp.php\",\n    \"native\": true,\n    \"request_paths\": [\n      \"cli/removespikes.php\",\n      \"tests/fixtures/Core/RemoveSpikesHelp.php\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8823": {
+      "status": "partial",
+      "head": "7093cc5245b20c6724295b99b9c8b1abaa8759c6",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "57265a6408a194896c6ea0e4d7145a2fd074cfa9",
+      "tree": "4e8f14bdead5c08bf733273ef4eac3d1188110e0",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8823.json",
+          "mode": "100644",
+          "blob": "37d91f0d69286f91afbad2e12647a77992d27465",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/AuthorizedActions.php\",\n    \"native\": true,\n    \"cases\": [\n      [\n        \"requests\"\n      ],\n      [\n        \"denied\"\n      ],\n      [\n        \"reorder\"\n      ],\n      [\n        \"oauth\"\n      ]\n    ],\n    \"request_paths\": [\n      \"auth_profile.php*\",\n      \"automation_templates.php*\",\n      \"data_debug.php*\",\n      \"graph_templates.php*\",\n      \"graphs.php*\",\n      \"oauth2.php*\",\n      \"tree.php*\",\n      \"utilities.php*\",\n      \"include/global_arrays.php*\",\n      \"lib/auth.php*\",\n      \"lib/functions.php*\",\n      \"lib/reports.php*\",\n      \"tests/fixtures/Core/AuthorizedActions.php*\"\n    ]\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_pr_change_tests.sh",
+          "mode": "100644",
+          "blob": "5855b3a02d1ea9b2d265a9914c6eef110fae2fd8",
+          "from": "foundation",
+          "before": "2068d8c8e123aa29ceedae377a2d9eae078aff90",
+          "hunks": "@@ -76,0 +77 @@ fi\n+\n@@ -87 +88 @@ browser_specs=()\n-for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths; do\n+for spec in graph-drilldown graph-spikekill filter-dialog-theme table-column-widths authorized-post-actions; do\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8824": {
+      "status": "complete",
+      "head": "4930d7b5c18c5f6472ad143d5b3d13d1863fef0e",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "25a81d1dc0719cb52092feaf2b5c88bf251b013c",
+      "tree": "b418839b91572c4ad6a5e88cb48f4b2aa78f6fce",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8824.json",
+          "mode": "100644",
+          "blob": "3ae6c40626a84b3a04e8c55059df72f4a2d9af77",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/ConfiguredCommands.php\",\n    \"native\": true,\n    \"cases\": [\n      [],\n      [\n        \"deprecated\"\n      ]\n    ],\n    \"request_paths\": [\n      \"cmd.php*\",\n      \"cmd_realtime.php*\",\n      \"remote_agent.php*\",\n      \"cli/audit_database.php*\",\n      \"cli/push_out_hosts.php*\",\n      \"cli/rrdresize.php*\",\n      \"cli/splice_rrd.php*\",\n      \"lib/dsstats.php*\",\n      \"lib/poller.php*\",\n      \"lib/rrdcheck.php*\",\n      \"lib/functions.php*\",\n      \"tests/fixtures/Core/ConfiguredCommands.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/DisplayAndValidation.php\",\n    \"native\": true,\n    \"cases\": [\n      [],\n      [\n        \"save\"\n      ]\n    ],\n    \"request_paths\": [\n      \"data_input.php*\",\n      \"data_sources.php*\",\n      \"pollers.php*\",\n      \"sites.php*\",\n      \"lib/clog_webapi.php*\",\n      \"lib/functions.php*\",\n      \"lib/html.php*\",\n      \"lib/import.php*\",\n      \"lib/plugins.php*\",\n      \"tests/fixtures/Core/DisplayAndValidation.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    },
+    "8828": {
+      "status": "partial",
+      "head": "ee4fc480fdff800de058f175088814b6560b8c8d",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "45225760b307c491f9cd382c1368cfa1cd1bfcab",
+      "tree": "f75372ffe67114967c1606dc98bd07ca21dd6a82",
+      "entries": [
+        {
+          "path": "tests/Coverage/features/pr-8828.json",
+          "mode": "100644",
+          "blob": "53b1270f8ed9901114fd045f4a0b40b0e66dba59",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/Rrd/RraContainmentSkip.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/Rrd/GraphDebugOutput.php\",\n    \"native\": true\n  }\n]\n"
+        },
+        {
+          "path": "tests/tools/run_request_coverage.sh",
+          "mode": "100644",
+          "blob": "947ee798810968acd44ee77a50024634f0c0187f",
+          "from": "source",
+          "before": "b9f0ba1c101998bff96b9dfa96f37e2416c9d53f",
+          "hunks": "@@ -39 +38,0 @@ run_php_probe tests/fixtures/Core/ScriptSubstitutionMatrix.php '^(lib/functions\\\n-run_php_probe tests/fixtures/Core/ConstantTimeGuardMatrix.php '^(auth_2fa\\.php|auth_resetpassword\\.php|tests/fixtures/Core/ConstantTimeGuardMatrix\\.php)'\n@@ -85,0 +85,2 @@ run_probe tests/e2e/basic_auth_identity_docker.sh '^(include/(auth|global)\\.php|\n+\n+git diff --name-only -z \"$merge_base\" HEAD | python3 tests/tools/run_feature_coverage.py request \"$CACTI_PR_COVERAGE_OUTPUT\"\n"
+        },
+        {
+          "path": "tests/tools/test_request_coverage_dispatch.py",
+          "mode": "100644",
+          "blob": "add5e7fb5fcb9e19ee938f8d70e9b2879331b692",
+          "from": "foundation",
+          "before": "4d512008f22fa1d96de285302a3961f98313f2ec",
+          "hunks": "@@ -41 +41,5 @@ class RequestDispatchTest(unittest.TestCase):\n-        self.dispatch('lib/rrd.php', 'FallbackSourceIdentity.php')\n+        self.dispatch('lib/rrd.php', ['GraphDebugOutput.php', 'FallbackSourceIdentity.php'])\n+        self.dispatch('graphs.php', 'GraphDebugOutput.php')\n+\n+    def test_rra_path_change_runs_the_containment_probe(self):\n+        self.dispatch('cli/structure_rra_paths.php', 'RraContainmentSkip.php')\n@@ -60 +64 @@ class RequestDispatchTest(unittest.TestCase):\n-                self.dispatch(path, 'BoostBulkDrainCoverage.php')\n+                self.dispatch(path, ['GraphDebugOutput.php', 'BoostBulkDrainCoverage.php'] if path == 'lib/boost.php' else 'BoostBulkDrainCoverage.php')\n@@ -110 +114 @@ class RequestDispatchTest(unittest.TestCase):\n-            for script in ['Core/Auth/BoundaryContracts.php', 'Core/Rrd/FallbackSourceIdentity.php',\n+            for script in ['Core/Auth/BoundaryContracts.php', 'Core/Rrd/GraphDebugOutput.php', 'Core/Rrd/FallbackSourceIdentity.php', 'Core/Rrd/RraContainmentSkip.php',\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "4"
+      ]
+    },
+    "8830": {
+      "status": "complete",
+      "head": "c7f925eb23581c32bec98282a2ebe4bcbe97bdaa",
+      "merge_base": "0f163ba945a628a1c93698bb092e45ffa66dd800",
+      "source_tree": "7b2df0e41a0f2741cc50d861f1f22ef6d39706f7",
+      "tree": "80060b5442c75979779e71aaf9eefdfd54f2d2c1",
+      "entries": [
+        {
+          "path": "tests/Coverage/dispatch/pr-8830.json",
+          "mode": "100644",
+          "blob": "3f8e172e5b11898d5e0455c4af1294b1e183f5b4",
+          "text": "{\n  \"fixtures\": [\n    \"tests/fixtures/Core/PackageDiffBoundary.php\",\n    \"tests/fixtures/Core/PackageRepositoryWorkspace.php\",\n    \"tests/fixtures/Core/PackageImportFileStatus.php\"\n  ],\n  \"cases\": [\n    [\n      \"lib/package.php\",\n      [\n        \"PackageArchive.php\",\n        \"PackageRepositoryWorkspace.php\",\n        \"PackageImportFileStatus.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/Core/PackageArchive.php\",\n      [\n        \"PackageArchive.php\"\n      ]\n    ],\n    [\n      \"lib/import.php\",\n      [\n        \"PackageManifestMatrix.php\",\n        \"PackageImportFileStatus.php\"\n      ]\n    ],\n    [\n      \"tests/fixtures/Core/PackageDiffBoundary.php\",\n      [\n        \"PackageDiffBoundary.php\"\n      ]\n    ]\n  ]\n}\n"
+        },
+        {
+          "path": "tests/Coverage/features/pr-8830.json",
+          "mode": "100644",
+          "blob": "36311d8ddd9f5ae9a66874e7d8302ab4d0a4b81f",
+          "text": "[\n  {\n    \"fixture\": \"tests/fixtures/Core/PackageArchive.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/PackageDiffBoundary.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/PackageRepositoryWorkspace.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/PackageImportFileStatus.php\",\n    \"native\": true\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/PackageRepositoryWorkspace.php\",\n    \"request_paths\": [\n      \"package_import.php*\",\n      \"lib/package.php*\",\n      \"tests/fixtures/Core/PackageRepositoryWorkspace.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/PackageImportFileStatus.php\",\n    \"request_paths\": [\n      \"lib/import.php*\",\n      \"lib/package.php*\",\n      \"tests/fixtures/Core/PackageImportFileStatus.php*\"\n    ]\n  },\n  {\n    \"fixture\": \"tests/fixtures/Core/PackageDiffBoundary.php\",\n    \"request_paths\": [\n      \"package_import.php*\",\n      \"tests/fixtures/Core/PackageDiffBoundary.php*\"\n    ]\n  }\n]\n"
+        }
+      ],
+      "shared": [
+        "6",
+        "8",
+        "7",
+        "3",
+        "5",
+        "1",
+        "9",
+        "4",
+        "2"
+      ]
+    }
+  }
+}

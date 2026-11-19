@@ -1,0 +1,35 @@
+name: Verify coverage migration snapshot
+on:
+  push:
+    branches: [ci/coverage-migration-set]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    if: github.event.repository.fork
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify patch generation and offline replay
+        run: python3 -B -m unittest discover -s tests/tools -p 'test_coverage_pinset.py'
+      - name: Reproduce every pinned migration
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PINS: tests/tools/coverage-migrations/2026-11-19.json
+        run: |
+          set -euo pipefail
+          parent=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.parent.clone_url')
+          git fetch --no-tags origin "$(jq -r .fork_foundation "$PINS")"
+          mapfile -t inputs < <(jq -r '.base, (.prs[] | .head)' "$PINS")
+          git fetch --no-tags "$parent" "${inputs[@]}"
+          jq -r '.prs | keys[]' "$PINS" | while read -r pr; do
+            python3 -B tests/tools/apply_coverage_pinset.py --repo . --pinset "$PINS" --pr "$pr" > /dev/null
+            echo "Verified #$pr"
+          done
