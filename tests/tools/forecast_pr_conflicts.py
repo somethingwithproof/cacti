@@ -252,6 +252,10 @@ def github_refs(repo, base, scratch, owner=None):
         owner = command(["gh", "api", "user", "--jq", ".login"]).decode().strip()
     if not owner:
         raise ValueError("gh did not return the signed-in user")
+    # The base SHA embedded in a PR may reflect its last refresh. Pin the branch itself.
+    expected_base = command(
+        ["gh", "api", f"repos/{repo}/git/ref/heads/{base}", "--jq", ".object.sha"]
+    ).decode().strip()
     listing = command(
         [
             "gh",
@@ -267,16 +271,14 @@ def github_refs(repo, base, scratch, owner=None):
             "-f",
             "per_page=100",
             "--jq",
-            ".[] | select(.draft == false) | [.number,.user.login,.head.sha,.base.sha] | @tsv",
+            ".[] | select(.draft == false) | [.number,.user.login,.head.sha] | @tsv",
         ]
     )
     heads = {}
-    base_oids = set()
     for line in listing.decode().splitlines():
-        number, login, head, base_oid = line.split("\t")
+        number, login, head = line.split("\t")
         if login.casefold() == owner.casefold():
             heads[int(number)] = head
-            base_oids.add(base_oid)
 
     forecast = Forecast(scratch)
     forecast.git("remote", "add", "origin", f"https://github.com/{repo}.git")
@@ -293,7 +295,7 @@ def github_refs(repo, base, scratch, owner=None):
         *refspecs,
     )
     base_oid = forecast.git("rev-parse", "refs/forecast/base")
-    if base_oids - {base_oid} or any(
+    if expected_base != base_oid or any(
         forecast.git("rev-parse", f"refs/forecast/pr/{n}") != head
         for n, head in heads.items()
     ):

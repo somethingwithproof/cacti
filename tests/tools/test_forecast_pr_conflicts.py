@@ -209,7 +209,7 @@ class SquashForecastTest(unittest.TestCase):
     def test_discovery_uses_authenticated_owner_ready_prs_and_checks_fetched_hashes(
         self,
     ):
-        responses = [b"", b"Owner\n", b"5\towner\tabc\tbase\n6\tother\tdef\tbase\n"]
+        responses = [b"", b"Owner\n", b"base\n", b"5\towner\tabc\n6\tother\tdef\n"]
         with (
             patch.object(planner, "command", side_effect=responses) as calls,
             patch.object(planner, "Forecast") as fake,
@@ -223,7 +223,9 @@ class SquashForecastTest(unittest.TestCase):
                 "org/repo", "release", self.parent
             )
             self.assertEqual((base, heads, owner), ("base", {5: "abc"}, "Owner"))
-            listing = calls.call_args_list[2].args[0]
+            self.assertIn("repos/org/repo/git/ref/heads/release", calls.call_args_list[2].args[0])
+            listing = calls.call_args_list[3].args[0]
+            self.assertNotIn(".base.sha", listing[-1])
             for item in ["GET", "--paginate", "state=open", "base=release"]:
                 self.assertIn(item, listing)
             self.assertIn(".draft == false", listing[-1])
