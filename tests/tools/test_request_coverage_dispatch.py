@@ -71,7 +71,7 @@ class RequestDispatchTest(unittest.TestCase):
             repository.mkdir()
             tools = root / 'tools'
             tools.mkdir()
-            for command in ['git', 'bash', 'grep', 'mkdir']:
+            for command in ['git', 'bash', 'grep', 'mkdir', 'python3']:
                 (tools / command).symlink_to(shutil.which(command))
             php = tools / 'php'
             php.write_text('#!' + shutil.which('bash') + '\n'
@@ -101,6 +101,13 @@ class RequestDispatchTest(unittest.TestCase):
                 path = repository / 'tests/fixtures' / script
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text('<?php // dispatch fixture\n')
+            source = Path(__file__).resolve().parent
+            helper = repository / 'tests/tools/run_feature_coverage.py'
+            helper.parent.mkdir(parents=True)
+            shutil.copy(source / helper.name, helper)
+            feature = Path('tests/Coverage/features/constant-time-guards.json')
+            (repository / feature.parent).mkdir(parents=True)
+            shutil.copy(source.parents[1] / feature, repository / feature)
             probe = repository / 'tests/Unit/fixtures/graph_group_probe.php'
             probe.parent.mkdir(parents=True, exist_ok=True)
             probe.write_text('<?php // dispatch fixture\n')

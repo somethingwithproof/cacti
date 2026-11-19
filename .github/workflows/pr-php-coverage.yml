@@ -3,6 +3,9 @@ name: Changed PHP Coverage
 on:
   pull_request:
     paths:
+      - 'tests/Coverage/features/*.json'
+      - 'tests/tools/run_feature_coverage.py'
+      - 'tests/tools/test_feature_coverage.py'
       - '**.php'
       - 'tests/phpunit.xml'
       - 'tests/e2e/**'
@@ -50,6 +53,7 @@ jobs:
           set -euo pipefail
           python3 tests/tools/test_check_changed_php_coverage.py
           python3 tests/tools/test_request_coverage_dispatch.py
+          python3 tests/tools/test_feature_coverage.py
           python3 tests/tools/check_changed_php_coverage.py --base "$BASE_COMMIT" \
             --prepare-config tests/phpunit.xml --output-config phpunit-changed.xml
       - name: Exercise unit and integration contracts with statement coverage

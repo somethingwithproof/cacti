@@ -1,0 +1,7 @@
+[
+  {
+    "fixture": "tests/fixtures/Core/RemoveSpikesHelp.php",
+    "native": true,
+    "request_paths": ["cli/removespikes.php"]
+  }
+]
