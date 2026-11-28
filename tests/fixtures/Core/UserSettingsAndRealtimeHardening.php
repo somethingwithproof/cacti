@@ -342,6 +342,7 @@ check(\cacti_validate_user_setting_value('x', 'invalid', ['method' => 'checkbox'
 check(\cacti_validate_user_setting_value('x', 'a', ['method' => 'drop_array']) === false, 'drop_array missing array');
 check(\cacti_validate_user_setting_value('x', 'a', ['method' => 'drop_array', 'array' => ['a' => 'A']]) === 'a', 'drop_array string');
 check(\cacti_validate_user_setting_value('x', '10', ['method' => 'drop_array', 'array' => [10 => 'Ten']]) === '10', 'drop_array int');
+check(\cacti_validate_user_setting_value('x', '010', ['method' => 'drop_array', 'array' => [10 => 'Ten']]) === '10', 'drop_array leading-zero int');
 check(\cacti_validate_user_setting_value('x', '99', ['method' => 'drop_array', 'array' => [10 => 'Ten']]) === false, 'drop_array miss');
 check(\cacti_validate_user_setting_value('x', '-1', ['method' => 'drop_sql']) === false, 'drop_sql neg');
 check(\cacti_validate_user_setting_value('x', '5', ['method' => 'drop_sql']) === '5', 'drop_sql ok');
@@ -349,9 +350,9 @@ check(\cacti_validate_user_setting_value('day_shift_start', '08:00', ['method' =
 check(\cacti_validate_user_setting_value('day_shift_start', '99:99', ['method' => 'textbox']) === false, 'time bad');
 check(\cacti_validate_user_setting_value('min_tree_width', '200', ['method' => 'textbox', 'default' => '100']) === '200', 'numeric ok');
 check(\cacti_validate_user_setting_value('min_tree_width', 'bad', ['method' => 'textbox', 'default' => '100']) === false, 'numeric bad');
-check(\cacti_validate_user_setting_value('note', 'ok', ['method' => 'textbox', 'max_length' => 5]) === 'ok', 'text ok');
+check(\cacti_validate_user_setting_value('note', 'ok', ['method' => 'textbox']) === 'ok', 'text default max_length');
 check(\cacti_validate_user_setting_value('note', 'toolong', ['method' => 'textbox', 'max_length' => 5]) === false, 'text long');
-check(\cacti_validate_user_setting_value('title_font', 'DejaVuSans', ['method' => 'font', 'max_length' => 50]) === 'DejaVuSans', 'font ok');
+check(\cacti_validate_user_setting_value('title_font', 'DejaVuSans', ['method' => 'font']) === 'DejaVuSans', 'font default max_length');
 check(\cacti_validate_user_setting_value('title_font', 'bad;font', ['method' => 'font', 'max_length' => 50]) === false, 'font bad');
 check(\cacti_validate_user_setting_value('x', 'v', ['method' => 'unsupported']) === false, 'unknown method');
 check(\cacti_sanitize_positive_int_setting('15', 10, 1, 100) === 15, 'pos int ok');
@@ -514,8 +515,8 @@ $GLOBALS['settings_user'] = [
 		],
 		'invalid_setting' => [
 			'method'  => 'drop_array',
-			'array'   => [10 => '10', 20 => '20'],
-			'default' => '20',
+			'array'   => ['a' => 'A', 'b' => 'B'],
+			'default' => 'a',
 		],
 	],
 ];
